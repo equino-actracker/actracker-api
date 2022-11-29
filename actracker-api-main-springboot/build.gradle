@@ -1,0 +1,19 @@
+plugins {
+    id 'java'
+//    id 'org.eclipse.jkube.kubernetes' version '1.10.1'
+//    id 'org.springframework.boot' version '2.7.5'
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web:2.7.5'
+    runtimeOnly project(':actracker-api-rest')
+}
+
+//springBoot {
+//    mainClass = 'ovh.equino.actracker.main.springboot.ActrackerApi'
+//}
+
+//kubernetes {
+//    buildStrategy = 'jib'
+//    registry = 'registry.equino.ovh'
+//}
