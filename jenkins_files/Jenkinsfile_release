@@ -1,0 +1,59 @@
+pipeline {
+    agent any
+
+    options {
+//        lock(resource: 'actracker-api_release', extra: [[label: 'actracker_PROD']])
+        buildDiscarder(logRotator(numToKeepStr: '5'))
+    }
+
+    stages {
+
+//        stage('Check release readiness') {
+//            steps {
+//                sh 'git branch -m ${CHANGE_BRANCH}'
+//                sh './gradlew --no-daemon --stacktrace verifyRelease'
+//                withCredentials([usernamePassword(credentialsId: 'ci_bitbucket_app_password', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+//                    sh 'if curl -L -u ${USERNAME}:${PASSWORD} https://api.bitbucket.org/2.0/repositories/actracker-workspace/actracker-api/pullrequests/${CHANGE_ID}/diffstat | grep \'"status": "merge conflict"\'; then echo "Conflicts detected, resolve conflicts before release"; exit 1; else echo "No conflicts detected"; exit 0; fi;'
+//                    sh 'if curl -L -u ${USERNAME}:${PASSWORD} https://api.bitbucket.org/2.0/repositories/actracker-workspace/actracker-api/pullrequests/${CHANGE_ID}/statuses | grep \'"state": "SUCCESSFUL"\'; then echo "Successful build detected"; exit 0; else echo "Successful build not detected"; exit 1; fi;'
+//                }
+//            }
+//        }
+
+        stage('Build') {
+            steps {
+                sh './gradlew --no-daemon --stacktrace clean build test'
+//                script {
+//                    currentBuild.displayName = readFile file: 'build/ovh.equino.version/currentVersion'
+//                }
+            }
+        }
+
+//        stage('DB schema migration') {
+//            steps {
+//                sh './gradlew --no-daemon --stacktrace :actracker-api-persistence-postgres:flywayMigrate :actracker-api-persistence-postgres:flywayInfo -PequinoDocker.remote -Pdeploy.environment=PROD'
+//            }
+//        }
+
+//        stage('Deploy') {
+//            steps {
+//                sh './gradlew --no-daemon --stacktrace deploy -PequinoDocker.remote -Pdeploy.environment=PROD'
+//            }
+//        }
+
+//        stage('Merge PR') {
+//            steps {
+//                withCredentials([usernamePassword(credentialsId: 'ci_bitbucket_app_password', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+//                    sh 'curl -L -X POST -u ${USERNAME}:${PASSWORD} https://api.bitbucket.org/2.0/repositories/actracker-workspace/actracker-api/pullrequests/${CHANGE_ID}/merge'
+//                    sh 'curl -L -X DELETE -u ${USERNAME}:${PASSWORD} https://api.bitbucket.org/2.0/repositories/actracker-workspace/actracker-api/refs/branches/${CHANGE_BRANCH}'
+//                }
+//            }
+//        }
+
+    }
+
+    post {
+        cleanup {
+            deleteDir()
+        }
+    }
+}

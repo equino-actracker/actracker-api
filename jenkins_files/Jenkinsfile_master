@@ -1,0 +1,52 @@
+pipeline {
+    agent any
+
+    triggers {
+        cron('@midnight')
+    }
+
+    options {
+//        lock(resource: 'actracker-api_master', extra: [[label: 'actracker_INT']])
+        buildDiscarder(logRotator(daysToKeepStr: '10'))
+    }
+
+    stages {
+
+//        stage('Upgrade version') {
+//            steps {
+//                withCredentials([usernamePassword(credentialsId: 'ci_bitbucket_app_password', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+//                    sh './gradlew --no-daemon --stacktrace clean release -PequinoVersion.gitUsername=$USERNAME -PequinoVersion.gitPassword=$PASSWORD'
+//                }
+//            }
+//        }
+
+        stage('Build') {
+            steps {
+                sh 'git branch -m master'
+                sh './gradlew --no-daemon --stacktrace clean build test'
+//                script {
+//                    currentBuild.displayName = readFile file: 'build/ovh.equino.version/currentVersion'
+//                }
+            }
+        }
+
+//        stage('DB schema migration') {
+//            steps {
+//                sh './gradlew --no-daemon --stacktrace :actracker-api-persistence-postgres:flywayMigrate :actracker-api-persistence-postgres:flywayInfo -PequinoDocker.remote -Pdeploy.environment=INT'
+//            }
+//        }
+
+//        stage('Deploy') {
+//            steps {
+//                sh './gradlew --no-daemon --stacktrace deploy -PequinoDocker.remote -Pdeploy.environment=INT'
+//            }
+//        }
+
+    }
+
+    post {
+        cleanup {
+            deleteDir()
+        }
+    }
+}
