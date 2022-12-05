@@ -1,6 +1,15 @@
 pipeline {
     agent any
 
+    tools {
+        jdk 'jdk17'
+    }
+
+    environment {
+        GH_ORG = 'marcinciapa'
+        GH_REPO = 'actracker-api'
+    }
+
     options {
 //        lock(resource: 'actracker-api_release', extra: [[label: 'actracker_PROD']])
         buildDiscarder(logRotator(numToKeepStr: '5'))
@@ -8,19 +17,18 @@ pipeline {
 
     stages {
 
-//        stage('Check release readiness') {
-//            steps {
+        stage('Check release readiness') {
+            steps {
 //                sh 'git branch -m ${CHANGE_BRANCH}'
 //                sh './gradlew --no-daemon --stacktrace verifyRelease'
-//                withCredentials([usernamePassword(credentialsId: 'ci_bitbucket_app_password', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-//                    sh 'if curl -L -u ${USERNAME}:${PASSWORD} https://api.bitbucket.org/2.0/repositories/actracker-workspace/actracker-api/pullrequests/${CHANGE_ID}/diffstat | grep \'"status": "merge conflict"\'; then echo "Conflicts detected, resolve conflicts before release"; exit 1; else echo "No conflicts detected"; exit 0; fi;'
-//                    sh 'if curl -L -u ${USERNAME}:${PASSWORD} https://api.bitbucket.org/2.0/repositories/actracker-workspace/actracker-api/pullrequests/${CHANGE_ID}/statuses | grep \'"state": "SUCCESSFUL"\'; then echo "Successful build detected"; exit 0; else echo "Successful build not detected"; exit 1; fi;'
-//                }
-//            }
-//        }
+                  sh 'if curl -L https://api.github.com/repos/${GH_ORG}/${GH_REPO}/pulls/${CHANGE_ID} | grep \'"mergeable": true\'; then exit 0; else echo "PR is not mergeable"; exit 1; fi;'
+                  sh 'if curl -L https://api.github.com/repos/${GH_ORG}/${GH_REPO}/commits/${GIT_COMMIT}/statuses | grep \'"state": "success"\'; then exit 0; else echo "Commit check with success state not found"; exit 1; fi;'
+            }
+        }
 
         stage('Build') {
             steps {
+                sh 'printenv'
                 sh './gradlew --no-daemon --stacktrace clean build test'
 //                script {
 //                    currentBuild.displayName = readFile file: 'build/ovh.equino.version/currentVersion'
@@ -40,14 +48,14 @@ pipeline {
 //            }
 //        }
 
-//        stage('Merge PR') {
-//            steps {
-//                withCredentials([usernamePassword(credentialsId: 'ci_bitbucket_app_password', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-//                    sh 'curl -L -X POST -u ${USERNAME}:${PASSWORD} https://api.bitbucket.org/2.0/repositories/actracker-workspace/actracker-api/pullrequests/${CHANGE_ID}/merge'
-//                    sh 'curl -L -X DELETE -u ${USERNAME}:${PASSWORD} https://api.bitbucket.org/2.0/repositories/actracker-workspace/actracker-api/refs/branches/${CHANGE_BRANCH}'
-//                }
-//            }
-//        }
+        stage('Merge PR') {
+            steps {
+                withCredentials([string(credentialsId: 'JenkinsGitHubPluginClassicToken', variable: 'TOKEN')]) {
+                    sh 'curl -L -H "Authorization: Bearer ${TOKEN}" -X PUT https://api.github.com/repos/${GH_ORG}/${GH_REPO}/pulls/${CHANGE_ID}/merge -d \'{"merge_method": "squash"}\''
+                    sh 'curl -L -H "Authorization: Bearer ${TOKEN}" -X DELETE https://api.github.com/repos/${GH_ORG}/${GH_REPO}/git/refs/${CHANGE_BRANCH}'
+                }
+            }
+        }
 
     }
 

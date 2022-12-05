@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools {
+        jdk 'jdk17'
+    }
+
     triggers {
         cron('@midnight')
     }
@@ -22,7 +26,7 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'git branch -m master'
+//                sh 'git branch -m master'
                 sh './gradlew --no-daemon --stacktrace clean build test'
 //                script {
 //                    currentBuild.displayName = readFile file: 'build/ovh.equino.version/currentVersion'
