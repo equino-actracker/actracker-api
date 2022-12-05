@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools {
+        jdk 'jdk17'
+    }
+
     options {
 //        lock(resource: 'actracker-api_release', extra: [[label: 'actracker_PROD']])
         buildDiscarder(logRotator(numToKeepStr: '5'))
