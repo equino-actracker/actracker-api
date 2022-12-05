@@ -25,6 +25,7 @@ pipeline {
 
         stage('Build') {
             steps {
+                sh 'printenv'
                 sh './gradlew --no-daemon --stacktrace clean build test'
 //                script {
 //                    currentBuild.displayName = readFile file: 'build/ovh.equino.version/currentVersion'
