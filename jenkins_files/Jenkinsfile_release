@@ -50,7 +50,7 @@ pipeline {
 
         stage('Merge PR') {
             steps {
-                withCredentials([string(credentialsId: 'JenkinsGitHubPluginClassicToken', variable: 'TOKEN']) {
+                withCredentials([string(credentialsId: 'JenkinsGitHubPluginClassicToken', variable: 'TOKEN')]) {
                     sh 'curl -L -X -H "Authorization: Bearer ${TOKEN}" PUT https://api.github.com/repos/${GH_ORG}/${GH_REPO}/pulls/${CHANGE_ID}/merge -d \'{"merge_method": "squash"}\''
                     sh 'curl -L -X -H "Authorization: Bearer ${TOKEN}" DELETE https://api.github.com/repos/${GH_ORG}/${GH_REPO}/git/refs/${CHANGE_BRANCH}'
                 }
