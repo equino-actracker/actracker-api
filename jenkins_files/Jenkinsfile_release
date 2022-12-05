@@ -22,7 +22,7 @@ pipeline {
 //                sh 'git branch -m ${CHANGE_BRANCH}'
 //                sh './gradlew --no-daemon --stacktrace verifyRelease'
                   sh 'if curl -L https://api.github.com/repos/${GH_ORG}/${GH_REPO}/pulls/${CHANGE_ID} | grep \'"mergeable": true\'; then exit 0; else echo "PR is not mergeable"; exit 1; fi;'
-                  sh 'if curl -L https://api.github.com/repos/${GH_ORT}/${GH_REPO}/commits/${GIT_COMMIT}/statuses | grep \'"state": "success"\'; then exit 0; else echo "Commit check with success state not found"; exit 1; fi;'
+                  sh 'if curl -L https://api.github.com/repos/${GH_ORG}/${GH_REPO}/commits/${GIT_COMMIT}/statuses | grep \'"state": "success"\'; then exit 0; else echo "Commit check with success state not found"; exit 1; fi;'
             }
         }
 
