@@ -1,0 +1,16 @@
+on:
+  push:
+    branches:
+      - 'master'
+  schedule:
+    - cron: '25 21 * * *'
+
+jobs:
+  BuildMaster:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v3
+      - name: git branch
+        run: |
+          git branch
