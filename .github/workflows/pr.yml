@@ -33,8 +33,9 @@ jobs:
           file: ./build/resources/main/docker/Dockerfile
           push: true
           tags: registry.cloud.equino.ovh/actracker-api:0.0.2
-      - name: Deploy to k8s
+      - name: Set up Kubectl
         uses: tale/kubectl-action@v1
         with:
           base64-kube-config: ${{ secrets.EQUINO_KUBECONFIG_BASE64 }}
+      - name: Deploy to k8s
         run: kubectl apply -f build/resources/k8s/DEV.yaml
