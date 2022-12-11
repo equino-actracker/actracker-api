@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: actracker-api
+    version: 0.0.2
+  name: actracker-api
+  namespace: equino-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: actracker-api
+  template:
+    metadata:
+      labels:
+        app: actracker-api
+        version: 0.0.2
+      namespace: equino-dev
+    spec:
+      containers:
+          image: registry.cloud.equino.ovh/actracker/actracker-api:0.0.2
+          imagePullPolicy: IfNotPresent
+          name: actracker-api
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+            - containerPort: 9779
+              name: prometheus
+              protocol: TCP
+            - containerPort: 8778
+              name: jolokia
+              protocol: TCP
+          securityContext:
+            privileged: false
+      imagePullSecrets:
+        - name: equino-registry
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: actracker-api
+    version: 0.0.2
+  name: actracker-api
+  namespace: equino-dev
+spec:
+  ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: actracker-api
