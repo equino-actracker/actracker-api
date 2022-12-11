@@ -1,5 +1,8 @@
 name: Build PR
+
 on: pull_request
+
+concurrency: actracker-api-PR
 
 jobs:
   BuildPR:
@@ -14,4 +17,13 @@ jobs:
           distribution: adopt
       - name: Build and test
         run: |
-          ./gradlew --stacktrace clean build test
+          ./gradlew --no-daemon --stacktrace clean build test
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./build/resources/main/docker/Dockerfile
+          push: true
+          tags: registry.cloud.equino.ovh/actracker-api:0.0.2
