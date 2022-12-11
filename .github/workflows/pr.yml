@@ -26,10 +26,15 @@ jobs:
           registry: registry.cloud.equino.ovh
           username: ${{ secrets.EQUINO_REGISTRY_USERNAME }}
           password: ${{ secrets.EQUINO_REGISTRY_PASSWORD }}
-      - name: Build and push
+      - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
           context: .
           file: ./build/resources/main/docker/Dockerfile
           push: true
           tags: registry.cloud.equino.ovh/actracker-api:0.0.2
+      - name: Deploy to k8s
+        uses: tale/kubectl-action@v1
+        with:
+          base64-kube-config: ${{ secrets.EQUINO_KUBECONFIG_BASE64 }}
+        run: kubectl apply -f build/resources/k8s/DEV.yaml
