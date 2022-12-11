@@ -19,9 +19,9 @@ spec:
       namespace: equino-dev
     spec:
       containers:
+        - name: actracker-api
           image: registry.cloud.equino.ovh/actracker/actracker-api:0.0.2
           imagePullPolicy: IfNotPresent
-          name: actracker-api
           ports:
             - containerPort: 8080
               name: http
