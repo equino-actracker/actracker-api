@@ -32,7 +32,7 @@ jobs:
           context: .
           file: ./build/resources/main/docker/Dockerfile
           push: true
-          tags: registry.cloud.equino.ovh/actracker-api:0.0.2
+          tags: registry.cloud.equino.ovh/actracker/actracker-api:0.0.2
       - name: Set up Kubectl
         uses: tale/kubectl-action@v1
         with:
