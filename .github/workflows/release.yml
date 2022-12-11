@@ -21,3 +21,9 @@ jobs:
       - name: Build and test
         run: |
           ./gradlew --no-daemon --stacktrace clean build test
+
+      - name : Merge PR
+        uses : nbrugger-tgm/merge-pr-action@v0.2.2
+        with :
+          token: ${{ secrets.TOKEN_GITHUB }}
+          method: squash
