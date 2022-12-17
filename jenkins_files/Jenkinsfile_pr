@@ -15,13 +15,17 @@ pipeline {
         stage('Check release readiness') {
             steps {
                 sh 'git branch -m ${CHANGE_BRANCH}'
-                sh './gradlew --no-daemon --stacktrace verifyRelease'
+                withCredentials([usernamePassword(credentialsId: 'EquinoNexus', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh './gradlew --no-daemon --stacktrace verifyRelease -PequinoNexus.username=${USERNAME} -PequinoNexus.password=${PASSWORD}'
+                }
             }
         }
 
         stage('Build') {
             steps {
-                sh './gradlew --no-daemon --stacktrace clean build test'
+                withCredentials([usernamePassword(credentialsId: 'EquinoNexus', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh './gradlew --no-daemon --stacktrace clean build test -PequinoNexus.username=${USERNAME} -PequinoNexus.password=${PASSWORD}'
+                }
                 script {
                     currentBuild.displayName = readFile file: 'build/ovh.equino.version/currentVersion'
                 }

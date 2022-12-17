@@ -18,8 +18,11 @@ pipeline {
 
         stage('Upgrade version') {
             steps {
-                withCredentials([string(credentialsId: 'JenkinsGitHubPluginClassicToken', variable: 'TOKEN')]) {
-                    sh './gradlew --no-daemon --stacktrace clean release -PequinoVersion.gitUsername=$GH_ACTOR -PequinoVersion.gitPassword=$TOKEN'
+                withCredentials([
+                    string(credentialsId: 'JenkinsGitHubPluginClassicToken', variable: 'TOKEN')
+                    usernamePassword(credentialsId: 'EquinoNexus', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')
+                ]) {
+                    sh './gradlew --no-daemon --stacktrace clean release -PequinoVersion.gitUsername=$GH_ACTOR -PequinoVersion.gitPassword=$TOKEN -PequinoNexus.username=${USERNAME} -PequinoNexus.password=${PASSWORD}'
                 }
             }
         }
@@ -27,7 +30,9 @@ pipeline {
         stage('Build') {
             steps {
                 sh 'git branch -m master'
-                sh './gradlew --no-daemon --stacktrace clean build test'
+                withCredentials([usernamePassword(credentialsId: 'EquinoNexus', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh './gradlew --no-daemon --stacktrace clean build test -PequinoNexus.username=${USERNAME} -PequinoNexus.password=${PASSWORD}'
+                }
                 script {
                     currentBuild.displayName = readFile file: 'build/ovh.equino.version/currentVersion'
                 }

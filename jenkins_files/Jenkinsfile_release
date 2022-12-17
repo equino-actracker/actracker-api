@@ -20,15 +20,19 @@ pipeline {
         stage('Check release readiness') {
             steps {
                 sh 'git branch -m ${CHANGE_BRANCH}'
-                sh './gradlew --no-daemon --stacktrace verifyRelease'
-                  sh 'if curl -L https://api.github.com/repos/${GH_ORG}/${GH_REPO}/pulls/${CHANGE_ID} | grep \'"mergeable": true\'; then exit 0; else echo "PR is not mergeable"; exit 1; fi;'
-                  sh 'if curl -L https://api.github.com/repos/${GH_ORG}/${GH_REPO}/commits/${GIT_COMMIT}/statuses | grep \'"state": "success"\'; then exit 0; else echo "Commit check with success state not found"; exit 1; fi;'
+                withCredentials([usernamePassword(credentialsId: 'EquinoNexus', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh './gradlew --no-daemon --stacktrace verifyRelease -PequinoNexus.username=${USERNAME} -PequinoNexus.password=${PASSWORD}'
+                }
+                sh 'if curl -L https://api.github.com/repos/${GH_ORG}/${GH_REPO}/pulls/${CHANGE_ID} | grep \'"mergeable": true\'; then exit 0; else echo "PR is not mergeable"; exit 1; fi;'
+                sh 'if curl -L https://api.github.com/repos/${GH_ORG}/${GH_REPO}/commits/${GIT_COMMIT}/statuses | grep \'"state": "success"\'; then exit 0; else echo "Commit check with success state not found"; exit 1; fi;'
             }
         }
 
         stage('Build') {
             steps {
-                sh './gradlew --no-daemon --stacktrace clean build test'
+                withCredentials([usernamePassword(credentialsId: 'EquinoNexus', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh './gradlew --no-daemon --stacktrace clean build test -PequinoNexus.username=${USERNAME} -PequinoNexus.password=${PASSWORD}'
+                }
                 script {
                     currentBuild.displayName = readFile file: 'build/ovh.equino.version/currentVersion'
                 }
