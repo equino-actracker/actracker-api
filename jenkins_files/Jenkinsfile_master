@@ -10,27 +10,27 @@ pipeline {
     }
 
     options {
-//        lock(resource: 'actracker-api_master', extra: [[label: 'actracker_INT']])
+        lock resource: 'actracker-api_master'
         buildDiscarder(logRotator(daysToKeepStr: '10'))
     }
 
     stages {
 
-//        stage('Upgrade version') {
-//            steps {
-//                withCredentials([usernamePassword(credentialsId: 'ci_bitbucket_app_password', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-//                    sh './gradlew --no-daemon --stacktrace clean release -PequinoVersion.gitUsername=$USERNAME -PequinoVersion.gitPassword=$PASSWORD'
-//                }
-//            }
-//        }
+        stage('Upgrade version') {
+            steps {
+                withCredentials([string(credentialsId: 'JenkinsGitHubPluginClassicToken', variable: 'TOKEN')]) {
+                    sh './gradlew --no-daemon --stacktrace clean release -PequinoVersion.gitUsername=$GH_ACTOR -PequinoVersion.gitPassword=$TOKEN'
+                }
+            }
+        }
 
         stage('Build') {
             steps {
-//                sh 'git branch -m master'
+                sh 'git branch -m master'
                 sh './gradlew --no-daemon --stacktrace clean build test'
-//                script {
-//                    currentBuild.displayName = readFile file: 'build/ovh.equino.version/currentVersion'
-//                }
+                script {
+                    currentBuild.displayName = readFile file: 'build/ovh.equino.version/currentVersion'
+                }
             }
         }
 
