@@ -6,29 +6,29 @@ pipeline {
     }
 
     options {
-//        lock(resource: 'actracker-api_pr', extra: [[label: 'actracker_DEV']])
+        lock resource: 'actracker-api_pr'
         buildDiscarder(logRotator(numToKeepStr: '10'))
-    }
-
-    environment {
-        GIT_LOCAL_BRANCH = '${CHANGE_BRANCH}'
     }
 
     stages {
 
-//        stage('Check release readiness') {
-//            steps {
-//                sh 'git branch -m ${CHANGE_BRANCH}'
-//                sh './gradlew --no-daemon --stacktrace verifyRelease'
-//            }
-//        }
+        stage('Check release readiness') {
+            steps {
+                sh 'git branch -m ${CHANGE_BRANCH}'
+                withCredentials([usernamePassword(credentialsId: 'EquinoNexus', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh './gradlew --no-daemon --stacktrace verifyRelease -PequinoNexus.username=${USERNAME} -PequinoNexus.password=${PASSWORD}'
+                }
+            }
+        }
 
         stage('Build') {
             steps {
-                sh './gradlew --no-daemon --stacktrace clean build test'
-//                script {
-//                    currentBuild.displayName = readFile file: 'build/ovh.equino.version/currentVersion'
-//                }
+                withCredentials([usernamePassword(credentialsId: 'EquinoNexus', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh './gradlew --no-daemon --stacktrace clean build test -PequinoNexus.username=${USERNAME} -PequinoNexus.password=${PASSWORD}'
+                }
+                script {
+                    currentBuild.displayName = readFile file: 'build/ovh.equino.version/currentVersion'
+                }
             }
         }
 

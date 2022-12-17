@@ -1,2 +1,16 @@
+pluginManagement {
+    repositories {
+        maven {
+            url 'https://nexus.cloud.equino.ovh/repository/m2'
+            credentials {
+                // Requires equinoNexus.username and equinoNexus.password set in $GRADLE_HOME/gradle.properties file
+                username settings.'equinoNexus.username'
+                password settings.'equinoNexus.password'
+            }
+        }
+        gradlePluginPortal()
+    }
+}
+
 include 'actracker-api-main-springboot'
 include 'actracker-api-rest'
