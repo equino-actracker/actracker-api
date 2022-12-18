@@ -5,5 +5,8 @@ pluginManagement {
     }
 }
 
+rootProject.name 'actracker-api'
+rootProject.group 'ovh.equino.actracker-api'
+
 include 'actracker-api-main-springboot'
 include 'actracker-api-rest'
