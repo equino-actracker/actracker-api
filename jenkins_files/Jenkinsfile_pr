@@ -44,15 +44,17 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                sh './gradlew --no-daemon --stacktrace k8sResource k8sApply -Djkube.namespace=equino-dev'
+                withKubeConfig([namespace: "equino-dev"]) {
+                    sh './gradlew --no-daemon --stacktrace k8sResource k8sApply -Djkube.namespace=equino-dev'
+                }
             }
         }
 
     }
 
-//    post {
-//        cleanup {
-//            deleteDir()
-//        }
-//    }
+    post {
+        cleanup {
+            deleteDir()
+        }
+    }
 }
