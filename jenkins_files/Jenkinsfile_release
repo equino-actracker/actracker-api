@@ -41,11 +41,13 @@ pipeline {
 //            }
 //        }
 
-//        stage('Deploy') {
-//            steps {
-//                sh './gradlew --no-daemon --stacktrace deploy -PequinoDocker.remote -Pdeploy.environment=PROD'
-//            }
-//        }
+        stage('Deploy') {
+            steps {
+                withKubeConfig([credentialsId: 'MadritKubeConfig', namespace: 'equino-prod']) {
+                    sh './gradlew --no-daemon --stacktrace k8sResource k8sApply'
+                }
+            }
+        }
 
         stage('Merge PR') {
             steps {
