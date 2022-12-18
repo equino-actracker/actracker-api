@@ -34,11 +34,13 @@ pipeline {
 //            }
 //        }
 
-//        stage('Deploy') {
-//            steps {
-//                sh './gradlew --no-daemon --stacktrace deploy -PequinoDocker.remote -Pdeploy.environment=DEV'
-//            }
-//        }
+        stage('Build and push Docker') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'EquinoDockerRegistry', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh './gradlew --no-daemon --stacktrace k8sBuild k8sPush -Djkube.docker.username=${USERNAME} -Djkube.docker.password=${PASSWORD}'
+                }
+            }
+        }
 
     }
 
