@@ -5,6 +5,10 @@ pipeline {
         jdk 'jdk17'
     }
 
+    environment {
+        GH_ACTOR = 'marcinciapa'
+    }
+
     triggers {
         cron('@midnight')
     }
