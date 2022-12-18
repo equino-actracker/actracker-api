@@ -44,8 +44,8 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                withKubeConfig {
-                    sh './gradlew --no-daemon --stacktrace k8sResource k8sApply -Djkube.namespace=equino-dev'
+                withKubeConfig([credentialsId: 'MadritKubeConfig', namespace: 'equino-dev']) {
+                    sh './gradlew --no-daemon --stacktrace k8sResource k8sApply'
                 }
             }
         }
