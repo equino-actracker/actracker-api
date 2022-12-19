@@ -5,10 +5,6 @@ pipeline {
         jdk 'jdk17'
     }
 
-    environment {
-        KUBECONFIG = '/build/.kubeconfig'
-    }
-
     options {
         lock resource: 'actracker-api_pr'
         buildDiscarder(logRotator(numToKeepStr: '10'))
@@ -25,7 +21,6 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'printenv'
                 sh './gradlew --no-daemon --stacktrace clean build test'
                 script {
                     currentBuild.displayName = readFile file: 'build/ovh.equino.version/currentVersion'
@@ -49,9 +44,9 @@ pipeline {
 
         stage('Deploy') {
             steps {
+                sh './gradlew --no-daemon --stacktrace k8sResource'
                 withKubeConfig([credentialsId: 'MadritKubeConfig', namespace: 'equino-dev']) {
-                    sh 'printenv'
-                    sh './gradlew --no-daemon --stacktrace k8sResource k8sApply'
+                    sh './gradlew --no-daemon --stacktrace k8sApply'
                 }
             }
         }
