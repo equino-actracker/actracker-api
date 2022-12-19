@@ -5,6 +5,10 @@ pipeline {
         jdk 'jdk17'
     }
 
+    environment {
+        KUBECONFIG = '/build/.kubeconfig'
+    }
+
     options {
         lock resource: 'actracker-api_pr'
         buildDiscarder(logRotator(numToKeepStr: '10'))
