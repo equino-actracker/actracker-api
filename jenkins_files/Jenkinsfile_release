@@ -45,7 +45,7 @@ pipeline {
             steps {
                 sh './gradlew --no-daemon --stacktrace k8sResource'
                 withKubeConfig([credentialsId: 'MadritKubeConfig', namespace: 'equino-prod']) {
-                    sh './gradlew --no-daemon --stacktrace k8sApply'
+                    sh './gradlew --no-daemon --stacktrace k8sResource k8sApply -Prelease.ignoreUncommittedChanges'
                 }
             }
         }
