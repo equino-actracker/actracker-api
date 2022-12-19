@@ -21,6 +21,7 @@ pipeline {
 
         stage('Build') {
             steps {
+                sh 'printenv'
                 sh './gradlew --no-daemon --stacktrace clean build test'
                 script {
                     currentBuild.displayName = readFile file: 'build/ovh.equino.version/currentVersion'
@@ -45,6 +46,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 withKubeConfig([credentialsId: 'MadritKubeConfig', namespace: 'equino-dev']) {
+                    sh 'printenv'
                     sh './gradlew --no-daemon --stacktrace k8sResource k8sApply'
                 }
             }
