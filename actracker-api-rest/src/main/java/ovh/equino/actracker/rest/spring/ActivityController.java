@@ -6,7 +6,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 @RestController
@@ -15,7 +15,7 @@ class ActivityController {
 
 
     @RequestMapping(method = POST)
-    @ResponseStatus(CREATED)
+    @ResponseStatus(OK)
     Activity createActivity(@RequestBody Activity activity) {
         return new Activity(
                 UUID.randomUUID().toString(),
@@ -25,7 +25,7 @@ class ActivityController {
     }
 
     @RequestMapping(method = PUT, path = "/{id}")
-    @ResponseStatus(NO_CONTENT)
+    @ResponseStatus(OK)
     Activity updateActivity(@PathVariable("id") String id, @RequestBody Activity activity) {
         return activity;
     }
