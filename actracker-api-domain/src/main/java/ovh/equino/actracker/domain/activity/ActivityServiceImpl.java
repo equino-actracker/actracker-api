@@ -13,7 +13,7 @@ class ActivityServiceImpl implements ActivityService {
 
     @Override
     public ActivityDto createActivity(ActivityDto activity) {
-        Activity newActivity = Activity.newFrom(activity);
+        Activity newActivity = new Activity(activity);
         activities.put(newActivity.getId(), newActivity);
         return newActivity.toDto();
     }

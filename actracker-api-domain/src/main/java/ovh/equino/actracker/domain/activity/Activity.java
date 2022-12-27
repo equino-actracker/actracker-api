@@ -11,16 +11,14 @@ class Activity {
     private Instant startTime;
     private Instant endTime;
 
-    UUID getId() {
-        return id;
+    public Activity(ActivityDto activity) {
+        id = randomUUID();
+        startTime = activity.startTime();
+        endTime = activity.endTime();
     }
 
-    static Activity newFrom(ActivityDto activity) {
-        Activity newActivity = new Activity();
-        newActivity.id = randomUUID();
-        newActivity.startTime = activity.startTime();
-        newActivity.endTime = activity.endTime();
-        return newActivity;
+    UUID getId() {
+        return id;
     }
 
     void updateTo(ActivityDto activity) {
