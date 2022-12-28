@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-web:2.7.5'
+    implementation 'org.springframework.boot:spring-boot-starter-web:3.0.0'
     implementation project(':actracker-api-domain')
     runtimeOnly project(':actracker-api-repository-jpa')
     runtimeOnly project(':actracker-api-rest')
