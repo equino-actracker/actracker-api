@@ -3,6 +3,5 @@ plugins {
 }
 
 dependencies {
-    implementation 'org.springframework:spring-web:6.0.2'
     implementation project(':actracker-api-domain')
 }
