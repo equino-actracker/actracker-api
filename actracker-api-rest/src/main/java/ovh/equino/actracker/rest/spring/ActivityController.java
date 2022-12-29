@@ -5,6 +5,7 @@ import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivityService;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.*;
@@ -32,7 +33,7 @@ class ActivityController {
     @ResponseStatus(OK)
     Activity updateActivity(@PathVariable("id") String id, @RequestBody Activity activity) {
         ActivityDto activityDto = activityMapper.fromRequest(activity);
-        ActivityDto updateActivity = activityService.updateActivity(activityDto);
+        ActivityDto updateActivity = activityService.updateActivity(UUID.fromString(id), activityDto);
         return activityMapper.toResponse(updateActivity);
     }
 

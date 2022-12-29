@@ -10,17 +10,22 @@ class JpaActivityRepository implements ActivityRepository {
     private final Map<UUID, ActivityDto> activities = new HashMap<>();
 
     @Override
-    public void addActivity(ActivityDto activity) {
+    public void add(ActivityDto activity) {
         activities.put(activity.id(), activity);
     }
 
     @Override
-    public void updateActivity(ActivityDto activity) {
+    public void udpate(UUID activityId, ActivityDto activity) {
         activities.put(activity.id(), activity);
     }
 
     @Override
-    public List<ActivityDto> getActivities() {
-        return new ArrayList<>(activities.values());
+    public Optional<ActivityDto> findById(UUID activityId) {
+        return Optional.ofNullable(activities.get(activityId));
+    }
+
+    @Override
+    public List<ActivityDto> findAll() {
+        return activities.values().stream().toList();
     }
 }
