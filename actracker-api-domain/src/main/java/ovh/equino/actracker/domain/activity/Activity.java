@@ -11,14 +11,24 @@ class Activity {
     private Instant startTime;
     private Instant endTime;
 
-    public Activity(ActivityDto activity) {
-        id = randomUUID();
-        startTime = activity.startTime();
-        endTime = activity.endTime();
-    }
-
     UUID getId() {
         return id;
+    }
+
+    static Activity createdFrom(ActivityDto activity) {
+        Activity createdActivity = new Activity();
+        createdActivity.id = randomUUID();
+        createdActivity.startTime = activity.startTime();
+        createdActivity.endTime = activity.endTime();
+        return createdActivity;
+    }
+
+    static Activity existingFrom(ActivityDto activity) {
+        Activity existingActivity = new Activity();
+        existingActivity.id = activity.id();
+        existingActivity.startTime = activity.startTime();
+        existingActivity.endTime = activity.endTime();
+        return existingActivity;
     }
 
     void updateTo(ActivityDto activity) {

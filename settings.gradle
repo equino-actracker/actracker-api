@@ -7,7 +7,10 @@ pluginManagement {
 
 rootProject.name = 'actracker-api'
 
-include 'actracker-api-domain'
 include 'actracker-api-main-springboot'
+include 'actracker-api-domain'
 include 'actracker-api-rest'
 include 'actracker-api-repository-jpa'
+include 'actracker-api-db-h2'
+include 'actracker-api-db-postgres'
+

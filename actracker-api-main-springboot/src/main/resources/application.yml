@@ -1,0 +1,6 @@
+spring:
+  profiles:
+    active: ''
+server:
+  servlet:
+    context-path: /actracker-api
