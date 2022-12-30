@@ -3,5 +3,6 @@ plugins {
 }
 
 dependencies {
+    implementation 'org.hibernate:hibernate-core:6.1.6.Final'
     implementation project(':actracker-api-domain')
 }
