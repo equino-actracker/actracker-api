@@ -1,6 +1,8 @@
 spring:
   profiles:
-    active: ''
+    group:
+      default:
+        - 'actracker-api-db-h2'
 server:
   servlet:
     context-path: /actracker-api
