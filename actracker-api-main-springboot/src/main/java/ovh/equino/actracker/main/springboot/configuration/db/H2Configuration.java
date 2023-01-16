@@ -1,4 +1,4 @@
-package ovh.equino.actracker.main.springboot.configuration.datasource;
+package ovh.equino.actracker.main.springboot.configuration.db;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,8 +13,8 @@ import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.
 @Profile("actracker-api-db-h2")
 class H2Configuration {
 
-    @Bean
-    DataSource dataSource() {
+    @Bean("applicationDataSource")
+    DataSource applicationDataSource() {
         return new EmbeddedDatabaseBuilder()
                 .setType(H2)
                 .addScript("h2Schema.sql")
