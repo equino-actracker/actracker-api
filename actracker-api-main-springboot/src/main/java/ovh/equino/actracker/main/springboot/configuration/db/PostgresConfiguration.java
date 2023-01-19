@@ -51,8 +51,12 @@ class PostgresConfiguration {
         return dataSource;
     }
 
-    @Bean("ownerDataSource")
-    DataSource ownerDataSource() {
+    @Bean
+    FlywayMigrator flywayMigrator() {
+        return new FlywayMigrator(ownerDataSource());
+    }
+
+    private DataSource ownerDataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName("org.postgresql.Driver");
         dataSource.setUrl(url());
