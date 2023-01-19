@@ -14,6 +14,10 @@ allprojects {
 
 dependencies {
     runtimeOnly project(':actracker-api-main-springboot')
+
+    // kubernetes-gradle-plugin automatically adds Kubernetes liveness and readiness probes in generated Kubernetes manifests in presence of Spring Boot Actuator dependency.
+    // https://www.eclipse.org/jkube/docs/kubernetes-gradle-plugin/#spring-boot-getting-started
+    implementation 'org.springframework.boot:spring-boot-starter-actuator:3.0.1'
 }
 
 springBoot {
