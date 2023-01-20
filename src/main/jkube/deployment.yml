@@ -1,5 +1,13 @@
 spec:
   template:
     spec:
+      containers:
+        - envFrom:
+          - secretRef:
+              name: actracker-api-postgres-app-secret
+          - secretRef:
+              name: actracker-api-postgres-owner-secret
+          - configMapRef:
+              name: actracker-api-config
       imagePullSecrets:
         - name: equino-registry
