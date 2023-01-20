@@ -4,6 +4,8 @@ spring:
   profiles:
     group:
       default:
+        - 'actracker-api-db-h2'
+      dev:
         - 'actracker-api-db-postgres'
 server:
   servlet:
