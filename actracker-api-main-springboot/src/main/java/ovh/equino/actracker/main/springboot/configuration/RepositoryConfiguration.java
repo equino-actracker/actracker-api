@@ -26,7 +26,9 @@ import java.util.Properties;
 class RepositoryConfiguration {
 
     @Bean("entityManagerFactory")
-    LocalSessionFactoryBean sessionFactory(DataSource dataSource, Properties hibernateProperties) {
+    LocalSessionFactoryBean sessionFactory(@Qualifier("applicationDataSource") DataSource dataSource,
+                                           Properties hibernateProperties) {
+
         LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
         sessionFactory.setDataSource(dataSource);
         sessionFactory.setPackagesToScan("ovh.equino.actracker.repository.jpa");

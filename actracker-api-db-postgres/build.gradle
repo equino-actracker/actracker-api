@@ -1,7 +1,12 @@
 plugins {
     id 'java'
+    id 'org.flywaydb.flyway' version '9.11.0'
 }
 
 dependencies {
     runtimeOnly 'org.postgresql:postgresql:42.5.1'
+}
+
+flyway {
+    locations = ['filesystem:src/main/resources/schema']
 }

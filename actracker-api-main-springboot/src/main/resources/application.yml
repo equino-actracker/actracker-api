@@ -1,6 +1,16 @@
 spring:
   profiles:
-    active: ''
+    group:
+      default:
+        - 'actracker-api-db-h2'
+      dev:
+        - 'actracker-api-db-postgres'
+      int:
+        - 'actracker-api-db-postgres'
+      prod:
+        - 'actracker-api-db-postgres'
+  flyway:
+    enabled: false
 server:
   servlet:
     context-path: /actracker-api
