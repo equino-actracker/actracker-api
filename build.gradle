@@ -10,6 +10,9 @@ allprojects {
         mavenCentral()
     }
     group = 'ovh.equino.actracker-api'
+
+    task setupInfra(type: Task)
+    task tearDownInfra(type: Task)
 }
 
 dependencies {

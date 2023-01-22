@@ -2,7 +2,7 @@ spring:
   profiles:
     group:
       default:
-        - 'actracker-api-db-h2'
+        - 'actracker-api-db-postgres'
       dev:
         - 'actracker-api-db-postgres'
       int:

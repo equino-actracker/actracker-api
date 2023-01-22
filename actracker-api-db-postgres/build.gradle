@@ -1,12 +1,20 @@
 plugins {
     id 'java'
     id 'org.flywaydb.flyway' version '9.11.0'
+    id 'com.palantir.docker-compose' version '0.34.0'
 }
 
 dependencies {
     runtimeOnly 'org.postgresql:postgresql:42.5.1'
 }
 
+dockerCompose {
+    dockerComposeFile 'src/main/resources/docker/docker-compose.yml'
+}
+
 flyway {
     locations = ['filesystem:src/main/resources/schema']
 }
+
+setupInfra.dependsOn dockerComposeUp
+tearDownInfra.dependsOn dockerComposeDown
