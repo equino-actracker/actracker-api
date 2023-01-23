@@ -14,18 +14,18 @@ class ActivityServiceImpl implements ActivityService {
     }
 
     @Override
-    public ActivityDto createActivity(ActivityDto activity) {
-        Activity createdActivity = Activity.createdFrom(activity);
+    public ActivityDto createActivity(ActivityDto newActivityData) {
+        Activity createdActivity = new Activity(new ActivityId(), newActivityData);
         activityRepository.add(createdActivity.toDto());
         return createdActivity.toDto();
     }
 
     @Override
-    public ActivityDto updateActivity(UUID activityId, ActivityDto activity) {
+    public ActivityDto updateActivity(UUID activityId, ActivityDto updatedActivityData) {
         ActivityDto foundActivity = activityRepository.findById(activityId)
                 .orElseThrow(ActivityNotFoundException::new);
-        Activity existingActivity = Activity.existingFrom(foundActivity);
-        existingActivity.updateTo(activity);
+        Activity existingActivity = new Activity(foundActivity);
+        existingActivity.updateTo(updatedActivityData);
         activityRepository.udpate(activityId, existingActivity.toDto());
         return existingActivity.toDto();
     }

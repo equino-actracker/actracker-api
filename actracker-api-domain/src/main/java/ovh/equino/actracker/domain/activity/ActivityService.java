@@ -5,9 +5,9 @@ import java.util.UUID;
 
 public interface ActivityService {
 
-    ActivityDto createActivity(ActivityDto activity);
+    ActivityDto createActivity(ActivityDto newActivityData);
 
-    ActivityDto updateActivity(UUID activityId, ActivityDto activity);
+    ActivityDto updateActivity(UUID activityId, ActivityDto updatedActivityData);
 
     List<ActivityDto> getActivities();
 }

@@ -1,42 +1,46 @@
 package ovh.equino.actracker.domain.activity;
 
+import ovh.equino.actracker.domain.Entity;
+
 import java.time.Instant;
-import java.util.UUID;
 
-import static java.util.UUID.randomUUID;
+class Activity implements Entity {
 
-class Activity {
-
-    private UUID id;
+    private final ActivityId id;
     private Instant startTime;
     private Instant endTime;
 
-    UUID getId() {
-        return id;
+    Activity(ActivityId newId, ActivityDto activityData) {
+        this.id = newId;
+        this.startTime = activityData.startTime();
+        this.endTime = activityData.endTime();
+        validate();
     }
 
-    static Activity createdFrom(ActivityDto activity) {
-        Activity createdActivity = new Activity();
-        createdActivity.id = randomUUID();
-        createdActivity.startTime = activity.startTime();
-        createdActivity.endTime = activity.endTime();
-        return createdActivity;
-    }
-
-    static Activity existingFrom(ActivityDto activity) {
-        Activity existingActivity = new Activity();
-        existingActivity.id = activity.id();
-        existingActivity.startTime = activity.startTime();
-        existingActivity.endTime = activity.endTime();
-        return existingActivity;
+    Activity(ActivityDto activityData) {
+        this(new ActivityId(activityData.id()), activityData);
     }
 
     void updateTo(ActivityDto activity) {
         startTime = activity.startTime();
         endTime = activity.endTime();
+        validate();
+    }
+
+    @Override
+    public void validate() {
+        new ActivityValidator(this).validate();
     }
 
     ActivityDto toDto() {
-        return new ActivityDto(id, startTime, endTime);
+        return new ActivityDto(id.id(), startTime, endTime);
+    }
+
+    Instant getStartTime() {
+        return startTime;
+    }
+
+    Instant getEndTime() {
+        return endTime;
     }
 }
