@@ -14,14 +14,12 @@ import static java.util.Objects.nonNull;
 
 class JpaActivityRepository extends JpaRepository implements ActivityRepository {
 
-    private final Map<UUID, ActivityDto> activities = new HashMap<>();
     private final ActivityMapper activityMapper = new ActivityMapper();
 
     @Override
     public void add(ActivityDto activity) {
         ActivityEntity activityEntity = activityMapper.toEntity(activity);
         entityManager.persist(activityEntity);
-        activities.put(activity.id(), activity);
     }
 
     @Override
@@ -29,8 +27,6 @@ class JpaActivityRepository extends JpaRepository implements ActivityRepository 
         ActivityEntity activityEntity = activityMapper.toEntity(activity);
         activityEntity.id = activityId.toString();
         entityManager.merge(activityEntity);
-
-        activities.put(activity.id(), activity);
     }
 
     @Override

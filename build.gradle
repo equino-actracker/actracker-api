@@ -8,6 +8,7 @@ plugins {
 allprojects {
     repositories {
         mavenCentral()
+        maven { url 'https://nexus.cloud.equino.ovh/repository/m2' }
     }
     group = 'ovh.equino.actracker-api'
 

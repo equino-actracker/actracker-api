@@ -3,6 +3,8 @@ package ovh.equino.actracker.rest.spring;
 import org.springframework.web.bind.annotation.*;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivityService;
+import ovh.equino.security.identity.Identity;
+import ovh.equino.security.identity.IdentityProvider;
 
 import java.util.List;
 import java.util.UUID;
@@ -15,10 +17,12 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 class ActivityController {
 
     private final ActivityService activityService;
+    private final IdentityProvider identityProvider;
     private final ActivityMapper activityMapper = new ActivityMapper();
 
-    public ActivityController(ActivityService activityService) {
+    ActivityController(ActivityService activityService, IdentityProvider identityProvider) {
         this.activityService = activityService;
+        this.identityProvider = identityProvider;
     }
 
     @RequestMapping(method = POST)
