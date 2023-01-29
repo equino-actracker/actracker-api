@@ -11,8 +11,8 @@ import java.time.Instant;
 @Table(name = "activity")
 class ActivityEntity {
 
-    @Column(name = "id")
     @Id
+    @Column(name = "id")
     String id;
 
     @Column(name = "start_time")

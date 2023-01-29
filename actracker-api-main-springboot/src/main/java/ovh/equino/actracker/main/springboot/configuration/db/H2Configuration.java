@@ -18,6 +18,7 @@ class H2Configuration {
         return new EmbeddedDatabaseBuilder()
                 .setType(H2)
                 .addScript("h2Schema.sql")
+                .addScript("h2Data.sql")
                 .build();
     }
 

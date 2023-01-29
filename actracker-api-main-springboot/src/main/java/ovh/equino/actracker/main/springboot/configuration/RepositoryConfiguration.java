@@ -9,6 +9,7 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import ovh.equino.actracker.domain.activity.ActivityRepository;
+import ovh.equino.actracker.domain.tenant.TenantRepository;
 
 import javax.sql.DataSource;
 import java.util.Properties;
@@ -19,7 +20,8 @@ import java.util.Properties;
         includeFilters = @ComponentScan.Filter(
                 type = FilterType.ASSIGNABLE_TYPE,
                 classes = {
-                        ActivityRepository.class
+                        ActivityRepository.class,
+                        TenantRepository.class
                 }
         )
 )
