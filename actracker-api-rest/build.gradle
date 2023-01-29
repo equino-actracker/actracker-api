@@ -5,5 +5,5 @@ plugins {
 dependencies {
     implementation 'org.springframework:spring-web:6.0.3'
     implementation project(':actracker-api-domain')
-    implementation 'ovh.equino.security:equino-security:0.3.2-03bd411'
+    implementation 'ovh.equino.security:equino-security:0.3.2'
 }
