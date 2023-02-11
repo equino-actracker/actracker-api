@@ -9,7 +9,7 @@ public interface ActivityService {
 
     ActivityDto createActivity(ActivityDto newActivityData, User creator);
 
-    ActivityDto updateActivity(UUID activityId, ActivityDto updatedActivityData);
+    ActivityDto updateActivity(UUID activityId, ActivityDto updatedActivityData, User updater);
 
     List<ActivityDto> getActivities();
 }

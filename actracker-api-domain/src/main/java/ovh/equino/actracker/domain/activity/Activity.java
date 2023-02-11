@@ -40,6 +40,14 @@ class Activity implements Entity {
         validate();
     }
 
+    boolean isAvailableFor(User user) {
+        return creator.equals(user);
+    }
+
+    boolean isNotAvailableFor(User user) {
+        return !isAvailableFor(user);
+    }
+
     @Override
     public void validate() {
         new ActivityValidator(this).validate();

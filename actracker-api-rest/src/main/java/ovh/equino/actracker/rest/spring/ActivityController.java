@@ -30,10 +30,10 @@ class ActivityController {
     @ResponseStatus(OK)
     Activity createActivity(@RequestBody Activity activity) {
         Identity requestIdentity = identityProvider.provideIdentity();
-        User activityCreator = new User(requestIdentity.getId());
+        User requester = new User(requestIdentity.getId());
 
         ActivityDto activityDto = activityMapper.fromRequest(activity);
-        ActivityDto createdActivity = activityService.createActivity(activityDto, activityCreator);
+        ActivityDto createdActivity = activityService.createActivity(activityDto, requester);
 
         return activityMapper.toResponse(createdActivity);
     }
@@ -41,8 +41,12 @@ class ActivityController {
     @RequestMapping(method = PUT, path = "/{id}")
     @ResponseStatus(OK)
     Activity updateActivity(@PathVariable("id") String id, @RequestBody Activity activity) {
+        Identity requestIdentity = identityProvider.provideIdentity();
+        User requester = new User(requestIdentity.getId());
+
         ActivityDto activityDto = activityMapper.fromRequest(activity);
-        ActivityDto updateActivity = activityService.updateActivity(UUID.fromString(id), activityDto);
+        ActivityDto updateActivity = activityService.updateActivity(UUID.fromString(id), activityDto, requester);
+
         return activityMapper.toResponse(updateActivity);
     }
 

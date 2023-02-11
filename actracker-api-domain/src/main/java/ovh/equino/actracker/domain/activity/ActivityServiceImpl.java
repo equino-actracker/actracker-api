@@ -22,13 +22,19 @@ class ActivityServiceImpl implements ActivityService {
     }
 
     @Override
-    public ActivityDto updateActivity(UUID activityId, ActivityDto updatedActivityData) {
-        ActivityDto foundActivity = activityRepository.findById(activityId)
+    public ActivityDto updateActivity(UUID activityId, ActivityDto updatedActivityData, User updater) {
+        ActivityDto existingActivityData = activityRepository.findById(activityId)
                 .orElseThrow(ActivityNotFoundException::new);
-        Activity existingActivity = new Activity(foundActivity);
-        existingActivity.updateTo(updatedActivityData);
-        activityRepository.udpate(activityId, existingActivity.toDto());
-        return existingActivity.toDto();
+
+        Activity activity = new Activity(existingActivityData);
+
+        if (activity.isNotAvailableFor(updater)) {
+            throw new ActivityNotFoundException();
+        }
+
+        activity.updateTo(updatedActivityData);
+        activityRepository.udpate(activityId, activity.toDto());
+        return activity.toDto();
     }
 
     @Override
