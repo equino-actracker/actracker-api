@@ -1,6 +1,7 @@
 package ovh.equino.actracker.domain.activity;
 
 import ovh.equino.actracker.domain.activity.error.ActivityNotFoundException;
+import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
 import java.util.UUID;
@@ -14,8 +15,8 @@ class ActivityServiceImpl implements ActivityService {
     }
 
     @Override
-    public ActivityDto createActivity(ActivityDto newActivityData) {
-        Activity createdActivity = new Activity(new ActivityId(), newActivityData);
+    public ActivityDto createActivity(ActivityDto newActivityData, User creator) {
+        Activity createdActivity = new Activity(new ActivityId(), newActivityData, creator);
         activityRepository.add(createdActivity.toDto());
         return createdActivity.toDto();
     }

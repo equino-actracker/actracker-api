@@ -26,8 +26,8 @@ class ActivityValidator {
     }
 
     private boolean endTimeBeforeStartTime() {
-        Instant activityStartTime = activity.getStartTime();
-        Instant activityEndTime = activity.getEndTime();
+        Instant activityStartTime = activity.startTime();
+        Instant activityEndTime = activity.endTime();
 
         if (activityStartTime == null || activityEndTime == null) {
             return false;
