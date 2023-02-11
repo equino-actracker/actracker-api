@@ -53,7 +53,10 @@ class ActivityController {
     @RequestMapping(method = GET)
     @ResponseStatus(OK)
     List<Activity> getActivities() {
-        List<ActivityDto> activities = activityService.getActivities();
+        Identity requestIdentity = identityProvider.provideIdentity();
+        User requester = new User(requestIdentity.getId());
+
+        List<ActivityDto> activities = activityService.getActivities(requester);
         return activityMapper.toResponse(activities);
     }
 

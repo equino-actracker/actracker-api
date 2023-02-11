@@ -38,7 +38,7 @@ class ActivityServiceImpl implements ActivityService {
     }
 
     @Override
-    public List<ActivityDto> getActivities() {
-        return activityRepository.findAll();
+    public List<ActivityDto> getActivities(User searcher) {
+        return activityRepository.findAll(searcher);
     }
 }

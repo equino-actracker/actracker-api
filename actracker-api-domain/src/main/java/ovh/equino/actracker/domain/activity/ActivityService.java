@@ -11,5 +11,5 @@ public interface ActivityService {
 
     ActivityDto updateActivity(UUID activityId, ActivityDto updatedActivityData, User updater);
 
-    List<ActivityDto> getActivities();
+    List<ActivityDto> getActivities(User searcher);
 }
