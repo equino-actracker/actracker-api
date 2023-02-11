@@ -12,7 +12,6 @@ class ActivityMapper {
 
     ActivityDto fromRequest(Activity activityRequest) {
         return new ActivityDto(
-                stringToUUID(activityRequest.id()),
                 timestampToInstant(activityRequest.startTimestamp()),
                 timestampToInstant(activityRequest.endTimestamp())
         );
@@ -44,13 +43,6 @@ class ActivityMapper {
             return null;
         }
         return instant.toEpochMilli();
-    }
-
-    private UUID stringToUUID(String uuid) {
-        if (isNull(uuid)) {
-            return null;
-        }
-        return UUID.fromString(uuid);
     }
 
     private String uuidToString(UUID uuid) {

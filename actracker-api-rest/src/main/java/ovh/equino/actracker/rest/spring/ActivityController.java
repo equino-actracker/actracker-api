@@ -3,6 +3,7 @@ package ovh.equino.actracker.rest.spring;
 import org.springframework.web.bind.annotation.*;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivityService;
+import ovh.equino.actracker.domain.user.User;
 import ovh.equino.security.identity.Identity;
 import ovh.equino.security.identity.IdentityProvider;
 
@@ -28,23 +29,34 @@ class ActivityController {
     @RequestMapping(method = POST)
     @ResponseStatus(OK)
     Activity createActivity(@RequestBody Activity activity) {
+        Identity requestIdentity = identityProvider.provideIdentity();
+        User requester = new User(requestIdentity.getId());
+
         ActivityDto activityDto = activityMapper.fromRequest(activity);
-        ActivityDto createdActivity = activityService.createActivity(activityDto);
+        ActivityDto createdActivity = activityService.createActivity(activityDto, requester);
+
         return activityMapper.toResponse(createdActivity);
     }
 
     @RequestMapping(method = PUT, path = "/{id}")
     @ResponseStatus(OK)
     Activity updateActivity(@PathVariable("id") String id, @RequestBody Activity activity) {
+        Identity requestIdentity = identityProvider.provideIdentity();
+        User requester = new User(requestIdentity.getId());
+
         ActivityDto activityDto = activityMapper.fromRequest(activity);
-        ActivityDto updateActivity = activityService.updateActivity(UUID.fromString(id), activityDto);
+        ActivityDto updateActivity = activityService.updateActivity(UUID.fromString(id), activityDto, requester);
+
         return activityMapper.toResponse(updateActivity);
     }
 
     @RequestMapping(method = GET)
     @ResponseStatus(OK)
     List<Activity> getActivities() {
-        List<ActivityDto> activities = activityService.getActivities();
+        Identity requestIdentity = identityProvider.provideIdentity();
+        User requester = new User(requestIdentity.getId());
+
+        List<ActivityDto> activities = activityService.getActivities(requester);
         return activityMapper.toResponse(activities);
     }
 
