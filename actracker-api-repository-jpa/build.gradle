@@ -3,6 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation 'org.hibernate:hibernate-core:6.1.6.Final'
     implementation project(':actracker-api-domain')
+    implementation project(':actracker-api-notification-outbox')
+    implementation 'org.hibernate:hibernate-core:6.1.6.Final'
 }

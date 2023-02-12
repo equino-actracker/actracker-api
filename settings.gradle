@@ -13,4 +13,4 @@ include 'actracker-api-rest'
 include 'actracker-api-repository-jpa'
 include 'actracker-api-db-h2'
 include 'actracker-api-db-postgres'
-
+include 'actracker-api-notification-outbox'
