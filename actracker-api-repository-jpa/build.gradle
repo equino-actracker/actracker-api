@@ -6,4 +6,6 @@ dependencies {
     implementation project(':actracker-api-domain')
     implementation project(':actracker-api-notification-outbox')
     implementation 'org.hibernate:hibernate-core:6.1.6.Final'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.2'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.2'
 }
