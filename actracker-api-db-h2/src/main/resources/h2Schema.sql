@@ -12,3 +12,11 @@ CREATE TABLE activity (
     end_time TIMESTAMP,
     PRIMARY KEY (id)
 );
+
+CREATE SEQUENCE outbox_notification_version_seq INCREMENT BY 1;
+
+CREATE TABLE outbox_notification (
+    id VARCHAR(36) UNIQUE NOT NULL,
+    version INTEGER NOT NULL,
+    entity CLOB
+);

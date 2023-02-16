@@ -12,5 +12,6 @@ class JpaOutboxRepository extends JpaRepository implements OutboxRepository {
     public void save(Notification notification) {
         NotificationEntity notificationEntity = notificationMapper.toEntity(notification);
         System.out.printf("Outboxing entity: ID: %s%nENTITY: %s%n", notificationEntity.id, notificationEntity.entity);
+        entityManager.merge(notificationEntity);
     }
 }
