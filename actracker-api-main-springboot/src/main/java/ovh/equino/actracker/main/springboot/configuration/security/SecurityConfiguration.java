@@ -32,6 +32,8 @@ class SecurityConfiguration {
                 .csrf().disable()
                 .cors()
                 .and()
+                .headers().frameOptions().disable() // for H2 console to work correctly
+                .and()
                 .sessionManagement().sessionCreationPolicy(STATELESS);
 
         return http.build();

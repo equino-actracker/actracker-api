@@ -11,6 +11,8 @@ spring:
         - 'actracker-api-db-postgres'
   flyway:
     enabled: false
+  h2:
+    console.enabled: true # http://localhost:8080/h2-console
 server:
   servlet:
     context-path: /actracker-api
