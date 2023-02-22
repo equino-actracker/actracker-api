@@ -4,6 +4,9 @@ import ovh.equino.actracker.notification.outbox.Notification;
 import ovh.equino.actracker.notification.outbox.OutboxRepository;
 import ovh.equino.actracker.repository.jpa.JpaRepository;
 
+import java.util.Collections;
+import java.util.List;
+
 class JpaOutboxRepository extends JpaRepository implements OutboxRepository {
 
     private final NotificationMapper notificationMapper = new NotificationMapper();
@@ -11,7 +14,11 @@ class JpaOutboxRepository extends JpaRepository implements OutboxRepository {
     @Override
     public void save(Notification notification) {
         NotificationEntity notificationEntity = notificationMapper.toEntity(notification);
-        System.out.printf("Outboxing entity: ID: %s%nENTITY: %s%n", notificationEntity.id, notificationEntity.entity);
         entityManager.merge(notificationEntity);
+    }
+
+    @Override
+    public List<Notification> getPage(int limit) {
+        return Collections.emptyList();
     }
 }

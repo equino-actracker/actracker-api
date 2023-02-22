@@ -12,6 +12,7 @@ dependencies {
     runtimeOnly project(':actracker-api-repository-jpa')
     runtimeOnly project(':actracker-api-db-h2')
     runtimeOnly project(':actracker-api-db-postgres')
+    runtimeOnly project(':actracker-api-messagebroker-rabbitmq')
 
     implementation 'org.flywaydb:flyway-core:9.11.0'
 
