@@ -3,12 +3,16 @@ spring:
     group:
       default:
         - 'actracker-api-db-h2'
+        - 'actracker-api-messagebroker-memory'
       dev:
         - 'actracker-api-db-postgres'
+        - 'actracker-api-messagebroker-memory'
       int:
         - 'actracker-api-db-postgres'
+        - 'actracker-api-messagebroker-memory'
       prod:
         - 'actracker-api-db-postgres'
+        - 'actracker-api-messagebroker-memory'
   flyway:
     enabled: false
   h2:

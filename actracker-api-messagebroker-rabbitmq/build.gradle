@@ -1,7 +1,15 @@
 plugins {
     id 'java'
+    id 'com.palantir.docker-compose' version '0.34.0'
 }
 
 dependencies {
     implementation project(':actracker-api-notification-outbox')
 }
+
+dockerCompose {
+    dockerComposeFile 'src/main/resources/docker/docker-compose.yml'
+}
+
+setupInfra.dependsOn dockerComposeUp
+tearDownInfra.dependsOn dockerComposeDown
