@@ -39,7 +39,7 @@ public class ActivityService {
         activity.updateTo(updatedActivityData);
 
         ActivityDto activityDto = activity.toDto();
-        activityRepository.udpate(activityId, activityDto);
+        activityRepository.update(activityId, activityDto);
         activityNotifier.notifyChanged(activityDto);
 
         return activityDto;

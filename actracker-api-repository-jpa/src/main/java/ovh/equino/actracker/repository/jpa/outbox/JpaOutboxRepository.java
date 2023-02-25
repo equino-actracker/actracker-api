@@ -1,10 +1,12 @@
 package ovh.equino.actracker.repository.jpa.outbox;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import ovh.equino.actracker.notification.outbox.Notification;
 import ovh.equino.actracker.notification.outbox.OutboxRepository;
 import ovh.equino.actracker.repository.jpa.JpaRepository;
 
-import java.util.Collections;
 import java.util.List;
 
 class JpaOutboxRepository extends JpaRepository implements OutboxRepository {
@@ -19,6 +21,18 @@ class JpaOutboxRepository extends JpaRepository implements OutboxRepository {
 
     @Override
     public List<Notification> getPage(int limit) {
-        return Collections.emptyList();
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<NotificationEntity> criteriaQuery = criteriaBuilder.createQuery(NotificationEntity.class);
+        Root<NotificationEntity> rootEntity = criteriaQuery.from(NotificationEntity.class);
+
+        criteriaQuery
+                .select(rootEntity);
+
+        return entityManager.createQuery(criteriaQuery)
+                .setMaxResults(limit)
+                .getResultList()
+                .stream()
+                .map(notificationMapper::toDto)
+                .toList();
     }
 }

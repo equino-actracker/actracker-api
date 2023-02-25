@@ -26,7 +26,7 @@ class JpaActivityRepository extends JpaRepository implements ActivityRepository 
     }
 
     @Override
-    public void udpate(UUID activityId, ActivityDto activity) {
+    public void update(UUID activityId, ActivityDto activity) {
         ActivityEntity activityEntity = activityMapper.toEntity(activity);
         activityEntity.id = activityId.toString();
         entityManager.merge(activityEntity);

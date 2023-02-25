@@ -2,6 +2,7 @@ package ovh.equino.actracker.main.springboot.configuration.scheduler;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
+import ovh.equino.actracker.notification.outbox.Notification;
 import ovh.equino.actracker.notification.outbox.NotificationPublisher;
 import ovh.equino.actracker.notification.outbox.OutboxRepository;
 
@@ -20,7 +21,11 @@ class NotificationsPublishTask {
 
         System.out.println("Publishing next batch of notifications");
 
-        outboxRepository.getPage(10)
-                .forEach(notificationPublisher::publishNotification);
+        outboxRepository.getPage(3)
+                .forEach(this::publishAndDelete);
+    }
+
+    private void publishAndDelete(Notification notification) {
+        notificationPublisher.publishNotification(notification);
     }
 }
