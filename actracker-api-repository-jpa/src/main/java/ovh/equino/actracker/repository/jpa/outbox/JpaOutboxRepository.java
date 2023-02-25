@@ -8,6 +8,8 @@ import ovh.equino.actracker.notification.outbox.OutboxRepository;
 import ovh.equino.actracker.repository.jpa.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 class JpaOutboxRepository extends JpaRepository implements OutboxRepository {
 
@@ -34,5 +36,21 @@ class JpaOutboxRepository extends JpaRepository implements OutboxRepository {
                 .stream()
                 .map(notificationMapper::toDto)
                 .toList();
+    }
+
+    @Override
+    public Optional<Notification> findById(UUID notificationId) {
+        NotificationEntity notificationEntity = entityManager.find(NotificationEntity.class, notificationId.toString());
+        entityManager.detach(notificationEntity);
+        return Optional.ofNullable(notificationEntity)
+                .map(notificationMapper::toDto);
+    }
+
+    @Override
+    public void delete(UUID notificationId) {
+        NotificationEntity notificationToDelete = this.findById(notificationId)
+                .map(notificationMapper::toEntity)
+                .orElseThrow();
+        entityManager.remove(notificationToDelete);
     }
 }

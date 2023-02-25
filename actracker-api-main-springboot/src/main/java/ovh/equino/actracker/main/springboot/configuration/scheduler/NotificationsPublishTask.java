@@ -27,5 +27,6 @@ class NotificationsPublishTask {
 
     private void publishAndDelete(Notification notification) {
         notificationPublisher.publishNotification(notification);
+        outboxRepository.delete(notification.id());
     }
 }
