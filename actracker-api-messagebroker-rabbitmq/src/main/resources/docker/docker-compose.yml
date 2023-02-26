@@ -6,3 +6,7 @@ services:
       - 5672:5672
       - 15672:15672
     hostname: 'actracker-rabbit'
+
+networks: # networks indentation moved to top level
+  default:
+    name: rabbitmq-network
