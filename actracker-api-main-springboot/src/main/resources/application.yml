@@ -2,7 +2,12 @@ spring:
   profiles:
     group:
       default:
+        # DB
         - 'actracker-api-db-h2'
+#        - 'actracker-api-db-postgres'
+
+        # MESSAGING
+#        - 'actracker-api-messagebroker-rabbitmq'
         - 'actracker-api-messagebroker-memory'
       dev:
         - 'actracker-api-db-postgres'

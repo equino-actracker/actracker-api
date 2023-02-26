@@ -5,6 +5,7 @@ plugins {
 
 dependencies {
     implementation project(':actracker-api-notification-outbox')
+    implementation 'com.rabbitmq:amqp-client:5.16.0'
 }
 
 dockerCompose {

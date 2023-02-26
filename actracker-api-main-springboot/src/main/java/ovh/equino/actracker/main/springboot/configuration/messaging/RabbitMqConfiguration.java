@@ -1,9 +1,7 @@
 package ovh.equino.actracker.main.springboot.configuration.messaging;
 
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.FilterType;
-import org.springframework.context.annotation.Profile;
+import org.springframework.context.annotation.*;
+import ovh.equino.actracker.messagebroker.rabbitmq.RabbitMqChannelFactory;
 import ovh.equino.actracker.notification.outbox.NotificationPublisher;
 
 @Configuration
@@ -18,4 +16,9 @@ import ovh.equino.actracker.notification.outbox.NotificationPublisher;
         )
 )
 class RabbitMqConfiguration {
+
+    @Bean
+    RabbitMqChannelFactory rabbitMqChannelFactory() {
+        return new RabbitMqChannelFactory();
+    }
 }
