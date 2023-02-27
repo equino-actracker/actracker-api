@@ -19,8 +19,6 @@ class NotificationsPublishTask {
     @Scheduled(initialDelay = 20, fixedDelay = 10, timeUnit = SECONDS)
     void publishNotifications() {
 
-        System.out.println("Publishing next batch of notifications");
-
         outboxRepository.getPage(3)
                 .forEach(this::publishAndDelete);
     }

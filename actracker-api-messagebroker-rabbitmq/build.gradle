@@ -5,7 +5,10 @@ plugins {
 
 dependencies {
     implementation project(':actracker-api-notification-outbox')
+    implementation project(':actracker-api-domain')
     implementation 'com.rabbitmq:amqp-client:5.16.0'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.2'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.2'
 }
 
 dockerCompose {
