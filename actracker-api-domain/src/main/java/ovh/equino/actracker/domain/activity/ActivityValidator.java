@@ -6,7 +6,7 @@ import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
 
-class ActivityValidator {
+final class ActivityValidator {
 
     private final Activity activity;
     private final List<String> validationErrors = new LinkedList<>();
