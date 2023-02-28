@@ -1,21 +1,25 @@
 package ovh.equino.actracker.notification.outbox.activity;
 
-import ovh.equino.actracker.domain.activity.ActivityDto;
+import ovh.equino.actracker.domain.activity.ActivityChangedNotification;
 import ovh.equino.actracker.domain.activity.ActivityNotifier;
 import ovh.equino.actracker.notification.outbox.Notification;
-import ovh.equino.actracker.notification.outbox.OutboxRepository;
+import ovh.equino.actracker.notification.outbox.NotificationsOutboxRepository;
 
 class OutboxActivityNotifier implements ActivityNotifier {
 
-    private final OutboxRepository outbox;
+    private final NotificationsOutboxRepository outbox;
 
-    OutboxActivityNotifier(OutboxRepository outbox) {
+    OutboxActivityNotifier(NotificationsOutboxRepository outbox) {
         this.outbox = outbox;
     }
 
     @Override
-    public void notifyChanged(ActivityDto activity) {
-        Notification notification = new Notification(activity.id(), activity);
+    public void notifyChanged(ActivityChangedNotification activityChangedNotification) {
+        Notification notification = new Notification(
+                activityChangedNotification.id(),
+                activityChangedNotification.version(),
+                activityChangedNotification.activity()
+        );
         outbox.save(notification);
     }
 }

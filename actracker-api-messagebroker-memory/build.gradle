@@ -4,4 +4,5 @@ plugins {
 
 dependencies {
     implementation project(':actracker-api-notification-outbox')
+    implementation project(':actracker-api-domain')
 }

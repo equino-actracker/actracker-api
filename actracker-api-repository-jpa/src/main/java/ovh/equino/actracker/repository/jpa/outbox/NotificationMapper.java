@@ -20,7 +20,7 @@ class NotificationMapper {
     Notification toDto(NotificationEntity entity) {
         try {
             ActivityDto activity = objectMapper.readValue(entity.entity, ActivityDto.class);
-            return new Notification(UUID.fromString(entity.id), activity);
+            return new Notification(UUID.fromString(entity.id), entity.version, activity);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

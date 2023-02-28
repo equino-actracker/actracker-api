@@ -4,14 +4,14 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import ovh.equino.actracker.notification.outbox.Notification;
-import ovh.equino.actracker.notification.outbox.OutboxRepository;
+import ovh.equino.actracker.notification.outbox.NotificationsOutboxRepository;
 import ovh.equino.actracker.repository.jpa.JpaRepository;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-class JpaOutboxRepository extends JpaRepository implements OutboxRepository {
+class JpaNotificationsOutboxRepository extends JpaRepository implements NotificationsOutboxRepository {
 
     private final NotificationMapper notificationMapper = new NotificationMapper();
 

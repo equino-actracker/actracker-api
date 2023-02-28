@@ -57,6 +57,10 @@ class Activity implements Entity {
         return new ActivityDto(id.id(), creator.id(), startTime, endTime);
     }
 
+    ActivityChangedNotification toChangeNotification() {
+        return new ActivityChangedNotification(this.toDto());
+    }
+
     Instant startTime() {
         return startTime;
     }

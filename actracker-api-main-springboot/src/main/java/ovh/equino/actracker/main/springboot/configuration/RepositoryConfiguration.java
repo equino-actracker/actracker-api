@@ -10,7 +10,7 @@ import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import ovh.equino.actracker.domain.activity.ActivityRepository;
 import ovh.equino.actracker.domain.tenant.TenantRepository;
-import ovh.equino.actracker.notification.outbox.OutboxRepository;
+import ovh.equino.actracker.notification.outbox.NotificationsOutboxRepository;
 
 import javax.sql.DataSource;
 import java.util.Properties;
@@ -23,7 +23,7 @@ import java.util.Properties;
                 classes = {
                         ActivityRepository.class,
                         TenantRepository.class,
-                        OutboxRepository.class
+                        NotificationsOutboxRepository.class
                 }
         )
 )

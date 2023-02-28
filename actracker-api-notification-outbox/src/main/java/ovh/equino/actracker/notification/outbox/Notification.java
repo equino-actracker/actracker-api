@@ -8,6 +8,7 @@ import static java.util.Objects.requireNonNull;
 
 public record Notification(
         UUID id,
+        long version,
         ActivityDto entity) {
 
     public Notification {

@@ -22,15 +22,14 @@ class ActivityServiceImpl implements ActivityService {
 
         ActivityDto activityDto = createdActivity.toDto();
         activityRepository.add(activityDto);
-        activityNotifier.notifyChanged(activityDto);
+        activityNotifier.notifyChanged(createdActivity.toChangeNotification());
 
         return activityDto;
     }
 
     @Override
     public ActivityDto updateActivity(UUID activityId, ActivityDto updatedActivityData, User updater) {
-        ActivityDto existingActivityData = activityRepository.findById(activityId)
-                .orElseThrow(ActivityNotFoundException::new);
+        ActivityDto existingActivityData = activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
 
         Activity activity = new Activity(existingActivityData);
 
@@ -42,7 +41,7 @@ class ActivityServiceImpl implements ActivityService {
 
         ActivityDto activityDto = activity.toDto();
         activityRepository.update(activityId, activityDto);
-        activityNotifier.notifyChanged(activityDto);
+        activityNotifier.notifyChanged(activity.toChangeNotification());
 
         return activityDto;
     }
