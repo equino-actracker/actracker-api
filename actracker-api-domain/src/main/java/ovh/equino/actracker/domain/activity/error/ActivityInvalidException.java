@@ -4,7 +4,7 @@ import java.util.List;
 
 import static java.util.Collections.unmodifiableList;
 
-public class ActivityInvalidException extends RuntimeException {
+public final class ActivityInvalidException extends RuntimeException {
 
     private final List<String> errors;
 

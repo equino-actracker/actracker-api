@@ -13,8 +13,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static java.util.Objects.nonNull;
-
 class JpaActivityRepository extends JpaRepository implements ActivityRepository {
 
     private final ActivityMapper activityMapper = new ActivityMapper();
@@ -26,7 +24,7 @@ class JpaActivityRepository extends JpaRepository implements ActivityRepository 
     }
 
     @Override
-    public void udpate(UUID activityId, ActivityDto activity) {
+    public void update(UUID activityId, ActivityDto activity) {
         ActivityEntity activityEntity = activityMapper.toEntity(activity);
         activityEntity.id = activityId.toString();
         entityManager.merge(activityEntity);
@@ -35,8 +33,8 @@ class JpaActivityRepository extends JpaRepository implements ActivityRepository 
     @Override
     public Optional<ActivityDto> findById(UUID activityId) {
         ActivityEntity activityEntity = entityManager.find(ActivityEntity.class, activityId.toString());
-        ActivityDto activityDto = nonNull(activityEntity) ? activityMapper.toDto(activityEntity) : null;
-        return Optional.ofNullable(activityDto);
+        return Optional.ofNullable(activityEntity)
+                .map(activityMapper::toDto);
     }
 
     @Override

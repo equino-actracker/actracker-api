@@ -5,6 +5,7 @@ plugins {
 dependencies {
     implementation project(':actracker-api-domain')
     implementation project(':actracker-api-notification-outbox')
+    implementation project(':actracker-api-publisher-rabbitmq')
     implementation 'org.springframework.boot:spring-boot-starter-web:3.0.1'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa:3.0.1'
 
@@ -12,6 +13,7 @@ dependencies {
     runtimeOnly project(':actracker-api-repository-jpa')
     runtimeOnly project(':actracker-api-db-h2')
     runtimeOnly project(':actracker-api-db-postgres')
+    runtimeOnly project(':actracker-api-publisher-memory')
 
     implementation 'org.flywaydb:flyway-core:9.11.0'
 

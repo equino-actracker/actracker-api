@@ -1,12 +1,15 @@
 package ovh.equino.actracker.notification.outbox;
 
+import ovh.equino.actracker.domain.activity.ActivityDto;
+
 import java.util.UUID;
 
 import static java.util.Objects.requireNonNull;
 
 public record Notification(
         UUID id,
-        Object entity) {
+        long version,
+        ActivityDto entity) {
 
     public Notification {
         requireNonNull(id);

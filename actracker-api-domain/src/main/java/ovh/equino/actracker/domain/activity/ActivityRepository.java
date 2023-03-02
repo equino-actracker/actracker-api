@@ -10,7 +10,7 @@ public interface ActivityRepository {
 
     void add(ActivityDto activity);
 
-    void udpate(UUID activityId, ActivityDto activity);
+    void update(UUID activityId, ActivityDto activity);
 
     Optional<ActivityDto> findById(UUID activityId);
 
