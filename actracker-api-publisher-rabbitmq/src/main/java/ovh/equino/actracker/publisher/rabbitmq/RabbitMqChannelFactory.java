@@ -10,12 +10,14 @@ public class RabbitMqChannelFactory {
 
     private final Connection connection;
 
-    public RabbitMqChannelFactory() {
+    public RabbitMqChannelFactory(RabbitMqConnectionProperties connectionProperties) {
         ConnectionFactory connectionFactory = new ConnectionFactory();
-        connectionFactory.setHost("localhost");
-        connectionFactory.setPort(5672);
-        connectionFactory.setUsername("guest");
-        connectionFactory.setPassword("guest");
+        connectionFactory.setHost(connectionProperties.host());
+        connectionFactory.setVirtualHost(connectionProperties.vhost());
+        connectionFactory.setPort(connectionProperties.port());
+        connectionFactory.setUsername(connectionProperties.username());
+        connectionFactory.setPassword(connectionProperties.password());
+
         try {
             this.connection = connectionFactory.newConnection();
         } catch (Exception e) {
