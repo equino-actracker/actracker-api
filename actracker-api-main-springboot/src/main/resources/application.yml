@@ -11,13 +11,13 @@ spring:
         - 'actracker-api-messagebroker-memory'
       dev:
         - 'actracker-api-db-postgres'
-        - 'actracker-api-messagebroker-memory'
+        - 'actracker-api-messagebroker-rabbitmq'
       int:
         - 'actracker-api-db-postgres'
-        - 'actracker-api-messagebroker-memory'
+        - 'actracker-api-messagebroker-rabbitmq'
       prod:
         - 'actracker-api-db-postgres'
-        - 'actracker-api-messagebroker-memory'
+        - 'actracker-api-messagebroker-rabbitmq'
   flyway:
     enabled: false
   h2:
