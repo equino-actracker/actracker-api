@@ -1,4 +1,4 @@
-package ovh.equino.actracker.messagebroker.rabbitmq;
+package ovh.equino.actracker.publisher.rabbitmq;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;

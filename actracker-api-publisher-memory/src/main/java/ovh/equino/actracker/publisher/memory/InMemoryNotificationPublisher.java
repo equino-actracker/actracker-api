@@ -1,4 +1,4 @@
-package ovh.equino.actracker.messagebroker.memory;
+package ovh.equino.actracker.publisher.memory;
 
 import ovh.equino.actracker.domain.activity.ActivityChangedNotification;
 import ovh.equino.actracker.notification.outbox.NotificationPublisher;

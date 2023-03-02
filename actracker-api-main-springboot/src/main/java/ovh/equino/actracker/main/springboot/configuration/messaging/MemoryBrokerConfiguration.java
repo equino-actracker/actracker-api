@@ -7,9 +7,9 @@ import org.springframework.context.annotation.Profile;
 import ovh.equino.actracker.notification.outbox.NotificationPublisher;
 
 @Configuration
-@Profile("actracker-api-messagebroker-memory")
+@Profile("actracker-api-publisher-memory")
 @ComponentScan(
-        basePackages = "ovh.equino.actracker.messagebroker.memory",
+        basePackages = "ovh.equino.actracker.publisher.memory",
         includeFilters = @ComponentScan.Filter(
                 type = FilterType.ASSIGNABLE_TYPE,
                 classes = {
