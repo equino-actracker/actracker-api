@@ -9,11 +9,11 @@ import ovh.equino.actracker.notification.outbox.NotificationPublisher;
 
 import java.io.IOException;
 
-import static com.rabbitmq.client.BuiltinExchangeType.FANOUT;
+import static com.rabbitmq.client.BuiltinExchangeType.TOPIC;
 
 class RabbitMqNotificationPublisher implements NotificationPublisher {
 
-    public static final String EXCHANGE_NAME = "notification.X";
+    public static final String EXCHANGE_NAME = "notification.X.topic";
     private final Channel channel;
     private final ObjectMapper objectMapper;
 
@@ -22,7 +22,8 @@ class RabbitMqNotificationPublisher implements NotificationPublisher {
         this.objectMapper.registerModule(new JavaTimeModule());
         this.channel = channelFactory.createChannel();
         try {
-            this.channel.exchangeDeclare(EXCHANGE_NAME, FANOUT);
+            boolean durable = false;
+            this.channel.exchangeDeclare(EXCHANGE_NAME, TOPIC, durable);
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
@@ -32,7 +33,12 @@ class RabbitMqNotificationPublisher implements NotificationPublisher {
     public void publishNotification(ActivityChangedNotification changedNotification) {
         try {
             String message = objectMapper.writeValueAsString(changedNotification);
-            channel.basicPublish(EXCHANGE_NAME, "", MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
+            channel.basicPublish(
+                    EXCHANGE_NAME,
+                    ActivityChangedNotification.class.getSimpleName(),
+                    MessageProperties.PERSISTENT_TEXT_PLAIN,
+                    message.getBytes()
+            );
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
