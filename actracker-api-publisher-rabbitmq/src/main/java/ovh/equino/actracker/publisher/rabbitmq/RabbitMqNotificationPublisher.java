@@ -22,7 +22,7 @@ class RabbitMqNotificationPublisher implements NotificationPublisher {
         this.objectMapper.registerModule(new JavaTimeModule());
         this.channel = channelFactory.createChannel();
         try {
-            boolean durable = false;
+            boolean durable = true;
             this.channel.exchangeDeclare(EXCHANGE_NAME, TOPIC, durable);
         } catch (IOException e) {
             throw new IllegalStateException(e);
