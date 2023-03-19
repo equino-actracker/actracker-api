@@ -1,3 +1,23 @@
 plugins {
+//    id 'java-library'
     id 'java'
+    id 'maven-publish'
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "EquinoNexus"
+            url = "https://nexus.cloud.equino.ovh/repository/m2"
+            credentials {
+                username = project.findProperty("equinoNexus.username")
+                password = project.findProperty("equinoNexus.password")
+            }
+        }
+    }
+    publications {
+        actrackerApiDomain(MavenPublication) {
+            from components.java
+        }
+    }
 }
