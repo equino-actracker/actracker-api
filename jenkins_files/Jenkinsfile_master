@@ -38,6 +38,14 @@ pipeline {
             }
         }
 
+        stage('Publish') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'EquinoNexus', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh './gradlew --no-daemon --stacktrace publish -x build -x jar -PequinoNexus.username=${USERNAME} -PequinoNexus.password=${PASSWORD}'
+                }
+            }
+        }
+
 //        stage('DB schema migration') {
 //            steps {
 //                sh './gradlew --no-daemon --stacktrace :actracker-api-persistence-postgres:flywayMigrate :actracker-api-persistence-postgres:flywayInfo -PequinoDocker.remote -Pdeploy.environment=INT'
