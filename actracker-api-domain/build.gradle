@@ -1,3 +1,11 @@
 plugins {
-    id 'java'
+    id 'java-library'
+}
+
+publishing {
+    publications {
+        actrackerApiDomain(MavenPublication) {
+            from components.java
+        }
+    }
 }
