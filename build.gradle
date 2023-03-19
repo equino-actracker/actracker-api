@@ -6,10 +6,26 @@ plugins {
 }
 
 allprojects {
+    apply plugin: 'maven-publish'
+
     repositories {
         mavenCentral()
         maven { url 'https://nexus.cloud.equino.ovh/repository/m2' }
     }
+
+    publishing {
+        repositories {
+            maven {
+                name = "EquinoNexus"
+                url = "https://nexus.cloud.equino.ovh/repository/m2"
+                credentials {
+                    username = project.findProperty("equinoNexus.username")
+                    password = project.findProperty("equinoNexus.password")
+                }
+            }
+        }
+    }
+
     group = 'ovh.equino.actracker-api'
 
     task setupInfra(type: Task)
