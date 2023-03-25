@@ -32,8 +32,22 @@ class JpaActivityRepository extends JpaRepository implements ActivityRepository 
 
     @Override
     public Optional<ActivityDto> findById(UUID activityId) {
-        ActivityEntity activityEntity = entityManager.find(ActivityEntity.class, activityId.toString());
-        return Optional.ofNullable(activityEntity)
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<ActivityEntity> criteriaQuery = criteriaBuilder.createQuery(ActivityEntity.class);
+        Root<ActivityEntity> rootEntity = criteriaQuery.from(ActivityEntity.class);
+
+        CriteriaQuery<ActivityEntity> query = criteriaQuery
+                .select(rootEntity)
+                .where(
+                        criteriaBuilder.isFalse(rootEntity.get("deleted"))
+                );
+
+        TypedQuery<ActivityEntity> typedQuery = entityManager.createQuery(query);
+
+        // If Hibernate were used instead of JPA API, result transformers could do mapping rather than custom mapper:
+        // https://thorben-janssen.com/object-mapper-dto/
+        return typedQuery.getResultList().stream()
+                .findFirst()
                 .map(activityMapper::toDto);
     }
 
@@ -46,9 +60,12 @@ class JpaActivityRepository extends JpaRepository implements ActivityRepository 
         CriteriaQuery<ActivityEntity> query = criteriaQuery
                 .select(rootEntity)
                 .where(
-                        criteriaBuilder.equal(
-                                rootEntity.get("creatorId"),
-                                searcher.id().toString()
+                        criteriaBuilder.and(
+                                criteriaBuilder.equal(
+                                        rootEntity.get("creatorId"),
+                                        searcher.id().toString()
+                                ),
+                                criteriaBuilder.isFalse(rootEntity.get("deleted"))
                         )
                 );
 

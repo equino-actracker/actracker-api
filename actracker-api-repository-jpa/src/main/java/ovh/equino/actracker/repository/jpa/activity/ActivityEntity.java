@@ -23,4 +23,7 @@ class ActivityEntity {
 
     @Column(name = "end_time")
     Instant endTime;
+
+    @Column(name = "deleted")
+    boolean deleted;
 }

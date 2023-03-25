@@ -29,13 +29,7 @@ class ActivityServiceImpl implements ActivityService {
 
     @Override
     public ActivityDto updateActivity(UUID activityId, ActivityDto updatedActivityData, User updater) {
-        ActivityDto existingActivityData = activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
-
-        Activity activity = new Activity(existingActivityData);
-
-        if (activity.isNotAvailableFor(updater)) {
-            throw new ActivityNotFoundException();
-        }
+        Activity activity = getActivityIfAuthorized(updater, activityId);
 
         activity.updateTo(updatedActivityData);
 
@@ -49,5 +43,24 @@ class ActivityServiceImpl implements ActivityService {
     @Override
     public List<ActivityDto> getActivities(User searcher) {
         return activityRepository.findAll(searcher);
+    }
+
+    @Override
+    public void deleteActivity(UUID activityId, User remover) {
+        Activity activity = getActivityIfAuthorized(remover, activityId);
+        activityRepository.update(activityId, activity.toDto());
+        activityNotifier.notifyChanged(activity.toChangeNotification());
+    }
+
+    private Activity getActivityIfAuthorized(User user, UUID activityId) {
+        ActivityDto activityDto = activityRepository.findById(activityId)
+                .orElseThrow(ActivityNotFoundException::new);
+
+        Activity activity = Activity.fromDto(activityDto);
+
+        if (activity.isNotAvailableFor(user)) {
+            throw new ActivityNotFoundException();
+        }
+        return activity;
     }
 }

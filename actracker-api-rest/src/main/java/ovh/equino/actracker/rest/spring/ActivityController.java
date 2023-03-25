@@ -60,4 +60,13 @@ class ActivityController {
         return activityMapper.toResponse(activities);
     }
 
+    @RequestMapping(method = DELETE, path = "/{id}")
+    @ResponseStatus(OK)
+    void deleteActivity(@PathVariable("id") String id) {
+        Identity requestIdentity = identityProvider.provideIdentity();
+        User requester = new User(requestIdentity.getId());
+
+        activityService.deleteActivity(UUID.fromString(id), requester);
+    }
+
 }
