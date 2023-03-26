@@ -36,10 +36,15 @@ class JpaActivityRepository extends JpaRepository implements ActivityRepository 
         CriteriaQuery<ActivityEntity> criteriaQuery = criteriaBuilder.createQuery(ActivityEntity.class);
         Root<ActivityEntity> rootEntity = criteriaQuery.from(ActivityEntity.class);
 
+        // If Hibernate were used instead of JPA API, filters could be used instead:
+        // https://www.baeldung.com/spring-jpa-soft-delete
         CriteriaQuery<ActivityEntity> query = criteriaQuery
                 .select(rootEntity)
                 .where(
-                        criteriaBuilder.isFalse(rootEntity.get("deleted"))
+                        criteriaBuilder.and(
+                                criteriaBuilder.equal(rootEntity.get("id"), activityId.toString()),
+                                criteriaBuilder.isFalse(rootEntity.get("deleted"))
+                        )
                 );
 
         TypedQuery<ActivityEntity> typedQuery = entityManager.createQuery(query);

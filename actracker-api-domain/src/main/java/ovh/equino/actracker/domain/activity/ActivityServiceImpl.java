@@ -48,6 +48,7 @@ class ActivityServiceImpl implements ActivityService {
     @Override
     public void deleteActivity(UUID activityId, User remover) {
         Activity activity = getActivityIfAuthorized(remover, activityId);
+        activity.delete();
         activityRepository.update(activityId, activity.toDto());
         activityNotifier.notifyChanged(activity.toChangeNotification());
     }
