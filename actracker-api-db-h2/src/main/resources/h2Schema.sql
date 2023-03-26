@@ -10,6 +10,7 @@ CREATE TABLE activity (
     creator_id VARCHAR(36) NOT NULL,
     start_time TIMESTAMP,
     end_time TIMESTAMP,
+    deleted BOOLEAN,
     PRIMARY KEY (id)
 );
 
