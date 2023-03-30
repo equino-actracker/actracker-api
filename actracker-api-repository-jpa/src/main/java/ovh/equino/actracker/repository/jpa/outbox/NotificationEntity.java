@@ -19,4 +19,7 @@ class NotificationEntity {
 
     @Column(name = "entity")
     String data;
+
+    @Column(name = "entity_type")
+    String dataType;
 }

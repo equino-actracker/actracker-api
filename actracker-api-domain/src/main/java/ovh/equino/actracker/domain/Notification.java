@@ -7,7 +7,12 @@ import static java.util.Objects.requireNonNull;
 public record Notification<T> (
         UUID id,
         long version,
-        T data) {
+        T data,
+        Class<?> notificationType) {
+
+    public Notification(UUID id, long version, T data) {
+        this(id, version, data, data.getClass());
+    }
 
     public Notification(UUID id, T data) {
         // Version must be not null, otherwise H2 fails
@@ -19,7 +24,4 @@ public record Notification<T> (
         requireNonNull(data);
     }
 
-    public Class<?> notificationType() {
-        return data.getClass();
-    }
 }

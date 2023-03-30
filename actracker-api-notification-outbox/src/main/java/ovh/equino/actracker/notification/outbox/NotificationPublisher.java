@@ -5,6 +5,7 @@ import ovh.equino.actracker.domain.activity.ActivityChangedNotification;
 
 public interface NotificationPublisher {
 
+    // TODO delete
     void publishNotification(ActivityChangedNotification changedNotification);
 
     void publishNotification(Notification<?> notification);

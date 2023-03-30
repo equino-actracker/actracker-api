@@ -2,7 +2,6 @@ package ovh.equino.actracker.notification.outbox.activity;
 
 import ovh.equino.actracker.domain.Notification;
 import ovh.equino.actracker.domain.activity.ActivityChangedNotification;
-import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivityNotifier;
 import ovh.equino.actracker.notification.outbox.NotificationsOutboxRepository;
 
