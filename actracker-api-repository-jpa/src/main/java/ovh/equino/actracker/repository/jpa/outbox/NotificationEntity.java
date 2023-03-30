@@ -18,5 +18,8 @@ class NotificationEntity {
     long version;
 
     @Column(name = "entity")
-    String entity;
+    String data;
+
+    @Column(name = "entity_type")
+    String dataType;
 }

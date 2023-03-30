@@ -1,8 +1,8 @@
 package ovh.equino.actracker.notification.outbox;
 
-import ovh.equino.actracker.domain.activity.ActivityChangedNotification;
+import ovh.equino.actracker.domain.Notification;
 
 public interface NotificationPublisher {
 
-    void publishNotification(ActivityChangedNotification changedNotification);
+    void publishNotification(Notification<?> notification);
 }
