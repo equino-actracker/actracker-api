@@ -1,7 +1,6 @@
 package ovh.equino.actracker.notification.outbox;
 
 import ovh.equino.actracker.domain.Notification;
-import ovh.equino.actracker.domain.activity.ActivityChangedNotification;
 
 public class NotificationsOutboxService {
 
@@ -21,10 +20,6 @@ public class NotificationsOutboxService {
     }
 
     private void publishAndDelete(Notification<?> notification) {
-        ActivityChangedNotification activityChangedNotification = new ActivityChangedNotification(
-                notification.version(), ((ActivityChangedNotification) notification.data()).activity()
-        );
-        notificationPublisher.publishNotification(activityChangedNotification);
         notificationPublisher.publishNotification(notification);
         outboxRepository.delete(notification.id());
     }

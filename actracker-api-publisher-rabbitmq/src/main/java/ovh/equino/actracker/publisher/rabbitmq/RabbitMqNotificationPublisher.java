@@ -5,7 +5,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.MessageProperties;
 import ovh.equino.actracker.domain.Notification;
-import ovh.equino.actracker.domain.activity.ActivityChangedNotification;
 import ovh.equino.actracker.notification.outbox.NotificationPublisher;
 
 import java.io.IOException;
@@ -25,21 +24,6 @@ class RabbitMqNotificationPublisher implements NotificationPublisher {
         try {
             boolean durable = true;
             this.channel.exchangeDeclare(EXCHANGE_NAME, TOPIC, durable);
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
-    public void publishNotification(ActivityChangedNotification changedNotification) {
-        try {
-            String message = objectMapper.writeValueAsString(changedNotification);
-            channel.basicPublish(
-                    EXCHANGE_NAME,
-                    ActivityChangedNotification.class.getSimpleName(),
-                    MessageProperties.PERSISTENT_TEXT_PLAIN,
-                    message.getBytes()
-            );
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
