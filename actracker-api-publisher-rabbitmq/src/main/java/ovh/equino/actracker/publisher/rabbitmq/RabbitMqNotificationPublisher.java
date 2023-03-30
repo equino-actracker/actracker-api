@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.MessageProperties;
+import ovh.equino.actracker.domain.Notification;
 import ovh.equino.actracker.domain.activity.ActivityChangedNotification;
 import ovh.equino.actracker.notification.outbox.NotificationPublisher;
 
@@ -36,6 +37,21 @@ class RabbitMqNotificationPublisher implements NotificationPublisher {
             channel.basicPublish(
                     EXCHANGE_NAME,
                     ActivityChangedNotification.class.getSimpleName(),
+                    MessageProperties.PERSISTENT_TEXT_PLAIN,
+                    message.getBytes()
+            );
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    @Override
+    public void publishNotification(Notification<?> notification) {
+        try {
+            String message = objectMapper.writeValueAsString(notification);
+            channel.basicPublish(
+                    EXCHANGE_NAME,
+                    notification.notificationType().getCanonicalName(),
                     MessageProperties.PERSISTENT_TEXT_PLAIN,
                     message.getBytes()
             );
