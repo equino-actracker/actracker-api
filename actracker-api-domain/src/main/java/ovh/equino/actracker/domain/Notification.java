@@ -42,21 +42,19 @@ public record Notification<T>(
 
     public static Notification<?> fromJson(String json) throws ParseException {
         try {
-            Class<?> notificationType = getNotificationType(json);
-            JavaType javaType = objectMapper().getTypeFactory().constructParametricType(
-                    Notification.class,
-                    notificationType
-            );
-
-            return objectMapper().readValue(json, javaType);
+            JavaType notificationType = getNotificationType(json);
+            return objectMapper().readValue(json, notificationType);
         } catch (JsonProcessingException e) {
             throw new ParseException(e);
         }
     }
 
-    private static Class<?> getNotificationType(String rawMessage) throws JsonProcessingException {
+    private static JavaType getNotificationType(String rawMessage) throws JsonProcessingException {
         Notification<?> notification = objectMapper().readValue(rawMessage, Notification.class);
-        return notification.notificationType();
+        return objectMapper().getTypeFactory().constructParametricType(
+                Notification.class,
+                notification.notificationType()
+        );
     }
 
     private static ObjectMapper objectMapper() {
