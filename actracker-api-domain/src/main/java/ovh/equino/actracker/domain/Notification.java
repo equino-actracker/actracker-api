@@ -8,6 +8,7 @@ import ovh.equino.actracker.domain.exception.ParseException;
 
 import java.util.UUID;
 
+import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import static java.util.Objects.requireNonNull;
 
 public record Notification<T>(
@@ -61,6 +62,7 @@ public record Notification<T>(
     private static ObjectMapper objectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
         return objectMapper;
     }
 }
