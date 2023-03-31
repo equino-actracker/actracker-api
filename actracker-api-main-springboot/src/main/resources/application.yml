@@ -3,8 +3,8 @@ spring:
     group:
       default:
         # DB
-#        - 'actracker-api-db-h2'
-        - 'actracker-api-db-postgres'
+        - 'actracker-api-db-h2'
+#        - 'actracker-api-db-postgres'
 
         # MESSAGING
         - 'actracker-api-publisher-rabbitmq'
