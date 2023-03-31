@@ -1,10 +1,9 @@
 package ovh.equino.actracker.publisher.rabbitmq;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.MessageProperties;
 import ovh.equino.actracker.domain.Notification;
+import ovh.equino.actracker.domain.exception.ParseException;
 import ovh.equino.actracker.notification.outbox.NotificationPublisher;
 
 import java.io.IOException;
@@ -15,11 +14,8 @@ class RabbitMqNotificationPublisher implements NotificationPublisher {
 
     public static final String EXCHANGE_NAME = "notification.X.topic";
     private final Channel channel;
-    private final ObjectMapper objectMapper;
 
     RabbitMqNotificationPublisher(RabbitMqChannelFactory channelFactory) {
-        this.objectMapper = new ObjectMapper();
-        this.objectMapper.registerModule(new JavaTimeModule());
         this.channel = channelFactory.createChannel();
         try {
             boolean durable = true;
@@ -32,14 +28,14 @@ class RabbitMqNotificationPublisher implements NotificationPublisher {
     @Override
     public void publishNotification(Notification<?> notification) {
         try {
-            String message = objectMapper.writeValueAsString(notification);
+            String message = notification.toJson();
             channel.basicPublish(
                     EXCHANGE_NAME,
                     notification.notificationType().getCanonicalName(),
                     MessageProperties.PERSISTENT_TEXT_PLAIN,
                     message.getBytes()
             );
-        } catch (IOException e) {
+        } catch (IOException | ParseException e) {
             throw new IllegalStateException(e);
         }
     }
