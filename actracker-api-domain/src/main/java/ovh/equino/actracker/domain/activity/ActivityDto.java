@@ -9,12 +9,13 @@ public record ActivityDto(
         UUID creatorId,
         Instant startTime,
         Instant endTime,
+        String comment,
         boolean deleted
 
 ) {
 
     // Constructor for data provided from input
-    public ActivityDto(Instant startTime, Instant endTime) {
-        this(null, null, startTime, endTime, false);
+    public ActivityDto(Instant startTime, Instant endTime, String comment) {
+        this(null, null, startTime, endTime, comment, false);
     }
 }
