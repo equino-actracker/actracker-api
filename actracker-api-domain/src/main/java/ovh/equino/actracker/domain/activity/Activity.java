@@ -13,6 +13,7 @@ class Activity implements Entity {
     private final User creator;
     private Instant startTime;
     private Instant endTime;
+    private String comment;
     private boolean deleted;
 
     Activity(
@@ -24,6 +25,7 @@ class Activity implements Entity {
         this.creator = requireNonNull(creator);
         this.startTime = activityData.startTime();
         this.endTime = activityData.endTime();
+        this.comment = activityData.comment();
         this.deleted = false;
         validate();
     }
@@ -42,6 +44,7 @@ class Activity implements Entity {
     void updateTo(ActivityDto activity) {
         startTime = activity.startTime();
         endTime = activity.endTime();
+        comment = activity.comment();
         validate();
     }
 
@@ -63,7 +66,7 @@ class Activity implements Entity {
     }
 
     ActivityDto toDto() {
-        return new ActivityDto(id.id(), creator.id(), startTime, endTime, deleted);
+        return new ActivityDto(id.id(), creator.id(), startTime, endTime, comment, deleted);
     }
 
     ActivityChangedNotification toChangeNotification() {

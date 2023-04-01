@@ -13,7 +13,8 @@ class ActivityMapper {
     ActivityDto fromRequest(Activity activityRequest) {
         return new ActivityDto(
                 timestampToInstant(activityRequest.startTimestamp()),
-                timestampToInstant(activityRequest.endTimestamp())
+                timestampToInstant(activityRequest.endTimestamp()),
+                activityRequest.comment()
         );
     }
 
@@ -21,7 +22,8 @@ class ActivityMapper {
         return new Activity(
                 uuidToString(activity.id()),
                 instantToTimestamp(activity.startTime()),
-                instantToTimestamp(activity.endTime())
+                instantToTimestamp(activity.endTime()),
+                activity.comment()
         );
     }
 

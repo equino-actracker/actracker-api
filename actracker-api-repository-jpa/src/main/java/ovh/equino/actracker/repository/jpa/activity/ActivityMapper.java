@@ -14,6 +14,7 @@ class ActivityMapper {
                 UUID.fromString(entity.creatorId),
                 entity.startTime,
                 entity.endTime,
+                entity.comment,
                 entity.deleted
         );
     }
@@ -24,6 +25,7 @@ class ActivityMapper {
         entity.creatorId = isNull(dto.creatorId()) ? null : dto.creatorId().toString();
         entity.startTime = dto.startTime();
         entity.endTime = dto.endTime();
+        entity.comment = dto.comment();
         entity.deleted = dto.deleted();
         return entity;
     }
