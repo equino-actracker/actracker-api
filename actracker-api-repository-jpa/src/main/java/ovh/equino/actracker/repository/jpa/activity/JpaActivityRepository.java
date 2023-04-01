@@ -36,7 +36,7 @@ class JpaActivityRepository extends JpaRepository implements ActivityRepository 
         CriteriaQuery<ActivityEntity> criteriaQuery = criteriaBuilder.createQuery(ActivityEntity.class);
         Root<ActivityEntity> rootEntity = criteriaQuery.from(ActivityEntity.class);
 
-        // If Hibernate were used instead of JPA API, filters could be used instead:
+        // If Hibernate were used instead of JPA API, filters could be used instead for soft delete:
         // https://www.baeldung.com/spring-jpa-soft-delete
         CriteriaQuery<ActivityEntity> query = criteriaQuery
                 .select(rootEntity)

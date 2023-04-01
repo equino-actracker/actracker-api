@@ -1,6 +1,6 @@
 package ovh.equino.actracker.domain.activity;
 
-import ovh.equino.actracker.domain.activity.error.ActivityNotFoundException;
+import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
@@ -55,12 +55,12 @@ class ActivityServiceImpl implements ActivityService {
 
     private Activity getActivityIfAuthorized(User user, UUID activityId) {
         ActivityDto activityDto = activityRepository.findById(activityId)
-                .orElseThrow(ActivityNotFoundException::new);
+                .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
         Activity activity = Activity.fromDto(activityDto);
 
         if (activity.isNotAvailableFor(user)) {
-            throw new ActivityNotFoundException();
+            throw new EntityNotFoundException(Activity.class, activityId);
         }
         return activity;
     }

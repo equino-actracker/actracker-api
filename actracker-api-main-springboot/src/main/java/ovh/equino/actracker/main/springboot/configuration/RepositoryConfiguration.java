@@ -9,6 +9,7 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import ovh.equino.actracker.domain.activity.ActivityRepository;
+import ovh.equino.actracker.domain.tag.TagRepository;
 import ovh.equino.actracker.domain.tenant.TenantRepository;
 import ovh.equino.actracker.notification.outbox.NotificationsOutboxRepository;
 
@@ -22,6 +23,7 @@ import java.util.Properties;
                 type = FilterType.ASSIGNABLE_TYPE,
                 classes = {
                         ActivityRepository.class,
+                        TagRepository.class,
                         TenantRepository.class,
                         NotificationsOutboxRepository.class
                 }

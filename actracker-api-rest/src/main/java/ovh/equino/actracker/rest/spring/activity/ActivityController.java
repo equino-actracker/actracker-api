@@ -1,4 +1,4 @@
-package ovh.equino.actracker.rest.spring;
+package ovh.equino.actracker.rest.spring.activity;
 
 import org.springframework.web.bind.annotation.*;
 import ovh.equino.actracker.domain.activity.ActivityDto;
