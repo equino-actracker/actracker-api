@@ -30,6 +30,10 @@ class Tag implements Entity {
         return tag;
     }
 
+    TagDto toDto() {
+        return new TagDto(id.id(), creator.id(), name, deleted);
+    }
+
     void updateTo(TagDto tag) {
         this.name = tag.name();
         validate();
@@ -47,7 +51,12 @@ class Tag implements Entity {
         return !isAvailableFor(user);
     }
 
-    TagDto toDto() {
-        return new TagDto(id.id(), creator.id(), name, deleted);
+    @Override
+    public void validate() {
+        new TagValidator(this).validate();
+    }
+
+    String name() {
+        return name;
     }
 }
