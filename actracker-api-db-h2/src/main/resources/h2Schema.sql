@@ -15,6 +15,13 @@ CREATE TABLE activity (
     PRIMARY KEY (id)
 );
 
+CREATE TABLE tag (
+    id VARCHAR(36) UNIQUE NOT NULL,
+    creator_id VARCHAR(36) NOT NULL,
+    name TEXT,
+    deleted BOOLEAN,
+    PRIMARY KEY (id)
+);
 
 CREATE SEQUENCE outbox_notification_version_seq INCREMENT BY 1;
 

@@ -21,6 +21,7 @@ class TagMapper {
         TagEntity entity = new TagEntity();
         entity.id = isNull(dto.id()) ? null : dto.id().toString();
         entity.creatorId = isNull(dto.creatorId()) ? null : dto.creatorId().toString();
+        entity.name = dto.name();
         entity.deleted = dto.deleted();
         return entity;
     }
