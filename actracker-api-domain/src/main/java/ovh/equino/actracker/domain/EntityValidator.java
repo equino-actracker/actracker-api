@@ -7,11 +7,14 @@ import java.util.List;
 
 public abstract class EntityValidator<T extends Entity> {
 
-    public abstract Class<T> entityType();
+    protected abstract Class<T> entityType();
 
-    protected void handleValidationErrors(List<String> errors) {
-        if (CollectionUtils.isNotEmpty(errors)) {
-            throw new EntityInvalidException(entityType(), errors);
+    protected abstract List<String> collectValidationErrors();
+
+    public void validate() {
+        List<String> validationErrors = collectValidationErrors();
+        if (CollectionUtils.isNotEmpty(validationErrors)) {
+            throw new EntityInvalidException(entityType(), validationErrors);
         }
     }
 }

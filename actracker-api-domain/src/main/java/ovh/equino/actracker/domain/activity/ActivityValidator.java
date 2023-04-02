@@ -14,14 +14,15 @@ final class ActivityValidator extends EntityValidator<Activity> {
         this.activity = activity;
     }
 
-    void validate() {
+    @Override
+    protected List<String> collectValidationErrors() {
         List<String> validationErrors = new LinkedList<>();
 
         if (endTimeBeforeStartTime()) {
             validationErrors.add("End time is before start time");
         }
 
-        handleValidationErrors(validationErrors);
+        return validationErrors;
     }
 
     private boolean endTimeBeforeStartTime() {
@@ -35,7 +36,7 @@ final class ActivityValidator extends EntityValidator<Activity> {
     }
 
     @Override
-    public Class<Activity> entityType() {
+    protected Class<Activity> entityType() {
         return Activity.class;
     }
 }

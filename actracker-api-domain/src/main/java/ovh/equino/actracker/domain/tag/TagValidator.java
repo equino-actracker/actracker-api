@@ -15,18 +15,19 @@ final class TagValidator extends EntityValidator<Tag> {
         this.tag = tag;
     }
 
-    void validate() {
+    @Override
+    protected List<String> collectValidationErrors() {
         List<String> validationErrors = new LinkedList<>();
 
         if (isBlank(tag.name())) {
             validationErrors.add("Name is empty");
         }
 
-        handleValidationErrors(validationErrors);
+        return validationErrors;
     }
 
     @Override
-    public Class<Tag> entityType() {
+    protected Class<Tag> entityType() {
         return Tag.class;
     }
 }
