@@ -1,28 +1,28 @@
 package ovh.equino.actracker.domain.activity;
 
-import ovh.equino.actracker.domain.activity.error.ActivityInvalidException;
+import ovh.equino.actracker.domain.EntityValidator;
 
 import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
 
-final class ActivityValidator {
+final class ActivityValidator extends EntityValidator<Activity> {
 
     private final Activity activity;
-    private final List<String> validationErrors = new LinkedList<>();
 
     ActivityValidator(Activity activity) {
         this.activity = activity;
     }
 
-    void validate() {
+    @Override
+    protected List<String> collectValidationErrors() {
+        List<String> validationErrors = new LinkedList<>();
+
         if (endTimeBeforeStartTime()) {
             validationErrors.add("End time is before start time");
         }
 
-        if (!validationErrors.isEmpty()) {
-            throw new ActivityInvalidException(validationErrors);
-        }
+        return validationErrors;
     }
 
     private boolean endTimeBeforeStartTime() {
@@ -33,5 +33,10 @@ final class ActivityValidator {
             return false;
         }
         return activityEndTime.isBefore(activityStartTime);
+    }
+
+    @Override
+    protected Class<Activity> entityType() {
+        return Activity.class;
     }
 }

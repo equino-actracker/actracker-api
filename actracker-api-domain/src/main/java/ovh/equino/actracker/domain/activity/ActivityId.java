@@ -9,7 +9,7 @@ record ActivityId(UUID id) {
 
     ActivityId {
         if (isNull(id)) {
-            throw new IllegalArgumentException("ActivityId.id must is null");
+            throw new IllegalArgumentException("ActivityId.id must not be null");
         }
     }
 
