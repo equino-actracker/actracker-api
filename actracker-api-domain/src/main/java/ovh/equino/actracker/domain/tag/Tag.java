@@ -34,6 +34,10 @@ class Tag implements Entity {
         return new TagDto(id.id(), creator.id(), name, deleted);
     }
 
+    TagChangedNotification toChangeNotification() {
+        return new TagChangedNotification(this.toDto());
+    }
+
     void updateTo(TagDto tag) {
         this.name = tag.name();
         validate();

@@ -18,6 +18,7 @@ class ActivityServiceImpl implements ActivityService {
 
     @Override
     public ActivityDto createActivity(ActivityDto newActivityData, User creator) {
+
         Activity createdActivity = new Activity(new ActivityId(), newActivityData, creator);
 
         ActivityDto activityDto = createdActivity.toDto();
@@ -29,8 +30,8 @@ class ActivityServiceImpl implements ActivityService {
 
     @Override
     public ActivityDto updateActivity(UUID activityId, ActivityDto updatedActivityData, User updater) {
-        Activity activity = getActivityIfAuthorized(updater, activityId);
 
+        Activity activity = getActivityIfAuthorized(updater, activityId);
         activity.updateTo(updatedActivityData);
 
         ActivityDto activityDto = activity.toDto();
@@ -47,8 +48,10 @@ class ActivityServiceImpl implements ActivityService {
 
     @Override
     public void deleteActivity(UUID activityId, User remover) {
+
         Activity activity = getActivityIfAuthorized(remover, activityId);
         activity.delete();
+
         activityRepository.update(activityId, activity.toDto());
         activityNotifier.notifyChanged(activity.toChangeNotification());
     }
