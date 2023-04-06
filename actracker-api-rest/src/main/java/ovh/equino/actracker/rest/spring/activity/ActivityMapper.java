@@ -3,17 +3,19 @@ package ovh.equino.actracker.rest.spring.activity;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.rest.spring.PayloadMapper;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static java.util.Objects.requireNonNullElse;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 
 class ActivityMapper extends PayloadMapper {
 
     ActivityDto fromRequest(Activity activityRequest) {
 
-        Set<UUID> tagIds = activityRequest.tags().stream()
+        Set<UUID> tagIds = requireNonNullElse(activityRequest.tags(), new HashSet<String>()).stream()
                 .map(UUID::fromString)
                 .collect(toUnmodifiableSet());
 
