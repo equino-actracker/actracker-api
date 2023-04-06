@@ -25,7 +25,8 @@ CREATE TABLE tag (
 
 CREATE TABLE activity_tag (
     activity_id VARCHAR(36) NOT NULL,
-    tag_id VARCHAR(36) NOT NULL
+    tag_id VARCHAR(36) NOT NULL,
+    PRIMARY KEY (activity_id, tag_id)
 );
 
 CREATE SEQUENCE outbox_notification_version_seq INCREMENT BY 1;
