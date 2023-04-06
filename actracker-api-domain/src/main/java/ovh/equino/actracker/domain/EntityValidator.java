@@ -1,9 +1,10 @@
 package ovh.equino.actracker.domain;
 
-import org.apache.commons.collections4.CollectionUtils;
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
 
 import java.util.List;
+
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 public abstract class EntityValidator<T extends Entity> {
 
@@ -13,7 +14,7 @@ public abstract class EntityValidator<T extends Entity> {
 
     public void validate() {
         List<String> validationErrors = collectValidationErrors();
-        if (CollectionUtils.isNotEmpty(validationErrors)) {
+        if (isNotEmpty(validationErrors)) {
             throw new EntityInvalidException(entityType(), validationErrors);
         }
     }

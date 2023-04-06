@@ -26,30 +26,29 @@ class ActivityServiceImpl implements ActivityService {
     @Override
     public ActivityDto createActivity(ActivityDto newActivityData, User creator) {
         TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, creator);
-        Activity activity = Activity.create(newActivityData, creator);
+        Activity activity = Activity.create(newActivityData, creator, tagsExistenceVerifier);
         activityRepository.add(activity.forStorage());
         activityNotifier.notifyChanged(activity.forChangeNotification());
-        return activity.forClient(tagsExistenceVerifier);
+        return activity.forClient();
     }
 
     @Override
     public ActivityDto updateActivity(UUID activityId, ActivityDto updatedActivityData, User updater) {
-        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, updater);
         Activity activity = getActivityIfAuthorized(updater, activityId);
         activity.updateTo(updatedActivityData);
         activityRepository.update(activityId, activity.forStorage());
         activityNotifier.notifyChanged(activity.forChangeNotification());
-        return activity.forClient(tagsExistenceVerifier);
+        return activity.forClient();
     }
 
     @Override
     public List<ActivityDto> getActivities(User searcher) {
         TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, searcher);
         List<Activity> activities = activityRepository.findAll(searcher).stream()
-                .map(Activity::fromStorage)
+                .map(activity -> Activity.fromStorage(activity, tagsExistenceVerifier))
                 .toList();
         return activities.stream()
-                .map(activity -> activity.forClient(tagsExistenceVerifier))
+                .map(Activity::forClient)
                 .toList();
     }
 
@@ -62,10 +61,12 @@ class ActivityServiceImpl implements ActivityService {
     }
 
     private Activity getActivityIfAuthorized(User user, UUID activityId) {
+        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, user);
+
         ActivityDto activityDto = activityRepository.findById(activityId)
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
-        Activity activity = Activity.fromStorage(activityDto);
+        Activity activity = Activity.fromStorage(activityDto, tagsExistenceVerifier);
 
         if (activity.isNotAvailableFor(user)) {
             throw new EntityNotFoundException(Activity.class, activityId);
