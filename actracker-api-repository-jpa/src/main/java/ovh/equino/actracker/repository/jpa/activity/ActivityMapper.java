@@ -2,6 +2,7 @@ package ovh.equino.actracker.repository.jpa.activity;
 
 import ovh.equino.actracker.domain.activity.ActivityDto;
 
+import java.util.Collections;
 import java.util.UUID;
 
 import static java.util.Objects.isNull;
@@ -15,6 +16,7 @@ class ActivityMapper {
                 entity.startTime,
                 entity.endTime,
                 entity.comment,
+                Collections.emptySet(), // TODO :eyes:
                 entity.deleted
         );
     }

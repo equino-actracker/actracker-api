@@ -1,11 +1,18 @@
 package ovh.equino.actracker.domain.activity;
 
 import ovh.equino.actracker.domain.Entity;
+import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.user.User;
 
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.Objects.requireNonNullElse;
+import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.toUnmodifiableSet;
 
 class Activity implements Entity {
 
@@ -14,6 +21,7 @@ class Activity implements Entity {
     private Instant startTime;
     private Instant endTime;
     private String comment;
+    private Set<TagId> tags;
     private boolean deleted;
 
     Activity(
@@ -26,8 +34,15 @@ class Activity implements Entity {
         this.startTime = activityData.startTime();
         this.endTime = activityData.endTime();
         this.comment = activityData.comment();
+        this.tags = tagsData(activityData);
         this.deleted = false;
         validate();
+    }
+
+    private Set<TagId> tagsData(ActivityDto activityData) {
+        return requireNonNullElse(activityData.tags(), new HashSet<UUID>()).stream()
+                .map(TagId::new)
+                .collect(toCollection(HashSet::new));
     }
 
     static Activity fromDto(ActivityDto activityData) {
@@ -45,6 +60,7 @@ class Activity implements Entity {
         startTime = activity.startTime();
         endTime = activity.endTime();
         comment = activity.comment();
+        tags = tagsData(activity);
         validate();
     }
 
@@ -66,7 +82,10 @@ class Activity implements Entity {
     }
 
     ActivityDto toDto() {
-        return new ActivityDto(id.id(), creator.id(), startTime, endTime, comment, deleted);
+        Set<UUID> tagIds = tags.stream()
+                .map(TagId::id)
+                .collect(toUnmodifiableSet());
+        return new ActivityDto(id.id(), creator.id(), startTime, endTime, comment, tagIds, deleted);
     }
 
     ActivityChangedNotification toChangeNotification() {
