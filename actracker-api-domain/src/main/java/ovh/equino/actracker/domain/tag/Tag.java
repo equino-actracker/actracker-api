@@ -5,19 +5,31 @@ import ovh.equino.actracker.domain.user.User;
 
 import static java.util.Objects.requireNonNull;
 
-class Tag implements Entity {
+public class Tag implements Entity {
 
     private final TagId id;
     private final User creator;
     private String name;
     private boolean deleted;
 
-    Tag(TagId newId, TagDto tagData, User creator) {
+    public Tag(TagId newId, TagDto tagData, User creator) {
         this.id = requireNonNull(newId);
         this.creator = requireNonNull(creator);
         this.name = tagData.name();
         this.deleted = false;
         validate();
+    }
+
+    public TagId id() {
+        return id;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public boolean isNotDeleted() {
+        return !isDeleted();
     }
 
     static Tag fromDto(TagDto tagData) {

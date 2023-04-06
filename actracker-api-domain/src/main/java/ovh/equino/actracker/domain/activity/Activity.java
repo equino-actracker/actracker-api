@@ -1,7 +1,7 @@
 package ovh.equino.actracker.domain.activity;
 
 import ovh.equino.actracker.domain.Entity;
-import ovh.equino.actracker.domain.tag.TagId;
+import ovh.equino.actracker.domain.tag.Tag;
 import ovh.equino.actracker.domain.user.User;
 
 import java.time.Instant;
@@ -10,8 +10,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.Objects.requireNonNullElse;
-import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 
 class Activity implements Entity {
@@ -21,47 +19,81 @@ class Activity implements Entity {
     private Instant startTime;
     private Instant endTime;
     private String comment;
-    private Set<TagId> tags;
+    private final Set<Tag> tags = new HashSet<>();
     private boolean deleted;
 
-    Activity(
-            ActivityId newId,
-            ActivityDto activityData,
-            User creator) {
+    private Activity(
+            ActivityId id,
+            User creator,
+            Instant startTime,
+            Instant endTime,
+            String comment,
+            boolean deleted) {
 
-        this.id = requireNonNull(newId);
+        this.id = requireNonNull(id);
         this.creator = requireNonNull(creator);
-        this.startTime = activityData.startTime();
-        this.endTime = activityData.endTime();
-        this.comment = activityData.comment();
-        this.tags = tagsData(activityData);
-        this.deleted = false;
-        validate();
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.comment = comment;
+        this.deleted = deleted;
     }
 
-    private Set<TagId> tagsData(ActivityDto activityData) {
-        return requireNonNullElse(activityData.tags(), new HashSet<UUID>()).stream()
-                .map(TagId::new)
-                .collect(toCollection(HashSet::new));
-    }
-
-    static Activity fromDto(ActivityDto activityData) {
-        Activity activity = new Activity(
-                new ActivityId(activityData.id()),
-                activityData,
-                new User(activityData.creatorId())
+    static Activity create(ActivityDto activity, User creator) {
+        Activity newActivity = new Activity(
+                new ActivityId(),
+                creator,
+                activity.startTime(),
+                activity.endTime(),
+                activity.comment(),
+                false
         );
-        activity.deleted = activityData.deleted();
-
-        return activity;
+        newActivity.validate();
+        return newActivity;
     }
 
     void updateTo(ActivityDto activity) {
         startTime = activity.startTime();
         endTime = activity.endTime();
         comment = activity.comment();
-        tags = tagsData(activity);
         validate();
+    }
+
+    void delete() {
+        this.deleted = true;
+    }
+
+    static Activity fromStorage(ActivityDto activityData) {
+        return new Activity(
+                new ActivityId(activityData.id()),
+                new User(activityData.creatorId()),
+                activityData.startTime(),
+                activityData.endTime(),
+                activityData.comment(),
+                activityData.deleted()
+        );
+    }
+
+    ActivityDto forStorage() {
+        Set<UUID> tagIds = tags.stream()
+                .map(tag -> tag.id().id())
+                .collect(toUnmodifiableSet());
+        return new ActivityDto(id.id(), creator.id(), startTime, endTime, comment, tagIds, deleted);
+    }
+
+    ActivityDto forClient() {
+        Set<UUID> tagIds = tags.stream()
+                .filter(Tag::isNotDeleted)
+                .map(tag -> tag.id().id())
+                .collect(toUnmodifiableSet());
+        return new ActivityDto(id.id(), creator.id(), startTime, endTime, comment, tagIds, deleted);
+    }
+
+    ActivityChangedNotification forChangeNotification() {
+        Set<UUID> tagIds = tags.stream()
+                .map(tag -> tag.id().id())
+                .collect(toUnmodifiableSet());
+        ActivityDto dto = new ActivityDto(id.id(), creator.id(), startTime, endTime, comment, tagIds, deleted);
+        return new ActivityChangedNotification(dto);
     }
 
     boolean isAvailableFor(User user) {
@@ -72,24 +104,9 @@ class Activity implements Entity {
         return !isAvailableFor(user);
     }
 
-    void delete() {
-        this.deleted = true;
-    }
-
     @Override
     public void validate() {
         new ActivityValidator(this).validate();
-    }
-
-    ActivityDto toDto() {
-        Set<UUID> tagIds = tags.stream()
-                .map(TagId::id)
-                .collect(toUnmodifiableSet());
-        return new ActivityDto(id.id(), creator.id(), startTime, endTime, comment, tagIds, deleted);
-    }
-
-    ActivityChangedNotification toChangeNotification() {
-        return new ActivityChangedNotification(this.toDto());
     }
 
     Instant startTime() {
