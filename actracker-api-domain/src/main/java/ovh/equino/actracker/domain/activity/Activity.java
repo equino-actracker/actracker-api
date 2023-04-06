@@ -5,6 +5,7 @@ import ovh.equino.actracker.domain.tag.Tag;
 import ovh.equino.actracker.domain.user.User;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -19,7 +20,7 @@ class Activity implements Entity {
     private Instant startTime;
     private Instant endTime;
     private String comment;
-    private final Set<Tag> tags = new HashSet<>();
+    private final Set<Tag> tags;
     private boolean deleted;
 
     private Activity(
@@ -28,6 +29,7 @@ class Activity implements Entity {
             Instant startTime,
             Instant endTime,
             String comment,
+            Collection<Tag> tags,
             boolean deleted) {
 
         this.id = requireNonNull(id);
@@ -35,26 +37,30 @@ class Activity implements Entity {
         this.startTime = startTime;
         this.endTime = endTime;
         this.comment = comment;
+        this.tags = new HashSet<>(tags);
         this.deleted = deleted;
     }
 
-    static Activity create(ActivityDto activity, User creator) {
+    static Activity create(ActivityDto activity, User creator, Collection<Tag> tags) {
         Activity newActivity = new Activity(
                 new ActivityId(),
                 creator,
                 activity.startTime(),
                 activity.endTime(),
                 activity.comment(),
+                tags,
                 false
         );
         newActivity.validate();
         return newActivity;
     }
 
-    void updateTo(ActivityDto activity) {
-        startTime = activity.startTime();
-        endTime = activity.endTime();
-        comment = activity.comment();
+    void updateTo(ActivityDto activity, Collection<Tag> tags) {
+        this.startTime = activity.startTime();
+        this.endTime = activity.endTime();
+        this.comment = activity.comment();
+        this.tags.removeIf(Tag::isNotDeleted);
+        this.tags.addAll(tags);
         validate();
     }
 
@@ -62,14 +68,15 @@ class Activity implements Entity {
         this.deleted = true;
     }
 
-    static Activity fromStorage(ActivityDto activityData) {
+    static Activity fromStorage(ActivityDto activity, Collection<Tag> tags) {
         return new Activity(
-                new ActivityId(activityData.id()),
-                new User(activityData.creatorId()),
-                activityData.startTime(),
-                activityData.endTime(),
-                activityData.comment(),
-                activityData.deleted()
+                new ActivityId(activity.id()),
+                new User(activity.creatorId()),
+                activity.startTime(),
+                activity.endTime(),
+                activity.comment(),
+                tags,
+                activity.deleted()
         );
     }
 

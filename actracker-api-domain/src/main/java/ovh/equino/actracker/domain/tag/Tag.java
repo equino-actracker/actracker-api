@@ -12,12 +12,59 @@ public class Tag implements Entity {
     private String name;
     private boolean deleted;
 
-    public Tag(TagId newId, TagDto tagData, User creator) {
-        this.id = requireNonNull(newId);
+    private Tag(
+            TagId id,
+            User creator,
+            String name,
+            boolean deleted) {
+
+        this.id = requireNonNull(id);
         this.creator = requireNonNull(creator);
-        this.name = tagData.name();
-        this.deleted = false;
+        this.name = name;
+        this.deleted = deleted;
+
+    }
+
+    static Tag create(TagDto tag, User creator) {
+        Tag newTag = new Tag(
+                new TagId(),
+                creator,
+                tag.name(),
+                false
+        );
+        newTag.validate();
+        return newTag;
+    }
+
+    void updateTo(TagDto tag) {
+        this.name = tag.name();
         validate();
+    }
+
+    void delete() {
+        this.deleted = true;
+    }
+
+    static Tag fromStorage(TagDto tag) {
+        return new Tag(
+                new TagId(tag.id()),
+                new User(tag.creatorId()),
+                tag.name(),
+                tag.deleted()
+        );
+    }
+
+    TagDto forStorage() {
+        return new TagDto(id.id(), creator.id(), name, deleted);
+    }
+
+    TagDto forClient() {
+        return new TagDto(id.id(), creator.id(), name, deleted);
+    }
+
+    TagChangedNotification forChangeNotification() {
+        TagDto dto = new TagDto(id.id(), creator.id(), name, deleted);
+        return new TagChangedNotification(dto);
     }
 
     public TagId id() {
@@ -30,33 +77,6 @@ public class Tag implements Entity {
 
     public boolean isNotDeleted() {
         return !isDeleted();
-    }
-
-    static Tag fromDto(TagDto tagData) {
-        Tag tag = new Tag(
-                new TagId(tagData.id()),
-                tagData,
-                new User(tagData.creatorId())
-        );
-        tag.deleted = tagData.deleted();
-        return tag;
-    }
-
-    TagDto toDto() {
-        return new TagDto(id.id(), creator.id(), name, deleted);
-    }
-
-    TagChangedNotification toChangeNotification() {
-        return new TagChangedNotification(this.toDto());
-    }
-
-    void updateTo(TagDto tag) {
-        this.name = tag.name();
-        validate();
-    }
-
-    void delete() {
-        this.deleted = true;
     }
 
     boolean isAvailableFor(User user) {
