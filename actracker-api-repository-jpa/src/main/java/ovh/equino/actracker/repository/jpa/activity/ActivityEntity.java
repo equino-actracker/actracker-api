@@ -1,11 +1,10 @@
 package ovh.equino.actracker.repository.jpa.activity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import ovh.equino.actracker.repository.jpa.tag.TagEntity;
 
 import java.time.Instant;
+import java.util.Set;
 
 @Entity
 @Table(name = "activity")
@@ -26,6 +25,14 @@ class ActivityEntity {
 
     @Column(name = "comment")
     String comment;
+
+    @ManyToMany
+    @JoinTable(
+            name = "activity_tag",
+            joinColumns = @JoinColumn(name = "activity_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    Set<TagEntity> tags;
 
     @Column(name = "deleted")
     boolean deleted;

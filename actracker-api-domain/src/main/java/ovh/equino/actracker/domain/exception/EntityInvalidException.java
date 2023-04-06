@@ -11,7 +11,7 @@ public final class EntityInvalidException extends RuntimeException {
                 "%s invalid: %s"
                         .formatted(
                                 entityType.getSimpleName(),
-                                errors.toString()
+                                errors
                         )
         );
     }

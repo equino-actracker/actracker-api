@@ -18,49 +18,44 @@ class TagServiceImpl implements TagService {
 
     @Override
     public TagDto createTag(TagDto newTagData, User creator) {
-
-        Tag createdTag = new Tag(new TagId(), newTagData, creator);
-
-        TagDto tagDto = createdTag.toDto();
-        tagRepository.add(tagDto);
-        tagNotifier.notifyChanged(createdTag.toChangeNotification());
-
-        return tagDto;
+        Tag tag = Tag.create(newTagData, creator);
+        tagRepository.add(tag.forStorage());
+        tagNotifier.notifyChanged(tag.forChangeNotification());
+        return tag.forClient();
     }
 
     @Override
     public TagDto updateTag(UUID tagId, TagDto updatedTagData, User updater) {
-
         Tag tag = getTagIfAuthorized(updater, tagId);
         tag.updateTo(updatedTagData);
-
-        TagDto tagDto = tag.toDto();
-        tagRepository.update(tagId, tagDto);
-        tagNotifier.notifyChanged(tag.toChangeNotification());
-
-        return tagDto;
+        tagRepository.update(tagId, tag.forStorage());
+        tagNotifier.notifyChanged(tag.forChangeNotification());
+        return tag.forClient();
     }
 
     @Override
     public List<TagDto> getTags(User searcher) {
-        return tagRepository.findAll(searcher);
+        List<Tag> tags = tagRepository.findAll(searcher).stream()
+                .map(Tag::fromStorage)
+                .toList();
+        return tags.stream()
+                .map(Tag::forClient)
+                .toList();
     }
 
     @Override
     public void deleteTag(UUID tagId, User remover) {
-
         Tag tag = getTagIfAuthorized(remover, tagId);
         tag.delete();
-
-        tagRepository.update(tagId, tag.toDto());
-        tagNotifier.notifyChanged(tag.toChangeNotification());
+        tagRepository.update(tagId, tag.forStorage());
+        tagNotifier.notifyChanged(tag.forChangeNotification());
     }
 
     private Tag getTagIfAuthorized(User user, UUID tagId) {
         TagDto tagDto = tagRepository.findById(tagId)
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
 
-        Tag tag = Tag.fromDto(tagDto);
+        Tag tag = Tag.fromStorage(tagDto);
 
         if (tag.isNotAvailableFor(user)) {
             throw new EntityNotFoundException(Tag.class, tagId);

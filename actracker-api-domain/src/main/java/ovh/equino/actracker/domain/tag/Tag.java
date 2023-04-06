@@ -12,30 +12,28 @@ class Tag implements Entity {
     private String name;
     private boolean deleted;
 
-    Tag(TagId newId, TagDto tagData, User creator) {
-        this.id = requireNonNull(newId);
+    private Tag(
+            TagId id,
+            User creator,
+            String name,
+            boolean deleted) {
+
+        this.id = requireNonNull(id);
         this.creator = requireNonNull(creator);
-        this.name = tagData.name();
-        this.deleted = false;
-        validate();
+        this.name = name;
+        this.deleted = deleted;
+
     }
 
-    static Tag fromDto(TagDto tagData) {
-        Tag tag = new Tag(
-                new TagId(tagData.id()),
-                tagData,
-                new User(tagData.creatorId())
+    static Tag create(TagDto tag, User creator) {
+        Tag newTag = new Tag(
+                new TagId(),
+                creator,
+                tag.name(),
+                false
         );
-        tag.deleted = tagData.deleted();
-        return tag;
-    }
-
-    TagDto toDto() {
-        return new TagDto(id.id(), creator.id(), name, deleted);
-    }
-
-    TagChangedNotification toChangeNotification() {
-        return new TagChangedNotification(this.toDto());
+        newTag.validate();
+        return newTag;
     }
 
     void updateTo(TagDto tag) {
@@ -45,6 +43,40 @@ class Tag implements Entity {
 
     void delete() {
         this.deleted = true;
+    }
+
+    static Tag fromStorage(TagDto tag) {
+        return new Tag(
+                new TagId(tag.id()),
+                new User(tag.creatorId()),
+                tag.name(),
+                tag.deleted()
+        );
+    }
+
+    TagDto forStorage() {
+        return new TagDto(id.id(), creator.id(), name, deleted);
+    }
+
+    TagDto forClient() {
+        return new TagDto(id.id(), creator.id(), name, deleted);
+    }
+
+    TagChangedNotification forChangeNotification() {
+        TagDto dto = new TagDto(id.id(), creator.id(), name, deleted);
+        return new TagChangedNotification(dto);
+    }
+
+    TagId id() {
+        return id;
+    }
+
+    boolean isDeleted() {
+        return deleted;
+    }
+
+    boolean isNotDeleted() {
+        return !isDeleted();
     }
 
     boolean isAvailableFor(User user) {
