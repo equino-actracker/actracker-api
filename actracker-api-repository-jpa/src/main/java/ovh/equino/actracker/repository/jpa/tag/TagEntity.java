@@ -7,11 +7,11 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "tag")
-class TagEntity {
+public class TagEntity {
 
     @Id
     @Column(name = "id")
-    String id;
+    public String id;
 
     @Column(name = "creator_id")
     String creatorId;

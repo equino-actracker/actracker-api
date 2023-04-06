@@ -23,6 +23,11 @@ CREATE TABLE tag (
     PRIMARY KEY (id)
 );
 
+CREATE TABLE activity_tag (
+    activity_id VARCHAR(36) NOT NULL,
+    tag_id VARCHAR(36) NOT NULL
+);
+
 CREATE SEQUENCE outbox_notification_version_seq INCREMENT BY 1;
 
 CREATE TABLE outbox_notification (
