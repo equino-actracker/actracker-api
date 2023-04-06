@@ -1,16 +1,15 @@
 package ovh.equino.actracker.domain.activity;
 
 import ovh.equino.actracker.domain.Entity;
-import ovh.equino.actracker.domain.tag.Tag;
+import ovh.equino.actracker.domain.tag.TagId;
+import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
 import ovh.equino.actracker.domain.user.User;
 
 import java.time.Instant;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.Objects.requireNonNullElse;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 
 class Activity implements Entity {
@@ -20,7 +19,7 @@ class Activity implements Entity {
     private Instant startTime;
     private Instant endTime;
     private String comment;
-    private final Set<Tag> tags;
+    private final Set<TagId> tags;
     private boolean deleted;
 
     private Activity(
@@ -29,7 +28,7 @@ class Activity implements Entity {
             Instant startTime,
             Instant endTime,
             String comment,
-            Collection<Tag> tags,
+            Collection<TagId> tags,
             boolean deleted) {
 
         this.id = requireNonNull(id);
@@ -41,26 +40,25 @@ class Activity implements Entity {
         this.deleted = deleted;
     }
 
-    static Activity create(ActivityDto activity, User creator, Collection<Tag> tags) {
+    static Activity create(ActivityDto activity, User creator) {
         Activity newActivity = new Activity(
                 new ActivityId(),
                 creator,
                 activity.startTime(),
                 activity.endTime(),
                 activity.comment(),
-                tags,
+                toTagIds(activity),
                 false
         );
         newActivity.validate();
         return newActivity;
     }
 
-    void updateTo(ActivityDto activity, Collection<Tag> tags) {
+    void updateTo(ActivityDto activity) {
         this.startTime = activity.startTime();
         this.endTime = activity.endTime();
         this.comment = activity.comment();
-        this.tags.removeIf(Tag::isNotDeleted);
-        this.tags.addAll(tags);
+        this.tags.addAll(toTagIds(activity));
         validate();
     }
 
@@ -68,36 +66,36 @@ class Activity implements Entity {
         this.deleted = true;
     }
 
-    static Activity fromStorage(ActivityDto activity, Collection<Tag> tags) {
+    static Activity fromStorage(ActivityDto activity) {
         return new Activity(
                 new ActivityId(activity.id()),
                 new User(activity.creatorId()),
                 activity.startTime(),
                 activity.endTime(),
                 activity.comment(),
-                tags,
+                toTagIds(activity),
                 activity.deleted()
         );
     }
 
     ActivityDto forStorage() {
         Set<UUID> tagIds = tags.stream()
-                .map(tag -> tag.id().id())
+                .map(TagId::id)
                 .collect(toUnmodifiableSet());
         return new ActivityDto(id.id(), creator.id(), startTime, endTime, comment, tagIds, deleted);
     }
 
-    ActivityDto forClient() {
-        Set<UUID> tagIds = tags.stream()
-                .filter(Tag::isNotDeleted)
-                .map(tag -> tag.id().id())
+    ActivityDto forClient(TagsExistenceVerifier tagsExistenceVerifier) {
+        Set<UUID> tagIds = tagsExistenceVerifier.existing(tags).stream()
+                .map(TagId::id)
                 .collect(toUnmodifiableSet());
+
         return new ActivityDto(id.id(), creator.id(), startTime, endTime, comment, tagIds, deleted);
     }
 
     ActivityChangedNotification forChangeNotification() {
         Set<UUID> tagIds = tags.stream()
-                .map(tag -> tag.id().id())
+                .map(TagId::id)
                 .collect(toUnmodifiableSet());
         ActivityDto dto = new ActivityDto(id.id(), creator.id(), startTime, endTime, comment, tagIds, deleted);
         return new ActivityChangedNotification(dto);
@@ -124,4 +122,9 @@ class Activity implements Entity {
         return endTime;
     }
 
+    private static List<TagId> toTagIds(ActivityDto activity) {
+        return requireNonNullElse(activity.tags(), new HashSet<UUID>()).stream()
+                .map(TagId::new)
+                .toList();
+    }
 }

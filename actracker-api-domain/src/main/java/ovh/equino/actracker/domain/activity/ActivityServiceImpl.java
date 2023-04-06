@@ -2,12 +2,11 @@ package ovh.equino.actracker.domain.activity;
 
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.tag.TagRepository;
+import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
 import java.util.UUID;
-
-import static java.util.Collections.emptyList;
 
 class ActivityServiceImpl implements ActivityService {
 
@@ -26,28 +25,31 @@ class ActivityServiceImpl implements ActivityService {
 
     @Override
     public ActivityDto createActivity(ActivityDto newActivityData, User creator) {
-        Activity activity = Activity.create(newActivityData, creator, emptyList());
+        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, creator);
+        Activity activity = Activity.create(newActivityData, creator);
         activityRepository.add(activity.forStorage());
         activityNotifier.notifyChanged(activity.forChangeNotification());
-        return activity.forClient();
+        return activity.forClient(tagsExistenceVerifier);
     }
 
     @Override
     public ActivityDto updateActivity(UUID activityId, ActivityDto updatedActivityData, User updater) {
+        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, updater);
         Activity activity = getActivityIfAuthorized(updater, activityId);
-        activity.updateTo(updatedActivityData, emptyList());
+        activity.updateTo(updatedActivityData);
         activityRepository.update(activityId, activity.forStorage());
         activityNotifier.notifyChanged(activity.forChangeNotification());
-        return activity.forClient();
+        return activity.forClient(tagsExistenceVerifier);
     }
 
     @Override
     public List<ActivityDto> getActivities(User searcher) {
+        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, searcher);
         List<Activity> activities = activityRepository.findAll(searcher).stream()
-                .map(activity -> Activity.fromStorage(activity, emptyList()))
+                .map(Activity::fromStorage)
                 .toList();
         return activities.stream()
-                .map(Activity::forClient)
+                .map(activity -> activity.forClient(tagsExistenceVerifier))
                 .toList();
     }
 
@@ -63,7 +65,7 @@ class ActivityServiceImpl implements ActivityService {
         ActivityDto activityDto = activityRepository.findById(activityId)
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
-        Activity activity = Activity.fromStorage(activityDto, emptyList());
+        Activity activity = Activity.fromStorage(activityDto);
 
         if (activity.isNotAvailableFor(user)) {
             throw new EntityNotFoundException(Activity.class, activityId);
