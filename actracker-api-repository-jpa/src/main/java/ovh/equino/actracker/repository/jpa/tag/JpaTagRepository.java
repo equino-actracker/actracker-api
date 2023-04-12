@@ -84,6 +84,7 @@ class JpaTagRepository extends JpaRepository implements TagRepository {
         Integer pageSize = searchCriteria.pageSize();
         Set<UUID> excludedIds = searchCriteria.excludeFilter();
         User searcher = searchCriteria.searcher();
+        String term = searchCriteria.term();
 
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<TagEntity> criteriaQuery = criteriaBuilder.createQuery(TagEntity.class);
@@ -96,7 +97,8 @@ class JpaTagRepository extends JpaRepository implements TagRepository {
                                 isAccessibleFor(searcher, criteriaBuilder, rootEntity),
                                 isNotDeleted(criteriaBuilder, rootEntity),
                                 isInPage(pageId, criteriaBuilder, rootEntity),
-                                isNotExcluded(excludedIds, criteriaBuilder, rootEntity)
+                                isNotExcluded(excludedIds, criteriaBuilder, rootEntity),
+                                matchesTerm(term, criteriaBuilder, rootEntity)
                         )
                 )
                 .orderBy(criteriaBuilder.asc(rootEntity.get("id")));
@@ -122,6 +124,16 @@ class JpaTagRepository extends JpaRepository implements TagRepository {
         return lastTag.id().toString();
     }
 
+    private Predicate matchesTerm(String term, CriteriaBuilder criteriaBuilder, Root<TagEntity> rootEntity) {
+        if(isBlank(term)) {
+            return allMatch(criteriaBuilder);
+        }
+        return criteriaBuilder.like(
+                rootEntity.get("name"),
+                term + "%"
+        );
+    }
+
     private Predicate hasId(UUID tagId, CriteriaBuilder criteriaBuilder, Root<TagEntity> rootEntity) {
         return criteriaBuilder.equal(rootEntity.get("id"), tagId.toString());
     }
@@ -139,7 +151,7 @@ class JpaTagRepository extends JpaRepository implements TagRepository {
 
     private Predicate isNotExcluded(Set<UUID> excludedIds, CriteriaBuilder criteriaBuilder, Root<TagEntity> rootEntity) {
         if (isEmpty(excludedIds)) {
-            return criteriaBuilder.and();   // always true
+            return allMatch(criteriaBuilder);
         }
         Path<Object> id = rootEntity.get("id");
         CriteriaBuilder.In<Object> idIn = criteriaBuilder.in(id);
@@ -151,11 +163,15 @@ class JpaTagRepository extends JpaRepository implements TagRepository {
 
     private Predicate isInPage(String pageId, CriteriaBuilder criteriaBuilder, Root<TagEntity> rootEntity) {
         if (isBlank(pageId)) {
-            return criteriaBuilder.and();   // always true
+            return allMatch(criteriaBuilder);
         }
         return criteriaBuilder.greaterThan(
                 rootEntity.get("id"),
                 pageId
         );
+    }
+
+    private Predicate allMatch(CriteriaBuilder criteriaBuilder) {
+        return criteriaBuilder.and();
     }
 }
