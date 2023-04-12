@@ -9,10 +9,12 @@ import java.util.UUID;
 class TagServiceImpl implements TagService {
 
     private final TagRepository tagRepository;
+    private final TagSearchEngine tagSearchEngine;
     private final TagNotifier tagNotifier;
 
-    TagServiceImpl(TagRepository tagRepository, TagNotifier tagNotifier) {
+    TagServiceImpl(TagRepository tagRepository, TagSearchEngine tagSearchEngine, TagNotifier tagNotifier) {
         this.tagRepository = tagRepository;
+        this.tagSearchEngine = tagSearchEngine;
         this.tagNotifier = tagNotifier;
     }
 
@@ -41,6 +43,11 @@ class TagServiceImpl implements TagService {
         return tags.stream()
                 .map(Tag::forClient)
                 .toList();
+    }
+
+    @Override
+    public TagSearchResult searchTags(TagSearchCriteria searchCriteria) {
+        return tagSearchEngine.findTags(searchCriteria);
     }
 
     @Override

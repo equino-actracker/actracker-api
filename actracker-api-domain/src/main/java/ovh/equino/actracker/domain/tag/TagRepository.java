@@ -15,4 +15,6 @@ public interface TagRepository {
     Optional<TagDto> findById(UUID tagId);
 
     List<TagDto> findAll(User searcher);
+
+    TagSearchResult find(TagSearchCriteria searchCriteria);
 }
