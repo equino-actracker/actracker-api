@@ -13,5 +13,7 @@ public interface TagService {
 
     List<TagDto> getTags(User searcher);
 
+    TagSearchResult searchTags(TagSearchCriteria searchCriteria);
+
     void deleteTag(UUID tagId, User remover);
 }

@@ -6,12 +6,17 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tag.TagRepository;
+import ovh.equino.actracker.domain.tag.TagSearchCriteria;
+import ovh.equino.actracker.domain.tag.TagSearchResult;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaRepository;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 class JpaTagRepository extends JpaRepository implements TagRepository {
 
@@ -75,6 +80,55 @@ class JpaTagRepository extends JpaRepository implements TagRepository {
                 );
 
         TypedQuery<TagEntity> typedQuery = entityManager.createQuery(query);
-        return typedQuery.getResultList().stream().map(mapper::toDto).toList();
+        return typedQuery.getResultList().stream()
+                .map(mapper::toDto)
+                .toList();
+    }
+
+    @Override
+    public TagSearchResult find(TagSearchCriteria searchCriteria) {
+        String pageId = searchCriteria.pageId();
+        Integer pageSize = searchCriteria.pageSize();
+
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<TagEntity> criteriaQuery = criteriaBuilder.createQuery(TagEntity.class);
+        Root<TagEntity> rootEntity = criteriaQuery.from(TagEntity.class);
+
+        CriteriaQuery<TagEntity> query = criteriaQuery
+                .select(rootEntity)
+                .where(
+                        criteriaBuilder.and(
+                                criteriaBuilder.equal(
+                                        rootEntity.get("creatorId"),
+                                        searchCriteria.searcher().id().toString()
+                                ),
+                                criteriaBuilder.greaterThan(
+                                        rootEntity.get("id"),
+                                        pageId
+                                ),
+                                criteriaBuilder.isFalse(rootEntity.get("deleted"))
+                        )
+                )
+                .orderBy(criteriaBuilder.asc(rootEntity.get("id")));
+
+        TypedQuery<TagEntity> typedQuery = entityManager
+                .createQuery(query)
+                .setMaxResults(pageSize);
+
+        List<TagDto> foundTags = typedQuery.getResultList().stream()
+                .map(mapper::toDto)
+                .toList();
+
+        String nextPageId = getNextPageId(foundTags, pageId);
+
+        return new TagSearchResult(nextPageId, foundTags);
+    }
+
+    private static String getNextPageId(List<TagDto> foundTags, String currentPageId) {
+        if (isEmpty(foundTags)) {
+            return currentPageId;
+        }
+        TagDto lastTag = new LinkedList<>(foundTags).getLast();
+        return lastTag.id().toString();
     }
 }

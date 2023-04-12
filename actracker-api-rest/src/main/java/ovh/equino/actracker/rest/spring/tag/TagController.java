@@ -2,6 +2,8 @@ package ovh.equino.actracker.rest.spring.tag;
 
 import org.springframework.web.bind.annotation.*;
 import ovh.equino.actracker.domain.tag.TagDto;
+import ovh.equino.actracker.domain.tag.TagSearchCriteria;
+import ovh.equino.actracker.domain.tag.TagSearchResult;
 import ovh.equino.actracker.domain.tag.TagService;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.security.identity.Identity;
@@ -58,6 +60,21 @@ class TagController {
 
         List<TagDto> tags = tagService.getTags(requester);
         return mapper.toResponse(tags);
+    }
+
+    @RequestMapping(method = GET, path = "/matching")
+    @ResponseStatus(OK)
+    TagSearchResponse searchTags(
+            @RequestParam(name = "pageId", required = false) String pageId,
+            @RequestParam(name = "pageSize", required = false) Integer pageSize,
+            @RequestParam(name = "term", required = false) String term) {
+
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User requester = new User(requesterIdentity.getId());
+        TagSearchCriteria searchCriteria = new TagSearchCriteria(requester, pageSize, pageId, term);
+
+        TagSearchResult searchResult = tagService.searchTags(searchCriteria);
+        return mapper.toResponse(searchResult);
     }
 
     @RequestMapping(method = DELETE, path = "/{id}")

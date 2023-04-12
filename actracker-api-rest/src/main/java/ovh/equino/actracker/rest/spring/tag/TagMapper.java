@@ -2,6 +2,7 @@ package ovh.equino.actracker.rest.spring.tag;
 
 
 import ovh.equino.actracker.domain.tag.TagDto;
+import ovh.equino.actracker.domain.tag.TagSearchResult;
 import ovh.equino.actracker.rest.spring.PayloadMapper;
 
 import java.util.List;
@@ -20,6 +21,11 @@ class TagMapper extends PayloadMapper {
         return tags.stream()
                 .map(this::toResponse)
                 .toList();
+    }
+
+    TagSearchResponse toResponse(TagSearchResult tagSearchResult) {
+        List<Tag> foundTags = toResponse(tagSearchResult.tags());
+        return new TagSearchResponse(tagSearchResult.nextPageId(), foundTags);
     }
 
 }
