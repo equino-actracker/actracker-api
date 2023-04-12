@@ -3,6 +3,7 @@ package ovh.equino.actracker.repository.jpa.activity;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivityRepository;
@@ -42,8 +43,8 @@ class JpaActivityRepository extends JpaRepository implements ActivityRepository 
                 .select(rootEntity)
                 .where(
                         criteriaBuilder.and(
-                                criteriaBuilder.equal(rootEntity.get("id"), activityId.toString()),
-                                criteriaBuilder.isFalse(rootEntity.get("deleted"))
+                                hasId(activityId, criteriaBuilder, rootEntity),
+                                isNotDeleted(criteriaBuilder, rootEntity)
                         )
                 );
 
@@ -66,15 +67,27 @@ class JpaActivityRepository extends JpaRepository implements ActivityRepository 
                 .select(rootEntity)
                 .where(
                         criteriaBuilder.and(
-                                criteriaBuilder.equal(
-                                        rootEntity.get("creatorId"),
-                                        searcher.id().toString()
-                                ),
-                                criteriaBuilder.isFalse(rootEntity.get("deleted"))
+                                isAccessibleFor(searcher, criteriaBuilder, rootEntity),
+                                isNotDeleted(criteriaBuilder, rootEntity)
                         )
                 );
 
         TypedQuery<ActivityEntity> typedQuery = entityManager.createQuery(query);
         return typedQuery.getResultList().stream().map(activityMapper::toDto).toList();
+    }
+
+    private Predicate hasId(UUID activityId, CriteriaBuilder criteriaBuilder, Root<ActivityEntity> rootEntity) {
+        return criteriaBuilder.equal(rootEntity.get("id"), activityId.toString());
+    }
+
+    private Predicate isAccessibleFor(User searcher, CriteriaBuilder criteriaBuilder, Root<ActivityEntity> rootEntity) {
+        return criteriaBuilder.equal(
+                rootEntity.get("creatorId"),
+                searcher.id().toString()
+        );
+    }
+
+    private Predicate isNotDeleted(CriteriaBuilder criteriaBuilder, Root<ActivityEntity> rootEntity) {
+        return criteriaBuilder.isFalse(rootEntity.get("deleted"));
     }
 }

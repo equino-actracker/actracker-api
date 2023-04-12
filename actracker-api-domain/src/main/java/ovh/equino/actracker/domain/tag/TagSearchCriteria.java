@@ -2,6 +2,9 @@ package ovh.equino.actracker.domain.tag;
 
 import ovh.equino.actracker.domain.user.User;
 
+import java.util.Set;
+import java.util.UUID;
+
 import static java.util.Objects.requireNonNullElse;
 
 public record TagSearchCriteria(
@@ -9,7 +12,8 @@ public record TagSearchCriteria(
         User searcher,
         Integer pageSize,
         String pageId,
-        String term
+        String term,
+        Set<UUID> excludeFilter
 
 ) {
 

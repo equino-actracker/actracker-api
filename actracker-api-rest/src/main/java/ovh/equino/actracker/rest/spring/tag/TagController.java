@@ -67,12 +67,13 @@ class TagController {
     TagSearchResponse searchTags(
             @RequestParam(name = "pageId", required = false) String pageId,
             @RequestParam(name = "pageSize", required = false) Integer pageSize,
-            @RequestParam(name = "term", required = false) String term) {
+            @RequestParam(name = "term", required = false) String term,
+            @RequestParam(name = "excludedTags", required = false) String excludedTags) {
 
         Identity requesterIdentity = identityProvider.provideIdentity();
         User requester = new User(requesterIdentity.getId());
-        TagSearchCriteria searchCriteria = new TagSearchCriteria(requester, pageSize, pageId, term);
 
+        TagSearchCriteria searchCriteria = mapper.fromRequest(requester, pageId, pageSize, term, excludedTags);
         TagSearchResult searchResult = tagService.searchTags(searchCriteria);
         return mapper.toResponse(searchResult);
     }
