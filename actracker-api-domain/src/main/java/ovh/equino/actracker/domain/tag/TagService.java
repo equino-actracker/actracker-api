@@ -3,6 +3,7 @@ package ovh.equino.actracker.domain.tag;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public interface TagService {
@@ -11,7 +12,7 @@ public interface TagService {
 
     TagDto updateTag(UUID tagId, TagDto updatedTagData, User updater);
 
-    List<TagDto> getTags(User searcher);
+    List<TagDto> getTags(Set<UUID> tagIds, User searcher);
 
     TagSearchResult searchTags(TagSearchCriteria searchCriteria);
 

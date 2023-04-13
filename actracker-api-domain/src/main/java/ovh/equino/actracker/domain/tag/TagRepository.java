@@ -4,6 +4,7 @@ import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public interface TagRepository {
@@ -14,7 +15,7 @@ public interface TagRepository {
 
     Optional<TagDto> findById(UUID tagId);
 
-    List<TagDto> findAll(User searcher);
+    List<TagDto> findByIds(Set<UUID> tagIds, User searcher);
 
     TagSearchResult find(TagSearchCriteria searchCriteria);
 }

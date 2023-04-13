@@ -10,6 +10,7 @@ import ovh.equino.security.identity.Identity;
 import ovh.equino.security.identity.IdentityProvider;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.OK;
@@ -54,12 +55,14 @@ class TagController {
 
     @RequestMapping(method = GET)
     @ResponseStatus(OK)
-    List<Tag> getTags() {
+    List<Tag> resolveTags(@RequestParam(name = "ids", required = false) String tagIds) {
+
         Identity requesterIdentity = identityProvider.provideIdentity();
         User requester = new User(requesterIdentity.getId());
 
-        List<TagDto> tags = tagService.getTags(requester);
-        return mapper.toResponse(tags);
+        Set<UUID> parsedIds = mapper.parseIds(tagIds);
+        List<TagDto> foundTags = tagService.getTags(parsedIds, requester);
+        return mapper.toResponse(foundTags);
     }
 
     @RequestMapping(method = GET, path = "/matching")

@@ -4,6 +4,7 @@ import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 class TagServiceImpl implements TagService {
@@ -36,8 +37,8 @@ class TagServiceImpl implements TagService {
     }
 
     @Override
-    public List<TagDto> getTags(User searcher) {
-        List<Tag> tags = tagRepository.findAll(searcher).stream()
+    public List<TagDto> getTags(Set<UUID> tagIds, User searcher) {
+        List<Tag> tags = tagRepository.findByIds(tagIds, searcher).stream()
                 .map(Tag::fromStorage)
                 .toList();
         return tags.stream()

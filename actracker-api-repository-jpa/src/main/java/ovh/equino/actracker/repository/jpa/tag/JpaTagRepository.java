@@ -58,7 +58,7 @@ class JpaTagRepository extends JpaRepository implements TagRepository {
     }
 
     @Override
-    public List<TagDto> findAll(User searcher) {
+    public List<TagDto> findByIds(Set<UUID> tagIds, User searcher) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<TagEntity> criteriaQuery = criteriaBuilder.createQuery(TagEntity.class);
         Root<TagEntity> rootEntity = criteriaQuery.from(TagEntity.class);
@@ -68,7 +68,7 @@ class JpaTagRepository extends JpaRepository implements TagRepository {
                 .where(
                         criteriaBuilder.and(
                                 isAccessibleFor(searcher, criteriaBuilder, rootEntity),
-                                isNotDeleted(criteriaBuilder, rootEntity)
+                                hasId(tagIds, criteriaBuilder, rootEntity)
                         )
                 );
 
@@ -105,27 +105,34 @@ class JpaTagRepository extends JpaRepository implements TagRepository {
 
         TypedQuery<TagEntity> typedQuery = entityManager
                 .createQuery(query)
-                .setMaxResults(pageSize);
+                .setMaxResults(pageSize + 1); // additional one to calculate next page ID
 
         List<TagDto> foundTags = typedQuery.getResultList().stream()
                 .map(mapper::toDto)
                 .toList();
 
-        String nextPageId = getNextPageId(foundTags, pageId);
+        String nextPageId = getNextPageId(foundTags, pageSize);
+        List<TagDto> tagsResult = limited(foundTags, pageSize);
 
-        return new TagSearchResult(nextPageId, foundTags);
+        return new TagSearchResult(nextPageId, tagsResult);
     }
 
-    private String getNextPageId(List<TagDto> foundTags, String currentPageId) {
-        if (isEmpty(foundTags)) {
-            return currentPageId;
+    private List<TagDto> limited(List<TagDto> tags, int limit) {
+        return tags.stream()
+                .limit(limit)
+                .toList();
+    }
+
+    private String getNextPageId(List<TagDto> foundTags, int pageSize) {
+        if (foundTags.size() <= pageSize) {
+            return null;
         }
-        TagDto lastTag = new LinkedList<>(foundTags).getLast();
+        TagDto lastTag = new LinkedList<>(foundTags).get(pageSize);
         return lastTag.id().toString();
     }
 
     private Predicate matchesTerm(String term, CriteriaBuilder criteriaBuilder, Root<TagEntity> rootEntity) {
-        if(isBlank(term)) {
+        if (isBlank(term)) {
             return allMatch(criteriaBuilder);
         }
         return criteriaBuilder.like(
@@ -136,6 +143,18 @@ class JpaTagRepository extends JpaRepository implements TagRepository {
 
     private Predicate hasId(UUID tagId, CriteriaBuilder criteriaBuilder, Root<TagEntity> rootEntity) {
         return criteriaBuilder.equal(rootEntity.get("id"), tagId.toString());
+    }
+
+    private Predicate hasId(Set<UUID> tagIds, CriteriaBuilder criteriaBuilder, Root<TagEntity> rootEntity) {
+        if (isEmpty(tagIds)) {
+            return noneMatch(criteriaBuilder);
+        }
+        Path<Object> id = rootEntity.get("id");
+        CriteriaBuilder.In<Object> idIn = criteriaBuilder.in(id);
+        tagIds.stream()
+                .map(UUID::toString)
+                .forEach(idIn::value);
+        return idIn;
     }
 
     private Predicate isAccessibleFor(User searcher, CriteriaBuilder criteriaBuilder, Root<TagEntity> rootEntity) {
@@ -165,7 +184,7 @@ class JpaTagRepository extends JpaRepository implements TagRepository {
         if (isBlank(pageId)) {
             return allMatch(criteriaBuilder);
         }
-        return criteriaBuilder.greaterThan(
+        return criteriaBuilder.greaterThanOrEqualTo(
                 rootEntity.get("id"),
                 pageId
         );
@@ -173,5 +192,9 @@ class JpaTagRepository extends JpaRepository implements TagRepository {
 
     private Predicate allMatch(CriteriaBuilder criteriaBuilder) {
         return criteriaBuilder.and();
+    }
+
+    private Predicate noneMatch(CriteriaBuilder criteriaBuilder) {
+        return criteriaBuilder.or();
     }
 }
