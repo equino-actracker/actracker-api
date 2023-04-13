@@ -1,6 +1,5 @@
 package ovh.equino.actracker.rest.spring.tag;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tag.TagSearchCriteria;
@@ -54,29 +53,16 @@ class TagController {
         return mapper.toResponse(updatedTag);
     }
 
-    // TODO delete
-    private List<Tag> getTags() {
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User requester = new User(requesterIdentity.getId());
-
-        List<TagDto> tags = tagService.getTags(requester);
-        return mapper.toResponse(tags);
-    }
-
-    @RequestMapping(method=GET)
+    @RequestMapping(method = GET)
     @ResponseStatus(OK)
     List<Tag> resolveTags(@RequestParam(name = "ids", required = false) String tagIds) {
 
         Identity requesterIdentity = identityProvider.provideIdentity();
         User requester = new User(requesterIdentity.getId());
 
-        if(StringUtils.isBlank(tagIds)) {
-            Set<UUID> parsedIds = mapper.parseIds(tagIds);
-            List<TagDto> foundTags = tagService.getTags(parsedIds, requester);
-            return mapper.toResponse(foundTags);
-        } else {
-            return getTags();
-        }
+        Set<UUID> parsedIds = mapper.parseIds(tagIds);
+        List<TagDto> foundTags = tagService.getTags(parsedIds, requester);
+        return mapper.toResponse(foundTags);
     }
 
     @RequestMapping(method = GET, path = "/matching")

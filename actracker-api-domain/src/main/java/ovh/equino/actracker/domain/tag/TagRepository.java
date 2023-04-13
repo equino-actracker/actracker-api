@@ -15,9 +15,6 @@ public interface TagRepository {
 
     Optional<TagDto> findById(UUID tagId);
 
-    // TODO delete
-    List<TagDto> findAll(User searcher);
-
     List<TagDto> findByIds(Set<UUID> tagIds, User searcher);
 
     TagSearchResult find(TagSearchCriteria searchCriteria);

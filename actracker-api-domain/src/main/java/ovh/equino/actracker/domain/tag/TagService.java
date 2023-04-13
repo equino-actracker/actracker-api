@@ -12,9 +12,6 @@ public interface TagService {
 
     TagDto updateTag(UUID tagId, TagDto updatedTagData, User updater);
 
-    // TODO delete
-    List<TagDto> getTags(User searcher);
-
     List<TagDto> getTags(Set<UUID> tagIds, User searcher);
 
     TagSearchResult searchTags(TagSearchCriteria searchCriteria);

@@ -58,27 +58,6 @@ class JpaTagRepository extends JpaRepository implements TagRepository {
     }
 
     @Override
-    public List<TagDto> findAll(User searcher) {
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<TagEntity> criteriaQuery = criteriaBuilder.createQuery(TagEntity.class);
-        Root<TagEntity> rootEntity = criteriaQuery.from(TagEntity.class);
-
-        CriteriaQuery<TagEntity> query = criteriaQuery
-                .select(rootEntity)
-                .where(
-                        criteriaBuilder.and(
-                                isAccessibleFor(searcher, criteriaBuilder, rootEntity),
-                                isNotDeleted(criteriaBuilder, rootEntity)
-                        )
-                );
-
-        TypedQuery<TagEntity> typedQuery = entityManager.createQuery(query);
-        return typedQuery.getResultList().stream()
-                .map(mapper::toDto)
-                .toList();
-    }
-
-    @Override
     public List<TagDto> findByIds(Set<UUID> tagIds, User searcher) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<TagEntity> criteriaQuery = criteriaBuilder.createQuery(TagEntity.class);

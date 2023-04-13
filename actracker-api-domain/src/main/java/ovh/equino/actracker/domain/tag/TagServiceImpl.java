@@ -37,16 +37,6 @@ class TagServiceImpl implements TagService {
     }
 
     @Override
-    public List<TagDto> getTags(User searcher) {
-        List<Tag> tags = tagRepository.findAll(searcher).stream()
-                .map(Tag::fromStorage)
-                .toList();
-        return tags.stream()
-                .map(Tag::forClient)
-                .toList();
-    }
-
-    @Override
     public List<TagDto> getTags(Set<UUID> tagIds, User searcher) {
         List<Tag> tags = tagRepository.findByIds(tagIds, searcher).stream()
                 .map(Tag::fromStorage)
