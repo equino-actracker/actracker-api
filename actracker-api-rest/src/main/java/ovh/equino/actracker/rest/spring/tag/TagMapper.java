@@ -25,15 +25,7 @@ class TagMapper extends PayloadMapper {
     }
 
     TagSearchCriteria fromRequest(User requester, String pageId, Integer pageSize, String term, String excludedTags) {
-        String[] excluded = requireNonNullElse(split(excludedTags, ','), new String[]{});
-
-        Set<UUID> excludedTagIds = stream(excluded)
-                .filter(StringUtils::isNotBlank)
-                .map(String::trim)
-                .map(UUID::fromString)
-                .collect(toUnmodifiableSet());
-
-        return new TagSearchCriteria(requester, pageSize, pageId, term, excludedTagIds);
+        return new TagSearchCriteria(requester, pageSize, pageId, term, parseIds(excludedTags));
     }
 
     Tag toResponse(TagDto tag) {
@@ -51,4 +43,13 @@ class TagMapper extends PayloadMapper {
         return new TagSearchResponse(tagSearchResult.nextPageId(), foundTags);
     }
 
+    Set<UUID> parseIds(String jointIds) {
+        String[] parsedIds = requireNonNullElse(split(jointIds, ','), new String[]{});
+
+        return stream(parsedIds)
+                .filter(StringUtils::isNotBlank)
+                .map(String::trim)
+                .map(UUID::fromString)
+                .collect(toUnmodifiableSet());
+    }
 }
