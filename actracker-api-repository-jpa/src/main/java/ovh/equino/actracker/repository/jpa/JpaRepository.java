@@ -10,4 +10,8 @@ public abstract class JpaRepository {
     @PersistenceContext
     protected EntityManager entityManager;
 
+    protected <ENTITY> JpaQueryBuilder<ENTITY> queryBuilder(Class<ENTITY> entityType) {
+        return new JpaQueryBuilder<>(entityManager, entityType);
+    }
+
 }
