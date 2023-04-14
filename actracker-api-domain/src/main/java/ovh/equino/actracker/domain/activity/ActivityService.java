@@ -13,9 +13,6 @@ public interface ActivityService {
 
     ActivityDto updateActivity(UUID activityId, ActivityDto updatedActivityData, User updater);
 
-    // TODO delete
-    List<ActivityDto> getActivities(User searcher);
-
     EntitySearchResult<ActivityDto> searchActivities(EntitySearchCriteria searchCriteria);
 
     void deleteActivity(UUID activityId, User remover);

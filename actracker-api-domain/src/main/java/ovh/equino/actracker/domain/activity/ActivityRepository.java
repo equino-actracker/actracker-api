@@ -17,6 +17,4 @@ public interface ActivityRepository {
 
     List<ActivityDto> find(EntitySearchCriteria searchCriteria);
 
-    // TODO delete
-    List<ActivityDto> findAll(User searcher);
 }

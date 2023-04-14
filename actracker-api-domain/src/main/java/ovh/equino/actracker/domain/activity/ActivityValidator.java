@@ -35,7 +35,7 @@ final class ActivityValidator extends EntityValidator<Activity> {
             List<UUID> notExistingTagIds = notExistingTags.stream()
                     .map(TagId::id)
                     .toList();
-            validationErrors.add("Selected results do not exist: %s".formatted(notExistingTagIds));
+            validationErrors.add("Selected tags do not exist: %s".formatted(notExistingTagIds));
         }
 
         return validationErrors;
