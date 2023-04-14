@@ -49,7 +49,7 @@ class TagServiceImpl implements TagService {
     }
 
     @Override
-    public EntitySearchResult searchTags(EntitySearchCriteria searchCriteria) {
+    public EntitySearchResult<TagDto> searchTags(EntitySearchCriteria searchCriteria) {
         return tagSearchEngine.findTags(searchCriteria);
     }
 

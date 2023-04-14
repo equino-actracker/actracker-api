@@ -1,5 +1,7 @@
 package ovh.equino.actracker.domain.activity;
 
+import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.tag.TagRepository;
 import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
@@ -11,14 +13,17 @@ import java.util.UUID;
 class ActivityServiceImpl implements ActivityService {
 
     private final ActivityRepository activityRepository;
+    private final ActivitySearchEngine activitySearchEngine;
     private final TagRepository tagRepository;
     private final ActivityNotifier activityNotifier;
 
     ActivityServiceImpl(ActivityRepository activityRepository,
+                        ActivitySearchEngine activitySearchEngine,
                         TagRepository tagRepository,
                         ActivityNotifier activityNotifier) {
 
         this.activityRepository = activityRepository;
+        this.activitySearchEngine = activitySearchEngine;
         this.tagRepository = tagRepository;
         this.activityNotifier = activityNotifier;
     }
@@ -50,6 +55,11 @@ class ActivityServiceImpl implements ActivityService {
         return activities.stream()
                 .map(Activity::forClient)
                 .toList();
+    }
+
+    @Override
+    public EntitySearchResult<ActivityDto> searchActivities(EntitySearchCriteria searchCriteria) {
+        return activitySearchEngine.findActivities(searchCriteria);
     }
 
     @Override

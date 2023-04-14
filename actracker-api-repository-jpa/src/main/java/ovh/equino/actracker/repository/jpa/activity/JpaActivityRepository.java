@@ -5,8 +5,10 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivityRepository;
+import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaRepository;
 
@@ -74,6 +76,12 @@ class JpaActivityRepository extends JpaRepository implements ActivityRepository 
 
         TypedQuery<ActivityEntity> typedQuery = entityManager.createQuery(query);
         return typedQuery.getResultList().stream().map(activityMapper::toDto).toList();
+    }
+
+    @Override
+    public List<TagDto> find(EntitySearchCriteria searchCriteria) {
+        // TODO implement
+        return null;
     }
 
     private Predicate hasId(UUID activityId, CriteriaBuilder criteriaBuilder, Root<ActivityEntity> rootEntity) {

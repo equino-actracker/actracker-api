@@ -82,12 +82,6 @@ class JpaTagRepository extends JpaRepository implements TagRepository {
 
     @Override
     public List<TagDto> find(EntitySearchCriteria searchCriteria) {
-        String pageId = searchCriteria.pageId();
-        Integer pageSize = searchCriteria.pageSize();
-        Set<UUID> excludedIds = searchCriteria.excludeFilter();
-        User searcher = searchCriteria.searcher();
-        String term = searchCriteria.term();
-
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<TagEntity> criteriaQuery = criteriaBuilder.createQuery(TagEntity.class);
         Root<TagEntity> rootEntity = criteriaQuery.from(TagEntity.class);
@@ -96,18 +90,18 @@ class JpaTagRepository extends JpaRepository implements TagRepository {
                 .select(rootEntity)
                 .where(
                         criteriaBuilder.and(
-                                isAccessibleFor(searcher, criteriaBuilder, rootEntity),
+                                isAccessibleFor(searchCriteria.searcher(), criteriaBuilder, rootEntity),
                                 isNotDeleted(criteriaBuilder, rootEntity),
-                                isInPage(pageId, criteriaBuilder, rootEntity),
-                                isNotExcluded(excludedIds, criteriaBuilder, rootEntity),
-                                matchesTerm(term, criteriaBuilder, rootEntity)
+                                isInPage(searchCriteria.pageId(), criteriaBuilder, rootEntity),
+                                isNotExcluded(searchCriteria.excludeFilter(), criteriaBuilder, rootEntity),
+                                matchesTerm(searchCriteria.term(), criteriaBuilder, rootEntity)
                         )
                 )
                 .orderBy(criteriaBuilder.asc(rootEntity.get("id")));
 
         TypedQuery<TagEntity> typedQuery = entityManager
                 .createQuery(query)
-                .setMaxResults(pageSize);
+                .setMaxResults(searchCriteria.pageSize());
 
         return typedQuery.getResultList().stream()
                 .map(mapper::toDto)
