@@ -3,8 +3,8 @@ package ovh.equino.actracker.rest.spring.tag;
 
 import org.apache.commons.lang3.StringUtils;
 import ovh.equino.actracker.domain.tag.TagDto;
-import ovh.equino.actracker.domain.tag.TagSearchCriteria;
-import ovh.equino.actracker.domain.tag.TagSearchResult;
+import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.rest.spring.PayloadMapper;
 
@@ -15,7 +15,6 @@ import java.util.UUID;
 import static java.util.Arrays.stream;
 import static java.util.Objects.requireNonNullElse;
 import static java.util.stream.Collectors.toUnmodifiableSet;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.split;
 
 class TagMapper extends PayloadMapper {
@@ -24,8 +23,8 @@ class TagMapper extends PayloadMapper {
         return new TagDto(tagRequest.name());
     }
 
-    TagSearchCriteria fromRequest(User requester, String pageId, Integer pageSize, String term, String excludedTags) {
-        return new TagSearchCriteria(requester, pageSize, pageId, term, parseIds(excludedTags));
+    EntitySearchCriteria fromRequest(User requester, String pageId, Integer pageSize, String term, String excludedTags) {
+        return new EntitySearchCriteria(requester, pageSize, pageId, term, parseIds(excludedTags));
     }
 
     Tag toResponse(TagDto tag) {
@@ -38,8 +37,8 @@ class TagMapper extends PayloadMapper {
                 .toList();
     }
 
-    TagSearchResponse toResponse(TagSearchResult tagSearchResult) {
-        List<Tag> foundTags = toResponse(tagSearchResult.tags());
+    TagSearchResponse toResponse(EntitySearchResult<TagDto> tagSearchResult) {
+        List<Tag> foundTags = toResponse(tagSearchResult.results());
         return new TagSearchResponse(tagSearchResult.nextPageId(), foundTags);
     }
 

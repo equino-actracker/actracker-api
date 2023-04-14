@@ -2,10 +2,10 @@ package ovh.equino.actracker.repository.jpa.tag;
 
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
+import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tag.TagRepository;
-import ovh.equino.actracker.domain.tag.TagSearchCriteria;
-import ovh.equino.actracker.domain.tag.TagSearchResult;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaRepository;
 
@@ -79,7 +79,7 @@ class JpaTagRepository extends JpaRepository implements TagRepository {
     }
 
     @Override
-    public TagSearchResult find(TagSearchCriteria searchCriteria) {
+    public EntitySearchResult<TagDto> find(EntitySearchCriteria searchCriteria) {
         String pageId = searchCriteria.pageId();
         Integer pageSize = searchCriteria.pageSize();
         Set<UUID> excludedIds = searchCriteria.excludeFilter();
@@ -114,7 +114,7 @@ class JpaTagRepository extends JpaRepository implements TagRepository {
         String nextPageId = getNextPageId(foundTags, pageSize);
         List<TagDto> tagsResult = limited(foundTags, pageSize);
 
-        return new TagSearchResult(nextPageId, tagsResult);
+        return new EntitySearchResult<>(nextPageId, tagsResult);
     }
 
     private List<TagDto> limited(List<TagDto> tags, int limit) {

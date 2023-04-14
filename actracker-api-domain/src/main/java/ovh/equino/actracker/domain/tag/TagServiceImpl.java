@@ -1,5 +1,7 @@
 package ovh.equino.actracker.domain.tag;
 
+import ovh.equino.actracker.domain.EntitySearchResult;
+import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.user.User;
 
@@ -47,7 +49,7 @@ class TagServiceImpl implements TagService {
     }
 
     @Override
-    public TagSearchResult searchTags(TagSearchCriteria searchCriteria) {
+    public EntitySearchResult searchTags(EntitySearchCriteria searchCriteria) {
         return tagSearchEngine.findTags(searchCriteria);
     }
 

@@ -2,8 +2,8 @@ package ovh.equino.actracker.rest.spring.tag;
 
 import org.springframework.web.bind.annotation.*;
 import ovh.equino.actracker.domain.tag.TagDto;
-import ovh.equino.actracker.domain.tag.TagSearchCriteria;
-import ovh.equino.actracker.domain.tag.TagSearchResult;
+import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.tag.TagService;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.security.identity.Identity;
@@ -76,8 +76,8 @@ class TagController {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User requester = new User(requesterIdentity.getId());
 
-        TagSearchCriteria searchCriteria = mapper.fromRequest(requester, pageId, pageSize, term, excludedTags);
-        TagSearchResult searchResult = tagService.searchTags(searchCriteria);
+        EntitySearchCriteria searchCriteria = mapper.fromRequest(requester, pageId, pageSize, term, excludedTags);
+        EntitySearchResult<TagDto> searchResult = tagService.searchTags(searchCriteria);
         return mapper.toResponse(searchResult);
     }
 

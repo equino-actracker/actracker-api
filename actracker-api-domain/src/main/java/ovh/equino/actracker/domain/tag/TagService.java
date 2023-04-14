@@ -1,5 +1,7 @@
 package ovh.equino.actracker.domain.tag;
 
+import ovh.equino.actracker.domain.EntitySearchResult;
+import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
@@ -14,7 +16,7 @@ public interface TagService {
 
     List<TagDto> getTags(Set<UUID> tagIds, User searcher);
 
-    TagSearchResult searchTags(TagSearchCriteria searchCriteria);
+    EntitySearchResult<TagDto> searchTags(EntitySearchCriteria searchCriteria);
 
     void deleteTag(UUID tagId, User remover);
 }

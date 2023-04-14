@@ -1,4 +1,4 @@
-package ovh.equino.actracker.domain.tag;
+package ovh.equino.actracker.domain;
 
 import ovh.equino.actracker.domain.user.User;
 
@@ -7,7 +7,7 @@ import java.util.UUID;
 
 import static java.util.Objects.requireNonNullElse;
 
-public record TagSearchCriteria(
+public record EntitySearchCriteria(
 
         User searcher,
         Integer pageSize,
@@ -21,7 +21,7 @@ public record TagSearchCriteria(
     private static final String DEFAULT_PAGE_ID = "";
     private static final String DEFAULT_TERM = "";
 
-    public TagSearchCriteria {
+    public EntitySearchCriteria {
         pageSize = requireNonNullElse(pageSize, DEFAULT_PAGE_SIZE);
         pageId = requireNonNullElse(pageId, DEFAULT_PAGE_ID);
         term = requireNonNullElse(term, DEFAULT_TERM);
