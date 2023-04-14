@@ -16,7 +16,6 @@ class ActivityServiceImpl implements ActivityService {
     private final ActivitySearchEngine activitySearchEngine;
     private final TagRepository tagRepository;
     private final ActivityNotifier activityNotifier;
-    private EntitySearchResult<ActivityDto> searchResult;
 
     ActivityServiceImpl(ActivityRepository activityRepository,
                         ActivitySearchEngine activitySearchEngine,
@@ -48,19 +47,10 @@ class ActivityServiceImpl implements ActivityService {
     }
 
     @Override
-    public List<ActivityDto> getActivities(User searcher) {
-        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, searcher);
-        return activityRepository.findAll(searcher).stream()
-                .map(activity -> Activity.fromStorage(activity, tagsExistenceVerifier))
-                .map(Activity::forClient)
-                .toList();
-    }
-
-    @Override
     public EntitySearchResult<ActivityDto> searchActivities(EntitySearchCriteria searchCriteria) {
         TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, searchCriteria.searcher());
 
-        searchResult = activitySearchEngine.findActivities(searchCriteria);
+        EntitySearchResult<ActivityDto> searchResult = activitySearchEngine.findActivities(searchCriteria);
         List<ActivityDto> resultForClient = searchResult.results().stream()
                 .map(activity -> Activity.fromStorage(activity, tagsExistenceVerifier))
                 .map(Activity::forClient)

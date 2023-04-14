@@ -53,17 +53,6 @@ class ActivityController {
         return mapper.toResponse(updateActivity);
     }
 
-    @RequestMapping(method = GET)
-    @ResponseStatus(OK)
-        // TODO delete
-    List<Activity> getActivities() {
-        Identity requestIdentity = identityProvider.provideIdentity();
-        User requester = new User(requestIdentity.getId());
-
-        List<ActivityDto> activities = activityService.getActivities(requester);
-        return mapper.toResponse(activities);
-    }
-
     @RequestMapping(method = GET, path = "/matching")
     @ResponseStatus(OK)
     SearchResponse<Activity> searchActivities(
