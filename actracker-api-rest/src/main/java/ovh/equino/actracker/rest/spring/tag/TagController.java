@@ -1,11 +1,12 @@
 package ovh.equino.actracker.rest.spring.tag;
 
 import org.springframework.web.bind.annotation.*;
-import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
+import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tag.TagService;
 import ovh.equino.actracker.domain.user.User;
+import ovh.equino.actracker.rest.spring.SearchResponse;
 import ovh.equino.security.identity.Identity;
 import ovh.equino.security.identity.IdentityProvider;
 
@@ -67,7 +68,7 @@ class TagController {
 
     @RequestMapping(method = GET, path = "/matching")
     @ResponseStatus(OK)
-    TagSearchResponse searchTags(
+    SearchResponse<Tag> searchTags(
             @RequestParam(name = "pageId", required = false) String pageId,
             @RequestParam(name = "pageSize", required = false) Integer pageSize,
             @RequestParam(name = "term", required = false) String term,

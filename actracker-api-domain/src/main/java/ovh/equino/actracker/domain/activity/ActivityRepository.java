@@ -1,7 +1,6 @@
 package ovh.equino.actracker.domain.activity;
 
 import ovh.equino.actracker.domain.EntitySearchCriteria;
-import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
@@ -16,7 +15,7 @@ public interface ActivityRepository {
 
     Optional<ActivityDto> findById(UUID activityId);
 
-    List<TagDto> find(EntitySearchCriteria searchCriteria);
+    List<ActivityDto> find(EntitySearchCriteria searchCriteria);
 
     // TODO delete
     List<ActivityDto> findAll(User searcher);

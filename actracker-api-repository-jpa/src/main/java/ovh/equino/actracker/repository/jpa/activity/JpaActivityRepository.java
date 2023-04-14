@@ -5,7 +5,6 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivityRepository;
-import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaQueryBuilder;
 import ovh.equino.actracker.repository.jpa.JpaRepository;
@@ -16,17 +15,17 @@ import java.util.UUID;
 
 class JpaActivityRepository extends JpaRepository implements ActivityRepository {
 
-    private final ActivityMapper activityMapper = new ActivityMapper();
+    private final ActivityMapper mapper = new ActivityMapper();
 
     @Override
     public void add(ActivityDto activity) {
-        ActivityEntity activityEntity = activityMapper.toEntity(activity);
+        ActivityEntity activityEntity = mapper.toEntity(activity);
         entityManager.persist(activityEntity);
     }
 
     @Override
     public void update(UUID activityId, ActivityDto activity) {
-        ActivityEntity activityEntity = activityMapper.toEntity(activity);
+        ActivityEntity activityEntity = mapper.toEntity(activity);
         activityEntity.id = activityId.toString();
         entityManager.merge(activityEntity);
     }
@@ -52,7 +51,7 @@ class JpaActivityRepository extends JpaRepository implements ActivityRepository 
         // https://thorben-janssen.com/object-mapper-dto/
         return typedQuery.getResultList().stream()
                 .findFirst()
-                .map(activityMapper::toDto);
+                .map(mapper::toDto);
     }
 
     @Override
@@ -69,12 +68,34 @@ class JpaActivityRepository extends JpaRepository implements ActivityRepository 
                 );
 
         TypedQuery<ActivityEntity> typedQuery = entityManager.createQuery(query);
-        return typedQuery.getResultList().stream().map(activityMapper::toDto).toList();
+        return typedQuery.getResultList().stream()
+                .map(mapper::toDto)
+                .toList();
     }
 
     @Override
-    public List<TagDto> find(EntitySearchCriteria searchCriteria) {
-        // TODO implement
-        return null;
+    public List<ActivityDto> find(EntitySearchCriteria searchCriteria) {
+
+        JpaQueryBuilder<ActivityEntity> queryBuilder = queryBuilder(ActivityEntity.class);
+
+        CriteriaQuery<ActivityEntity> query = queryBuilder.select()
+                .where(
+                        queryBuilder.and(
+                                queryBuilder.isAccessibleFor(searchCriteria.searcher()),
+                                queryBuilder.isNotDeleted(),
+                                queryBuilder.isInPage(searchCriteria.pageId()),
+                                queryBuilder.isNotExcluded(searchCriteria.excludeFilter()),
+                                queryBuilder.matchesTerm(searchCriteria.term(), "comment")
+                        )
+                )
+                .orderBy(queryBuilder.ascending("id"));
+
+        TypedQuery<ActivityEntity> typedQuery = entityManager
+                .createQuery(query)
+                .setMaxResults(searchCriteria.pageSize());
+
+        return typedQuery.getResultList().stream()
+                .map(mapper::toDto)
+                .toList();
     }
 }
