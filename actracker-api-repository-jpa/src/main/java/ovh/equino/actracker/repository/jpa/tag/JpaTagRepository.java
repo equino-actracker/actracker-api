@@ -3,13 +3,15 @@ package ovh.equino.actracker.repository.jpa.tag;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
-import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tag.TagRepository;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaRepository;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -79,7 +81,7 @@ class JpaTagRepository extends JpaRepository implements TagRepository {
     }
 
     @Override
-    public EntitySearchResult<TagDto> find(EntitySearchCriteria searchCriteria) {
+    public List<TagDto> find(EntitySearchCriteria searchCriteria) {
         String pageId = searchCriteria.pageId();
         Integer pageSize = searchCriteria.pageSize();
         Set<UUID> excludedIds = searchCriteria.excludeFilter();
@@ -105,30 +107,11 @@ class JpaTagRepository extends JpaRepository implements TagRepository {
 
         TypedQuery<TagEntity> typedQuery = entityManager
                 .createQuery(query)
-                .setMaxResults(pageSize + 1); // additional one to calculate next page ID
+                .setMaxResults(pageSize);
 
-        List<TagDto> foundTags = typedQuery.getResultList().stream()
+        return typedQuery.getResultList().stream()
                 .map(mapper::toDto)
                 .toList();
-
-        String nextPageId = getNextPageId(foundTags, pageSize);
-        List<TagDto> tagsResult = limited(foundTags, pageSize);
-
-        return new EntitySearchResult<>(nextPageId, tagsResult);
-    }
-
-    private List<TagDto> limited(List<TagDto> tags, int limit) {
-        return tags.stream()
-                .limit(limit)
-                .toList();
-    }
-
-    private String getNextPageId(List<TagDto> foundTags, int pageSize) {
-        if (foundTags.size() <= pageSize) {
-            return null;
-        }
-        TagDto lastTag = new LinkedList<>(foundTags).get(pageSize);
-        return lastTag.id().toString();
     }
 
     private Predicate matchesTerm(String term, CriteriaBuilder criteriaBuilder, Root<TagEntity> rootEntity) {
