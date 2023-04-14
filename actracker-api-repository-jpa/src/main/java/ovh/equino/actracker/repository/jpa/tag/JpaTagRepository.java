@@ -1,18 +1,18 @@
 package ovh.equino.actracker.repository.jpa.tag;
 
 import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.*;
+import jakarta.persistence.criteria.CriteriaQuery;
+import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tag.TagRepository;
-import ovh.equino.actracker.domain.tag.TagSearchCriteria;
-import ovh.equino.actracker.domain.tag.TagSearchResult;
 import ovh.equino.actracker.domain.user.User;
+import ovh.equino.actracker.repository.jpa.JpaQueryBuilder;
 import ovh.equino.actracker.repository.jpa.JpaRepository;
 
-import java.util.*;
-
-import static org.apache.commons.collections4.CollectionUtils.isEmpty;
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 class JpaTagRepository extends JpaRepository implements TagRepository {
 
@@ -33,18 +33,16 @@ class JpaTagRepository extends JpaRepository implements TagRepository {
 
     @Override
     public Optional<TagDto> findById(UUID tagId) {
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<TagEntity> criteriaQuery = criteriaBuilder.createQuery(TagEntity.class);
-        Root<TagEntity> rootEntity = criteriaQuery.from(TagEntity.class);
+
+        JpaQueryBuilder<TagEntity> queryBuilder = queryBuilder(TagEntity.class);
 
         // If Hibernate were used instead of JPA API, filters could be used instead for soft delete:
         // https://www.baeldung.com/spring-jpa-soft-delete
-        CriteriaQuery<TagEntity> query = criteriaQuery
-                .select(rootEntity)
+        CriteriaQuery<TagEntity> query = queryBuilder.select()
                 .where(
-                        criteriaBuilder.and(
-                                hasId(tagId, criteriaBuilder, rootEntity),
-                                isNotDeleted(criteriaBuilder, rootEntity)
+                        queryBuilder.and(
+                                queryBuilder.hasId(tagId),
+                                queryBuilder.isNotDeleted()
                         )
                 );
 
@@ -59,16 +57,14 @@ class JpaTagRepository extends JpaRepository implements TagRepository {
 
     @Override
     public List<TagDto> findByIds(Set<UUID> tagIds, User searcher) {
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<TagEntity> criteriaQuery = criteriaBuilder.createQuery(TagEntity.class);
-        Root<TagEntity> rootEntity = criteriaQuery.from(TagEntity.class);
 
-        CriteriaQuery<TagEntity> query = criteriaQuery
-                .select(rootEntity)
+        JpaQueryBuilder<TagEntity> queryBuilder = queryBuilder(TagEntity.class);
+
+        CriteriaQuery<TagEntity> query = queryBuilder.select()
                 .where(
-                        criteriaBuilder.and(
-                                isAccessibleFor(searcher, criteriaBuilder, rootEntity),
-                                hasId(tagIds, criteriaBuilder, rootEntity)
+                        queryBuilder.and(
+                                queryBuilder.isAccessibleFor(searcher),
+                                queryBuilder.hasId(tagIds)
                         )
                 );
 
@@ -79,122 +75,28 @@ class JpaTagRepository extends JpaRepository implements TagRepository {
     }
 
     @Override
-    public TagSearchResult find(TagSearchCriteria searchCriteria) {
-        String pageId = searchCriteria.pageId();
-        Integer pageSize = searchCriteria.pageSize();
-        Set<UUID> excludedIds = searchCriteria.excludeFilter();
-        User searcher = searchCriteria.searcher();
-        String term = searchCriteria.term();
+    public List<TagDto> find(EntitySearchCriteria searchCriteria) {
 
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<TagEntity> criteriaQuery = criteriaBuilder.createQuery(TagEntity.class);
-        Root<TagEntity> rootEntity = criteriaQuery.from(TagEntity.class);
+        JpaQueryBuilder<TagEntity> queryBuilder = queryBuilder(TagEntity.class);
 
-        CriteriaQuery<TagEntity> query = criteriaQuery
-                .select(rootEntity)
+        CriteriaQuery<TagEntity> query = queryBuilder.select()
                 .where(
-                        criteriaBuilder.and(
-                                isAccessibleFor(searcher, criteriaBuilder, rootEntity),
-                                isNotDeleted(criteriaBuilder, rootEntity),
-                                isInPage(pageId, criteriaBuilder, rootEntity),
-                                isNotExcluded(excludedIds, criteriaBuilder, rootEntity),
-                                matchesTerm(term, criteriaBuilder, rootEntity)
+                        queryBuilder.and(
+                                queryBuilder.isAccessibleFor(searchCriteria.searcher()),
+                                queryBuilder.isNotDeleted(),
+                                queryBuilder.isInPage(searchCriteria.pageId()),
+                                queryBuilder.isNotExcluded(searchCriteria.excludeFilter()),
+                                queryBuilder.matchesTerm(searchCriteria.term(), "name")
                         )
                 )
-                .orderBy(criteriaBuilder.asc(rootEntity.get("id")));
+                .orderBy(queryBuilder.ascending("id"));
 
         TypedQuery<TagEntity> typedQuery = entityManager
                 .createQuery(query)
-                .setMaxResults(pageSize + 1); // additional one to calculate next page ID
+                .setMaxResults(searchCriteria.pageSize());
 
-        List<TagDto> foundTags = typedQuery.getResultList().stream()
+        return typedQuery.getResultList().stream()
                 .map(mapper::toDto)
                 .toList();
-
-        String nextPageId = getNextPageId(foundTags, pageSize);
-        List<TagDto> tagsResult = limited(foundTags, pageSize);
-
-        return new TagSearchResult(nextPageId, tagsResult);
-    }
-
-    private List<TagDto> limited(List<TagDto> tags, int limit) {
-        return tags.stream()
-                .limit(limit)
-                .toList();
-    }
-
-    private String getNextPageId(List<TagDto> foundTags, int pageSize) {
-        if (foundTags.size() <= pageSize) {
-            return null;
-        }
-        TagDto lastTag = new LinkedList<>(foundTags).get(pageSize);
-        return lastTag.id().toString();
-    }
-
-    private Predicate matchesTerm(String term, CriteriaBuilder criteriaBuilder, Root<TagEntity> rootEntity) {
-        if (isBlank(term)) {
-            return allMatch(criteriaBuilder);
-        }
-        return criteriaBuilder.like(
-                rootEntity.get("name"),
-                term + "%"
-        );
-    }
-
-    private Predicate hasId(UUID tagId, CriteriaBuilder criteriaBuilder, Root<TagEntity> rootEntity) {
-        return criteriaBuilder.equal(rootEntity.get("id"), tagId.toString());
-    }
-
-    private Predicate hasId(Set<UUID> tagIds, CriteriaBuilder criteriaBuilder, Root<TagEntity> rootEntity) {
-        if (isEmpty(tagIds)) {
-            return noneMatch(criteriaBuilder);
-        }
-        Path<Object> id = rootEntity.get("id");
-        CriteriaBuilder.In<Object> idIn = criteriaBuilder.in(id);
-        tagIds.stream()
-                .map(UUID::toString)
-                .forEach(idIn::value);
-        return idIn;
-    }
-
-    private Predicate isAccessibleFor(User searcher, CriteriaBuilder criteriaBuilder, Root<TagEntity> rootEntity) {
-        return criteriaBuilder.equal(
-                rootEntity.get("creatorId"),
-                searcher.id().toString()
-        );
-    }
-
-    private Predicate isNotDeleted(CriteriaBuilder criteriaBuilder, Root<TagEntity> rootEntity) {
-        return criteriaBuilder.isFalse(rootEntity.get("deleted"));
-    }
-
-    private Predicate isNotExcluded(Set<UUID> excludedIds, CriteriaBuilder criteriaBuilder, Root<TagEntity> rootEntity) {
-        if (isEmpty(excludedIds)) {
-            return allMatch(criteriaBuilder);
-        }
-        Path<Object> id = rootEntity.get("id");
-        CriteriaBuilder.In<Object> idIn = criteriaBuilder.in(id);
-        excludedIds.stream()
-                .map(UUID::toString)
-                .forEach(idIn::value);
-        return criteriaBuilder.not(idIn);
-    }
-
-    private Predicate isInPage(String pageId, CriteriaBuilder criteriaBuilder, Root<TagEntity> rootEntity) {
-        if (isBlank(pageId)) {
-            return allMatch(criteriaBuilder);
-        }
-        return criteriaBuilder.greaterThanOrEqualTo(
-                rootEntity.get("id"),
-                pageId
-        );
-    }
-
-    private Predicate allMatch(CriteriaBuilder criteriaBuilder) {
-        return criteriaBuilder.and();
-    }
-
-    private Predicate noneMatch(CriteriaBuilder criteriaBuilder) {
-        return criteriaBuilder.or();
     }
 }

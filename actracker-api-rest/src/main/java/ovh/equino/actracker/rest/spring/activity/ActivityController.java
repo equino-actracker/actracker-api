@@ -1,9 +1,12 @@
 package ovh.equino.actracker.rest.spring.activity;
 
 import org.springframework.web.bind.annotation.*;
+import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivityService;
 import ovh.equino.actracker.domain.user.User;
+import ovh.equino.actracker.rest.spring.SearchResponse;
 import ovh.equino.security.identity.Identity;
 import ovh.equino.security.identity.IdentityProvider;
 
@@ -19,7 +22,7 @@ class ActivityController {
 
     private final ActivityService activityService;
     private final IdentityProvider identityProvider;
-    private final ActivityMapper activityMapper = new ActivityMapper();
+    private final ActivityMapper mapper = new ActivityMapper();
 
     ActivityController(ActivityService activityService, IdentityProvider identityProvider) {
         this.activityService = activityService;
@@ -32,10 +35,10 @@ class ActivityController {
         Identity requestIdentity = identityProvider.provideIdentity();
         User requester = new User(requestIdentity.getId());
 
-        ActivityDto activityDto = activityMapper.fromRequest(activity);
+        ActivityDto activityDto = mapper.fromRequest(activity);
         ActivityDto createdActivity = activityService.createActivity(activityDto, requester);
 
-        return activityMapper.toResponse(createdActivity);
+        return mapper.toResponse(createdActivity);
     }
 
     @RequestMapping(method = PUT, path = "/{id}")
@@ -44,20 +47,37 @@ class ActivityController {
         Identity requestIdentity = identityProvider.provideIdentity();
         User requester = new User(requestIdentity.getId());
 
-        ActivityDto activityDto = activityMapper.fromRequest(activity);
+        ActivityDto activityDto = mapper.fromRequest(activity);
         ActivityDto updateActivity = activityService.updateActivity(UUID.fromString(id), activityDto, requester);
 
-        return activityMapper.toResponse(updateActivity);
+        return mapper.toResponse(updateActivity);
     }
 
     @RequestMapping(method = GET)
     @ResponseStatus(OK)
+        // TODO delete
     List<Activity> getActivities() {
         Identity requestIdentity = identityProvider.provideIdentity();
         User requester = new User(requestIdentity.getId());
 
         List<ActivityDto> activities = activityService.getActivities(requester);
-        return activityMapper.toResponse(activities);
+        return mapper.toResponse(activities);
+    }
+
+    @RequestMapping(method = GET, path = "/matching")
+    @ResponseStatus(OK)
+    SearchResponse<Activity> searchActivities(
+            @RequestParam(name = "pageId", required = false) String pageId,
+            @RequestParam(name = "pageSize", required = false) Integer pageSize,
+            @RequestParam(name = "term", required = false) String term,
+            @RequestParam(name = "excludedActivities", required = false) String excludedActivities) {
+
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User requester = new User(requesterIdentity.getId());
+
+        EntitySearchCriteria searchCriteria = mapper.fromRequest(requester, pageId, pageSize, term, excludedActivities);
+        EntitySearchResult<ActivityDto> searchResult = activityService.searchActivities(searchCriteria);
+        return mapper.toResponse(searchResult);
     }
 
     @RequestMapping(method = DELETE, path = "/{id}")

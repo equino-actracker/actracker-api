@@ -1,5 +1,7 @@
 package ovh.equino.actracker.domain.activity;
 
+import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.tag.TagRepository;
 import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
@@ -11,14 +13,18 @@ import java.util.UUID;
 class ActivityServiceImpl implements ActivityService {
 
     private final ActivityRepository activityRepository;
+    private final ActivitySearchEngine activitySearchEngine;
     private final TagRepository tagRepository;
     private final ActivityNotifier activityNotifier;
+    private EntitySearchResult<ActivityDto> searchResult;
 
     ActivityServiceImpl(ActivityRepository activityRepository,
+                        ActivitySearchEngine activitySearchEngine,
                         TagRepository tagRepository,
                         ActivityNotifier activityNotifier) {
 
         this.activityRepository = activityRepository;
+        this.activitySearchEngine = activitySearchEngine;
         this.tagRepository = tagRepository;
         this.activityNotifier = activityNotifier;
     }
@@ -44,12 +50,23 @@ class ActivityServiceImpl implements ActivityService {
     @Override
     public List<ActivityDto> getActivities(User searcher) {
         TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, searcher);
-        List<Activity> activities = activityRepository.findAll(searcher).stream()
+        return activityRepository.findAll(searcher).stream()
                 .map(activity -> Activity.fromStorage(activity, tagsExistenceVerifier))
-                .toList();
-        return activities.stream()
                 .map(Activity::forClient)
                 .toList();
+    }
+
+    @Override
+    public EntitySearchResult<ActivityDto> searchActivities(EntitySearchCriteria searchCriteria) {
+        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, searchCriteria.searcher());
+
+        searchResult = activitySearchEngine.findActivities(searchCriteria);
+        List<ActivityDto> resultForClient = searchResult.results().stream()
+                .map(activity -> Activity.fromStorage(activity, tagsExistenceVerifier))
+                .map(Activity::forClient)
+                .toList();
+
+        return new EntitySearchResult<>(searchResult.nextPageId(), resultForClient);
     }
 
     @Override

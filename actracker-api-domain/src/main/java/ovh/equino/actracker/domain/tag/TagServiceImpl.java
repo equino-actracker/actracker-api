@@ -1,5 +1,7 @@
 package ovh.equino.actracker.domain.tag;
 
+import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.user.User;
 
@@ -38,17 +40,20 @@ class TagServiceImpl implements TagService {
 
     @Override
     public List<TagDto> getTags(Set<UUID> tagIds, User searcher) {
-        List<Tag> tags = tagRepository.findByIds(tagIds, searcher).stream()
+        return tagRepository.findByIds(tagIds, searcher).stream()
                 .map(Tag::fromStorage)
-                .toList();
-        return tags.stream()
                 .map(Tag::forClient)
                 .toList();
     }
 
     @Override
-    public TagSearchResult searchTags(TagSearchCriteria searchCriteria) {
-        return tagSearchEngine.findTags(searchCriteria);
+    public EntitySearchResult<TagDto> searchTags(EntitySearchCriteria searchCriteria) {
+        EntitySearchResult<TagDto> searchResult = tagSearchEngine.findTags(searchCriteria);
+        List<TagDto> resultForClient = searchResult.results().stream()
+                .map(Tag::fromStorage)
+                .map(Tag::forClient)
+                .toList();
+        return new EntitySearchResult<>(searchResult.nextPageId(), resultForClient);
     }
 
     @Override
