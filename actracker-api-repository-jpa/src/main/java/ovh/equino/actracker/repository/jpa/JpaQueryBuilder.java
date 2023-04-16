@@ -10,13 +10,13 @@ import java.util.UUID;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class JpaQueryBuilder<ENTITY> {
+public abstract class JpaQueryBuilder<ENTITY> {
 
-    private final CriteriaBuilder criteriaBuilder;
-    private final CriteriaQuery<ENTITY> criteriaQuery;
-    private final Root<ENTITY> rootEntity;
+    protected final CriteriaBuilder criteriaBuilder;
+    protected final CriteriaQuery<ENTITY> criteriaQuery;
+    protected final Root<ENTITY> rootEntity;
 
-    JpaQueryBuilder(EntityManager entityManager, Class<ENTITY> entityType) {
+    public JpaQueryBuilder(EntityManager entityManager, Class<ENTITY> entityType) {
         criteriaBuilder = entityManager.getCriteriaBuilder();
         criteriaQuery = criteriaBuilder.createQuery(entityType);
         rootEntity = criteriaQuery.from(entityType);
@@ -83,7 +83,7 @@ public class JpaQueryBuilder<ENTITY> {
         return or();
     }
 
-    public Predicate matchesTerm(String term, String searchFieldName) {
+    protected Predicate matchesTerm(String term, String searchFieldName) {
         if (isBlank(term)) {
             return allMatch();
         }

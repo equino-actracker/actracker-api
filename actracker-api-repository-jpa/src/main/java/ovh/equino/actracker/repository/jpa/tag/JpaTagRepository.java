@@ -6,7 +6,6 @@ import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tag.TagRepository;
 import ovh.equino.actracker.domain.user.User;
-import ovh.equino.actracker.repository.jpa.JpaQueryBuilder;
 import ovh.equino.actracker.repository.jpa.JpaRepository;
 
 import java.util.List;
@@ -34,7 +33,7 @@ class JpaTagRepository extends JpaRepository implements TagRepository {
     @Override
     public Optional<TagDto> findById(UUID tagId) {
 
-        JpaQueryBuilder<TagEntity> queryBuilder = queryBuilder(TagEntity.class);
+        TagQueryBuilder queryBuilder = new TagQueryBuilder(entityManager);
 
         // If Hibernate were used instead of JPA API, filters could be used instead for soft delete:
         // https://www.baeldung.com/spring-jpa-soft-delete
@@ -58,7 +57,7 @@ class JpaTagRepository extends JpaRepository implements TagRepository {
     @Override
     public List<TagDto> findByIds(Set<UUID> tagIds, User searcher) {
 
-        JpaQueryBuilder<TagEntity> queryBuilder = queryBuilder(TagEntity.class);
+        TagQueryBuilder queryBuilder = new TagQueryBuilder(entityManager);
 
         CriteriaQuery<TagEntity> query = queryBuilder.select()
                 .where(
@@ -77,7 +76,7 @@ class JpaTagRepository extends JpaRepository implements TagRepository {
     @Override
     public List<TagDto> find(EntitySearchCriteria searchCriteria) {
 
-        JpaQueryBuilder<TagEntity> queryBuilder = queryBuilder(TagEntity.class);
+        TagQueryBuilder queryBuilder = new TagQueryBuilder(entityManager);
 
         CriteriaQuery<TagEntity> query = queryBuilder.select()
                 .where(
@@ -86,7 +85,7 @@ class JpaTagRepository extends JpaRepository implements TagRepository {
                                 queryBuilder.isNotDeleted(),
                                 queryBuilder.isInPage(searchCriteria.pageId()),
                                 queryBuilder.isNotExcluded(searchCriteria.excludeFilter()),
-                                queryBuilder.matchesTerm(searchCriteria.term(), "name")
+                                queryBuilder.matchesTerm(searchCriteria.term())
                         )
                 )
                 .orderBy(queryBuilder.ascending("id"));
