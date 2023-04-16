@@ -23,6 +23,7 @@ class ActivityMapper {
         return new ActivityDto(
                 UUID.fromString(entity.id),
                 UUID.fromString(entity.creatorId),
+                entity.title,
                 entity.startTime,
                 entity.endTime,
                 entity.comment,
@@ -41,6 +42,7 @@ class ActivityMapper {
         ActivityEntity entity = new ActivityEntity();
         entity.id = isNull(dto.id()) ? null : dto.id().toString();
         entity.creatorId = isNull(dto.creatorId()) ? null : dto.creatorId().toString();
+        entity.title = dto.title();
         entity.startTime = dto.startTime();
         entity.endTime = dto.endTime();
         entity.comment = dto.comment();

@@ -22,6 +22,7 @@ class ActivityMapper extends PayloadMapper {
                 .collect(toUnmodifiableSet());
 
         return new ActivityDto(
+                activityRequest.title(),
                 timestampToInstant(activityRequest.startTimestamp()),
                 timestampToInstant(activityRequest.endTimestamp()),
                 activityRequest.comment(),
@@ -37,6 +38,7 @@ class ActivityMapper extends PayloadMapper {
 
         return new Activity(
                 uuidToString(activity.id()),
+                activity.title(),
                 instantToTimestamp(activity.startTime()),
                 instantToTimestamp(activity.endTime()),
                 activity.comment(),

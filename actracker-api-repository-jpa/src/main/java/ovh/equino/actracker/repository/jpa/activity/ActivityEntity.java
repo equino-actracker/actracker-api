@@ -17,6 +17,9 @@ class ActivityEntity {
     @Column(name = "creator_id")
     String creatorId;
 
+    @Column(name = "title")
+    String title;
+
     @Column(name = "start_time")
     Instant startTime;
 

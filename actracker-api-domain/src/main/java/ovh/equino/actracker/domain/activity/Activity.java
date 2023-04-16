@@ -17,6 +17,7 @@ class Activity implements Entity {
 
     private final ActivityId id;
     private final User creator;
+    private String title;
     private Instant startTime;
     private Instant endTime;
     private String comment;
@@ -28,6 +29,7 @@ class Activity implements Entity {
     private Activity(
             ActivityId id,
             User creator,
+            String title,
             Instant startTime,
             Instant endTime,
             String comment,
@@ -37,6 +39,7 @@ class Activity implements Entity {
 
         this.id = requireNonNull(id);
         this.creator = requireNonNull(creator);
+        this.title = title;
         this.startTime = startTime;
         this.endTime = endTime;
         this.comment = comment;
@@ -49,6 +52,7 @@ class Activity implements Entity {
         Activity newActivity = new Activity(
                 new ActivityId(),
                 creator,
+                activity.title(),
                 activity.startTime(),
                 activity.endTime(),
                 activity.comment(),
@@ -62,6 +66,7 @@ class Activity implements Entity {
 
     void updateTo(ActivityDto activity) {
         Set<TagId> deletedAssignedTags = tagsExistenceVerifier.notExisting(this.tags);
+        this.title = activity.title();
         this.startTime = activity.startTime();
         this.endTime = activity.endTime();
         this.comment = activity.comment();
@@ -79,6 +84,7 @@ class Activity implements Entity {
         return new Activity(
                 new ActivityId(activity.id()),
                 new User(activity.creatorId()),
+                activity.title(),
                 activity.startTime(),
                 activity.endTime(),
                 activity.comment(),
@@ -92,7 +98,7 @@ class Activity implements Entity {
         Set<UUID> tagIds = tags.stream()
                 .map(TagId::id)
                 .collect(toUnmodifiableSet());
-        return new ActivityDto(id.id(), creator.id(), startTime, endTime, comment, tagIds, deleted);
+        return new ActivityDto(id.id(), creator.id(), title, startTime, endTime, comment, tagIds, deleted);
     }
 
     ActivityDto forClient() {
@@ -100,14 +106,14 @@ class Activity implements Entity {
                 .map(TagId::id)
                 .collect(toUnmodifiableSet());
 
-        return new ActivityDto(id.id(), creator.id(), startTime, endTime, comment, tagIds, deleted);
+        return new ActivityDto(id.id(), creator.id(), title, startTime, endTime, comment, tagIds, deleted);
     }
 
     ActivityChangedNotification forChangeNotification() {
         Set<UUID> tagIds = tags.stream()
                 .map(TagId::id)
                 .collect(toUnmodifiableSet());
-        ActivityDto dto = new ActivityDto(id.id(), creator.id(), startTime, endTime, comment, tagIds, deleted);
+        ActivityDto dto = new ActivityDto(id.id(), creator.id(), title, startTime, endTime, comment, tagIds, deleted);
         return new ActivityChangedNotification(dto);
     }
 
