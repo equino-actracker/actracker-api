@@ -8,6 +8,7 @@ public record ActivityDto(
 
         UUID id,
         UUID creatorId,
+        String title,
         Instant startTime,
         Instant endTime,
         String comment,
@@ -17,7 +18,7 @@ public record ActivityDto(
 ) {
 
     // Constructor for data provided from input
-    public ActivityDto(Instant startTime, Instant endTime, String comment, Set<UUID> tags) {
-        this(null, null, startTime, endTime, comment, tags, false);
+    public ActivityDto(String title, Instant startTime, Instant endTime, String comment, Set<UUID> tags) {
+        this(null, null, title, startTime, endTime, comment, tags, false);
     }
 }

@@ -4,6 +4,7 @@ import java.util.Collection;
 
 record Activity(
         String id,
+        String title,
         Long startTimestamp,
         Long endTimestamp,
         String comment,
