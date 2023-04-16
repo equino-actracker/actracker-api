@@ -8,6 +8,7 @@ import ovh.equino.actracker.domain.activity.ActivityRepository;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaRepository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -79,7 +80,24 @@ class JpaActivityRepository extends JpaRepository implements ActivityRepository 
     }
 
     @Override
-    public List<ActivityDto> findUnfinishedStartedInPast(User user) {
-        throw new IllegalStateException("Not implemented yet");
+    public List<ActivityDto> findUnfinishedStartedBefore(Instant startTime, User user) {
+
+        ActivityQueryBuilder queryBuilder = new ActivityQueryBuilder(entityManager);
+
+        CriteriaQuery<ActivityEntity> query = queryBuilder.select()
+                .where(
+                        queryBuilder.and(
+                                queryBuilder.isAccessibleFor(user),
+                                queryBuilder.isStartedBefore(startTime),
+                                queryBuilder.isNotFinished(),
+                                queryBuilder.isNotDeleted()
+                        )
+                );
+
+        TypedQuery<ActivityEntity> typedQuery = entityManager.createQuery(query);
+
+        return typedQuery.getResultList().stream()
+                .map(mapper::toDto)
+                .toList();
     }
 }

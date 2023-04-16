@@ -77,7 +77,7 @@ class ActivityServiceImpl implements ActivityService {
         Instant switchTime = newActivity.isStarted() ? newActivity.startTime() : now();
         newActivity.start(switchTime);
 
-        List<Activity> activitiesToFinish = activityRepository.findUnfinishedStartedInPast(switcher).stream()
+        List<Activity> activitiesToFinish = activityRepository.findUnfinishedStartedBefore(switchTime, switcher).stream()
                 .map(activity -> Activity.fromStorage(activity, tagsExistenceVerifier))
                 .toList();
 
