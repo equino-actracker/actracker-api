@@ -5,6 +5,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivityRepository;
+import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaQueryBuilder;
 import ovh.equino.actracker.repository.jpa.JpaRepository;
 
@@ -77,5 +78,10 @@ class JpaActivityRepository extends JpaRepository implements ActivityRepository 
         return typedQuery.getResultList().stream()
                 .map(mapper::toDto)
                 .toList();
+    }
+
+    @Override
+    public List<ActivityDto> findUnfinishedStartedInPast(User user) {
+        throw new IllegalStateException("Not implemented yet");
     }
 }

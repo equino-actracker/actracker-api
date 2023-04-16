@@ -17,4 +17,6 @@ public interface ActivityRepository {
 
     List<ActivityDto> find(EntitySearchCriteria searchCriteria);
 
+    List<ActivityDto> findUnfinishedStartedInPast(User user);
+
 }

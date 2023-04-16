@@ -10,7 +10,6 @@ import ovh.equino.actracker.rest.spring.SearchResponse;
 import ovh.equino.security.identity.Identity;
 import ovh.equino.security.identity.IdentityProvider;
 
-import java.util.List;
 import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.OK;
@@ -76,6 +75,17 @@ class ActivityController {
         User requester = new User(requestIdentity.getId());
 
         activityService.deleteActivity(UUID.fromString(id), requester);
+    }
+
+    @RequestMapping(method = POST, path = "/switched")
+    @ResponseStatus(OK)
+    Activity switchToActivity(@RequestBody Activity activity) {
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User requester = new User(requesterIdentity.getId());
+
+        ActivityDto activityDto = mapper.fromRequest(activity);
+        ActivityDto switchedActivity = activityService.switchToNewActivity(activityDto, requester);
+        return mapper.toResponse(switchedActivity);
     }
 
 }

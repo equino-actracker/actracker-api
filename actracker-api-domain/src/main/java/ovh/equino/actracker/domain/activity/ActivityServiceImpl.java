@@ -7,8 +7,11 @@ import ovh.equino.actracker.domain.tag.TagRepository;
 import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
 import ovh.equino.actracker.domain.user.User;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+
+import static java.time.Instant.now;
 
 class ActivityServiceImpl implements ActivityService {
 
@@ -65,6 +68,31 @@ class ActivityServiceImpl implements ActivityService {
         activity.delete();
         activityRepository.update(activityId, activity.forStorage());
         activityNotifier.notifyChanged(activity.forChangeNotification());
+    }
+
+    @Override
+    public ActivityDto switchToNewActivity(ActivityDto activityToSwitch, User switcher) {
+        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, switcher);
+        Activity newActivity = Activity.create(activityToSwitch, switcher, tagsExistenceVerifier);
+        Instant switchTime = newActivity.isStarted() ? newActivity.startTime() : now();
+        newActivity.start(switchTime);
+
+        List<Activity> activitiesToFinish = activityRepository.findUnfinishedStartedInPast(switcher).stream()
+                .map(activity -> Activity.fromStorage(activity, tagsExistenceVerifier))
+                .toList();
+
+        activitiesToFinish.forEach(activity -> activity.finish(switchTime));
+        activitiesToFinish.stream()
+                .map(Activity::forStorage)
+                .forEach(activity -> activityRepository.update(activity.id(), activity));
+        activitiesToFinish.stream()
+                .map(Activity::forChangeNotification)
+                .forEach(activityNotifier::notifyChanged);
+
+        activityRepository.add(newActivity.forStorage());
+        activityNotifier.notifyChanged(newActivity.forChangeNotification());
+
+        return newActivity.forClient();
     }
 
     private Activity getActivityIfAuthorized(User user, UUID activityId) {

@@ -9,8 +9,7 @@ import java.time.Instant;
 import java.util.*;
 
 import static java.util.Collections.unmodifiableSet;
-import static java.util.Objects.requireNonNull;
-import static java.util.Objects.requireNonNullElse;
+import static java.util.Objects.*;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 
 class Activity implements Entity {
@@ -80,6 +79,16 @@ class Activity implements Entity {
         this.deleted = true;
     }
 
+    void finish(Instant endTime) {
+        this.endTime = endTime;
+        this.validate();
+    }
+
+    void start(Instant startTime) {
+        this.startTime = startTime;
+        this.validate();
+    }
+
     static Activity fromStorage(ActivityDto activity, TagsExistenceVerifier tagsExistenceVerifier) {
         return new Activity(
                 new ActivityId(activity.id()),
@@ -123,6 +132,10 @@ class Activity implements Entity {
 
     boolean isNotAvailableFor(User user) {
         return !isAvailableFor(user);
+    }
+
+    boolean isStarted() {
+        return nonNull(this.startTime);
     }
 
     @Override
