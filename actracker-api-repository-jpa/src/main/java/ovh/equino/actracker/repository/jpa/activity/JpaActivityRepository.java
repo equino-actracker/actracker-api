@@ -5,9 +5,10 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivityRepository;
-import ovh.equino.actracker.repository.jpa.JpaQueryBuilder;
+import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaRepository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -32,7 +33,7 @@ class JpaActivityRepository extends JpaRepository implements ActivityRepository 
     @Override
     public Optional<ActivityDto> findById(UUID activityId) {
 
-        JpaQueryBuilder<ActivityEntity> queryBuilder = queryBuilder(ActivityEntity.class);
+        ActivityQueryBuilder queryBuilder = new ActivityQueryBuilder(entityManager);
 
         // If Hibernate were used instead of JPA API, filters could be used instead for soft delete:
         // https://www.baeldung.com/spring-jpa-soft-delete
@@ -56,7 +57,7 @@ class JpaActivityRepository extends JpaRepository implements ActivityRepository 
     @Override
     public List<ActivityDto> find(EntitySearchCriteria searchCriteria) {
 
-        JpaQueryBuilder<ActivityEntity> queryBuilder = queryBuilder(ActivityEntity.class);
+        ActivityQueryBuilder queryBuilder = new ActivityQueryBuilder(entityManager);
 
         CriteriaQuery<ActivityEntity> query = queryBuilder.select()
                 .where(
@@ -64,8 +65,7 @@ class JpaActivityRepository extends JpaRepository implements ActivityRepository 
                                 queryBuilder.isAccessibleFor(searchCriteria.searcher()),
                                 queryBuilder.isNotDeleted(),
                                 queryBuilder.isInPage(searchCriteria.pageId()),
-                                queryBuilder.isNotExcluded(searchCriteria.excludeFilter()),
-                                queryBuilder.matchesTerm(searchCriteria.term(), "comment")
+                                queryBuilder.isNotExcluded(searchCriteria.excludeFilter())
                         )
                 )
                 .orderBy(queryBuilder.ascending("id"));
@@ -73,6 +73,28 @@ class JpaActivityRepository extends JpaRepository implements ActivityRepository 
         TypedQuery<ActivityEntity> typedQuery = entityManager
                 .createQuery(query)
                 .setMaxResults(searchCriteria.pageSize());
+
+        return typedQuery.getResultList().stream()
+                .map(mapper::toDto)
+                .toList();
+    }
+
+    @Override
+    public List<ActivityDto> findUnfinishedStartedBefore(Instant startTime, User user) {
+
+        ActivityQueryBuilder queryBuilder = new ActivityQueryBuilder(entityManager);
+
+        CriteriaQuery<ActivityEntity> query = queryBuilder.select()
+                .where(
+                        queryBuilder.and(
+                                queryBuilder.isAccessibleFor(user),
+                                queryBuilder.isStartedBefore(startTime),
+                                queryBuilder.isNotFinished(),
+                                queryBuilder.isNotDeleted()
+                        )
+                );
+
+        TypedQuery<ActivityEntity> typedQuery = entityManager.createQuery(query);
 
         return typedQuery.getResultList().stream()
                 .map(mapper::toDto)
