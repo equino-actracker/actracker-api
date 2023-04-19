@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import ovh.equino.actracker.domain.activity.ActivitySearchEngine;
 import ovh.equino.actracker.domain.tag.TagSearchEngine;
+import ovh.equino.actracker.domain.tagset.TagSetSearchEngine;
 
 @Configuration
 @ComponentScan(
@@ -13,7 +14,8 @@ import ovh.equino.actracker.domain.tag.TagSearchEngine;
                 type = FilterType.ASSIGNABLE_TYPE,
                 classes = {
                         TagSearchEngine.class,
-                        ActivitySearchEngine.class
+                        ActivitySearchEngine.class,
+                        TagSetSearchEngine.class
                 }
         )
 )
