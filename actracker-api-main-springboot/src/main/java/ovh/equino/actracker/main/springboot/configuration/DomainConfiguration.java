@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import ovh.equino.actracker.domain.activity.ActivityService;
 import ovh.equino.actracker.domain.tag.TagService;
+import ovh.equino.actracker.domain.tagset.TagSetService;
 
 @Configuration
 @ComponentScan(
@@ -13,7 +14,8 @@ import ovh.equino.actracker.domain.tag.TagService;
                 type = FilterType.ASSIGNABLE_TYPE,
                 classes = {
                         ActivityService.class,
-                        TagService.class
+                        TagService.class,
+                        TagSetService.class
                 }
         )
 )

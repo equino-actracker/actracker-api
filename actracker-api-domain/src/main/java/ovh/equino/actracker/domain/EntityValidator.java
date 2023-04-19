@@ -12,7 +12,7 @@ public abstract class EntityValidator<T extends Entity> {
 
     protected abstract List<String> collectValidationErrors();
 
-    public void validate() {
+    public final void validate() {
         List<String> validationErrors = collectValidationErrors();
         if (isNotEmpty(validationErrors)) {
             throw new EntityInvalidException(entityType(), validationErrors);

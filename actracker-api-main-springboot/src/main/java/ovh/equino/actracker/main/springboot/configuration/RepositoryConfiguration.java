@@ -10,6 +10,7 @@ import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import ovh.equino.actracker.domain.activity.ActivityRepository;
 import ovh.equino.actracker.domain.tag.TagRepository;
+import ovh.equino.actracker.domain.tagset.TagSetRepository;
 import ovh.equino.actracker.domain.tenant.TenantRepository;
 import ovh.equino.actracker.notification.outbox.NotificationsOutboxRepository;
 
@@ -25,7 +26,8 @@ import java.util.Properties;
                         ActivityRepository.class,
                         TagRepository.class,
                         TenantRepository.class,
-                        NotificationsOutboxRepository.class
+                        NotificationsOutboxRepository.class,
+                        TagSetRepository.class
                 }
         )
 )

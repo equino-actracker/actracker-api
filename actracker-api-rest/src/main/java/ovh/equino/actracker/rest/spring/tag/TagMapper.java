@@ -18,15 +18,15 @@ class TagMapper extends PayloadMapper {
         return new Tag(uuidToString(tag.id()), tag.name());
     }
 
+    SearchResponse<Tag> toResponse(EntitySearchResult<TagDto> tagSearchResult) {
+        List<Tag> foundTags = toResponse(tagSearchResult.results());
+        return new SearchResponse<>(tagSearchResult.nextPageId(), foundTags);
+    }
+
     List<Tag> toResponse(List<TagDto> tags) {
         return tags.stream()
                 .map(this::toResponse)
                 .toList();
-    }
-
-    SearchResponse<Tag> toResponse(EntitySearchResult<TagDto> tagSearchResult) {
-        List<Tag> foundTags = toResponse(tagSearchResult.results());
-        return new SearchResponse<>(tagSearchResult.nextPageId(), foundTags);
     }
 
 }
