@@ -47,9 +47,9 @@ class ActivityController {
         User requester = new User(requestIdentity.getId());
 
         ActivityDto activityDto = mapper.fromRequest(activity);
-        ActivityDto updateActivity = activityService.updateActivity(UUID.fromString(id), activityDto, requester);
+        ActivityDto updatedActivity = activityService.updateActivity(UUID.fromString(id), activityDto, requester);
 
-        return mapper.toResponse(updateActivity);
+        return mapper.toResponse(updatedActivity);
     }
 
     @RequestMapping(method = GET, path = "/matching")

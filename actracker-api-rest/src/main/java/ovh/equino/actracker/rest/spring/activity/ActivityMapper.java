@@ -46,14 +46,14 @@ class ActivityMapper extends PayloadMapper {
         );
     }
 
-    List<Activity> toResponse(List<ActivityDto> activities) {
-        return activities.stream()
-                .map(this::toResponse)
-                .toList();
-    }
-
     SearchResponse<Activity> toResponse(EntitySearchResult<ActivityDto> activitySearchResult) {
         List<Activity> foundActivities = toResponse(activitySearchResult.results());
         return new SearchResponse<>(activitySearchResult.nextPageId(), foundActivities);
+    }
+
+    private List<Activity> toResponse(List<ActivityDto> activities) {
+        return activities.stream()
+                .map(this::toResponse)
+                .toList();
     }
 }
