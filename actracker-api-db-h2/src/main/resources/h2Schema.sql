@@ -30,6 +30,20 @@ CREATE TABLE activity_tag (
     PRIMARY KEY (activity_id, tag_id)
 );
 
+CREATE TABLE tag_set (
+    id VARCHAR(36) UNIQUE NOT NULL,
+    creator_id VARCHAR(36) NOT NULL,
+    name TEXT,
+    deleted BOOLEAN,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE tag_set_tag (
+    tag_set_id VARCHAR(36) NOT NULL,
+    tag_id VARCHAR(36) NOT NULL,
+    PRIMARY KEY (tag_set_id, tag_id)
+);
+
 CREATE SEQUENCE outbox_notification_version_seq INCREMENT BY 1;
 
 CREATE TABLE outbox_notification (
