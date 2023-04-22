@@ -44,6 +44,14 @@ CREATE TABLE tag_set_tag (
     PRIMARY KEY (tag_set_id, tag_id)
 );
 
+CREATE TABLE dashboard (
+    id VARCHAR(36) UNIQUE NOT NULL,
+    creator_id VARCHAR(36) NOT NULL,
+    name TEXT,
+    deleted BOOLEAN,
+    PRIMARY KEY (id)
+);
+
 CREATE SEQUENCE outbox_notification_version_seq INCREMENT BY 1;
 
 CREATE TABLE outbox_notification (

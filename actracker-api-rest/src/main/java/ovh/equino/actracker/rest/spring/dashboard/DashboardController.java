@@ -14,7 +14,6 @@ import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.*;
-import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 
 @RestController
 @RequestMapping("/dashboard")
@@ -27,6 +26,16 @@ class DashboardController {
     DashboardController(DashboardService dashboardService, IdentityProvider identityProvider) {
         this.dashboardService = dashboardService;
         this.identityProvider = identityProvider;
+    }
+
+    @RequestMapping(method = GET, path = "/{id}")
+    @ResponseStatus(OK)
+    Dashboard getDashboard(@PathVariable("id") String id) {
+        Identity requestIdentity = identityProvider.provideIdentity();
+        User requester = new User(requestIdentity.getId());
+
+        DashboardDto foundDashboard = dashboardService.getDashboard(UUID.fromString(id), requester);
+        return mapper.toResponse(foundDashboard);
     }
 
     @RequestMapping(method = POST)

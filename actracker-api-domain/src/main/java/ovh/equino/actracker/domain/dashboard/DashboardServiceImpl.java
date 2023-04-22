@@ -14,9 +14,14 @@ class DashboardServiceImpl implements DashboardService {
     private final DashboardSearchEngine dashboardSearchEngine;
 
     DashboardServiceImpl(DashboardRepository dashboardRepository, DashboardSearchEngine dashboardSearchEngine) {
-
         this.dashboardRepository = dashboardRepository;
         this.dashboardSearchEngine = dashboardSearchEngine;
+    }
+
+    @Override
+    public DashboardDto getDashboard(UUID dashboardId, User searcher) {
+        Dashboard dashboard = getDashboardIfAuthorized(searcher, dashboardId);
+        return dashboard.forClient();
     }
 
     @Override

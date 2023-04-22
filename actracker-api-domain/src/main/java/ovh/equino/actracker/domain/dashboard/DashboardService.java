@@ -8,6 +8,8 @@ import java.util.UUID;
 
 public interface DashboardService {
 
+    DashboardDto getDashboard(UUID dashboardId, User searcher);
+
     DashboardDto createDashboard(DashboardDto newDashboardData, User creator);
 
     DashboardDto updateDashboard(UUID dashboardId, DashboardDto updatedDashboardData, User updater);
