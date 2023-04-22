@@ -4,6 +4,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import ovh.equino.actracker.domain.activity.ActivitySearchEngine;
+import ovh.equino.actracker.domain.dashboard.DashboardSearchEngine;
 import ovh.equino.actracker.domain.tag.TagSearchEngine;
 import ovh.equino.actracker.domain.tagset.TagSetSearchEngine;
 
@@ -15,7 +16,8 @@ import ovh.equino.actracker.domain.tagset.TagSetSearchEngine;
                 classes = {
                         TagSearchEngine.class,
                         ActivitySearchEngine.class,
-                        TagSetSearchEngine.class
+                        TagSetSearchEngine.class,
+                        DashboardSearchEngine.class
                 }
         )
 )

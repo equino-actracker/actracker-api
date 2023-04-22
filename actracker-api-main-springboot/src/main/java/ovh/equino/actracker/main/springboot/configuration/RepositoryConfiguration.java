@@ -9,6 +9,7 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import ovh.equino.actracker.domain.activity.ActivityRepository;
+import ovh.equino.actracker.domain.dashboard.DashboardRepository;
 import ovh.equino.actracker.domain.tag.TagRepository;
 import ovh.equino.actracker.domain.tagset.TagSetRepository;
 import ovh.equino.actracker.domain.tenant.TenantRepository;
@@ -27,7 +28,8 @@ import java.util.Properties;
                         TagRepository.class,
                         TenantRepository.class,
                         NotificationsOutboxRepository.class,
-                        TagSetRepository.class
+                        TagSetRepository.class,
+                        DashboardRepository.class
                 }
         )
 )

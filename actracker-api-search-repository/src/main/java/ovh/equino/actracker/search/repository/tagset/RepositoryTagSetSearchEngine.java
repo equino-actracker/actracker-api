@@ -13,7 +13,7 @@ class RepositoryTagSetSearchEngine implements TagSetSearchEngine {
 
     private final TagSetRepository tagSetRepository;
 
-    public RepositoryTagSetSearchEngine(TagSetRepository tagSetRepository) {
+    RepositoryTagSetSearchEngine(TagSetRepository tagSetRepository) {
         this.tagSetRepository = tagSetRepository;
     }
 
