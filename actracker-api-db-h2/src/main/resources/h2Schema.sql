@@ -52,6 +52,12 @@ CREATE TABLE dashboard (
     PRIMARY KEY (id)
 );
 
+CREATE TABLE chart (
+    id VARCHAR(36) UNIQUE NOT NULL,
+    dashboard_id VARCHAR(36) NOT NULL,
+    name TEXT
+);
+
 CREATE SEQUENCE outbox_notification_version_seq INCREMENT BY 1;
 
 CREATE TABLE outbox_notification (

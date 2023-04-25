@@ -9,16 +9,20 @@ import java.util.List;
 
 class DashboardMapper extends PayloadMapper {
 
+    private final ChartMapper chartMapper = new ChartMapper();
+
     DashboardDto fromRequest(Dashboard dashboardRequest) {
         return new DashboardDto(
-                dashboardRequest.name()
+                dashboardRequest.name(),
+                chartMapper.fromRequest(dashboardRequest.charts())
         );
     }
 
     Dashboard toResponse(DashboardDto dashboard) {
         return new Dashboard(
                 uuidToString(dashboard.id()),
-                dashboard.name()
+                dashboard.name(),
+                chartMapper.toResponse(dashboard.charts())
         );
     }
 
