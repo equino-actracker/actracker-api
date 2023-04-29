@@ -15,4 +15,6 @@ public interface DashboardRepository {
     Optional<DashboardDto> findById(UUID dashboardId);
 
     List<DashboardDto> find(EntitySearchCriteria searchCriteria);
+
+    DashboardChartData generateChart(String chartName);
 }

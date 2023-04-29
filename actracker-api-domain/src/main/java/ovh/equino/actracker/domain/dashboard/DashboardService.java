@@ -17,4 +17,6 @@ public interface DashboardService {
     EntitySearchResult<DashboardDto> searchDashboards(EntitySearchCriteria searchCriteria);
 
     void deleteDashboard(UUID dashboardId, User remover);
+
+    DashboardData generateDashboard(UUID dashboardId, User generator);
 }

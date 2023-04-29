@@ -15,6 +15,7 @@ dependencies {
     runtimeOnly project(':actracker-api-db-postgres')
     runtimeOnly project(':actracker-api-publisher-memory')
     runtimeOnly project(':actracker-api-search-repository')
+    runtimeOnly project(':actracker-api-dashboard-generator-repository')
 
     implementation 'org.flywaydb:flyway-core:9.11.0'
 
