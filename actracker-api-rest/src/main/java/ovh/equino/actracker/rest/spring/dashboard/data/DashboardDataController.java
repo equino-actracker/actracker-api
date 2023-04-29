@@ -19,6 +19,7 @@ class DashboardDataController {
     @ResponseStatus(OK)
     DashboardData getData(@PathVariable("id") String id) {
         return new DashboardData(
+                "Super dashboard",
                 of(
                         new DashboardDataChart(
                                 "Chart 1",
