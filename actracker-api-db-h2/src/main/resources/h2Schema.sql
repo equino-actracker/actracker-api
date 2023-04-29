@@ -83,6 +83,10 @@ CREATE VIEW activities_duration_by_tag AS
                 EXTRACT(EPOCH FROM SUM(activity.end_time - activity.start_time)) AS duration
             FROM activity
         ) total_measured
+    WHERE
+            duration_by_tag.tag_id IS NOT NULL
+        AND
+            total_measured.duration > 0
 ;
 
 CREATE SEQUENCE outbox_notification_version_seq INCREMENT BY 1;
