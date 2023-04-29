@@ -12,10 +12,15 @@ class DashboardServiceImpl implements DashboardService {
 
     private final DashboardRepository dashboardRepository;
     private final DashboardSearchEngine dashboardSearchEngine;
+    private final DashboardGenerationEngine dashboardGenerationEngine;
 
-    DashboardServiceImpl(DashboardRepository dashboardRepository, DashboardSearchEngine dashboardSearchEngine) {
+    DashboardServiceImpl(DashboardRepository dashboardRepository,
+                         DashboardSearchEngine dashboardSearchEngine,
+                         DashboardGenerationEngine dashboardGenerationEngine) {
+
         this.dashboardRepository = dashboardRepository;
         this.dashboardSearchEngine = dashboardSearchEngine;
+        this.dashboardGenerationEngine = dashboardGenerationEngine;
     }
 
     @Override
@@ -55,6 +60,12 @@ class DashboardServiceImpl implements DashboardService {
         Dashboard dashboard = getDashboardIfAuthorized(remover, dashboardId);
         dashboard.delete();
         dashboardRepository.update(dashboardId, dashboard.forStorage());
+    }
+
+    @Override
+    public DashboardData generateDashboard(UUID dashboardId, User generator) {
+        Dashboard dashboard = getDashboardIfAuthorized(generator, dashboardId);
+        return dashboardGenerationEngine.generateDashboard(dashboard.forStorage());
     }
 
     private Dashboard getDashboardIfAuthorized(User user, UUID dashboardId) {

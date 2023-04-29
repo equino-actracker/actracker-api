@@ -3,10 +3,13 @@ package ovh.equino.actracker.repository.jpa.dashboard;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaQuery;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.dashboard.ChartBucketData;
+import ovh.equino.actracker.domain.dashboard.DashboardChartData;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
 import ovh.equino.actracker.domain.dashboard.DashboardRepository;
 import ovh.equino.actracker.repository.jpa.JpaRepository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -69,5 +72,25 @@ class JpaDashboardRepository extends JpaRepository implements DashboardRepositor
         return typedQuery.getResultList().stream()
                 .map(mapper::toDto)
                 .toList();
+    }
+
+    @Override
+    public DashboardChartData generateChart(String chartName) {
+
+        TypedQuery<TagBucketEntity> query = entityManager.createNamedQuery("findAll", TagBucketEntity.class);
+        List<TagBucketEntity> resultList = query.getResultList();
+        List<ChartBucketData> buckets = resultList.stream()
+                .map(this::toBucket)
+                .toList();
+
+        return new DashboardChartData(chartName, buckets);
+    }
+
+    private ChartBucketData toBucket(TagBucketEntity bucketEntity) {
+        return new ChartBucketData(
+                bucketEntity.tagId,
+                bucketEntity.durationSeconds,
+                bucketEntity.percentage
+        );
     }
 }
