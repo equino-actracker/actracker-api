@@ -11,7 +11,7 @@ FROM (
     SELECT
         t.id AS tag_id,
         t.name AS tag_name,
-        EXTRACT(EPOCH FROM SUM(a.end_time - a.start_time)) AS tag_duration
+        COALESCE(EXTRACT(EPOCH FROM SUM(a.end_time - a.start_time)), 0) AS tag_duration
     FROM
         activity a
         LEFT JOIN activity_tag at
