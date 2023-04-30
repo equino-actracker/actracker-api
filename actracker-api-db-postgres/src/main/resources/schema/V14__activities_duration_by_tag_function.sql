@@ -20,13 +20,12 @@ CREATE OR REPLACE FUNCTION activities_duration_by_tag (
             SELECT
                 t.id AS tag_id,
                 COALESCE( EXTRACT(EPOCH FROM SUM(a.end_time - a.start_time)), 0) AS tag_duration
-            FROM
-                (
-                    SELECT
-                        id,
-                        GREATEST(start_time, $2) AS start_time,
-                        LEAST(end_time, $3) AS end_time
-                    FROM activity
+            FROM (
+                SELECT
+                    id,
+                    GREATEST(start_time, $2) AS start_time,
+                    LEAST(end_time, $3) AS end_time
+                FROM activity
                     WHERE
                         creator_id = $1
                     AND
@@ -35,24 +34,38 @@ CREATE OR REPLACE FUNCTION activities_duration_by_tag (
                         start_time <= $3
                     AND
                         end_time >= $2
-                ) a
-                LEFT JOIN activity_tag at
-                    ON a.id = at.activity_id
-                LEFT JOIN
-                    (
-                        SELECT id FROM tag WHERE creator_id = $1 AND deleted IS FALSE
-                    ) t
-                    ON at.tag_id = t.id
-                GROUP BY t.id
+            ) a
+            LEFT JOIN activity_tag at
+                ON a.id = at.activity_id
+            LEFT JOIN (SELECT id FROM tag WHERE creator_id = $1 AND deleted IS FALSE) t
+                ON at.tag_id = t.id
+            WHERE t.id IS NOT NULL
+            GROUP BY t.id
         ) duration_by_tag
             CROSS JOIN (
                 SELECT
-                    EXTRACT(EPOCH FROM SUM(activity.end_time - activity.start_time)) AS duration
-                FROM activity
+                    EXTRACT(EPOCH FROM SUM(a.end_time - a.start_time)) AS duration
+                FROM (
+                     SELECT
+                         id,
+                         GREATEST(start_time, $2) AS start_time,
+                         LEAST(end_time, $3) AS end_time
+                     FROM activity
+                         WHERE
+                             creator_id = $1
+                         AND
+                             deleted IS FALSE
+                         AND
+                             start_time <= $3
+                         AND
+                             end_time >= $2
+                ) a
+                LEFT JOIN activity_tag at
+                    ON a.id = at.activity_id
+                LEFT JOIN (SELECT id FROM tag WHERE creator_id = $1 AND deleted IS FALSE) t
+                    ON at.tag_id = t.id
+                WHERE t.id IS NOT NULL
             ) total_measured
-        WHERE
-                duration_by_tag.tag_id IS NOT NULL
-            AND
-                total_measured.duration > 0
+        WHERE total_measured.duration > 0
 
 $$ LANGUAGE SQL;
