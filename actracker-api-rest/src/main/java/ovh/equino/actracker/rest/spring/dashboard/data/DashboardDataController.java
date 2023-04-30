@@ -1,16 +1,11 @@
 package ovh.equino.actracker.rest.spring.dashboard.data;
 
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ovh.equino.actracker.domain.dashboard.DashboardGenerationCriteria;
 import ovh.equino.actracker.domain.dashboard.DashboardService;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.security.identity.Identity;
 import ovh.equino.security.identity.IdentityProvider;
-
-import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -30,14 +25,24 @@ class DashboardDataController {
 
     @RequestMapping(method = GET)
     @ResponseStatus(OK)
-    DashboardData getData(@PathVariable("id") String id) {
+    DashboardData getData(
+            @PathVariable("id") String id,
+            @RequestParam(name = "rangeStartMillis", required = false) Long rangeStartMillis,
+            @RequestParam(name = "rangeEndMillis", required = false) Long rangeEndMillis
+    ) {
+
         Identity requesterIdentity = identityProvider.provideIdentity();
         User requester = new User(requesterIdentity.getId());
 
-        DashboardGenerationCriteria dashboardGenerationCriteria = new DashboardGenerationCriteria(requester);
+        DashboardGenerationCriteria dashboardGenerationCriteria = new DashboardGenerationCriteriaBuilder()
+                .withGenerator(requester)
+                .withTimeRangeStart(rangeStartMillis)
+                .withTimeRangeEnd(rangeEndMillis)
+                .withDashboardId(id)
+                .build();
 
         ovh.equino.actracker.domain.dashboard.DashboardData dashboardData =
-                dashboardService.generateDashboard(UUID.fromString(id), dashboardGenerationCriteria);
+                dashboardService.generateDashboard(dashboardGenerationCriteria);
 
         return mapper.toResponse(dashboardData);
     }

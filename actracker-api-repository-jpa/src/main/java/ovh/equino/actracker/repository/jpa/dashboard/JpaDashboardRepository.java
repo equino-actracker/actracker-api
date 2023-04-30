@@ -7,11 +7,17 @@ import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.dashboard.*;
 import ovh.equino.actracker.repository.jpa.JpaRepository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.util.Objects.requireNonNullElse;
+
 class JpaDashboardRepository extends JpaRepository implements DashboardRepository {
+
+    private static final Instant MAX_RANGE_BEGIN = Instant.ofEpochSecond(-2208993840L); // 0000-01-01:00:00:00
+    private static final Instant MAX_RANGE_END = Instant.ofEpochSecond(32503676399L); // 2999-12-31:23:59:59
 
     private final DashboardMapper mapper = new DashboardMapper();
 
@@ -75,9 +81,13 @@ class JpaDashboardRepository extends JpaRepository implements DashboardRepositor
     public DashboardChartData generateChart(String chartName, DashboardGenerationCriteria generationCriteria) {
 
         String generatorId = generationCriteria.generator().id().toString();
+        Instant timeRangeStart = requireNonNullElse(generationCriteria.timeRangeStart(), MAX_RANGE_BEGIN);
+        Instant timeRangeEnd = requireNonNullElse(generationCriteria.timeRangeEnd(), MAX_RANGE_END);
 
         StoredProcedureQuery procedure = entityManager.createNamedStoredProcedureQuery(TagBucketEntity.PROCEDURE_NAME);
         procedure.setParameter(TagBucketEntity.USER_ID_PARAM_NAME, generatorId);
+        procedure.setParameter(TagBucketEntity.RANGE_START_PARAM_NAME, timeRangeStart);
+        procedure.setParameter(TagBucketEntity.RANGE_END_PARAM_NAME, timeRangeEnd);
 
         //noinspection unchecked
         List<TagBucketEntity> results = (List<TagBucketEntity>) procedure.getResultList();
