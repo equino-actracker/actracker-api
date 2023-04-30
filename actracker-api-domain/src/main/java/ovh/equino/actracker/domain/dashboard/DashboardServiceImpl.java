@@ -63,9 +63,10 @@ class DashboardServiceImpl implements DashboardService {
     }
 
     @Override
-    public DashboardData generateDashboard(UUID dashboardId, User generator) {
-        Dashboard dashboard = getDashboardIfAuthorized(generator, dashboardId);
-        return dashboardGenerationEngine.generateDashboard(dashboard.forStorage());
+    public DashboardData generateDashboard(DashboardGenerationCriteria generationCriteria) {
+        UUID dashboardId = generationCriteria.dashboardId();
+        Dashboard dashboard = getDashboardIfAuthorized(generationCriteria.generator(), dashboardId);
+        return dashboardGenerationEngine.generateDashboard(dashboard.forStorage(), generationCriteria);
     }
 
     private Dashboard getDashboardIfAuthorized(User user, UUID dashboardId) {

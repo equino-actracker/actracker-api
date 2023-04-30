@@ -18,5 +18,5 @@ public interface DashboardService {
 
     void deleteDashboard(UUID dashboardId, User remover);
 
-    DashboardData generateDashboard(UUID dashboardId, User generator);
+    DashboardData generateDashboard(DashboardGenerationCriteria generationCriteria);
 }
