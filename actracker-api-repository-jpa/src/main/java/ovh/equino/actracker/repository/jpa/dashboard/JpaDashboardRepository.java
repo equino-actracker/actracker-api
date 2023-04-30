@@ -1,5 +1,6 @@
 package ovh.equino.actracker.repository.jpa.dashboard;
 
+import jakarta.persistence.StoredProcedureQuery;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaQuery;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
@@ -9,7 +10,6 @@ import ovh.equino.actracker.domain.dashboard.DashboardDto;
 import ovh.equino.actracker.domain.dashboard.DashboardRepository;
 import ovh.equino.actracker.repository.jpa.JpaRepository;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -75,11 +75,14 @@ class JpaDashboardRepository extends JpaRepository implements DashboardRepositor
     }
 
     @Override
-    public DashboardChartData generateChart(String chartName) {
+    public DashboardChartData generateChart(String chartName, UUID userId) {
 
-        TypedQuery<TagBucketEntity> query = entityManager.createNamedQuery("findAll", TagBucketEntity.class);
-        List<TagBucketEntity> resultList = query.getResultList();
-        List<ChartBucketData> buckets = resultList.stream()
+        StoredProcedureQuery procedure = entityManager.createNamedStoredProcedureQuery(TagBucketEntity.PROCEDURE_NAME);
+        procedure.setParameter(TagBucketEntity.USER_ID_PARAM_NAME, userId.toString());
+
+        List<TagBucketEntity> results = (List<TagBucketEntity>) procedure.getResultList();
+
+        List<ChartBucketData> buckets = results.stream()
                 .map(this::toBucket)
                 .toList();
 
