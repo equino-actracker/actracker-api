@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import ovh.equino.actracker.domain.dashboard.DashboardGenerationParameters;
+import ovh.equino.actracker.domain.dashboard.DashboardGenerationCriteria;
 import ovh.equino.actracker.domain.dashboard.DashboardService;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.security.identity.Identity;
@@ -34,10 +34,10 @@ class DashboardDataController {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User requester = new User(requesterIdentity.getId());
 
-        DashboardGenerationParameters dashboardGenerationParameters = new DashboardGenerationParameters(requester);
+        DashboardGenerationCriteria dashboardGenerationCriteria = new DashboardGenerationCriteria(requester);
 
         ovh.equino.actracker.domain.dashboard.DashboardData dashboardData =
-                dashboardService.generateDashboard(UUID.fromString(id), dashboardGenerationParameters);
+                dashboardService.generateDashboard(UUID.fromString(id), dashboardGenerationCriteria);
 
         return mapper.toResponse(dashboardData);
     }

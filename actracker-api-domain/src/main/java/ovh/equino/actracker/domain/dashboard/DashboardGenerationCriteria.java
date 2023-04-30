@@ -2,7 +2,7 @@ package ovh.equino.actracker.domain.dashboard;
 
 import ovh.equino.actracker.domain.user.User;
 
-public record DashboardGenerationParameters(
+public record DashboardGenerationCriteria(
 
         User generator
 ) {

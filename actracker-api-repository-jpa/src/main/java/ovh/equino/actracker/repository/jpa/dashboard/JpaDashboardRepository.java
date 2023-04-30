@@ -72,9 +72,9 @@ class JpaDashboardRepository extends JpaRepository implements DashboardRepositor
     }
 
     @Override
-    public DashboardChartData generateChart(String chartName, DashboardGenerationParameters generationParameters) {
+    public DashboardChartData generateChart(String chartName, DashboardGenerationCriteria generationCriteria) {
 
-        String generatorId = generationParameters.generator().id().toString();
+        String generatorId = generationCriteria.generator().id().toString();
 
         StoredProcedureQuery procedure = entityManager.createNamedStoredProcedureQuery(TagBucketEntity.PROCEDURE_NAME);
         procedure.setParameter(TagBucketEntity.USER_ID_PARAM_NAME, generatorId);

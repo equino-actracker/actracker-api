@@ -13,9 +13,9 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
     }
 
     @Override
-    public DashboardData generateDashboard(DashboardDto dashboard, DashboardGenerationParameters generationParameters) {
+    public DashboardData generateDashboard(DashboardDto dashboard, DashboardGenerationCriteria generationCriteria) {
         List<DashboardChartData> chartsData = dashboard.charts().stream()
-                .map(chart -> dashboardRepository.generateChart(chart.name(), generationParameters))
+                .map(chart -> dashboardRepository.generateChart(chart.name(), generationCriteria))
                 .toList();
 
         return new DashboardData(dashboard.name(), chartsData);
