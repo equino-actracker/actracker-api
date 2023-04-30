@@ -4,10 +4,7 @@ import jakarta.persistence.StoredProcedureQuery;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaQuery;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
-import ovh.equino.actracker.domain.dashboard.ChartBucketData;
-import ovh.equino.actracker.domain.dashboard.DashboardChartData;
-import ovh.equino.actracker.domain.dashboard.DashboardDto;
-import ovh.equino.actracker.domain.dashboard.DashboardRepository;
+import ovh.equino.actracker.domain.dashboard.*;
 import ovh.equino.actracker.repository.jpa.JpaRepository;
 
 import java.util.List;
@@ -75,11 +72,14 @@ class JpaDashboardRepository extends JpaRepository implements DashboardRepositor
     }
 
     @Override
-    public DashboardChartData generateChart(String chartName, UUID userId) {
+    public DashboardChartData generateChart(String chartName, DashboardGenerationParameters generationParameters) {
+
+        String generatorId = generationParameters.generator().id().toString();
 
         StoredProcedureQuery procedure = entityManager.createNamedStoredProcedureQuery(TagBucketEntity.PROCEDURE_NAME);
-        procedure.setParameter(TagBucketEntity.USER_ID_PARAM_NAME, userId.toString());
+        procedure.setParameter(TagBucketEntity.USER_ID_PARAM_NAME, generatorId);
 
+        //noinspection unchecked
         List<TagBucketEntity> results = (List<TagBucketEntity>) procedure.getResultList();
 
         List<ChartBucketData> buckets = results.stream()
