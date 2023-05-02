@@ -116,7 +116,7 @@ class JpaDashboardRepository extends JpaRepository implements DashboardRepositor
         List<DayBucketEntity> results = (List<DayBucketEntity>) procedure.getResultList();
 
         Map<Instant, List<DayBucketEntity>> bucketsByDay = results.stream()
-                .collect(groupingBy(bucket -> bucket.id.bucketRangeStart));
+                .collect(groupingBy(bucket -> bucket.bucketRangeStart));
 
         List<ChartBucketData> buckets = bucketsByDay.entrySet().stream()
                 .map(entry -> toBucket(entry.getKey(), entry.getValue()))
@@ -148,7 +148,7 @@ class JpaDashboardRepository extends JpaRepository implements DashboardRepositor
 
     private ChartBucketData toBucket(DayBucketEntity bucket) {
         return new ChartBucketData(
-                bucket.id.tagId,
+                bucket.tagId,
                 bucket.durationSeconds,
                 bucket.percentage,
                 null

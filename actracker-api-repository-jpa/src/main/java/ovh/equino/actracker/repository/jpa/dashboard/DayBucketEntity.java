@@ -38,19 +38,16 @@ class DayBucketEntity {
     @EmbeddedId
     DayBucketEntityId id;
 
-//    @Id
-//    @Column(name = "tag_id")
-//    String tagId;
-//
-//    @Id
-//    @Column(name = "bucket_range_start")
-//    Instant bucketRangeStart;
+    @Column(name = "tag_id", insertable = false, updatable = false)
+    String tagId;
+
+    @Column(name = "bucket_range_start", insertable = false, updatable = false)
+    Instant bucketRangeStart;
 
     @Column(name = "tag_duration")
     BigDecimal durationSeconds;
 
     @Column(name = "measured_percentage")
     BigDecimal percentage;
-
 
 }

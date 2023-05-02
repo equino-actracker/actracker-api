@@ -7,6 +7,7 @@ ALTER TABLE IF EXISTS chart
     ALTER COLUMN group_by SET NOT NULL;
 
 
+DROP FUNCTION IF EXISTS activities_duration_by_day;
 
 CREATE OR REPLACE FUNCTION activities_duration_by_day (
         user_id VARCHAR(36),
