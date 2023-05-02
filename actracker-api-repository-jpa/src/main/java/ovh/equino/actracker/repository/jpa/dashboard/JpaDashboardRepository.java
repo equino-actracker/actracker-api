@@ -5,6 +5,7 @@ import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaQuery;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.dashboard.*;
+import ovh.equino.actracker.domain.dashboard.ChartBucketData.BucketType;
 import ovh.equino.actracker.repository.jpa.JpaRepository;
 
 import java.time.Instant;
@@ -128,6 +129,7 @@ class JpaDashboardRepository extends JpaRepository implements DashboardRepositor
     private ChartBucketData toBucket(TagBucketEntity bucketEntity) {
         return new ChartBucketData(
                 bucketEntity.tagId,
+                BucketType.TAG,
                 bucketEntity.durationSeconds,
                 bucketEntity.percentage,
                 null
@@ -140,6 +142,7 @@ class JpaDashboardRepository extends JpaRepository implements DashboardRepositor
                 .toList();
         return new ChartBucketData(
                 Long.toString(day.toEpochMilli()),
+                BucketType.DAY,
                 null,
                 null,
                 subBuckets
@@ -149,6 +152,7 @@ class JpaDashboardRepository extends JpaRepository implements DashboardRepositor
     private ChartBucketData toBucket(DayBucketEntity bucket) {
         return new ChartBucketData(
                 bucket.tagId,
+                BucketType.TAG,
                 bucket.durationSeconds,
                 bucket.percentage,
                 null
