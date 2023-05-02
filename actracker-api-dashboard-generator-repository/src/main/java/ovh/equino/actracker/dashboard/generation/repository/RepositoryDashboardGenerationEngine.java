@@ -15,9 +15,16 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
     @Override
     public DashboardData generateDashboard(DashboardDto dashboard, DashboardGenerationCriteria generationCriteria) {
         List<DashboardChartData> chartsData = dashboard.charts().stream()
-                .map(chart -> dashboardRepository.generateChart(chart.name(), generationCriteria))
+                .map(chart -> generate(chart, generationCriteria))
                 .toList();
 
         return new DashboardData(dashboard.name(), chartsData);
+    }
+
+    private DashboardChartData generate(Chart chart, DashboardGenerationCriteria generationCriteria) {
+        return switch (chart.groupBy()) {
+            case TAG -> dashboardRepository.generateChartGroupedByTags(chart.name(), generationCriteria);
+            case DAY -> dashboardRepository.generateChartGroupedByDays(chart.name(), generationCriteria);
+        };
     }
 }

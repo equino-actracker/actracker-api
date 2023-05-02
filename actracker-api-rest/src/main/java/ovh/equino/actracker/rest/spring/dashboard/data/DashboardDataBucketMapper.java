@@ -14,7 +14,8 @@ class DashboardDataBucketMapper extends PayloadMapper {
         return new DashboardDataBucket(
                 bucket.name(),
                 bucket.value(),
-                bucket.percentage()
+                bucket.percentage(),
+                toResponse(bucket.buckets())
         );
     }
 

@@ -2,8 +2,8 @@ DROP VIEW IF EXISTS activities_duration_by_tag;
 
 CREATE OR REPLACE FUNCTION activities_duration_by_tag (
         user_id VARCHAR(36),
-        range_start_timestamp TIMESTAMP WITH TIME ZONE,
-        range_end_timestamp TIMESTAMP WITH TIME ZONE
+        range_start_timestamp TIMESTAMP,
+        range_end_timestamp TIMESTAMP
     ) RETURNS TABLE (
         tag_id VARCHAR(36),
         tag_duration NUMERIC,

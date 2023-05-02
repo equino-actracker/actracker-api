@@ -9,10 +9,12 @@ import ovh.equino.actracker.repository.jpa.JpaRepository;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Objects.requireNonNullElse;
+import static java.util.stream.Collectors.groupingBy;
 
 class JpaDashboardRepository extends JpaRepository implements DashboardRepository {
 
@@ -78,7 +80,7 @@ class JpaDashboardRepository extends JpaRepository implements DashboardRepositor
     }
 
     @Override
-    public DashboardChartData generateChart(String chartName, DashboardGenerationCriteria generationCriteria) {
+    public DashboardChartData generateChartGroupedByTags(String chartName, DashboardGenerationCriteria generationCriteria) {
 
         String generatorId = generationCriteria.generator().id().toString();
         Instant timeRangeStart = requireNonNullElse(generationCriteria.timeRangeStart(), MIN_RANGE_BEGIN);
@@ -99,11 +101,58 @@ class JpaDashboardRepository extends JpaRepository implements DashboardRepositor
         return new DashboardChartData(chartName, buckets);
     }
 
+    @Override
+    public DashboardChartData generateChartGroupedByDays(String chartName, DashboardGenerationCriteria generationCriteria) {
+        String generatorId = generationCriteria.generator().id().toString();
+        Instant timeRangeStart = requireNonNullElse(generationCriteria.timeRangeStart(), MIN_RANGE_BEGIN);
+        Instant timeRangeEnd = requireNonNullElse(generationCriteria.timeRangeEnd(), MAX_RANGE_END);
+
+        StoredProcedureQuery procedure = entityManager.createNamedStoredProcedureQuery(DayBucketEntity.PROCEDURE_NAME);
+        procedure.setParameter(DayBucketEntity.USER_ID_PARAM_NAME, generatorId);
+        procedure.setParameter(DayBucketEntity.RANGE_START_PARAM_NAME, timeRangeStart);
+        procedure.setParameter(DayBucketEntity.RANGE_END_PARAM_NAME, timeRangeEnd);
+
+        //noinspection unchecked
+        List<DayBucketEntity> results = (List<DayBucketEntity>) procedure.getResultList();
+
+        Map<Instant, List<DayBucketEntity>> bucketsByDay = results.stream()
+                .collect(groupingBy(bucket -> bucket.id.bucketRangeStart));
+
+        List<ChartBucketData> buckets = bucketsByDay.entrySet().stream()
+                .map(entry -> toBucket(entry.getKey(), entry.getValue()))
+                .toList();
+
+        return new DashboardChartData(chartName, buckets);
+    }
+
     private ChartBucketData toBucket(TagBucketEntity bucketEntity) {
         return new ChartBucketData(
                 bucketEntity.tagId,
                 bucketEntity.durationSeconds,
-                bucketEntity.percentage
+                bucketEntity.percentage,
+                null
         );
     }
+
+    private ChartBucketData toBucket(Instant day, List<DayBucketEntity> buckets) {
+        List<ChartBucketData> subBuckets = buckets.stream()
+                .map(this::toBucket)
+                .toList();
+        return new ChartBucketData(
+                Long.toString(day.toEpochMilli()),
+                null,
+                null,
+                subBuckets
+        );
+    }
+
+    private ChartBucketData toBucket(DayBucketEntity bucket) {
+        return new ChartBucketData(
+                bucket.id.tagId,
+                bucket.durationSeconds,
+                bucket.percentage,
+                null
+        );
+    }
+
 }
