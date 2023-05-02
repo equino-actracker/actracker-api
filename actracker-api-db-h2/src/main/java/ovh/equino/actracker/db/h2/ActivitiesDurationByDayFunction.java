@@ -14,8 +14,8 @@ public class ActivitiesDurationByDayFunction {
                     by_tag.measured_percentage
                 FROM (
                     SELECT
-                        date_in_range AS start,
-                        date_in_range + INTERVAL '1' DAY AS end
+                        date_in_range AS start_time,
+                        date_in_range + INTERVAL '1' DAY AS end_time
                     FROM
                         generate_series($2, $3, INTERVAL '1' DAY) AS date_in_range
                 )
