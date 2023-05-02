@@ -9,11 +9,9 @@ import ovh.equino.actracker.domain.dashboard.ChartBucketData.BucketType;
 import ovh.equino.actracker.repository.jpa.JpaRepository;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
+import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNullElse;
 import static java.util.stream.Collectors.groupingBy;
 
@@ -121,6 +119,7 @@ class JpaDashboardRepository extends JpaRepository implements DashboardRepositor
 
         List<ChartBucketData> buckets = bucketsByDay.entrySet().stream()
                 .map(entry -> toBucket(entry.getKey(), entry.getValue()))
+                .sorted(comparing(ChartBucketData::name))
                 .toList();
 
         return new DashboardChartData(chartName, buckets);
