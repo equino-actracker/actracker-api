@@ -16,4 +16,7 @@ class ChartEntity {
 
     @Column(name = "name")
     String name;
+
+    @Column(name = "group_by")
+    String groupBy;
 }

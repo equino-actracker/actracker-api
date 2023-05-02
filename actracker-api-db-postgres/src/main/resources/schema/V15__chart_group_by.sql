@@ -1,0 +1,7 @@
+ALTER TABLE IF EXISTS chart
+    ADD COLUMN group_by VARCHAR(20);
+
+UPDATE chart SET group_by='TAG' WHERE group_by IS NULL;
+
+ALTER TABLE IF EXISTS chart
+    ALTER COLUMN group_by SET NOT NULL;

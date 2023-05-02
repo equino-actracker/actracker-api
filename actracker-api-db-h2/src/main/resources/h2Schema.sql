@@ -55,6 +55,7 @@ CREATE TABLE dashboard (
 CREATE TABLE chart (
     id VARCHAR(36) UNIQUE NOT NULL,
     dashboard_id VARCHAR(36) NOT NULL,
+    group_by VARCHAR(20) NOT NULL,
     name TEXT
 );
 

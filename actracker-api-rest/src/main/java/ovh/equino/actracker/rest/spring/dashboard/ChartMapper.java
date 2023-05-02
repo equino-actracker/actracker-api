@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Objects.requireNonNullElse;
+import static ovh.equino.actracker.domain.dashboard.Chart.*;
 
 class ChartMapper {
 
@@ -14,7 +15,8 @@ class ChartMapper {
     }
 
     ovh.equino.actracker.domain.dashboard.Chart fromRequest(Chart chartRequest) {
-        return new ovh.equino.actracker.domain.dashboard.Chart(chartRequest.name());
+        GroupBy groupBy = GroupBy.valueOf(chartRequest.groupBy().name());
+        return new ovh.equino.actracker.domain.dashboard.Chart(chartRequest.name(), groupBy);
     }
 
     List<Chart> toResponse(List<ovh.equino.actracker.domain.dashboard.Chart> charts) {
@@ -24,6 +26,7 @@ class ChartMapper {
     }
 
     Chart toResponse(ovh.equino.actracker.domain.dashboard.Chart chart) {
-        return new Chart(chart.name());
+        Chart.GroupBy groupBy = Chart.GroupBy.valueOf(chart.groupBy().name());
+        return new Chart(chart.name(), groupBy);
     }
 }
