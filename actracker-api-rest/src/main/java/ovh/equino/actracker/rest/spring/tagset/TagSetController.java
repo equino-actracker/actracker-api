@@ -6,6 +6,7 @@ import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.tagset.TagSetDto;
 import ovh.equino.actracker.domain.tagset.TagSetService;
 import ovh.equino.actracker.domain.user.User;
+import ovh.equino.actracker.rest.spring.EntitySearchCriteriaBuilder;
 import ovh.equino.actracker.rest.spring.SearchResponse;
 import ovh.equino.security.identity.Identity;
 import ovh.equino.security.identity.IdentityProvider;
@@ -63,7 +64,14 @@ class TagSetController {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User requester = new User(requesterIdentity.getId());
 
-        EntitySearchCriteria searchCriteria = mapper.fromRequest(requester, pageId, pageSize, term, excludedTagSets);
+        EntitySearchCriteria searchCriteria = new EntitySearchCriteriaBuilder()
+                .withSearcher(requester)
+                .withPageId(pageId)
+                .withPageSize(pageSize)
+                .withTerm(term)
+                .withExcludedIdsJointWithComma(excludedTagSets)
+                .build();
+
         EntitySearchResult<TagSetDto> searchResult = tagSetService.searchTagSets(searchCriteria);
         return mapper.toResponse(searchResult);
     }

@@ -12,12 +12,42 @@ class ActivityQueryBuilder extends JpaQueryBuilder<ActivityEntity> {
         super(entityManager, ActivityEntity.class);
     }
 
-    Predicate isStartedBefore(Instant startTime) {
+    Predicate isInTimeRange(Instant timeRangeStart, Instant timeRangeEnd) {
+        Predicate isBeforeRangeEnd = timeRangeEnd != null
+                ? isStartedBeforeOrAt(timeRangeEnd)
+                : allMatch();
+
+        Predicate isAfterRangeStart = timeRangeStart != null
+                //@formatter:off
+                ? and(
+                    isStarted(),
+                    or(
+                        isNotFinished(),
+                        isFinishedAfterOrAt(timeRangeStart)
+                    )
+                )
+                : allMatch();
+                //@formatter:on
+
+        return and(isBeforeRangeEnd, isAfterRangeStart);
+    }
+
+    Predicate isStartedBeforeOrAt(Instant startTime) {
         return and(
                 isStarted(),
-                criteriaBuilder.lessThan(
+                criteriaBuilder.lessThanOrEqualTo(
                         rootEntity.get("startTime"),
                         startTime
+                )
+        );
+    }
+
+    Predicate isFinishedAfterOrAt(Instant endTime) {
+        return and(
+                isFinished(),
+                criteriaBuilder.greaterThanOrEqualTo(
+                        rootEntity.get("endTime"),
+                        endTime
                 )
         );
     }
@@ -28,9 +58,16 @@ class ActivityQueryBuilder extends JpaQueryBuilder<ActivityEntity> {
         );
     }
 
+    Predicate isFinished() {
+        return criteriaBuilder.isNotNull(
+                rootEntity.get("endTime")
+        );
+    }
+
     Predicate isNotFinished() {
         return criteriaBuilder.isNull(
                 rootEntity.get("endTime")
         );
     }
+
 }

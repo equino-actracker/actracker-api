@@ -6,6 +6,7 @@ import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
 import ovh.equino.actracker.domain.dashboard.DashboardService;
 import ovh.equino.actracker.domain.user.User;
+import ovh.equino.actracker.rest.spring.EntitySearchCriteriaBuilder;
 import ovh.equino.actracker.rest.spring.SearchResponse;
 import ovh.equino.security.identity.Identity;
 import ovh.equino.security.identity.IdentityProvider;
@@ -73,7 +74,14 @@ class DashboardController {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User requester = new User(requesterIdentity.getId());
 
-        EntitySearchCriteria searchCriteria = mapper.fromRequest(requester, pageId, pageSize, term, excludedDashboards);
+        EntitySearchCriteria searchCriteria = new EntitySearchCriteriaBuilder()
+                .withSearcher(requester)
+                .withPageId(pageId)
+                .withPageSize(pageSize)
+                .withTerm(term)
+                .withExcludedIdsJointWithComma(excludedDashboards)
+                .build();
+
         EntitySearchResult<DashboardDto> searchResult = dashboardService.searchDashboards(searchCriteria);
         return mapper.toResponse(searchResult);
     }

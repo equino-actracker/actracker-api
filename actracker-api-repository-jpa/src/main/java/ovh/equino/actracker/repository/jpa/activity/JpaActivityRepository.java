@@ -64,6 +64,10 @@ class JpaActivityRepository extends JpaRepository implements ActivityRepository 
                         queryBuilder.and(
                                 queryBuilder.isAccessibleFor(searchCriteria.searcher()),
                                 queryBuilder.isNotDeleted(),
+                                queryBuilder.isInTimeRange(
+                                        searchCriteria.timeRangeStart(),
+                                        searchCriteria.timeRangeEnd()
+                                ),
                                 queryBuilder.isInPage(searchCriteria.pageId()),
                                 queryBuilder.isNotExcluded(searchCriteria.excludeFilter())
                         )
@@ -88,7 +92,7 @@ class JpaActivityRepository extends JpaRepository implements ActivityRepository 
                 .where(
                         queryBuilder.and(
                                 queryBuilder.isAccessibleFor(user),
-                                queryBuilder.isStartedBefore(startTime),
+                                queryBuilder.isStartedBeforeOrAt(startTime),
                                 queryBuilder.isNotFinished(),
                                 queryBuilder.isNotDeleted()
                         )

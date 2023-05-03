@@ -37,10 +37,6 @@ abstract public class PayloadMapper {
         return uuid.toString();
     }
 
-    public EntitySearchCriteria fromRequest(User requester, String pageId, Integer pageSize, String term, String excludedIds) {
-        return new EntitySearchCriteria(requester, pageSize, pageId, term, parseIds(excludedIds));
-    }
-
     public Set<UUID> parseIds(String jointIds) {
         String[] parsedIds = requireNonNullElse(split(jointIds, ','), new String[]{});
 
