@@ -1,5 +1,7 @@
 DROP VIEW IF EXISTS activities_duration_by_tag;
 
+DROP FUNCTION IF EXISTS activities_duration_by_tag;
+
 CREATE OR REPLACE FUNCTION activities_duration_by_tag (
         user_id VARCHAR(36),
         range_start_timestamp TIMESTAMP WITH TIME ZONE,

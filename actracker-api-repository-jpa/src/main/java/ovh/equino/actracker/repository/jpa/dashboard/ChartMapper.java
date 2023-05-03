@@ -18,7 +18,7 @@ class ChartMapper {
     }
 
     Chart toValueObject(ChartEntity entity) {
-        return new Chart(entity.name);
+        return new Chart(entity.name, Chart.GroupBy.valueOf(entity.groupBy));
     }
 
     List<ChartEntity> toEntities(Collection<Chart> charts, DashboardEntity dashboard) {
@@ -32,6 +32,7 @@ class ChartMapper {
         entity.id = UUID.randomUUID().toString();
         entity.name = chart.name();
         entity.dashboard = dashboard;
+        entity.groupBy = chart.groupBy().toString();
         return entity;
     }
 }

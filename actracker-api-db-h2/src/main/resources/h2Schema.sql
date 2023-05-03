@@ -55,10 +55,12 @@ CREATE TABLE dashboard (
 CREATE TABLE chart (
     id VARCHAR(36) UNIQUE NOT NULL,
     dashboard_id VARCHAR(36) NOT NULL,
+    group_by VARCHAR(20) NOT NULL,
     name TEXT
 );
 
-CREATE OR REPLACE ALIAS activities_duration_by_tag FOR 'ovh.equino.actracker.db.h2.ActivitiesDurationByTagFunction.execute';
+CREATE ALIAS activities_duration_by_tag FOR 'ovh.equino.actracker.db.h2.ActivitiesDurationByTagFunction.execute';
+CREATE ALIAS activities_duration_by_day FOR 'ovh.equino.actracker.db.h2.ActivitiesDurationByDayFunction.execute';
 
 CREATE SEQUENCE outbox_notification_version_seq INCREMENT BY 1;
 
