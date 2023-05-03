@@ -23,6 +23,17 @@ public class ActivitiesDurationByDayFunction {
                 CROSS JOIN activities_duration_by_tag($1, bucket_range.start_time, bucket_range.end_time) by_tag
             """;
 
+    private static final String I_GIVE_UP_QUERY = """
+                SELECT
+                    DATE '1970-01-01' AS bucket_range_start,
+                    DATE '1970-01-03' AS bucket_range_end,
+                    COALESCE(id, 'other') AS tag_id,
+                    1 as tag_duration,
+                    1 as measured_duration,
+                    1 as measured_percentage
+                FROM tag LIMIT 1;
+            """;
+
     public static ResultSet execute(
             Connection connection,
             String userId, //$1
@@ -31,10 +42,10 @@ public class ActivitiesDurationByDayFunction {
 
     ) throws SQLException {
 
-        PreparedStatement preparedStatement = connection.prepareStatement(GET_DURATION_BY_DAY_ID);
-        preparedStatement.setString(1, userId);
-        preparedStatement.setTimestamp(2, rangeStartTimestamp);
-        preparedStatement.setTimestamp(3, rangeEndTimestamp);
+        PreparedStatement preparedStatement = connection.prepareStatement(I_GIVE_UP_QUERY);
+//        preparedStatement.setString(1, userId);
+//        preparedStatement.setTimestamp(2, rangeStartTimestamp);
+//        preparedStatement.setTimestamp(3, rangeEndTimestamp);
         return preparedStatement.executeQuery();
     }
 }
