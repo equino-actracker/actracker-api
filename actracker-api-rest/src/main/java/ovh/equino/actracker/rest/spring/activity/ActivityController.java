@@ -6,6 +6,7 @@ import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivityService;
 import ovh.equino.actracker.domain.user.User;
+import ovh.equino.actracker.rest.spring.EntitySearchCriteriaBuilder;
 import ovh.equino.actracker.rest.spring.SearchResponse;
 import ovh.equino.security.identity.Identity;
 import ovh.equino.security.identity.IdentityProvider;
@@ -63,7 +64,14 @@ class ActivityController {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User requester = new User(requesterIdentity.getId());
 
-        EntitySearchCriteria searchCriteria = mapper.fromRequest(requester, pageId, pageSize, term, excludedActivities);
+        EntitySearchCriteria searchCriteria = new EntitySearchCriteriaBuilder()
+                .withSearcher(requester)
+                .withPageId(pageId)
+                .withPageSize(pageSize)
+                .withTerm(term)
+                .withExcludedIdsJointWithComma(excludedActivities)
+                .build();
+
         EntitySearchResult<ActivityDto> searchResult = activityService.searchActivities(searchCriteria);
         return mapper.toResponse(searchResult);
     }

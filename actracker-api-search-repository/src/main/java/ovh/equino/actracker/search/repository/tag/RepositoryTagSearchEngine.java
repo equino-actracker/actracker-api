@@ -25,6 +25,8 @@ class RepositoryTagSearchEngine implements TagSearchEngine {
                 searchCriteria.pageSize() + 1,   // additional one to calculate next page ID
                 searchCriteria.pageId(),
                 searchCriteria.term(),
+                searchCriteria.timeRangeStart(),
+                searchCriteria.timeRangeEnd(),
                 searchCriteria.excludeFilter()
         );
 
