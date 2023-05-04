@@ -2,6 +2,7 @@ package ovh.equino.actracker.dashboard.generation.repository;
 
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
+import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivitySearchEngine;
 import ovh.equino.actracker.domain.dashboard.DashboardGenerationCriteria;
@@ -46,7 +47,8 @@ final class ActivityFinder {
                 null,
                 generationCriteria.timeRangeStart(),
                 generationCriteria.timeRangeEnd(),
-                null
+                null,
+                EntitySortCriteria.irrelevant()
         );
         return searchEngine.findActivities(searchCriteria);
     }

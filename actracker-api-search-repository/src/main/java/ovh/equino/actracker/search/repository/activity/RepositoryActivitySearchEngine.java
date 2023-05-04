@@ -27,7 +27,8 @@ class RepositoryActivitySearchEngine implements ActivitySearchEngine {
                 searchCriteria.term(),
                 searchCriteria.timeRangeStart(),
                 searchCriteria.timeRangeEnd(),
-                searchCriteria.excludeFilter()
+                searchCriteria.excludeFilter(),
+                searchCriteria.sortCriteria()
         );
 
         List<ActivityDto> foundActivities = activityRepository.find(forNextPageIdSearchCriteria);

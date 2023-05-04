@@ -1,17 +1,14 @@
 package ovh.equino.actracker.rest.spring;
 
-import org.apache.commons.lang3.StringUtils;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.user.User;
 
 import java.time.Instant;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.Set;
 import java.util.UUID;
-
-import static java.util.Arrays.stream;
-import static java.util.Objects.requireNonNullElse;
-import static java.util.stream.Collectors.toUnmodifiableSet;
-import static org.apache.commons.lang3.StringUtils.split;
 
 public final class EntitySearchCriteriaBuilder extends PayloadMapper {
 
@@ -22,6 +19,7 @@ public final class EntitySearchCriteriaBuilder extends PayloadMapper {
     private Instant timeRangeStart;
     private Instant timeRangeEnd;
     private Set<UUID> excludeFilter;
+    private final Deque<EntitySortCriteria.Level> sortLevels = new LinkedList<>();
 
     public EntitySearchCriteriaBuilder withSearcher(User searcher) {
         this.searcher = searcher;
@@ -58,6 +56,11 @@ public final class EntitySearchCriteriaBuilder extends PayloadMapper {
         return this;
     }
 
+    public EntitySearchCriteriaBuilder withSortLevel(EntitySortCriteria.Field field, EntitySortCriteria.Order order) {
+        this.sortLevels.addLast(new EntitySortCriteria.Level(field, order));
+        return this;
+    }
+
     public EntitySearchCriteria build() {
         return new EntitySearchCriteria(
                 searcher,
@@ -66,7 +69,8 @@ public final class EntitySearchCriteriaBuilder extends PayloadMapper {
                 term,
                 timeRangeStart,
                 timeRangeEnd,
-                excludeFilter
+                excludeFilter,
+                new EntitySortCriteria(sortLevels)
         );
     }
 }
