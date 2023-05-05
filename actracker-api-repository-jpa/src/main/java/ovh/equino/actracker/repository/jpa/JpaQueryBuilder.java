@@ -2,8 +2,12 @@ package ovh.equino.actracker.repository.jpa;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.*;
+import ovh.equino.actracker.domain.EntitySortCriteria;
+import ovh.equino.actracker.domain.exception.InvalidSortFieldException;
 import ovh.equino.actracker.domain.user.User;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -16,10 +20,17 @@ public abstract class JpaQueryBuilder<ENTITY> {
     protected final CriteriaQuery<ENTITY> criteriaQuery;
     protected final Root<ENTITY> rootEntity;
 
-    public JpaQueryBuilder(EntityManager entityManager, Class<ENTITY> entityType) {
+    private final Map<EntitySortCriteria.Field, String> sortFieldToEntityField;
+
+
+    protected JpaQueryBuilder(EntityManager entityManager,
+                              Class<ENTITY> entityType,
+                              Map<EntitySortCriteria.Field, String> sortFieldToEntityField) {
+
         criteriaBuilder = entityManager.getCriteriaBuilder();
         criteriaQuery = criteriaBuilder.createQuery(entityType);
         rootEntity = criteriaQuery.from(entityType);
+        this.sortFieldToEntityField = sortFieldToEntityField;
     }
 
     public CriteriaQuery<ENTITY> select() {
@@ -103,5 +114,28 @@ public abstract class JpaQueryBuilder<ENTITY> {
 
     public Order ascending(String fieldName) {
         return criteriaBuilder.asc(rootEntity.get(fieldName));
+    }
+
+    public Order descending(String fieldName) {
+        return criteriaBuilder.desc(rootEntity.get(fieldName));
+    }
+
+    public List<Order> sortingSequence(EntitySortCriteria sortCriteria) {
+        return sortCriteria.levels().stream()
+                .map(this::sortingSequence)
+                .toList();
+    }
+
+    private Order sortingSequence(EntitySortCriteria.Level sortLevel) {
+        String entityField = sortFieldToEntityField.get(sortLevel.field());
+
+        if (entityField == null) {
+            throw new InvalidSortFieldException(sortLevel.field().toString());
+        }
+
+        return switch (sortLevel.order()) {
+            case ASC -> ascending(entityField);
+            case DESC -> descending(entityField);
+        };
     }
 }

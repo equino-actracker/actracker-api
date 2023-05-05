@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
+import static ovh.equino.actracker.domain.EntitySortCriteria.irrelevant;
 
 public record EntitySearchCriteria(
 
@@ -17,7 +18,8 @@ public record EntitySearchCriteria(
         String term,
         Instant timeRangeStart,
         Instant timeRangeEnd,
-        Set<UUID> excludeFilter
+        Set<UUID> excludeFilter,
+        EntitySortCriteria sortCriteria
 
 ) {
 
@@ -30,5 +32,6 @@ public record EntitySearchCriteria(
         pageSize = requireNonNullElse(pageSize, DEFAULT_PAGE_SIZE);
         pageId = requireNonNullElse(pageId, DEFAULT_PAGE_ID);
         term = requireNonNullElse(term, DEFAULT_TERM);
+        sortCriteria = requireNonNullElse(sortCriteria, irrelevant());
     }
 }

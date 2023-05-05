@@ -72,7 +72,7 @@ class JpaActivityRepository extends JpaRepository implements ActivityRepository 
                                 queryBuilder.isNotExcluded(searchCriteria.excludeFilter())
                         )
                 )
-                .orderBy(queryBuilder.ascending("id"));
+                .orderBy(queryBuilder.sortingSequence(searchCriteria.sortCriteria()));
 
         TypedQuery<ActivityEntity> typedQuery = entityManager
                 .createQuery(query)

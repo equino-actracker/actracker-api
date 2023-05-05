@@ -26,7 +26,8 @@ class RepositoryDashboardSearchEngine implements DashboardSearchEngine {
                 searchCriteria.term(),
                 searchCriteria.timeRangeStart(),
                 searchCriteria.timeRangeEnd(),
-                searchCriteria.excludeFilter()
+                searchCriteria.excludeFilter(),
+                searchCriteria.sortCriteria()
         );
 
         List<DashboardDto> foundDashboards = dashboardRepository.find(forNextPageIdSearchCriteria);

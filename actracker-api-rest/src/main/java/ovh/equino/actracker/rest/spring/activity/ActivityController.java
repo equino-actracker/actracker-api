@@ -5,6 +5,7 @@ import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivityService;
+import ovh.equino.actracker.domain.activity.ActivitySortField;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.rest.spring.EntitySearchCriteriaBuilder;
 import ovh.equino.actracker.rest.spring.SearchResponse;
@@ -59,7 +60,8 @@ class ActivityController {
             @RequestParam(name = "pageId", required = false) String pageId,
             @RequestParam(name = "pageSize", required = false) Integer pageSize,
             @RequestParam(name = "term", required = false) String term,
-            @RequestParam(name = "excludedActivities", required = false) String excludedActivities) {
+            @RequestParam(name = "excludedActivities", required = false) String excludedActivities,
+            @RequestParam(name = "orderBy", required = false) String orderBy) {
 
         Identity requesterIdentity = identityProvider.provideIdentity();
         User requester = new User(requesterIdentity.getId());
@@ -70,6 +72,8 @@ class ActivityController {
                 .withPageSize(pageSize)
                 .withTerm(term)
                 .withExcludedIdsJointWithComma(excludedActivities)
+                .withPossibleSortFields(ActivitySortField.START_TIME)
+                .withSortLevelsJointWithComma(orderBy)
                 .build();
 
         EntitySearchResult<ActivityDto> searchResult = activityService.searchActivities(searchCriteria);

@@ -27,7 +27,8 @@ class RepositoryTagSearchEngine implements TagSearchEngine {
                 searchCriteria.term(),
                 searchCriteria.timeRangeStart(),
                 searchCriteria.timeRangeEnd(),
-                searchCriteria.excludeFilter()
+                searchCriteria.excludeFilter(),
+                searchCriteria.sortCriteria()
         );
 
         List<TagDto> foundTags = tagRepository.find(forNextPageIdSearchCriteria);

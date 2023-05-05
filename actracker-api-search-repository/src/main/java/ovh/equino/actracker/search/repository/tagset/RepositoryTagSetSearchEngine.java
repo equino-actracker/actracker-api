@@ -26,7 +26,8 @@ class RepositoryTagSetSearchEngine implements TagSetSearchEngine {
                 searchCriteria.term(),
                 searchCriteria.timeRangeStart(),
                 searchCriteria.timeRangeEnd(),
-                searchCriteria.excludeFilter()
+                searchCriteria.excludeFilter(),
+                searchCriteria.sortCriteria()
         );
 
         List<TagSetDto> foundTagSets = tagSetRepository.find(forNextPageIdSearchCriteria);

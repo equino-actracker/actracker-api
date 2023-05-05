@@ -2,6 +2,7 @@ package ovh.equino.actracker.dashboard.generation.repository;
 
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
+import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.dashboard.DashboardGenerationCriteria;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tag.TagSearchEngine;
@@ -40,7 +41,8 @@ final class TagFinder {
                 null,
                 null,
                 null,
-                null
+                null,
+                EntitySortCriteria.irrelevant()
         );
         return searchEngine.findTags(searchCriteria);
     }
