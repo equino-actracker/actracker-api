@@ -73,7 +73,7 @@ class ActivityController {
                 .withTerm(term)
                 .withExcludedIdsJointWithComma(excludedActivities)
                 .withPossibleSortFields(ActivitySortField.START_TIME)
-                .withSortLevelsJointWithComma(orderBy)
+//                .withSortLevelsJointWithComma(orderBy)
                 .build();
 
         EntitySearchResult<ActivityDto> searchResult = activityService.searchActivities(searchCriteria);
