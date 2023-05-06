@@ -46,4 +46,5 @@ abstract public class PayloadMapper {
                 .map(UUID::fromString)
                 .collect(toUnmodifiableSet());
     }
+
 }

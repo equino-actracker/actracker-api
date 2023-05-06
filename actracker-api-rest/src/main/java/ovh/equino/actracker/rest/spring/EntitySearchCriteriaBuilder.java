@@ -46,13 +46,13 @@ public final class EntitySearchCriteriaBuilder extends PayloadMapper {
         return this;
     }
 
-    public EntitySearchCriteriaBuilder withTimeRangeStart(Instant timeRangeStart) {
-        this.timeRangeStart = timeRangeStart;
+    public EntitySearchCriteriaBuilder withTimeRangeStart(Long timeRangeStart) {
+        this.timeRangeStart = timestampToInstant(timeRangeStart);
         return this;
     }
 
-    public EntitySearchCriteriaBuilder withTimeRangeEnd(Instant timeRangeEnd) {
-        this.timeRangeEnd = timeRangeEnd;
+    public EntitySearchCriteriaBuilder withTimeRangeEnd(Long timeRangeEnd) {
+        this.timeRangeEnd = timestampToInstant(timeRangeEnd);
         return this;
     }
 
