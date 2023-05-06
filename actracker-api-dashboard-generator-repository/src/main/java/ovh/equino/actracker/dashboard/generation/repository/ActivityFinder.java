@@ -7,14 +7,13 @@ import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivitySearchEngine;
 import ovh.equino.actracker.domain.dashboard.DashboardGenerationCriteria;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 
-import static java.util.Arrays.stream;
 import static java.util.Objects.nonNull;
+import static ovh.equino.actracker.dashboard.generation.repository.DashboardUtils.earliestOf;
+import static ovh.equino.actracker.dashboard.generation.repository.DashboardUtils.latestOf;
 
 final class ActivityFinder {
 
@@ -32,7 +31,7 @@ final class ActivityFinder {
         while (pageId != null) {
             EntitySearchResult<ActivityDto> searchResult = fetchNextPageOfActivities(generationCriteria, pageId);
             pageId = searchResult.nextPageId();
-            activities.addAll(alignedToTimeRange(searchResult.results(), generationCriteria));
+            activities.addAll(searchResult.results());
         }
         return activities;
     }
@@ -68,17 +67,4 @@ final class ActivityFinder {
                 .toList();
     }
 
-    Instant earliestOf(Instant... candidates) {
-        return stream(candidates)
-                .filter(Objects::nonNull)
-                .min(Instant::compareTo)
-                .orElse(null);
-    }
-
-    Instant latestOf(Instant... candidates) {
-        return stream(candidates)
-                .filter(Objects::nonNull)
-                .max(Instant::compareTo)
-                .orElse(null);
-    }
 }
