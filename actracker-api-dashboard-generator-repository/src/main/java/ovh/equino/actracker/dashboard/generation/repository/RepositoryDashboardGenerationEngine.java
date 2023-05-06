@@ -13,6 +13,7 @@ import java.util.Objects;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.Collections.emptyList;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static ovh.equino.actracker.dashboard.generation.repository.DashboardUtils.*;
@@ -36,6 +37,7 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
         }
 
         List<ActivityDto> activities = activityFinder.find(generationCriteria).stream()
+                .filter(activity -> nonNull(activity.startTime()))
                 .filter(activity -> isNotEmpty(activity.tags()))
                 .toList();
 
