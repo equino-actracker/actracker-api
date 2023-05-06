@@ -31,7 +31,6 @@ final class ActivityFinder {
         while (pageId != null) {
             EntitySearchResult<ActivityDto> searchResult = fetchNextPageOfActivities(generationCriteria, pageId);
             pageId = searchResult.nextPageId();
-//            activities.addAll(alignedToTimeRange(searchResult.results(), generationCriteria));
             activities.addAll(searchResult.results());
         }
         return activities;

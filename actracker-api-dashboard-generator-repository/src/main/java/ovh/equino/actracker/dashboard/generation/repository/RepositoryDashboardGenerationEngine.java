@@ -150,8 +150,6 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
     private List<ActivityDto> alignedTo(DashboardGenerationCriteria generationCriteria, List<ActivityDto> activities) {
         return activities.stream()
                 .filter(activity -> nonNull(activity.startTime()))
-//                .filter(activity -> activity.startTime().isBefore(generationCriteria.timeRangeEnd()))
-//                .filter(activity -> activity.endTime().isAfter(generationCriteria.timeRangeStart()))
                 .map(activity -> new ActivityDto(
                         activity.title(),
                         latestOf(activity.startTime(), generationCriteria.timeRangeStart()),
