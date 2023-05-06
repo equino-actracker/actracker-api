@@ -13,7 +13,6 @@ import java.util.Objects;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.Collections.emptyList;
-import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static ovh.equino.actracker.dashboard.generation.repository.DashboardUtils.*;
@@ -41,7 +40,6 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
                 .toList();
 
         Instant earliestStartTime = activities.stream()
-                .filter(activity -> isNotEmpty(activity.tags()))
                 .map(ActivityDto::startTime)
                 .filter(Objects::nonNull)
                 .min(Instant::compareTo)
@@ -52,12 +50,11 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
         earliestStartTime = latestOf(beginningOfDay(earliestStartTime), generationCriteria.timeRangeStart());
 
         Instant latestEndTime = activities.stream()
-                .filter(activity -> isNotEmpty(activity.tags()))
                 .map(ActivityDto::endTime)
                 .filter(Objects::nonNull)
                 .max(Instant::compareTo)
                 .orElse(null);
-        latestEndTime = earliestOf(beginningOfDay(latestEndTime), generationCriteria.timeRangeEnd());
+        latestEndTime = earliestOf(endOfDay(latestEndTime), generationCriteria.timeRangeEnd());
         if (latestEndTime == null) {
             return empty(dashboard);
         }
@@ -149,7 +146,8 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
 
     private List<ActivityDto> alignedTo(DashboardGenerationCriteria generationCriteria, List<ActivityDto> activities) {
         return activities.stream()
-                .filter(activity -> nonNull(activity.startTime()))
+                .filter(activity -> !activity.startTime().isAfter(generationCriteria.timeRangeEnd()))
+                .filter(activity -> activity.endTime() == null || !activity.endTime().isBefore(generationCriteria.timeRangeStart()))
                 .map(activity -> new ActivityDto(
                         activity.title(),
                         latestOf(activity.startTime(), generationCriteria.timeRangeStart()),

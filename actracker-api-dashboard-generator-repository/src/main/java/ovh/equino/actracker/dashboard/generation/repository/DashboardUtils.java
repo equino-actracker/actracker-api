@@ -25,6 +25,9 @@ interface DashboardUtils {
     }
 
     static Instant beginningOfDay(Instant instant) {
+        if (instant == null) {
+            return null;
+        }
         return LocalDate.ofInstant(instant, ZoneId.systemDefault())
                 .atStartOfDay()
                 .atZone(ZoneId.systemDefault())
@@ -32,6 +35,9 @@ interface DashboardUtils {
     }
 
     static Instant endOfDay(Instant instant) {
+        if (instant == null) {
+            return null;
+        }
         return LocalDate.ofInstant(instant, ZoneId.systemDefault())
                 .atTime(LocalTime.MAX)
                 .atZone(ZoneId.systemDefault())
