@@ -21,6 +21,7 @@ public final class EntitySearchCriteriaBuilder extends PayloadMapper {
     private String term;
     private Instant timeRangeStart;
     private Instant timeRangeEnd;
+    private Set<UUID> tags;
     private Set<UUID> excludeFilter;
     private final Deque<EntitySortCriteria.Level> sortLevels = new LinkedList<>();
 
@@ -46,18 +47,23 @@ public final class EntitySearchCriteriaBuilder extends PayloadMapper {
         return this;
     }
 
-    public EntitySearchCriteriaBuilder withTimeRangeStart(Instant timeRangeStart) {
-        this.timeRangeStart = timeRangeStart;
+    public EntitySearchCriteriaBuilder withTimeRangeStart(Long timeRangeStart) {
+        this.timeRangeStart = timestampToInstant(timeRangeStart);
         return this;
     }
 
-    public EntitySearchCriteriaBuilder withTimeRangeEnd(Instant timeRangeEnd) {
-        this.timeRangeEnd = timeRangeEnd;
+    public EntitySearchCriteriaBuilder withTimeRangeEnd(Long timeRangeEnd) {
+        this.timeRangeEnd = timestampToInstant(timeRangeEnd);
         return this;
     }
 
     public EntitySearchCriteriaBuilder withExcludedIdsJointWithComma(String jointIds) {
         this.excludeFilter = parseIds(jointIds);
+        return this;
+    }
+
+    public EntitySearchCriteriaBuilder withTagsJointWithComma(String jointTagIds) {
+        this.tags = parseIds(jointTagIds);
         return this;
     }
 
@@ -129,6 +135,7 @@ public final class EntitySearchCriteriaBuilder extends PayloadMapper {
                 timeRangeStart,
                 timeRangeEnd,
                 excludeFilter,
+                tags,
                 new EntitySortCriteria(sortLevels)
         );
     }

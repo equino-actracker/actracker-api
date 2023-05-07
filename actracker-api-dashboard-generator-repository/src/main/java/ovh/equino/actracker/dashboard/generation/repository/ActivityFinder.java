@@ -47,6 +47,7 @@ final class ActivityFinder {
                 generationCriteria.timeRangeStart(),
                 generationCriteria.timeRangeEnd(),
                 null,
+                null,
                 EntitySortCriteria.irrelevant()
         );
         return searchEngine.findActivities(searchCriteria);

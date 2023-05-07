@@ -68,6 +68,7 @@ class JpaActivityRepository extends JpaRepository implements ActivityRepository 
                                         searchCriteria.timeRangeStart(),
                                         searchCriteria.timeRangeEnd()
                                 ),
+                                queryBuilder.hasAnyOfTag(searchCriteria.tags()),
                                 queryBuilder.isInPage(searchCriteria.pageId()),
                                 queryBuilder.isNotExcluded(searchCriteria.excludeFilter())
                         )

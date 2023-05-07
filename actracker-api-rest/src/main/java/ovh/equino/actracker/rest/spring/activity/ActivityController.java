@@ -60,7 +60,10 @@ class ActivityController {
             @RequestParam(name = "pageId", required = false) String pageId,
             @RequestParam(name = "pageSize", required = false) Integer pageSize,
             @RequestParam(name = "term", required = false) String term,
+            @RequestParam(name = "requiredTags", required = false) String requiredTags,
             @RequestParam(name = "excludedActivities", required = false) String excludedActivities,
+            @RequestParam(name = "rangeStartMillis", required = false) Long rangeStartMillis,
+            @RequestParam(name = "rangeEndMillis", required = false) Long rangeEndMillis,
             @RequestParam(name = "orderBy", required = false) String orderBy) {
 
         Identity requesterIdentity = identityProvider.provideIdentity();
@@ -71,7 +74,10 @@ class ActivityController {
                 .withPageId(pageId)
                 .withPageSize(pageSize)
                 .withTerm(term)
+                .withTimeRangeStart(rangeStartMillis)
+                .withTimeRangeEnd(rangeEndMillis)
                 .withExcludedIdsJointWithComma(excludedActivities)
+                .withTagsJointWithComma(requiredTags)
                 .withPossibleSortFields(ActivitySortField.START_TIME)
 //                .withSortLevelsJointWithComma(orderBy)
                 .build();
