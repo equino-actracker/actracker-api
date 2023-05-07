@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.List;
 
 import static java.util.Objects.nonNull;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static ovh.equino.actracker.dashboard.generation.repository.DashboardUtils.earliestOf;
 import static ovh.equino.actracker.dashboard.generation.repository.DashboardUtils.latestOf;
 
@@ -33,7 +34,10 @@ final class ActivityFinder {
             pageId = searchResult.nextPageId();
             activities.addAll(searchResult.results());
         }
-        return activities;
+        return activities.stream()
+                .filter(activity -> nonNull(activity.startTime()))
+                .filter(activity -> isNotEmpty(activity.tags()))
+                .toList();
     }
 
     private EntitySearchResult<ActivityDto> fetchNextPageOfActivities(DashboardGenerationCriteria generationCriteria,
@@ -47,7 +51,7 @@ final class ActivityFinder {
                 generationCriteria.timeRangeStart(),
                 generationCriteria.timeRangeEnd(),
                 null,
-                null,
+                generationCriteria.tags(),
                 EntitySortCriteria.irrelevant()
         );
         return searchEngine.findActivities(searchCriteria);

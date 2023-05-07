@@ -36,10 +36,7 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
             return empty(dashboard);
         }
 
-        List<ActivityDto> activities = activityFinder.find(generationCriteria).stream()
-                .filter(activity -> nonNull(activity.startTime()))
-                .filter(activity -> isNotEmpty(activity.tags()))
-                .toList();
+        List<ActivityDto> activities = activityFinder.find(generationCriteria);
 
         Instant earliestStartTime = activities.stream()
                 .map(ActivityDto::startTime)
@@ -65,7 +62,8 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
                 generationCriteria.dashboardId(),
                 generationCriteria.generator(),
                 earliestStartTime,
-                latestEndTime
+                latestEndTime,
+                generationCriteria.tags()
         );
 
         List<DashboardChartData> chartsData = dashboard.charts().stream()
@@ -113,7 +111,8 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
                     generationCriteria.dashboardId(),
                     generationCriteria.generator(),
                     bucket,
-                    bucket.plus(1, DAYS).minusMillis(1)
+                    bucket.plus(1, DAYS).minusMillis(1),
+                    generationCriteria.tags()
             );
 
             List<ActivityDto> matchingAlignedActivities = alignedTo(forDayGenerationCriteria, allActivities);

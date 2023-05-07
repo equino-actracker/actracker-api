@@ -28,7 +28,8 @@ class DashboardDataController {
     DashboardData getData(
             @PathVariable("id") String id,
             @RequestParam(name = "rangeStartMillis", required = false) Long rangeStartMillis,
-            @RequestParam(name = "rangeEndMillis", required = false) Long rangeEndMillis
+            @RequestParam(name = "rangeEndMillis", required = false) Long rangeEndMillis,
+            @RequestParam(name = "requiredTags", required = false) String requiredTags
     ) {
 
         Identity requesterIdentity = identityProvider.provideIdentity();
@@ -38,6 +39,7 @@ class DashboardDataController {
                 .withGenerator(requester)
                 .withTimeRangeStart(rangeStartMillis)
                 .withTimeRangeEnd(rangeEndMillis)
+                .withTagsJointWithComma(requiredTags)
                 .withDashboardId(id)
                 .build();
 
