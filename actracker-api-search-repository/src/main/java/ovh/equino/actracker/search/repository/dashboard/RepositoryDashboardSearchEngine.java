@@ -27,6 +27,7 @@ class RepositoryDashboardSearchEngine implements DashboardSearchEngine {
                 searchCriteria.timeRangeStart(),
                 searchCriteria.timeRangeEnd(),
                 searchCriteria.excludeFilter(),
+                searchCriteria.tags(),
                 searchCriteria.sortCriteria()
         );
 

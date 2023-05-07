@@ -28,6 +28,7 @@ class RepositoryActivitySearchEngine implements ActivitySearchEngine {
                 searchCriteria.timeRangeStart(),
                 searchCriteria.timeRangeEnd(),
                 searchCriteria.excludeFilter(),
+                searchCriteria.tags(),
                 searchCriteria.sortCriteria()
         );
 

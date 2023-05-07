@@ -42,6 +42,7 @@ final class TagFinder {
                 null,
                 null,
                 null,
+                null,
                 EntitySortCriteria.irrelevant()
         );
         return searchEngine.findTags(searchCriteria);

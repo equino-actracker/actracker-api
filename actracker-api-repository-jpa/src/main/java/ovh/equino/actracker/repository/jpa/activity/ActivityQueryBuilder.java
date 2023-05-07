@@ -1,13 +1,18 @@
 package ovh.equino.actracker.repository.jpa.activity;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.*;
 import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.activity.ActivitySortField;
 import ovh.equino.actracker.repository.jpa.JpaQueryBuilder;
+import ovh.equino.actracker.repository.jpa.tag.TagEntity;
 
 import java.time.Instant;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 class ActivityQueryBuilder extends JpaQueryBuilder<ActivityEntity> {
 
@@ -78,6 +83,28 @@ class ActivityQueryBuilder extends JpaQueryBuilder<ActivityEntity> {
         return criteriaBuilder.isNull(
                 rootEntity.get("endTime")
         );
+    }
+
+    Predicate hasAnyOfTag(Set<UUID> tags) {
+        if (isEmpty(tags)) {
+            return allMatch();
+        }
+
+        Join<ActivityEntity, TagEntity> activityTag = rootEntity.join("tags");
+
+        Predicate[] predicatesForTags = tags.stream()
+                .map(tagId -> hasTag(tagId, activityTag))
+                .toArray(Predicate[]::new);
+
+        return or(predicatesForTags);
+    }
+
+    private Predicate hasTag(UUID tagId, Join<ActivityEntity, TagEntity> activityTag) {
+        Subquery<Long> subQuery = criteriaQuery.subquery(Long.class);
+        Root<ActivityEntity> root = subQuery.from(ActivityEntity.class);
+        subQuery.select(criteriaBuilder.literal(1L));
+        subQuery.where(criteriaBuilder.equal(activityTag.get("id"), tagId.toString()));
+        return criteriaBuilder.exists(subQuery);
     }
 
 }

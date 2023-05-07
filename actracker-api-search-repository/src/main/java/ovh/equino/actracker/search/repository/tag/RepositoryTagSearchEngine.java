@@ -28,6 +28,7 @@ class RepositoryTagSearchEngine implements TagSearchEngine {
                 searchCriteria.timeRangeStart(),
                 searchCriteria.timeRangeEnd(),
                 searchCriteria.excludeFilter(),
+                searchCriteria.tags(),
                 searchCriteria.sortCriteria()
         );
 

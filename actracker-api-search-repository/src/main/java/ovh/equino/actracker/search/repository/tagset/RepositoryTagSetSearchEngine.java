@@ -27,6 +27,7 @@ class RepositoryTagSetSearchEngine implements TagSetSearchEngine {
                 searchCriteria.timeRangeStart(),
                 searchCriteria.timeRangeEnd(),
                 searchCriteria.excludeFilter(),
+                searchCriteria.tags(),
                 searchCriteria.sortCriteria()
         );
 
