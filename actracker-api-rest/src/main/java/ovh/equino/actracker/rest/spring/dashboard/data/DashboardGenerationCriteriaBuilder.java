@@ -5,6 +5,7 @@ import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.rest.spring.PayloadMapper;
 
 import java.time.Instant;
+import java.util.Set;
 import java.util.UUID;
 
 final class DashboardGenerationCriteriaBuilder extends PayloadMapper {
@@ -13,6 +14,7 @@ final class DashboardGenerationCriteriaBuilder extends PayloadMapper {
     private User generator;
     private Instant timeRangeStart;
     private Instant timeRangeEnd;
+    private Set<UUID> tags;
 
     DashboardGenerationCriteriaBuilder withDashboardId(String dashboardId) {
         this.dashboardId = UUID.fromString(dashboardId);
@@ -34,7 +36,12 @@ final class DashboardGenerationCriteriaBuilder extends PayloadMapper {
         return this;
     }
 
+    public DashboardGenerationCriteriaBuilder withTagsJointWithComma(String jointTagIds) {
+        this.tags = parseIds(jointTagIds);
+        return this;
+    }
+
     DashboardGenerationCriteria build() {
-        return new DashboardGenerationCriteria(dashboardId, generator, timeRangeStart, timeRangeEnd);
+        return new DashboardGenerationCriteria(dashboardId, generator, timeRangeStart, timeRangeEnd, tags);
     }
 }
