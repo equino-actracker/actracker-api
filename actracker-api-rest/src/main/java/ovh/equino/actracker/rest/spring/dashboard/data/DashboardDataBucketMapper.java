@@ -11,8 +11,15 @@ import static java.util.Objects.requireNonNullElse;
 class DashboardDataBucketMapper extends PayloadMapper {
 
     DashboardDataBucket toResponse(ChartBucketData bucket) {
+        String bucketName = instantToTimestamp(bucket.rangeStart()) != null
+                ? instantToTimestamp(bucket.rangeStart()).toString()
+                : bucket.id();
+
         return new DashboardDataBucket(
-                bucket.name(),
+                bucketName,
+                bucket.id(),
+                instantToTimestamp(bucket.rangeStart()),
+                instantToTimestamp(bucket.rangeEnd()),
                 bucket.type().toString(),
                 bucket.value(),
                 bucket.percentage(),

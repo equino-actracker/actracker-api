@@ -59,9 +59,6 @@ CREATE TABLE chart (
     name TEXT
 );
 
-CREATE ALIAS activities_duration_by_tag FOR 'ovh.equino.actracker.db.h2.ActivitiesDurationByTagFunction.execute';
-CREATE ALIAS activities_duration_by_day FOR 'ovh.equino.actracker.db.h2.ActivitiesDurationByDayFunction.execute';
-
 CREATE SEQUENCE outbox_notification_version_seq INCREMENT BY 1;
 
 CREATE TABLE outbox_notification (

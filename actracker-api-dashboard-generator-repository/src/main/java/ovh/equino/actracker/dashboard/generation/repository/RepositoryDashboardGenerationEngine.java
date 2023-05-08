@@ -13,9 +13,7 @@ import java.util.Objects;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.Collections.emptyList;
-import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static ovh.equino.actracker.dashboard.generation.repository.DashboardUtils.*;
 
 class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
@@ -107,26 +105,32 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
              bucket.isBefore(generationCriteria.timeRangeEnd());
              bucket = bucket.plus(1, DAYS)) {
 
+            //noinspection UnnecessaryLocalVariable
+            Instant bucketStartTime = bucket;
+            Instant bucketEndTime = bucketStartTime.plus(1, DAYS).minusMillis(1);
+
             DashboardGenerationCriteria forDayGenerationCriteria = new DashboardGenerationCriteria(
                     generationCriteria.dashboardId(),
                     generationCriteria.generator(),
-                    bucket,
-                    bucket.plus(1, DAYS).minusMillis(1),
+                    bucketStartTime,
+                    bucketEndTime,
                     generationCriteria.tags()
             );
 
             List<ActivityDto> matchingAlignedActivities = alignedTo(forDayGenerationCriteria, allActivities);
 
             DashboardChartData chartByTag = generateChartGroupedByTag(
-                    Long.toString(bucket.toEpochMilli()),
+                    Long.toString(bucketStartTime.toEpochMilli()),
                     forDayGenerationCriteria,
                     allTags,
                     matchingAlignedActivities
             );
 
             ChartBucketData dailyBucket = new ChartBucketData(
-                    Long.toString(bucket.toEpochMilli()),
-                    ChartBucketData.BucketType.DAY,
+                    null,
+                    bucketStartTime,
+                    bucketEndTime,
+                    ChartBucketData.Type.DAY,
                     null,
                     null,
                     chartByTag.buckets()

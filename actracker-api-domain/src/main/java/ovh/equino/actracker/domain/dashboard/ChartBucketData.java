@@ -1,13 +1,16 @@
 package ovh.equino.actracker.domain.dashboard;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Collection;
 
 import static java.math.RoundingMode.HALF_UP;
 
 public record ChartBucketData(
-        String name,
-        BucketType type,
+        String id,
+        Instant rangeStart,
+        Instant rangeEnd,
+        Type type,
         BigDecimal value,
         BigDecimal percentage,
         Collection<ChartBucketData> buckets
@@ -19,7 +22,7 @@ public record ChartBucketData(
         }
     }
 
-    public enum BucketType {
+    public enum Type {
         TAG, DAY
     }
 }
