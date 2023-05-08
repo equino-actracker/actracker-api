@@ -15,8 +15,4 @@ public interface DashboardRepository {
     Optional<DashboardDto> findById(UUID dashboardId);
 
     List<DashboardDto> find(EntitySearchCriteria searchCriteria);
-
-    DashboardChartData generateChartGroupedByTags(String chartName, DashboardGenerationCriteria generationCriteria);
-
-    DashboardChartData generateChartGroupedByDays(String chartName, DashboardGenerationCriteria generationCriteria);
 }

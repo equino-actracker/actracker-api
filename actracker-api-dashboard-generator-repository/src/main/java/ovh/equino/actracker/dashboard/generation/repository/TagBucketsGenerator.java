@@ -13,7 +13,7 @@ import java.util.Map;
 import static java.math.RoundingMode.HALF_UP;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
-import static ovh.equino.actracker.domain.dashboard.ChartBucketData.BucketType.TAG;
+import static ovh.equino.actracker.domain.dashboard.ChartBucketData.Type.TAG;
 
 class TagBucketsGenerator {
 
@@ -37,6 +37,8 @@ class TagBucketsGenerator {
                     BigDecimal totalDuration = BigDecimal.valueOf(totalMeasuredDuration.toSeconds());
                     return new ChartBucketData(
                             tag.id().toString(),
+                            null,
+                            null,
                             TAG,
                             tagDuration,
                             tagDuration.divide(totalDuration, 4, HALF_UP),
@@ -50,6 +52,8 @@ class TagBucketsGenerator {
         return tags.stream()
                 .map(tag -> new ChartBucketData(
                         tag.id().toString(),
+                        null,
+                        null,
                         TAG,
                         null,
                         null,

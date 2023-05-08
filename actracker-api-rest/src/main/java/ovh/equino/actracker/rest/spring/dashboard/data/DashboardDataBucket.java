@@ -5,6 +5,9 @@ import java.util.Collection;
 
 record DashboardDataBucket(
     String name,
+    String id,
+    Long rangeStartMillis,
+    Long rangeEndMillis,
     String type,
     BigDecimal value,
     BigDecimal percentage,
