@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.Collection;
 
 record DashboardDataBucket(
-    String name,
     String id,
     Long rangeStartMillis,
     Long rangeEndMillis,
