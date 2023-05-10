@@ -1,12 +1,9 @@
 package ovh.equino.actracker.rest.spring;
 
 import org.apache.commons.lang3.StringUtils;
-import ovh.equino.actracker.domain.EntitySearchCriteria;
-import ovh.equino.actracker.domain.user.User;
 
 import java.time.Instant;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static java.util.Arrays.stream;
 import static java.util.Objects.isNull;
@@ -28,6 +25,20 @@ abstract public class PayloadMapper {
             return null;
         }
         return instant.toEpochMilli();
+    }
+
+    protected Set<UUID> stringsToUuids(Collection<String> strings) {
+        return requireNonNullElse(strings, new ArrayList<String>()).stream()
+                .filter(Objects::nonNull)
+                .map(UUID::fromString)
+                .collect(toUnmodifiableSet());
+    }
+
+    protected Set<String> uuidsToStrings(Collection<UUID> uuids) {
+        return requireNonNullElse(uuids, new ArrayList<UUID>()).stream()
+                .filter(Objects::nonNull)
+                .map(this::uuidToString)
+                .collect(toUnmodifiableSet());
     }
 
     protected String uuidToString(UUID uuid) {

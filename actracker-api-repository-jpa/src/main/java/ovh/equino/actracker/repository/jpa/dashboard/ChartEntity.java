@@ -1,6 +1,9 @@
 package ovh.equino.actracker.repository.jpa.dashboard;
 
 import jakarta.persistence.*;
+import ovh.equino.actracker.repository.jpa.tag.TagEntity;
+
+import java.util.Set;
 
 @Entity
 @Table(name = "chart")
@@ -19,4 +22,12 @@ class ChartEntity {
 
     @Column(name = "group_by")
     String groupBy;
+
+    @ManyToMany
+    @JoinTable(
+            name = "chart_tag",
+            joinColumns = @JoinColumn(name = "chart_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    Set<TagEntity> tags;
 }

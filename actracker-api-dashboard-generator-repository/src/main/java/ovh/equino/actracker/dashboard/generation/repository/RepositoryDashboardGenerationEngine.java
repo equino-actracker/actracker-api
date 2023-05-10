@@ -76,27 +76,35 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
                                         List<TagDto> allTags,
                                         List<ActivityDto> allActivities) {
 
+        //@formatter:off
+        List<TagDto> chartTags = chart.includesAllTags()
+                ? allTags
+                : allTags.stream()
+                    .filter(tag -> chart.includedTags().contains(tag.id()))
+                    .toList();
+        //@formatter:on
+
         return switch (chart.groupBy()) {
-            case TAG -> generateChartGroupedByTag(chart.name(), generationCriteria, allTags, allActivities);
-            case DAY -> generateChartGroupedByDay(chart.name(), generationCriteria, allTags, allActivities);
+            case TAG -> generateChartGroupedByTag(chart.name(), generationCriteria, chartTags, allActivities);
+            case DAY -> generateChartGroupedByDay(chart.name(), generationCriteria, chartTags, allActivities);
         };
     }
 
     private DashboardChartData generateChartGroupedByTag(String chartName,
                                                          DashboardGenerationCriteria generationCriteria,
-                                                         List<TagDto> allTags,
+                                                         List<TagDto> chartTags,
                                                          List<ActivityDto> allActivities) {
 
         List<ActivityDto> matchingAlignedActivities = alignedTo(generationCriteria, allActivities);
 
-        List<ChartBucketData> buckets = new TagBucketsGenerator().generate(allTags, matchingAlignedActivities);
+        List<ChartBucketData> buckets = new TagBucketsGenerator().generate(chartTags, matchingAlignedActivities);
 
         return new DashboardChartData(chartName, buckets);
     }
 
     private DashboardChartData generateChartGroupedByDay(String chartName,
                                                          DashboardGenerationCriteria generationCriteria,
-                                                         List<TagDto> allTags,
+                                                         List<TagDto> chartTags,
                                                          List<ActivityDto> allActivities) {
 
         List<ChartBucketData> dailyBuckets = new ArrayList<>();
@@ -122,7 +130,7 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
             DashboardChartData chartByTag = generateChartGroupedByTag(
                     Long.toString(bucketStartTime.toEpochMilli()),
                     forDayGenerationCriteria,
-                    allTags,
+                    chartTags,
                     matchingAlignedActivities
             );
 
