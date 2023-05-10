@@ -17,11 +17,11 @@ class ChartMapper extends PayloadMapper {
     }
 
     ovh.equino.actracker.domain.dashboard.Chart fromRequest(Chart chartRequest) {
-        GroupBy groupBy = GroupBy.valueOf(chartRequest.groupBy().name());
-        Set<UUID> includedTagIds = requireNonNullElse(chartRequest.includedTags(), new HashSet<String>()).stream()
-                .map(UUID::fromString)
-                .collect(toUnmodifiableSet());
-        return new ovh.equino.actracker.domain.dashboard.Chart(chartRequest.name(), groupBy, includedTagIds);
+        return new ovh.equino.actracker.domain.dashboard.Chart(
+                chartRequest.name(),
+                GroupBy.valueOf(chartRequest.groupBy().name()),
+                stringsToUuids(chartRequest.includedTags())
+        );
     }
 
     List<Chart> toResponse(List<ovh.equino.actracker.domain.dashboard.Chart> charts) {
@@ -31,10 +31,10 @@ class ChartMapper extends PayloadMapper {
     }
 
     Chart toResponse(ovh.equino.actracker.domain.dashboard.Chart chart) {
-        Chart.GroupBy groupBy = Chart.GroupBy.valueOf(chart.groupBy().name());
-        Set<String> includedTagIds = chart.includedTags().stream()
-                .map(super::uuidToString)
-                .collect(toUnmodifiableSet());
-        return new Chart(chart.name(), groupBy, includedTagIds);
+        return new Chart(
+                chart.name(),
+                Chart.GroupBy.valueOf(chart.groupBy().name()),
+                uuidsToStrings(chart.includedTags())
+        );
     }
 }
