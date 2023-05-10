@@ -59,6 +59,12 @@ CREATE TABLE chart (
     name TEXT
 );
 
+CREATE TABLE chart_tag (
+    chart_id VARCHAR(36) NOT NULL,
+    tag_id VARCHAR(36) NOT NULL,
+    PRIMARY KEY (chart_id, tag_id)
+);
+
 CREATE SEQUENCE outbox_notification_version_seq INCREMENT BY 1;
 
 CREATE TABLE outbox_notification (

@@ -1,9 +1,12 @@
 package ovh.equino.actracker.rest.spring.dashboard;
 
+import java.util.Collection;
+
 record Chart(
 
         String name,
-        GroupBy groupBy
+        GroupBy groupBy,
+        Collection<String> includedTags
 
 ) {
 

@@ -1,12 +1,14 @@
 package ovh.equino.actracker.rest.spring.dashboard;
 
-import java.util.ArrayList;
-import java.util.List;
+import ovh.equino.actracker.rest.spring.PayloadMapper;
+
+import java.util.*;
 
 import static java.util.Objects.requireNonNullElse;
-import static ovh.equino.actracker.domain.dashboard.Chart.*;
+import static java.util.stream.Collectors.toUnmodifiableSet;
+import static ovh.equino.actracker.domain.dashboard.Chart.GroupBy;
 
-class ChartMapper {
+class ChartMapper extends PayloadMapper {
 
     List<ovh.equino.actracker.domain.dashboard.Chart> fromRequest(List<Chart> chartsRequest) {
         return requireNonNullElse(chartsRequest, new ArrayList<Chart>()).stream()
@@ -16,7 +18,10 @@ class ChartMapper {
 
     ovh.equino.actracker.domain.dashboard.Chart fromRequest(Chart chartRequest) {
         GroupBy groupBy = GroupBy.valueOf(chartRequest.groupBy().name());
-        return new ovh.equino.actracker.domain.dashboard.Chart(chartRequest.name(), groupBy);
+        Set<UUID> includedTagIds = requireNonNullElse(chartRequest.includedTags(), new HashSet<String>()).stream()
+                .map(UUID::fromString)
+                .collect(toUnmodifiableSet());
+        return new ovh.equino.actracker.domain.dashboard.Chart(chartRequest.name(), groupBy, includedTagIds);
     }
 
     List<Chart> toResponse(List<ovh.equino.actracker.domain.dashboard.Chart> charts) {
@@ -27,6 +32,9 @@ class ChartMapper {
 
     Chart toResponse(ovh.equino.actracker.domain.dashboard.Chart chart) {
         Chart.GroupBy groupBy = Chart.GroupBy.valueOf(chart.groupBy().name());
-        return new Chart(chart.name(), groupBy);
+        Set<String> includedTagIds = chart.includedTags().stream()
+                .map(super::uuidToString)
+                .collect(toUnmodifiableSet());
+        return new Chart(chart.name(), groupBy, includedTagIds);
     }
 }

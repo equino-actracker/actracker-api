@@ -1,13 +1,12 @@
 package ovh.equino.actracker.repository.jpa.dashboard;
 
 import ovh.equino.actracker.domain.dashboard.Chart;
+import ovh.equino.actracker.repository.jpa.tag.TagEntity;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static java.util.Objects.requireNonNullElse;
+import static java.util.stream.Collectors.toUnmodifiableSet;
 
 class ChartMapper {
 
@@ -18,7 +17,11 @@ class ChartMapper {
     }
 
     Chart toValueObject(ChartEntity entity) {
-        return new Chart(entity.name, Chart.GroupBy.valueOf(entity.groupBy));
+        Set<UUID> entityTags = requireNonNullElse(entity.tags, new HashSet<TagEntity>()).stream()
+                .map(tag -> tag.id)
+                .map(UUID::fromString)
+                .collect(toUnmodifiableSet());
+        return new Chart(entity.name, Chart.GroupBy.valueOf(entity.groupBy), entityTags);
     }
 
     List<ChartEntity> toEntities(Collection<Chart> charts, DashboardEntity dashboard) {
@@ -28,11 +31,23 @@ class ChartMapper {
     }
 
     ChartEntity toEntity(Chart chart, DashboardEntity dashboard) {
+        Set<TagEntity> dtoTags = requireNonNullElse(chart.includedTags(), new HashSet<UUID>()).stream()
+                .map(UUID::toString)
+                .map(this::toTagEntity)
+                .collect(toUnmodifiableSet());
+
         ChartEntity entity = new ChartEntity();
         entity.id = UUID.randomUUID().toString();
         entity.name = chart.name();
         entity.dashboard = dashboard;
         entity.groupBy = chart.groupBy().toString();
+        entity.tags = dtoTags;
         return entity;
+    }
+
+    private TagEntity toTagEntity(String tagId) {
+        TagEntity tagEntity = new TagEntity();
+        tagEntity.id = tagId;
+        return tagEntity;
     }
 }
