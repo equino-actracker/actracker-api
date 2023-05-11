@@ -3,6 +3,7 @@ package ovh.equino.actracker.repository.jpa.activity;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.repository.jpa.tag.TagEntity;
 
+import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -24,8 +25,8 @@ class ActivityMapper {
                 UUID.fromString(entity.id),
                 UUID.fromString(entity.creatorId),
                 entity.title,
-                entity.startTime,
-                entity.endTime,
+                isNull(entity.startTime) ? null : entity.startTime.toInstant(),
+                isNull(entity.endTime) ? null : entity.endTime.toInstant(),
                 entity.comment,
                 entityTags,
                 entity.deleted
@@ -43,8 +44,8 @@ class ActivityMapper {
         entity.id = isNull(dto.id()) ? null : dto.id().toString();
         entity.creatorId = isNull(dto.creatorId()) ? null : dto.creatorId().toString();
         entity.title = dto.title();
-        entity.startTime = dto.startTime();
-        entity.endTime = dto.endTime();
+        entity.startTime = isNull(dto.startTime()) ? null : Timestamp.from(dto.startTime());
+        entity.endTime = isNull(dto.endTime()) ? null : Timestamp.from(dto.endTime());
         entity.comment = dto.comment();
         entity.tags = dtoTags;
         entity.deleted = dto.deleted();

@@ -3,6 +3,7 @@ package ovh.equino.actracker.repository.jpa.activity;
 import jakarta.persistence.*;
 import ovh.equino.actracker.repository.jpa.tag.TagEntity;
 
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Set;
 
@@ -21,10 +22,10 @@ class ActivityEntity {
     String title;
 
     @Column(name = "start_time")
-    Instant startTime;
+    Timestamp startTime;
 
     @Column(name = "end_time")
-    Instant endTime;
+    Timestamp endTime;
 
     @Column(name = "comment")
     String comment;
