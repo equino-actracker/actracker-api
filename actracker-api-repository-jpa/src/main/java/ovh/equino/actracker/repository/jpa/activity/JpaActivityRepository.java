@@ -8,10 +8,13 @@ import ovh.equino.actracker.domain.activity.ActivityRepository;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaRepository;
 
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import static java.util.Objects.isNull;
 
 class JpaActivityRepository extends JpaRepository implements ActivityRepository {
 
@@ -57,6 +60,13 @@ class JpaActivityRepository extends JpaRepository implements ActivityRepository 
     @Override
     public List<ActivityDto> find(EntitySearchCriteria searchCriteria) {
 
+        Timestamp timeRangeStart = isNull(searchCriteria.timeRangeStart())
+                ? null
+                : Timestamp.from(searchCriteria.timeRangeStart());
+        Timestamp timeRangeEnd = isNull(searchCriteria.timeRangeEnd())
+                ? null
+                : Timestamp.from(searchCriteria.timeRangeEnd());
+
         ActivityQueryBuilder queryBuilder = new ActivityQueryBuilder(entityManager);
 
         CriteriaQuery<ActivityEntity> query = queryBuilder.select()
@@ -64,10 +74,7 @@ class JpaActivityRepository extends JpaRepository implements ActivityRepository 
                         queryBuilder.and(
                                 queryBuilder.isAccessibleFor(searchCriteria.searcher()),
                                 queryBuilder.isNotDeleted(),
-                                queryBuilder.isInTimeRange(
-                                        searchCriteria.timeRangeStart(),
-                                        searchCriteria.timeRangeEnd()
-                                ),
+                                queryBuilder.isInTimeRange(timeRangeStart, timeRangeEnd),
                                 queryBuilder.hasAnyOfTag(searchCriteria.tags()),
                                 queryBuilder.isInPage(searchCriteria.pageId()),
                                 queryBuilder.isNotExcluded(searchCriteria.excludeFilter())
@@ -87,13 +94,15 @@ class JpaActivityRepository extends JpaRepository implements ActivityRepository 
     @Override
     public List<ActivityDto> findUnfinishedStartedBefore(Instant startTime, User user) {
 
+        Timestamp startTimestamp = isNull(startTime) ? null : Timestamp.from(startTime);
+
         ActivityQueryBuilder queryBuilder = new ActivityQueryBuilder(entityManager);
 
         CriteriaQuery<ActivityEntity> query = queryBuilder.select()
                 .where(
                         queryBuilder.and(
                                 queryBuilder.isAccessibleFor(user),
-                                queryBuilder.isStartedBeforeOrAt(startTime),
+                                queryBuilder.isStartedBeforeOrAt(startTimestamp),
                                 queryBuilder.isNotFinished(),
                                 queryBuilder.isNotDeleted()
                         )

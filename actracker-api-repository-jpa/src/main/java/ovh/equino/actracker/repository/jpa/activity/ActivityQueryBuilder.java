@@ -7,6 +7,7 @@ import ovh.equino.actracker.domain.activity.ActivitySortField;
 import ovh.equino.actracker.repository.jpa.JpaQueryBuilder;
 import ovh.equino.actracker.repository.jpa.tag.TagEntity;
 
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Set;
@@ -27,7 +28,7 @@ class ActivityQueryBuilder extends JpaQueryBuilder<ActivityEntity> {
         super(entityManager, ActivityEntity.class, SORT_FIELD_TO_ENTITY_FIELD);
     }
 
-    Predicate isInTimeRange(Instant timeRangeStart, Instant timeRangeEnd) {
+    Predicate isInTimeRange(Timestamp timeRangeStart, Timestamp timeRangeEnd) {
         Predicate isBeforeRangeEnd = timeRangeEnd != null
                 ? isStartedBeforeOrAt(timeRangeEnd)
                 : allMatch();
@@ -47,7 +48,7 @@ class ActivityQueryBuilder extends JpaQueryBuilder<ActivityEntity> {
         return and(isBeforeRangeEnd, isAfterRangeStart);
     }
 
-    Predicate isStartedBeforeOrAt(Instant startTime) {
+    Predicate isStartedBeforeOrAt(Timestamp startTime) {
         return and(
                 isStarted(),
                 criteriaBuilder.lessThanOrEqualTo(
@@ -57,7 +58,7 @@ class ActivityQueryBuilder extends JpaQueryBuilder<ActivityEntity> {
         );
     }
 
-    Predicate isFinishedAfterOrAt(Instant endTime) {
+    Predicate isFinishedAfterOrAt(Timestamp endTime) {
         return and(
                 isFinished(),
                 criteriaBuilder.greaterThanOrEqualTo(
