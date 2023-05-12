@@ -5,15 +5,12 @@ import ovh.equino.actracker.domain.dashboard.ChartBucketData;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
-import java.time.temporal.TemporalAdjuster;
-import java.time.temporal.TemporalAdjusters;
 
 import static java.time.DayOfWeek.MONDAY;
 import static java.time.ZoneOffset.UTC;
 import static java.time.temporal.ChronoField.HOUR_OF_DAY;
 import static java.time.temporal.ChronoUnit.DAYS;
-import static java.time.temporal.TemporalAdjusters.next;
-import static java.time.temporal.TemporalAdjusters.previousOrSame;
+import static java.time.temporal.TemporalAdjusters.*;
 
 class ChartTypeMapper {
 
@@ -22,14 +19,16 @@ class ChartTypeMapper {
             case TAG -> ChartBucketData.Type.TAG;
             case DAY -> ChartBucketData.Type.DAY;
             case WEEK -> ChartBucketData.Type.WEEK;
+            case MONTH -> ChartBucketData.Type.MONTH;
         };
     }
 
     static Instant toRangeStart(Instant timeInRange, Chart.GroupBy chartGroupBy) {
         return switch (chartGroupBy) {
             case TAG -> throw new RuntimeException("Tag bucket cannot be mapped to duration");
-            case WEEK -> toStartOfWeek(timeInRange);
             case DAY -> toStartOfDay(timeInRange);
+            case WEEK -> toStartOfWeek(timeInRange);
+            case MONTH -> toStartOfMonth(timeInRange);
         };
     }
 
@@ -40,9 +39,26 @@ class ChartTypeMapper {
     static Instant toNextRangeStart(Instant timeInRange, Chart.GroupBy chartGroupBy) {
         return switch (chartGroupBy) {
             case TAG -> throw new RuntimeException("Tag bucket cannot be mapped to duration");
-            case WEEK -> toStartOfNextWeek(timeInRange);
             case DAY -> toStartOfNextDay(timeInRange);
+            case WEEK -> toStartOfNextWeek(timeInRange);
+            case MONTH -> toStartOfNextMonth(timeInRange);
         };
+    }
+
+    private static Instant toStartOfMonth(Instant instant) {
+        return toStartOfDay(
+                ZonedDateTime.ofInstant(instant, UTC)
+                        .with(firstDayOfMonth())
+                        .toInstant()
+        );
+    }
+
+    private static Instant toStartOfNextMonth(Instant instant) {
+        return toStartOfDay(
+                ZonedDateTime.ofInstant(instant, UTC)
+                        .with(firstDayOfNextMonth())
+                        .toInstant()
+        );
     }
 
     private static Instant toStartOfWeek(Instant instant) {

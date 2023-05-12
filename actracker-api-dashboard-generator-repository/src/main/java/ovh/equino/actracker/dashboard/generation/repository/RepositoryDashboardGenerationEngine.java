@@ -86,7 +86,7 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
 
         return switch (chart.groupBy()) {
             case TAG -> generateChartGroupedByTag(chart.name(), generationCriteria, chartTags, allActivities);
-            case DAY, WEEK -> generateChartGroupedByTime(chart, generationCriteria, chartTags, allActivities);
+            case DAY, WEEK, MONTH -> generateChartGroupedByTime(chart, generationCriteria, chartTags, allActivities);
         };
     }
 

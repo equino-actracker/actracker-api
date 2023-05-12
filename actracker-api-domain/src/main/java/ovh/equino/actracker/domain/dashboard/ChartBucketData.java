@@ -23,6 +23,6 @@ public record ChartBucketData(
     }
 
     public enum Type {
-        TAG, DAY, WEEK
+        TAG, DAY, WEEK, MONTH
     }
 }

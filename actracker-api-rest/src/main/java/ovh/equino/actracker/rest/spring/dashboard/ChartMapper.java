@@ -2,11 +2,10 @@ package ovh.equino.actracker.rest.spring.dashboard;
 
 import ovh.equino.actracker.rest.spring.PayloadMapper;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.util.Objects.requireNonNullElse;
-import static java.util.stream.Collectors.toUnmodifiableSet;
-import static ovh.equino.actracker.domain.dashboard.Chart.GroupBy;
 
 class ChartMapper extends PayloadMapper {
 
@@ -19,7 +18,7 @@ class ChartMapper extends PayloadMapper {
     ovh.equino.actracker.domain.dashboard.Chart fromRequest(Chart chartRequest) {
         return new ovh.equino.actracker.domain.dashboard.Chart(
                 chartRequest.name(),
-                GroupBy.valueOf(chartRequest.groupBy().name()),
+                Chart.GroupBy.toDomain(chartRequest.groupBy()),
                 stringsToUuids(chartRequest.includedTags())
         );
     }
@@ -33,7 +32,7 @@ class ChartMapper extends PayloadMapper {
     Chart toResponse(ovh.equino.actracker.domain.dashboard.Chart chart) {
         return new Chart(
                 chart.name(),
-                Chart.GroupBy.valueOf(chart.groupBy().name()),
+                Chart.GroupBy.fromDomain(chart.groupBy()),
                 uuidsToStrings(chart.includedTags())
         );
     }
