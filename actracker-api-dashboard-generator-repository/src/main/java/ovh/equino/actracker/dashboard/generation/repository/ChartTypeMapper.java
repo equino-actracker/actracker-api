@@ -31,25 +31,34 @@ class ChartTypeMapper {
         };
     }
 
-    static Instant alignedRangeStart(Instant timeInRange, Chart.GroupBy chartGroupBy) {
-        TemporalAdjuster beginningOfWeekAdjuster = TemporalAdjusters.previousOrSame(MONDAY);
+    static Instant toRangeStart(Instant timeInRange, Chart.GroupBy chartGroupBy) {
 
         return switch (chartGroupBy) {
             case TAG -> throw new RuntimeException("Tag bucket cannot be mapped to duration");
-            case WEEK -> ZonedDateTime.ofInstant(timeInRange, UTC)
-                    .with(beginningOfWeekAdjuster)
-                    .with(HOUR_OF_DAY, 0)
-                    .toInstant();
-            case DAY -> ZonedDateTime.ofInstant(timeInRange, UTC)
-                    .with(HOUR_OF_DAY, 0)
-                    .toInstant();
+            case WEEK -> toStartOfWeek(timeInRange);
+            case DAY -> toStartOfDay(timeInRange);
         };
     }
 
-    static Instant alignedRangeEnd(Instant timeInRange, Chart.GroupBy chartGroupBy) {
-        Instant rangeStart = alignedRangeStart(timeInRange, chartGroupBy);
+    static Instant toRangeEnd(Instant timeInRange, Chart.GroupBy chartGroupBy) {
+        Instant rangeStart = toRangeStart(timeInRange, chartGroupBy);
         Duration rangeDuration = toRangeDuration(chartGroupBy);
         return rangeStart.plus(rangeDuration).minusMillis(1);
+    }
+
+    private static Instant toStartOfWeek(Instant instant) {
+        TemporalAdjuster beginningOfWeekAdjuster = TemporalAdjusters.previousOrSame(MONDAY);
+        return toStartOfDay(
+                ZonedDateTime.ofInstant(instant, UTC)
+                        .with(beginningOfWeekAdjuster)
+                        .toInstant()
+        );
+    }
+
+    private static Instant toStartOfDay(Instant instant) {
+        return ZonedDateTime.ofInstant(instant, UTC)
+                .with(HOUR_OF_DAY, 0)
+                .toInstant();
     }
 
 }
