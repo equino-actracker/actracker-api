@@ -11,9 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.Collections.emptyList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+import static ovh.equino.actracker.dashboard.generation.repository.ChartTypeMapper.*;
 import static ovh.equino.actracker.dashboard.generation.repository.DashboardUtils.*;
 
 class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
@@ -86,7 +86,7 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
 
         return switch (chart.groupBy()) {
             case TAG -> generateChartGroupedByTag(chart.name(), generationCriteria, chartTags, allActivities);
-            case DAY -> generateChartGroupedByDay(chart.name(), generationCriteria, chartTags, allActivities);
+            case DAY, WEEK -> generateChartGroupedByTime(chart, generationCriteria, chartTags, allActivities);
         };
     }
 
@@ -102,22 +102,21 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
         return new DashboardChartData(chartName, buckets);
     }
 
-    private DashboardChartData generateChartGroupedByDay(String chartName,
-                                                         DashboardGenerationCriteria generationCriteria,
-                                                         List<TagDto> chartTags,
-                                                         List<ActivityDto> allActivities) {
+    private DashboardChartData generateChartGroupedByTime(Chart chart,
+                                                          DashboardGenerationCriteria generationCriteria,
+                                                          List<TagDto> chartTags,
+                                                          List<ActivityDto> allActivities) {
 
-        List<ChartBucketData> dailyBuckets = new ArrayList<>();
+        List<ChartBucketData> timeRangeBuckets = new ArrayList<>();
 
         for (Instant bucket = generationCriteria.timeRangeStart();
              bucket.isBefore(generationCriteria.timeRangeEnd());
-             bucket = bucket.plus(1, DAYS)) {
+             bucket = bucket.plus(toRangeDuration(chart.groupBy()))) {
 
-            //noinspection UnnecessaryLocalVariable
-            Instant bucketStartTime = bucket;
-            Instant bucketEndTime = bucketStartTime.plus(1, DAYS).minusMillis(1);
+            Instant bucketStartTime = alignedRangeStart(bucket, chart.groupBy());
+            Instant bucketEndTime = alignedRangeEnd(bucket, chart.groupBy());
 
-            DashboardGenerationCriteria forDayGenerationCriteria = new DashboardGenerationCriteria(
+            DashboardGenerationCriteria forTimeRangeGenerationCriteria = new DashboardGenerationCriteria(
                     generationCriteria.dashboardId(),
                     generationCriteria.generator(),
                     bucketStartTime,
@@ -125,11 +124,11 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
                     generationCriteria.tags()
             );
 
-            List<ActivityDto> matchingAlignedActivities = alignedTo(forDayGenerationCriteria, allActivities);
+            List<ActivityDto> matchingAlignedActivities = alignedTo(forTimeRangeGenerationCriteria, allActivities);
 
             DashboardChartData chartByTag = generateChartGroupedByTag(
                     Long.toString(bucketStartTime.toEpochMilli()),
-                    forDayGenerationCriteria,
+                    forTimeRangeGenerationCriteria,
                     chartTags,
                     matchingAlignedActivities
             );
@@ -138,15 +137,15 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
                     null,
                     bucketStartTime,
                     bucketEndTime,
-                    ChartBucketData.Type.DAY,
+                    toBucketType(chart.groupBy()),
                     null,
                     null,
                     chartByTag.buckets()
             );
-            dailyBuckets.add(dailyBucket);
+            timeRangeBuckets.add(dailyBucket);
         }
 
-        return new DashboardChartData(chartName, dailyBuckets);
+        return new DashboardChartData(chart.name(), timeRangeBuckets);
     }
 
     DashboardData empty(DashboardDto dashboard) {

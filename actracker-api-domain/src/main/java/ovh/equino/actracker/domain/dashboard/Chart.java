@@ -23,6 +23,7 @@ public record Chart(
 
     public enum GroupBy {
         TAG,
-        DAY
+        DAY,
+        WEEK,
     }
 }

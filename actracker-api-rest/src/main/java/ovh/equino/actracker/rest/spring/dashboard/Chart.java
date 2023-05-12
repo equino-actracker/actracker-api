@@ -11,6 +11,6 @@ record Chart(
 ) {
 
     enum GroupBy {
-        TAG, DAY
+        TAG, DAY, WEEK
     }
 }
