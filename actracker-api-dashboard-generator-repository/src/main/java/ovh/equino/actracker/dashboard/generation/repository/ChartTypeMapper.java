@@ -3,7 +3,6 @@ package ovh.equino.actracker.dashboard.generation.repository;
 import ovh.equino.actracker.domain.dashboard.Chart;
 import ovh.equino.actracker.domain.dashboard.ChartBucketData;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAdjuster;
@@ -12,6 +11,9 @@ import java.time.temporal.TemporalAdjusters;
 import static java.time.DayOfWeek.MONDAY;
 import static java.time.ZoneOffset.UTC;
 import static java.time.temporal.ChronoField.HOUR_OF_DAY;
+import static java.time.temporal.ChronoUnit.DAYS;
+import static java.time.temporal.TemporalAdjusters.next;
+import static java.time.temporal.TemporalAdjusters.previousOrSame;
 
 class ChartTypeMapper {
 
@@ -23,16 +25,7 @@ class ChartTypeMapper {
         };
     }
 
-    static Duration toRangeDuration(Chart.GroupBy chartGroupBy) {
-        return switch (chartGroupBy) {
-            case TAG -> throw new RuntimeException("Tag bucket cannot be mapped to duration");
-            case DAY -> Duration.ofDays(1);
-            case WEEK -> Duration.ofDays(7);
-        };
-    }
-
     static Instant toRangeStart(Instant timeInRange, Chart.GroupBy chartGroupBy) {
-
         return switch (chartGroupBy) {
             case TAG -> throw new RuntimeException("Tag bucket cannot be mapped to duration");
             case WEEK -> toStartOfWeek(timeInRange);
@@ -41,16 +34,29 @@ class ChartTypeMapper {
     }
 
     static Instant toRangeEnd(Instant timeInRange, Chart.GroupBy chartGroupBy) {
-        Instant rangeStart = toRangeStart(timeInRange, chartGroupBy);
-        Duration rangeDuration = toRangeDuration(chartGroupBy);
-        return rangeStart.plus(rangeDuration).minusMillis(1);
+        return toNextRangeStart(timeInRange, chartGroupBy).minusMillis(1);
+    }
+
+    static Instant toNextRangeStart(Instant timeInRange, Chart.GroupBy chartGroupBy) {
+        return switch (chartGroupBy) {
+            case TAG -> throw new RuntimeException("Tag bucket cannot be mapped to duration");
+            case WEEK -> toStartOfNextWeek(timeInRange);
+            case DAY -> toStartOfNextDay(timeInRange);
+        };
     }
 
     private static Instant toStartOfWeek(Instant instant) {
-        TemporalAdjuster beginningOfWeekAdjuster = TemporalAdjusters.previousOrSame(MONDAY);
         return toStartOfDay(
                 ZonedDateTime.ofInstant(instant, UTC)
-                        .with(beginningOfWeekAdjuster)
+                        .with(previousOrSame(MONDAY))
+                        .toInstant()
+        );
+    }
+
+    private static Instant toStartOfNextWeek(Instant instant) {
+        return toStartOfDay(
+                ZonedDateTime.ofInstant(instant, UTC)
+                        .with(next(MONDAY))
                         .toInstant()
         );
     }
@@ -59,6 +65,11 @@ class ChartTypeMapper {
         return ZonedDateTime.ofInstant(instant, UTC)
                 .with(HOUR_OF_DAY, 0)
                 .toInstant();
+    }
+
+    private static Instant toStartOfNextDay(Instant instant) {
+        return toStartOfDay(instant)
+                .plus(1, DAYS);
     }
 
 }

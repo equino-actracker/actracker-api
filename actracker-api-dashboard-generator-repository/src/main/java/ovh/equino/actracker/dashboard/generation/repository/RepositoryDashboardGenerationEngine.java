@@ -111,7 +111,7 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
 
         for (Instant bucket = generationCriteria.timeRangeStart();
              bucket.isBefore(generationCriteria.timeRangeEnd());
-             bucket = bucket.plus(toRangeDuration(chart.groupBy()))) {
+             bucket = toNextRangeStart(bucket, chart.groupBy())) {
 
             Instant bucketStartTime = toRangeStart(bucket, chart.groupBy());
             Instant bucketEndTime = toRangeEnd(bucket, chart.groupBy());
