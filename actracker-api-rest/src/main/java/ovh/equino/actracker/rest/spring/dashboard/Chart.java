@@ -11,7 +11,7 @@ record Chart(
 ) {
 
     enum GroupBy {
-        TAG, DAY, WEEK, MONTH;
+        TAG, DAY, WEEK, MONTH, WEEKEND;
 
         static GroupBy fromDomain(ovh.equino.actracker.domain.dashboard.Chart.GroupBy groupBy) {
             return switch (groupBy) {
@@ -19,6 +19,7 @@ record Chart(
                 case DAY -> DAY;
                 case WEEK -> WEEK;
                 case MONTH -> MONTH;
+                case WEEKEND -> WEEKEND;
             };
         }
 
@@ -28,6 +29,7 @@ record Chart(
                 case DAY -> ovh.equino.actracker.domain.dashboard.Chart.GroupBy.DAY;
                 case WEEK -> ovh.equino.actracker.domain.dashboard.Chart.GroupBy.WEEK;
                 case MONTH -> ovh.equino.actracker.domain.dashboard.Chart.GroupBy.MONTH;
+                case WEEKEND -> ovh.equino.actracker.domain.dashboard.Chart.GroupBy.WEEKEND;
             };
         }
     }
