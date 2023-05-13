@@ -25,6 +25,7 @@ public record Chart(
         TAG,
         DAY,
         WEEK,
-        MONTH
+        MONTH,
+        WEEKEND
     }
 }
