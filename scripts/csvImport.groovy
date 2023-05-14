@@ -2,15 +2,16 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+// START INPUT PARAMS
 String basicAuthToken = ''
-
 def tagToId = [
         'tagName1': 'tagId1',
         'tagName2': 'tagId2',
         'tagName3': 'tagId3',
 ]
+// END INPUT PARAMS
 
-def file = new File('actracker.csv')
+def file = new File('actracker_import.csv')
 def rows = file.readLines()
 
 rows.each { row ->
