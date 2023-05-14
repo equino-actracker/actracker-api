@@ -56,7 +56,7 @@ do {
                         ? activity.title
                         : ''
 
-                file.append("${category};${startTime.format(dateTimeFormatter)};${endTime.format(dateTimeFormatter)};${comment}\n")
+                file.append("${category},${startTime.format(dateTimeFormatter)},${endTime.format(dateTimeFormatter)},${comment}\n")
             }
         }
     }
