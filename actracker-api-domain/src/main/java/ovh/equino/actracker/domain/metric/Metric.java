@@ -1,8 +1,7 @@
 package ovh.equino.actracker.domain.metric;
 
-import org.apache.commons.lang3.StringUtils;
-
 import static java.util.Objects.requireNonNull;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public record Metric(
         String name,
@@ -10,7 +9,7 @@ public record Metric(
 ) {
 
     public Metric {
-        if(StringUtils.isBlank(name)) {
+        if (isBlank(name)) {
             throw new RuntimeException();
         }
         requireNonNull(type);
