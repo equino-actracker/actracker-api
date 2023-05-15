@@ -1,8 +1,14 @@
 package ovh.equino.actracker.domain.tag;
 
 import ovh.equino.actracker.domain.Entity;
+import ovh.equino.actracker.domain.metric.Metric;
 import ovh.equino.actracker.domain.user.User;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import static java.util.Collections.unmodifiableList;
 import static java.util.Objects.requireNonNull;
 
 class Tag implements Entity {
@@ -11,18 +17,20 @@ class Tag implements Entity {
     private final User creator;
     private String name;
     private boolean deleted;
+    private final List<Metric> metrics;
 
     private Tag(
             TagId id,
             User creator,
             String name,
+            Collection<Metric> metrics,
             boolean deleted) {
 
         this.id = requireNonNull(id);
         this.creator = requireNonNull(creator);
         this.name = name;
         this.deleted = deleted;
-
+        this.metrics = new ArrayList<>(metrics);
     }
 
     static Tag create(TagDto tag, User creator) {
@@ -30,6 +38,7 @@ class Tag implements Entity {
                 new TagId(),
                 creator,
                 tag.name(),
+                tag.metrics(),
                 false
         );
         newTag.validate();
@@ -38,6 +47,8 @@ class Tag implements Entity {
 
     void updateTo(TagDto tag) {
         this.name = tag.name();
+        this.metrics.clear();
+        this.metrics.addAll(tag.metrics());
         validate();
     }
 
@@ -50,20 +61,21 @@ class Tag implements Entity {
                 new TagId(tag.id()),
                 new User(tag.creatorId()),
                 tag.name(),
+                tag.metrics(),
                 tag.deleted()
         );
     }
 
     TagDto forStorage() {
-        return new TagDto(id.id(), creator.id(), name, deleted);
+        return new TagDto(id.id(), creator.id(), name, unmodifiableList(metrics), deleted);
     }
 
     TagDto forClient() {
-        return new TagDto(id.id(), creator.id(), name, deleted);
+        return new TagDto(id.id(), creator.id(), name, unmodifiableList(metrics), deleted);
     }
 
     TagChangedNotification forChangeNotification() {
-        TagDto dto = new TagDto(id.id(), creator.id(), name, deleted);
+        TagDto dto = new TagDto(id.id(), creator.id(), name, unmodifiableList(metrics), deleted);
         return new TagChangedNotification(dto);
     }
 

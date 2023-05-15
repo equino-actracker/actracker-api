@@ -56,13 +56,22 @@ CREATE TABLE chart (
     id VARCHAR(36) UNIQUE NOT NULL,
     dashboard_id VARCHAR(36) NOT NULL,
     group_by VARCHAR(20) NOT NULL,
-    name TEXT
+    name TEXT,
+    PRIMARY KEY (id)
 );
 
 CREATE TABLE chart_tag (
     chart_id VARCHAR(36) NOT NULL,
     tag_id VARCHAR(36) NOT NULL,
     PRIMARY KEY (chart_id, tag_id)
+);
+
+CREATE TABLE metric (
+    id VARCHAR(36) UNIQUE NOT NULL,
+    tag_id VARCHAR(36) NOT NULL,
+    name TEXT,
+    type VARCHAR(50),
+    PRIMARY KEY (id)
 );
 
 CREATE SEQUENCE outbox_notification_version_seq INCREMENT BY 1;
