@@ -34,6 +34,7 @@ class MetricMapper {
         entity.id = randomUUID().toString();
         entity.name = metric.name();
         entity.tag = tagEntity;
+        entity.type = metric.type().toString();
         return entity;
     }
 }
