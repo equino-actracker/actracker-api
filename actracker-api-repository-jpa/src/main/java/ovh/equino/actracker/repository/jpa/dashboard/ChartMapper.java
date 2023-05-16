@@ -6,6 +6,7 @@ import ovh.equino.actracker.repository.jpa.tag.TagEntity;
 import java.util.*;
 
 import static java.util.Objects.requireNonNullElse;
+import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 
 class ChartMapper {
@@ -37,7 +38,7 @@ class ChartMapper {
                 .collect(toUnmodifiableSet());
 
         ChartEntity entity = new ChartEntity();
-        entity.id = UUID.randomUUID().toString();
+        entity.id = randomUUID().toString();
         entity.name = chart.name();
         entity.dashboard = dashboard;
         entity.groupBy = chart.groupBy().toString();

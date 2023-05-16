@@ -10,12 +10,21 @@ import java.util.List;
 
 class TagMapper extends PayloadMapper {
 
+    private final MetricMapper metricMapper = new MetricMapper();
+
     TagDto fromRequest(Tag tagRequest) {
-        return new TagDto(tagRequest.name());
+        return new TagDto(
+                tagRequest.name(),
+                metricMapper.fromRequest(tagRequest.metrics())
+        );
     }
 
     Tag toResponse(TagDto tag) {
-        return new Tag(uuidToString(tag.id()), tag.name());
+        return new Tag(
+                uuidToString(tag.id()),
+                tag.name(),
+                metricMapper.toResponse(tag.metrics())
+        );
     }
 
     SearchResponse<Tag> toResponse(EntitySearchResult<TagDto> tagSearchResult) {
