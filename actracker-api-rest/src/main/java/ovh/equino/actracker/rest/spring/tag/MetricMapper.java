@@ -1,6 +1,7 @@
 package ovh.equino.actracker.rest.spring.tag;
 
 import ovh.equino.actracker.domain.tag.MetricDto;
+import ovh.equino.actracker.rest.spring.PayloadMapper;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,7 +9,7 @@ import java.util.List;
 
 import static java.util.Objects.requireNonNullElse;
 
-class MetricMapper {
+class MetricMapper extends PayloadMapper {
 
     List<MetricDto> fromRequest(Collection<Metric> metrics) {
         return requireNonNullElse(metrics, new ArrayList<Metric>()).stream()
@@ -18,6 +19,7 @@ class MetricMapper {
 
     MetricDto fromRequest(Metric metric) {
         return new MetricDto(
+                stringToUuid(metric.id()),
                 metric.name(),
                 Metric.MetricType.toDomain(metric.type())
         );
@@ -31,6 +33,7 @@ class MetricMapper {
 
     Metric toResponse(MetricDto metric) {
         return new Metric(
+                uuidToString(metric.id()),
                 metric.name(),
                 Metric.MetricType.fromDomain(metric.type())
         );

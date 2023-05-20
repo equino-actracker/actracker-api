@@ -11,7 +11,7 @@ public record MetricDto(
 ) {
 
     // Constructor for data provided from input
-    public MetricDto(String name, MetricType type) {
-        this(null, null, name, type, false);
+    public MetricDto(UUID id, String name, MetricType type) {
+        this(id, null, name, type, false);
     }
 }
