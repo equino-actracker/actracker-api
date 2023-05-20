@@ -15,7 +15,7 @@ class TagMapper {
                 UUID.fromString(entity.id),
                 UUID.fromString(entity.creatorId),
                 entity.name,
-                metricMapper.toValueObjects(entity.metrics),
+                metricMapper.toDto(entity.metrics),
                 entity.deleted
         );
     }

@@ -10,6 +10,9 @@ class MetricEntity {
     @Column(name = "id")
     String id;
 
+    @Column(name = "creator_id")
+    String creatorId;
+
     @ManyToOne
     @JoinColumn(name = "tag_id")
     TagEntity tag;
@@ -19,4 +22,7 @@ class MetricEntity {
 
     @Column(name = "type")
     String type;
+
+    @Column(name = "deleted")
+    boolean deleted;
 }

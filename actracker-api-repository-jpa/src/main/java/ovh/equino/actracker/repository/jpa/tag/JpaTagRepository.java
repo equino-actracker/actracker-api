@@ -26,7 +26,6 @@ class JpaTagRepository extends JpaRepository implements TagRepository {
     @Override
     public void update(UUID tagId, TagDto tag) {
         TagEntity tagEntity = mapper.toEntity(tag);
-        tagEntity.id = tagId.toString();
         entityManager.merge(tagEntity);
     }
 
