@@ -63,6 +63,7 @@ class Tag implements Entity {
     }
 
     void delete() {
+        this.metrics.forEach(Metric::delete);
         this.deleted = true;
     }
 
