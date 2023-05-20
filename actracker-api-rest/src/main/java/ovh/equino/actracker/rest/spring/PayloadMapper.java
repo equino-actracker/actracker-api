@@ -34,6 +34,13 @@ abstract public class PayloadMapper {
                 .collect(toUnmodifiableSet());
     }
 
+    protected UUID stringToUuid(String string) {
+        if(isNull(string)) {
+            return null;
+        }
+        return UUID.fromString(string);
+    }
+
     protected Set<String> uuidsToStrings(Collection<UUID> uuids) {
         return requireNonNullElse(uuids, new ArrayList<UUID>()).stream()
                 .filter(Objects::nonNull)

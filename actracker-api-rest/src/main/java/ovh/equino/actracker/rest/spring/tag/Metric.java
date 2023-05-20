@@ -1,6 +1,7 @@
 package ovh.equino.actracker.rest.spring.tag;
 
 record Metric(
+        String id,
         String name,
         MetricType type
 ) {
@@ -8,15 +9,15 @@ record Metric(
     enum MetricType {
         NUMERIC;
 
-        static MetricType fromDomain(ovh.equino.actracker.domain.metric.MetricType metricType) {
+        static MetricType fromDomain(ovh.equino.actracker.domain.tag.MetricType metricType) {
             return switch (metricType) {
                 case NUMERIC -> NUMERIC;
             };
         }
 
-        static ovh.equino.actracker.domain.metric.MetricType toDomain(MetricType metricType) {
+        static ovh.equino.actracker.domain.tag.MetricType toDomain(MetricType metricType) {
             return switch (metricType) {
-                case NUMERIC -> ovh.equino.actracker.domain.metric.MetricType.NUMERIC;
+                case NUMERIC -> ovh.equino.actracker.domain.tag.MetricType.NUMERIC;
             };
         }
     }

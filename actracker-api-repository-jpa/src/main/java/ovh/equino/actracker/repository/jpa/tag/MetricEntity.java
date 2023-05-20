@@ -10,8 +10,14 @@ class MetricEntity {
     @Column(name = "id")
     String id;
 
+    @Column(name = "creator_id", insertable = false, updatable = false)
+    String creatorId;
+
     @ManyToOne
-    @JoinColumn(name = "tag_id")
+    @JoinColumns({
+            @JoinColumn(name = "tag_id", referencedColumnName = "id"),
+            @JoinColumn(name = "creator_id", referencedColumnName = "creator_id")
+    })
     TagEntity tag;
 
     @Column(name = "name")
@@ -19,4 +25,7 @@ class MetricEntity {
 
     @Column(name = "type")
     String type;
+
+    @Column(name = "deleted")
+    boolean deleted;
 }

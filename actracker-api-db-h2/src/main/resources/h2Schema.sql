@@ -68,9 +68,11 @@ CREATE TABLE chart_tag (
 
 CREATE TABLE metric (
     id VARCHAR(36) UNIQUE NOT NULL,
+    creator_id VARCHAR(36) NOT NULL,
     tag_id VARCHAR(36) NOT NULL,
     name TEXT,
     type VARCHAR(50),
+    deleted BOOLEAN,
     PRIMARY KEY (id)
 );
 
