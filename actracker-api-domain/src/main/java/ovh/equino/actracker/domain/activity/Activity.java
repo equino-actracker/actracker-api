@@ -1,6 +1,8 @@
 package ovh.equino.actracker.domain.activity;
 
 import ovh.equino.actracker.domain.Entity;
+import ovh.equino.actracker.domain.tag.MetricId;
+import ovh.equino.actracker.domain.tag.MetricsExistenceVerifier;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
 import ovh.equino.actracker.domain.user.User;
@@ -8,6 +10,7 @@ import ovh.equino.actracker.domain.user.User;
 import java.time.Instant;
 import java.util.*;
 
+import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.*;
 import static java.util.stream.Collectors.toUnmodifiableSet;
@@ -21,9 +24,11 @@ class Activity implements Entity {
     private Instant endTime;
     private String comment;
     private final Set<TagId> tags;
+    private final List<MetricValue> metricValues;
     private boolean deleted;
 
     private final TagsExistenceVerifier tagsExistenceVerifier;
+    private final MetricsExistenceVerifier metricsExistenceVerifier;
 
     private Activity(
             ActivityId id,
@@ -33,6 +38,7 @@ class Activity implements Entity {
             Instant endTime,
             String comment,
             Collection<TagId> tags,
+            Collection<MetricValue> metricValues,
             boolean deleted,
             TagsExistenceVerifier tagsExistenceVerifier) {
 
@@ -43,8 +49,11 @@ class Activity implements Entity {
         this.endTime = endTime;
         this.comment = comment;
         this.tags = new HashSet<>(tags);
+        this.metricValues = new ArrayList<>(metricValues);
         this.deleted = deleted;
+
         this.tagsExistenceVerifier = tagsExistenceVerifier;
+        this.metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
     }
 
     static Activity create(ActivityDto activity, User creator, TagsExistenceVerifier tagsExistenceVerifier) {
@@ -56,6 +65,7 @@ class Activity implements Entity {
                 activity.endTime(),
                 activity.comment(),
                 toTagIds(activity),
+                activity.metricValues(),
                 false,
                 tagsExistenceVerifier
         );
@@ -63,16 +73,36 @@ class Activity implements Entity {
         return newActivity;
     }
 
+    private static List<TagId> toTagIds(ActivityDto activity) {
+        return requireNonNullElse(activity.tags(), new HashSet<UUID>()).stream()
+                .map(TagId::new)
+                .toList();
+    }
+
     void updateTo(ActivityDto activity) {
         Set<TagId> deletedAssignedTags = tagsExistenceVerifier.notExisting(this.tags);
+        Set<MetricId> deletedAssignedMetrics = metricsExistenceVerifier.notExisting(this.tags, this.selectedMetrics());
+        List<MetricValue> deletedAssignedValues = valuesForMetricIds(deletedAssignedMetrics);
         this.title = activity.title();
         this.startTime = activity.startTime();
         this.endTime = activity.endTime();
         this.comment = activity.comment();
         this.tags.clear();
         this.tags.addAll(toTagIds(activity));
+        this.metricValues.clear();
+        this.metricValues.addAll(activity.metricValues());
         validate();
         this.tags.addAll(deletedAssignedTags);
+        this.metricValues.addAll(deletedAssignedValues);
+    }
+
+    private List<MetricValue> valuesForMetricIds(Collection<MetricId> metricIds) {
+        List<UUID> metricUUIDs = metricIds.stream()
+                .map(MetricId::id)
+                .toList();
+        return this.metricValues.stream()
+                .filter(metricValue -> metricUUIDs.contains(metricValue.metricId()))
+                .toList();
     }
 
     void delete() {
@@ -98,6 +128,7 @@ class Activity implements Entity {
                 activity.endTime(),
                 activity.comment(),
                 toTagIds(activity),
+                activity.metricValues(),
                 activity.deleted(),
                 tagsExistenceVerifier
         );
@@ -107,22 +138,55 @@ class Activity implements Entity {
         Set<UUID> tagIds = tags.stream()
                 .map(TagId::id)
                 .collect(toUnmodifiableSet());
-        return new ActivityDto(id.id(), creator.id(), title, startTime, endTime, comment, tagIds, deleted);
+        return new ActivityDto(
+                id.id(),
+                creator.id(),
+                title,
+                startTime,
+                endTime,
+                comment,
+                tagIds,
+                unmodifiableList(metricValues),
+                deleted
+        );
     }
 
     ActivityDto forClient() {
         Set<UUID> tagIds = tagsExistenceVerifier.existing(tags).stream()
                 .map(TagId::id)
                 .collect(toUnmodifiableSet());
+        List<MetricValue> metricValues = valuesForMetricIds(
+                metricsExistenceVerifier.existing(this.tags, this.selectedMetrics())
+        );
 
-        return new ActivityDto(id.id(), creator.id(), title, startTime, endTime, comment, tagIds, deleted);
+        return new ActivityDto(
+                id.id(),
+                creator.id(),
+                title,
+                startTime,
+                endTime,
+                comment,
+                tagIds,
+                unmodifiableList(metricValues),
+                deleted
+        );
     }
 
     ActivityChangedNotification forChangeNotification() {
         Set<UUID> tagIds = tags.stream()
                 .map(TagId::id)
                 .collect(toUnmodifiableSet());
-        ActivityDto dto = new ActivityDto(id.id(), creator.id(), title, startTime, endTime, comment, tagIds, deleted);
+        ActivityDto dto = new ActivityDto(
+                id.id(),
+                creator.id(),
+                title,
+                startTime,
+                endTime,
+                comment,
+                tagIds,
+                unmodifiableList(metricValues),
+                deleted
+        );
         return new ActivityChangedNotification(dto);
     }
 
@@ -155,9 +219,10 @@ class Activity implements Entity {
         return unmodifiableSet(tags);
     }
 
-    private static List<TagId> toTagIds(ActivityDto activity) {
-        return requireNonNullElse(activity.tags(), new HashSet<UUID>()).stream()
-                .map(TagId::new)
-                .toList();
+    Set<MetricId> selectedMetrics() {
+        return metricValues.stream()
+                .map(MetricValue::metricId)
+                .map(MetricId::new)
+                .collect(toUnmodifiableSet());
     }
 }

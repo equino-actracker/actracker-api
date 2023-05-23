@@ -1,6 +1,8 @@
 package ovh.equino.actracker.domain.activity;
 
 import ovh.equino.actracker.domain.EntityValidator;
+import ovh.equino.actracker.domain.tag.MetricId;
+import ovh.equino.actracker.domain.tag.MetricsExistenceVerifier;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
 
@@ -16,10 +18,12 @@ final class ActivityValidator extends EntityValidator<Activity> {
 
     private final Activity activity;
     private final TagsExistenceVerifier tagsExistenceVerifier;
+    private final MetricsExistenceVerifier metricsExistenceVerifier;
 
     ActivityValidator(Activity activity, TagsExistenceVerifier tagsExistenceVerifier) {
         this.activity = activity;
         this.tagsExistenceVerifier = tagsExistenceVerifier;
+        this.metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
     }
 
     @Override
@@ -36,6 +40,17 @@ final class ActivityValidator extends EntityValidator<Activity> {
                     .map(TagId::id)
                     .toList();
             validationErrors.add("Selected tags do not exist: %s".formatted(notExistingTagIds));
+        }
+
+        Set<MetricId> notExistingMetrics = metricsExistenceVerifier.notExisting(
+                activity.tags(),
+                activity.selectedMetrics()
+        );
+        if (isNotEmpty(notExistingMetrics)) {
+            List<UUID> notExistingMetricIds = notExistingMetrics.stream()
+                    .map(MetricId::id)
+                    .toList();
+            validationErrors.add("Selected metrics do not exist in selected tags: %s".formatted(notExistingMetricIds));
         }
 
         return validationErrors;

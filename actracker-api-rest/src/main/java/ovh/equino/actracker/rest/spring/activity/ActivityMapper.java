@@ -9,13 +9,16 @@ import java.util.List;
 
 class ActivityMapper extends PayloadMapper {
 
+    private final MetricValueMapper metricValueMapper = new MetricValueMapper();
+
     ActivityDto fromRequest(Activity activityRequest) {
         return new ActivityDto(
                 activityRequest.title(),
                 timestampToInstant(activityRequest.startTimestamp()),
                 timestampToInstant(activityRequest.endTimestamp()),
                 activityRequest.comment(),
-                stringsToUuids(activityRequest.tags())
+                stringsToUuids(activityRequest.tags()),
+                metricValueMapper.fromRequest(activityRequest.metricValues())
         );
     }
 
@@ -26,7 +29,8 @@ class ActivityMapper extends PayloadMapper {
                 instantToTimestamp(activity.startTime()),
                 instantToTimestamp(activity.endTime()),
                 activity.comment(),
-                uuidsToStrings(activity.tags())
+                uuidsToStrings(activity.tags()),
+                metricValueMapper.toResponse(activity.metricValues())
         );
     }
 

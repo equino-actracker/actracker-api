@@ -86,7 +86,8 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
 
         return switch (chart.groupBy()) {
             case TAG -> generateChartGroupedByTag(chart.name(), generationCriteria, chartTags, allActivities);
-            case DAY, WEEK, MONTH, WEEKEND -> generateChartGroupedByTime(chart, generationCriteria, chartTags, allActivities);
+            case DAY, WEEK, MONTH, WEEKEND ->
+                    generateChartGroupedByTime(chart, generationCriteria, chartTags, allActivities);
         };
     }
 
@@ -165,7 +166,8 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
                         latestOf(activity.startTime(), generationCriteria.timeRangeStart()),
                         earliestOf(activity.endTime(), generationCriteria.timeRangeEnd()),
                         activity.comment(),
-                        activity.tags()
+                        activity.tags(),
+                        activity.metricValues()
                 ))
                 .toList();
     }

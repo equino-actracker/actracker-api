@@ -76,6 +76,13 @@ CREATE TABLE metric (
     PRIMARY KEY (id)
 );
 
+CREATE TABLE metric_value (
+    id VARCHAR(36) UNIQUE NOT NULL,
+    activity_id VARCHAR(36) NOT NULL,
+    metric_id VARCHAR(36) NOT NULL,
+    metric_value NUMERIC(12, 3) -- Max 999_999_999.999
+);
+
 CREATE SEQUENCE outbox_notification_version_seq INCREMENT BY 1;
 
 CREATE TABLE outbox_notification (

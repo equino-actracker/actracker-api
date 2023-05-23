@@ -65,7 +65,8 @@ final class ActivityFinder {
                                 latestOf(generationCriteria.timeRangeStart(), activity.startTime()),
                                 earliestOf(generationCriteria.timeRangeEnd(), activity.endTime()),
                                 activity.comment(),
-                                activity.tags()
+                                activity.tags(),
+                                activity.metricValues()
                         )
                 )
                 .filter(activity -> nonNull(activity.startTime()) && nonNull(activity.endTime()))

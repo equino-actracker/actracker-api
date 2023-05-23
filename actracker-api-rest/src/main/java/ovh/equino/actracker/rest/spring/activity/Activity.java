@@ -8,6 +8,7 @@ record Activity(
         Long startTimestamp,
         Long endTimestamp,
         String comment,
-        Collection<String> tags
+        Collection<String> tags,
+        Collection<MetricValue> metricValues
 ) {
 }
