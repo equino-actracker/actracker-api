@@ -5,6 +5,7 @@ import ovh.equino.actracker.domain.user.User;
 
 import java.util.*;
 
+import static java.util.Collections.unmodifiableList;
 import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
 
@@ -106,6 +107,10 @@ class Tag implements Entity {
 
     TagId id() {
         return id;
+    }
+
+    Collection<Metric> metrics() {
+        return unmodifiableList(metrics);
     }
 
     boolean isDeleted() {

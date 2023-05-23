@@ -4,8 +4,10 @@ import jakarta.persistence.*;
 import ovh.equino.actracker.repository.jpa.tag.TagEntity;
 
 import java.sql.Timestamp;
-import java.time.Instant;
+import java.util.List;
 import java.util.Set;
+
+import static jakarta.persistence.CascadeType.ALL;
 
 @Entity
 @Table(name = "activity")
@@ -37,6 +39,9 @@ class ActivityEntity {
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     Set<TagEntity> tags;
+
+    @OneToMany(mappedBy = "activity", cascade = ALL, orphanRemoval = true)
+    List<MetricValueEntity> metricValues;
 
     @Column(name = "deleted")
     boolean deleted;

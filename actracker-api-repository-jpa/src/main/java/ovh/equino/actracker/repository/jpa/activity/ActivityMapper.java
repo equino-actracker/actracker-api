@@ -14,6 +14,8 @@ import static java.util.stream.Collectors.toUnmodifiableSet;
 
 class ActivityMapper {
 
+    private final MetricValueMapper metricValueMapper = new MetricValueMapper();
+
     ActivityDto toDto(ActivityEntity entity) {
 
         Set<UUID> entityTags = requireNonNullElse(entity.tags, new HashSet<TagEntity>()).stream()
@@ -29,6 +31,7 @@ class ActivityMapper {
                 isNull(entity.endTime) ? null : entity.endTime.toInstant(),
                 entity.comment,
                 entityTags,
+                metricValueMapper.toValueObjects(entity.metricValues),
                 entity.deleted
         );
     }
@@ -48,6 +51,7 @@ class ActivityMapper {
         entity.endTime = isNull(dto.endTime()) ? null : Timestamp.from(dto.endTime());
         entity.comment = dto.comment();
         entity.tags = dtoTags;
+        entity.metricValues = metricValueMapper.toEntities(dto.metricValues(), entity);
         entity.deleted = dto.deleted();
         return entity;
     }

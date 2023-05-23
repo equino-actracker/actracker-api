@@ -28,20 +28,21 @@ public class TagsExistenceVerifier {
     }
 
     public Set<TagId> existing(Collection<TagId> tags) {
-        List<TagId> existingTags = existingTagIds(tags);
+        List<TagId> existingTags = existingTags(tags).stream()
+                .map(Tag::id)
+                .toList();
         return tags.stream()
                 .filter(existingTags::contains)
                 .collect(toUnmodifiableSet());
     }
 
-    private List<TagId> existingTagIds(Collection<TagId> tagsToCheck) {
+    List<Tag> existingTags(Collection<TagId> tagsToCheck) {
         Set<UUID> uuids = tagsToCheck.stream()
                 .map(TagId::id)
                 .collect(toUnmodifiableSet());
         return tagRepository.findByIds(uuids, owner).stream()
                 .map(Tag::fromStorage)
                 .filter(Tag::isNotDeleted)
-                .map(Tag::id)
                 .toList();
     }
 }
