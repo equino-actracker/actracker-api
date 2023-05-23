@@ -81,7 +81,6 @@ class Activity implements Entity {
 
     void updateTo(ActivityDto activity) {
         Set<TagId> deletedAssignedTags = tagsExistenceVerifier.notExisting(this.tags);
-        // TODO test !!!!!!! Both, preserving when tag or metric is missing
         Set<MetricId> deletedAssignedMetrics = metricsExistenceVerifier.notExisting(this.tags, this.selectedMetrics());
         List<MetricValue> deletedAssignedValues = valuesForMetricIds(deletedAssignedMetrics);
         this.title = activity.title();
@@ -95,7 +94,6 @@ class Activity implements Entity {
         validate();
         this.tags.addAll(deletedAssignedTags);
         this.metricValues.addAll(deletedAssignedValues);
-        boolean worksFine = false;
     }
 
     private List<MetricValue> valuesForMetricIds(Collection<MetricId> metricIds) {
@@ -157,7 +155,6 @@ class Activity implements Entity {
         Set<UUID> tagIds = tagsExistenceVerifier.existing(tags).stream()
                 .map(TagId::id)
                 .collect(toUnmodifiableSet());
-        // TODO test !!!!!!!! Both, hiding when metric and tag is missing
         List<MetricValue> metricValues = valuesForMetricIds(
                 metricsExistenceVerifier.existing(this.tags, this.selectedMetrics())
         );

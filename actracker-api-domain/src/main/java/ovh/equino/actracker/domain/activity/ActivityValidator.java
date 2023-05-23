@@ -42,8 +42,6 @@ final class ActivityValidator extends EntityValidator<Activity> {
             validationErrors.add("Selected tags do not exist: %s".formatted(notExistingTagIds));
         }
 
-        // TODO test!!! Both, when tag is missing or metric is missing
-        // TODO Check if validation doesn't fail, when not existing metric was deleted
         Set<MetricId> notExistingMetrics = metricsExistenceVerifier.notExisting(
                 activity.tags(),
                 activity.selectedMetrics()
