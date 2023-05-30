@@ -48,7 +48,7 @@ abstract class TimeChartGenerator extends ChartGenerator {
 
             List<ActivityDto> matchingAlignedActivities = alignedTo(bucketStartTime, bucketEndTime, activities);
             DashboardChartData subChart = subChartGenerator.generate(matchingAlignedActivities);
-            ChartBucketData dailyBucket = new ChartBucketData(
+            ChartBucketData timeBucket = new ChartBucketData(
                     null,
                     bucketStartTime,
                     bucketEndTime,
@@ -57,7 +57,7 @@ abstract class TimeChartGenerator extends ChartGenerator {
                     null,
                     subChart.buckets()
             );
-            timeRangeBuckets.add(dailyBucket);
+            timeRangeBuckets.add(timeBucket);
         }
         return new DashboardChartData(chartName, timeRangeBuckets);
     }
