@@ -94,10 +94,10 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
     private DashboardChartData generate(Chart chart,
                                         Instant rangeStart,
                                         Instant rangeEnd,
-                                        List<TagDto> allTags,
+                                        List<TagDto> tags,
                                         List<ActivityDto> activities) {
 
-        Set<TagId> tagIds = allTags.stream()
+        Set<TagId> tagIds = tags.stream()
                 .map(TagDto::id)
                 .map(TagId::new)
                 .collect(toUnmodifiableSet());
