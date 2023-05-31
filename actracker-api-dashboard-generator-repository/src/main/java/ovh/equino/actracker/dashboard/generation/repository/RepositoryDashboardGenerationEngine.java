@@ -83,7 +83,7 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
                 .filter(Objects::nonNull)
                 .max(Instant::compareTo)
                 .orElse(null);
-        return Optional.of(
+        return Optional.ofNullable(
                 earliestOf(
                         endOfDay(activityLatestEndTime),
                         generationCriteria.timeRangeEnd()
