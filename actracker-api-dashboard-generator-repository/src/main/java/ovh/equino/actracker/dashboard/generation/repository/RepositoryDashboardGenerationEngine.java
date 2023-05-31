@@ -10,6 +10,7 @@ import ovh.equino.actracker.domain.tag.TagSearchEngine;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import static java.util.Collections.emptyList;
@@ -37,73 +38,83 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
 
         List<ActivityDto> activities = activityFinder.find(generationCriteria);
 
-        Instant earliestStartTime = activities.stream()
-                .map(ActivityDto::startTime)
-                .filter(Objects::nonNull)
-                .min(Instant::compareTo)
-                .orElse(null);
-        if (earliestStartTime == null) {
-            return empty(dashboard);
-        }
-        earliestStartTime = latestOf(beginningOfDay(earliestStartTime), generationCriteria.timeRangeStart());
-
-        Instant latestEndTime = activities.stream()
-                .map(ActivityDto::endTime)
-                .filter(Objects::nonNull)
-                .max(Instant::compareTo)
-                .orElse(null);
-        latestEndTime = earliestOf(endOfDay(latestEndTime), generationCriteria.timeRangeEnd());
-        if (latestEndTime == null) {
+        Optional<Instant> rangeStartTime = rangeStartTime(activities, generationCriteria);
+        if (rangeStartTime.isEmpty()) {
             return empty(dashboard);
         }
 
-        DashboardGenerationCriteria dataDrivenGenerationCriteria = new DashboardGenerationCriteria(
-                generationCriteria.dashboardId(),
-                generationCriteria.generator(),
-                earliestStartTime,
-                latestEndTime,
-                generationCriteria.tags()
-        );
+        Optional<Instant> rangeEndTime = rangeEndTime(activities, generationCriteria);
+        if (rangeEndTime.isEmpty()) {
+            return empty(dashboard);
+        }
 
-        List<DashboardChartData> chartsData = dashboard.charts().stream()
-                .map(chart -> generate(chart, dataDrivenGenerationCriteria, tags, activities))
+        List<DashboardChartData> chartsData = dashboard.charts()
+                .stream()
+                .map(chart -> generate(chart, rangeStartTime.get(), rangeEndTime.get(), tags, activities))
                 .toList();
 
         return new DashboardData(dashboard.name(), chartsData);
     }
 
+    private Optional<Instant> rangeStartTime(List<ActivityDto> activities,
+                                             DashboardGenerationCriteria generationCriteria) {
+
+        Instant activityEarliestStartTime = activities.stream()
+                .map(ActivityDto::startTime)
+                .filter(Objects::nonNull)
+                .min(Instant::compareTo)
+                .orElse(null);
+        if (activityEarliestStartTime == null) {
+            return Optional.empty();
+        }
+        return Optional.of(
+                latestOf(
+                        startOfDay(activityEarliestStartTime),
+                        generationCriteria.timeRangeStart()
+                )
+        );
+    }
+
+    private Optional<Instant> rangeEndTime(List<ActivityDto> activities,
+                                           DashboardGenerationCriteria generationCriteria) {
+
+        Instant activityLatestEndTime = activities.stream()
+                .map(ActivityDto::endTime)
+                .filter(Objects::nonNull)
+                .max(Instant::compareTo)
+                .orElse(null);
+        return Optional.ofNullable(
+                earliestOf(
+                        endOfDay(activityLatestEndTime),
+                        generationCriteria.timeRangeEnd()
+                )
+        );
+    }
+
     private DashboardChartData generate(Chart chart,
-                                        DashboardGenerationCriteria generationCriteria,
-                                        List<TagDto> allTags,
-                                        List<ActivityDto> allActivities) {
+                                        Instant rangeStart,
+                                        Instant rangeEnd,
+                                        List<TagDto> tags,
+                                        List<ActivityDto> activities) {
 
-        //@formatter:off
-        List<TagDto> chartTags = chart.includesAllTags()
-                ? allTags
-                : allTags.stream()
-                    .filter(tag -> chart.includedTags().contains(tag.id()))
-                    .toList();
-        //@formatter:on
-
-        List<ActivityDto> matchingAlignedActivities = alignedTo(generationCriteria, allActivities);
-        Set<TagId> allowedTags = chartTags.stream()
-                .map(TagDto::id)
-                .map(TagId::new)
-                .collect(toUnmodifiableSet());
-        Set<TagId> allTag = allTags.stream()
+        Set<TagId> tagIds = tags.stream()
                 .map(TagDto::id)
                 .map(TagId::new)
                 .collect(toUnmodifiableSet());
 
         ChartGenerator generator = switch (chart.groupBy()) {
-            case TAG -> new TagChartGenerator(chart.name(), allowedTags, allTag);
-            case DAY -> new DailyChartGenerator(new TagChartGenerator(chart.name(), allowedTags, allTag));
-            case WEEK -> new WeeklyChartGenerator(new TagChartGenerator(chart.name(), allowedTags, allTag));
-            case MONTH -> new MonthlyChartGenerator(new TagChartGenerator(chart.name(), allowedTags, allTag));
-            case WEEKEND -> new WeekendlyChartGenerator(new TagChartGenerator(chart.name(), allowedTags, allTag));
+            case TAG -> new TagChartGenerator(chart, rangeStart, rangeEnd, activities, tagIds);
+            case DAY ->
+                    new DailyChartGenerator(chart, rangeStart, rangeEnd, activities, tagIds, TagChartGenerator::new);
+            case WEEK ->
+                    new WeeklyChartGenerator(chart, rangeStart, rangeEnd, activities, tagIds, TagChartGenerator::new);
+            case MONTH ->
+                    new MonthlyChartGenerator(chart, rangeStart, rangeEnd, activities, tagIds, TagChartGenerator::new);
+            case WEEKEND ->
+                    new WeekendlyChartGenerator(chart, rangeStart, rangeEnd, activities, tagIds, TagChartGenerator::new);
         };
 
-        return generator.generate(matchingAlignedActivities);
+        return generator.generate();
     }
 
     DashboardData empty(DashboardDto dashboard) {
@@ -112,21 +123,5 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
                 .map(chart -> new DashboardChartData(chart.name(), emptyList()))
                 .toList();
         return new DashboardData(dashboard.name(), emptyCharts);
-    }
-
-    // This is a code duplication (TimeChartGenerator)
-    private List<ActivityDto> alignedTo(DashboardGenerationCriteria generationCriteria, List<ActivityDto> activities) {
-        return activities.stream()
-                .filter(activity -> !activity.startTime().isAfter(generationCriteria.timeRangeEnd()))
-                .filter(activity -> activity.endTime() == null || !activity.endTime().isBefore(generationCriteria.timeRangeStart()))
-                .map(activity -> new ActivityDto(
-                        activity.title(),
-                        latestOf(activity.startTime(), generationCriteria.timeRangeStart()),
-                        earliestOf(activity.endTime(), generationCriteria.timeRangeEnd()),
-                        activity.comment(),
-                        activity.tags(),
-                        activity.metricValues()
-                ))
-                .toList();
     }
 }

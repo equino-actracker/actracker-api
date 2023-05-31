@@ -1,16 +1,17 @@
 package ovh.equino.actracker.dashboard.generation.repository;
 
 import ovh.equino.actracker.domain.activity.ActivityDto;
+import ovh.equino.actracker.domain.dashboard.Chart;
 import ovh.equino.actracker.domain.dashboard.ChartBucketData;
 import ovh.equino.actracker.domain.dashboard.DashboardChartData;
 import ovh.equino.actracker.domain.tag.TagId;
 
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
@@ -20,19 +21,24 @@ class TagChartGenerator extends ChartGenerator {
 
     private final PercentageCalculator percentageCalculator = new PercentageCalculator();
 
-    TagChartGenerator(String chartName, Set<TagId> allowedTags, Set<TagId> availableTags) {
-        super(chartName, allowedTags, availableTags);
+    protected TagChartGenerator(Chart chartDefinition,
+                                Instant rangeStart,
+                                Instant rangeEnd,
+                                Collection<ActivityDto> activities,
+                                Collection<TagId> tags) {
+
+        super(chartDefinition, rangeStart, rangeEnd, activities, tags);
     }
 
     @Override
-    DashboardChartData generate(Collection<ActivityDto> activities) {
+    DashboardChartData generate() {
         Map<TagId, Duration> durationByTag = tags.stream()
                 .collect(toMap(
                         identity(),
                         tag -> totalDurationOf(activitiesWithTag(tag, activities))
                 ));
 
-        return new DashboardChartData(chartName, toBuckets(durationByTag));
+        return new DashboardChartData(chartDefinition.name(), toBuckets(durationByTag));
     }
 
     Duration totalDurationOf(Collection<ActivityDto> activities) {

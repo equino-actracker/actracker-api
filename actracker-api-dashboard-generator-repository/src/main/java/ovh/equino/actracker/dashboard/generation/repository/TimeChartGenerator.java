@@ -1,53 +1,55 @@
 package ovh.equino.actracker.dashboard.generation.repository;
 
 import ovh.equino.actracker.domain.activity.ActivityDto;
+import ovh.equino.actracker.domain.dashboard.Chart;
 import ovh.equino.actracker.domain.dashboard.ChartBucketData;
 import ovh.equino.actracker.domain.dashboard.DashboardChartData;
+import ovh.equino.actracker.domain.tag.TagId;
 
 import java.time.Instant;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static java.time.ZoneOffset.UTC;
-import static java.time.temporal.ChronoField.HOUR_OF_DAY;
-import static java.time.temporal.ChronoUnit.DAYS;
-import static ovh.equino.actracker.dashboard.generation.repository.DashboardUtils.earliestOf;
-import static ovh.equino.actracker.dashboard.generation.repository.DashboardUtils.latestOf;
-
 abstract class TimeChartGenerator extends ChartGenerator {
 
-    protected final ChartGenerator subChartGenerator;
+    private final ChartGeneratorSupplier subChartGeneratorSupplier;
+    private final Instant timelineStart;
+    private final Instant timelineEnd;
 
-    protected TimeChartGenerator(ChartGenerator subChartGenerator) {
-        super(subChartGenerator.chartName, subChartGenerator.tags, subChartGenerator.tags);
-        this.subChartGenerator = subChartGenerator;
+    public TimeChartGenerator(Chart chartDefinition,
+                              Instant rangeStart,
+                              Instant rangeEnd,
+                              Collection<ActivityDto> activities,
+                              Collection<TagId> tags,
+                              ChartGeneratorSupplier subChartGeneratorSupplier) {
+
+        super(chartDefinition, rangeStart, rangeEnd, activities, tags);
+        this.timelineStart = rangeStart;
+        this.timelineEnd = rangeEnd;
+        this.subChartGeneratorSupplier = subChartGeneratorSupplier;
     }
 
     @Override
-    DashboardChartData generate(Collection<ActivityDto> activities) {
-
-        Instant timelineStartTime = activities.stream()
-                .map(ActivityDto::startTime)
-                .min(Instant::compareTo)
-                .orElse(null);
-        Instant timelineEndTime = activities.stream()
-                .map(ActivityDto::endTime)
-                .max(Instant::compareTo)
-                .orElse(null);
+    DashboardChartData generate() {
 
         List<ChartBucketData> timeRangeBuckets = new ArrayList<>();
 
-        for (Instant bucket = timelineStartTime;
-             bucket.isBefore(timelineEndTime);
+        for (Instant bucket = timelineStart;
+             bucket.isBefore(timelineEnd);
              bucket = toNextRangeStart(bucket)) {
 
             Instant bucketStartTime = toRangeStart(bucket);
             Instant bucketEndTime = toRangeEnd(bucket);
 
-            List<ActivityDto> matchingAlignedActivities = alignedTo(bucketStartTime, bucketEndTime, activities);
-            DashboardChartData subChart = subChartGenerator.generate(matchingAlignedActivities);
+            ChartGenerator subChartGenerator = subChartGeneratorSupplier.provideGenerator(
+                    chartDefinition,
+                    bucketStartTime,
+                    bucketEndTime,
+                    activities,
+                    tags
+            );
+            DashboardChartData subChart = subChartGenerator.generate();
             ChartBucketData timeBucket = new ChartBucketData(
                     null,
                     bucketStartTime,
@@ -59,23 +61,7 @@ abstract class TimeChartGenerator extends ChartGenerator {
             );
             timeRangeBuckets.add(timeBucket);
         }
-        return new DashboardChartData(chartName, timeRangeBuckets);
-    }
-
-    // This is a duplication (RepositoryDashboardGenerationEngine)
-    private List<ActivityDto> alignedTo(Instant rangeStart, Instant rangeEnd, Collection<ActivityDto> activities) {
-        return activities.stream()
-                .filter(activity -> !activity.startTime().isAfter(rangeEnd))
-                .filter(activity -> activity.endTime() == null || !activity.endTime().isBefore(rangeStart))
-                .map(activity -> new ActivityDto(
-                        activity.title(),
-                        latestOf(activity.startTime(), rangeStart),
-                        earliestOf(activity.endTime(), rangeEnd),
-                        activity.comment(),
-                        activity.tags(),
-                        activity.metricValues()
-                ))
-                .toList();
+        return new DashboardChartData(chartDefinition.name(), timeRangeBuckets);
     }
 
     protected abstract ChartBucketData.Type bucketType();
@@ -85,15 +71,4 @@ abstract class TimeChartGenerator extends ChartGenerator {
     protected abstract Instant toRangeEnd(Instant timeInRange);
 
     protected abstract Instant toNextRangeStart(Instant timeInRange);
-
-    protected Instant toStartOfDay(Instant instant) {
-        return ZonedDateTime.ofInstant(instant, UTC)
-                .with(HOUR_OF_DAY, 0)
-                .toInstant();
-    }
-
-    protected Instant toStartOfNextDay(Instant instant) {
-        return toStartOfDay(instant)
-                .plus(1, DAYS);
-    }
 }

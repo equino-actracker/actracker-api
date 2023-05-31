@@ -1,18 +1,29 @@
 package ovh.equino.actracker.dashboard.generation.repository;
 
+import ovh.equino.actracker.domain.activity.ActivityDto;
+import ovh.equino.actracker.domain.dashboard.Chart;
 import ovh.equino.actracker.domain.dashboard.ChartBucketData;
+import ovh.equino.actracker.domain.tag.TagId;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.util.Collection;
 
 import static java.time.ZoneOffset.UTC;
 import static java.time.temporal.TemporalAdjusters.firstDayOfMonth;
 import static java.time.temporal.TemporalAdjusters.firstDayOfNextMonth;
+import static ovh.equino.actracker.dashboard.generation.repository.DashboardUtils.startOfDay;
 
 class MonthlyChartGenerator extends TimeChartGenerator {
 
-    MonthlyChartGenerator(ChartGenerator subChartGenerator) {
-        super(subChartGenerator);
+    public MonthlyChartGenerator(Chart chartDefinition,
+                                 Instant rangeStart,
+                                 Instant rangeEnd,
+                                 Collection<ActivityDto> activities,
+                                 Collection<TagId> tags,
+                                 ChartGeneratorSupplier subChartGeneratorSupplier) {
+
+        super(chartDefinition, rangeStart, rangeEnd, activities, tags, subChartGeneratorSupplier);
     }
 
     @Override
@@ -22,7 +33,7 @@ class MonthlyChartGenerator extends TimeChartGenerator {
 
     @Override
     protected Instant toRangeStart(Instant timeInRange) {
-        return toStartOfDay(
+        return startOfDay(
                 ZonedDateTime.ofInstant(timeInRange, UTC)
                         .with(firstDayOfMonth())
                         .toInstant()
@@ -36,7 +47,7 @@ class MonthlyChartGenerator extends TimeChartGenerator {
 
     @Override
     protected Instant toNextRangeStart(Instant timeInRange) {
-        return toStartOfDay(
+        return startOfDay(
                 ZonedDateTime.ofInstant(timeInRange, UTC)
                         .with(firstDayOfNextMonth())
                         .toInstant()

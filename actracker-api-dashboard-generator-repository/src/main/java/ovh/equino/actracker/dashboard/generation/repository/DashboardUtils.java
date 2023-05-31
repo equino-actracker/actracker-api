@@ -1,11 +1,12 @@
 package ovh.equino.actracker.dashboard.generation.repository;
 
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Objects;
 
+import static java.time.LocalTime.MAX;
+import static java.time.ZoneOffset.UTC;
+import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.Arrays.stream;
 
 interface DashboardUtils {
@@ -24,13 +25,14 @@ interface DashboardUtils {
                 .orElse(null);
     }
 
-    static Instant beginningOfDay(Instant instant) {
+    static Instant startOfDay(Instant instant) {
         if (instant == null) {
             return null;
         }
-        return LocalDate.ofInstant(instant, ZoneId.systemDefault())
+        return ZonedDateTime.ofInstant(instant, UTC)
+                .toLocalDate()
                 .atStartOfDay()
-                .atZone(ZoneId.systemDefault())
+                .atZone(UTC)
                 .toInstant();
     }
 
@@ -38,9 +40,17 @@ interface DashboardUtils {
         if (instant == null) {
             return null;
         }
-        return LocalDate.ofInstant(instant, ZoneId.systemDefault())
-                .atTime(LocalTime.MAX)
-                .atZone(ZoneId.systemDefault())
+        return ZonedDateTime.ofInstant(instant, UTC)
+                .toLocalDate()
+                .atTime(MAX)
+                .atZone(UTC)
                 .toInstant();
+    }
+
+    static Instant startOfNextDay(Instant instant) {
+        if (instant == null) {
+            return null;
+        }
+        return startOfDay(instant).plus(1, DAYS);
     }
 }
