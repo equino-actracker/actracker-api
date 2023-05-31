@@ -1,9 +1,13 @@
 package ovh.equino.actracker.dashboard.generation.repository;
 
+import ovh.equino.actracker.domain.activity.ActivityDto;
+import ovh.equino.actracker.domain.dashboard.Chart;
 import ovh.equino.actracker.domain.dashboard.ChartBucketData;
+import ovh.equino.actracker.domain.tag.TagId;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.util.Collection;
 
 import static java.time.DayOfWeek.FRIDAY;
 import static java.time.DayOfWeek.MONDAY;
@@ -11,11 +15,18 @@ import static java.time.ZoneOffset.UTC;
 import static java.time.temporal.ChronoField.HOUR_OF_DAY;
 import static java.time.temporal.TemporalAdjusters.next;
 import static java.time.temporal.TemporalAdjusters.previousOrSame;
+import static ovh.equino.actracker.dashboard.generation.repository.DashboardUtils.startOfDay;
 
 class WeekendlyChartGenerator extends TimeChartGenerator {
 
-    WeekendlyChartGenerator(ChartGenerator subChartGenerator) {
-        super(subChartGenerator);
+    public WeekendlyChartGenerator(Chart chartDefinition,
+                                   Instant rangeStart,
+                                   Instant rangeEnd,
+                                   Collection<ActivityDto> activities,
+                                   Collection<TagId> tags,
+                                   ChartGeneratorSupplier subChartGeneratorSupplier) {
+
+        super(chartDefinition, rangeStart, rangeEnd, activities, tags, subChartGeneratorSupplier);
     }
 
     @Override
@@ -34,7 +45,7 @@ class WeekendlyChartGenerator extends TimeChartGenerator {
     @Override
     protected Instant toRangeEnd(Instant timeInRange) {
         Instant rangeStart = toRangeStart(timeInRange);
-        return toStartOfDay(
+        return startOfDay(
                 ZonedDateTime.ofInstant(rangeStart, UTC)
                         .with(next(MONDAY))
                         .toInstant()

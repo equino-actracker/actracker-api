@@ -56,21 +56,4 @@ final class ActivityFinder {
         );
         return searchEngine.findActivities(searchCriteria);
     }
-
-    private Collection<ActivityDto> alignedToTimeRange(List<ActivityDto> activities, DashboardGenerationCriteria generationCriteria) {
-        return activities.stream()
-                .map(activity ->
-                        new ActivityDto(
-                                activity.title(),
-                                latestOf(generationCriteria.timeRangeStart(), activity.startTime()),
-                                earliestOf(generationCriteria.timeRangeEnd(), activity.endTime()),
-                                activity.comment(),
-                                activity.tags(),
-                                activity.metricValues()
-                        )
-                )
-                .filter(activity -> nonNull(activity.startTime()) && nonNull(activity.endTime()))
-                .toList();
-    }
-
 }
