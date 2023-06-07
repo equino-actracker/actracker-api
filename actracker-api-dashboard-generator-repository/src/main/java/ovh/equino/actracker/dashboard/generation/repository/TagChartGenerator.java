@@ -2,8 +2,9 @@ package ovh.equino.actracker.dashboard.generation.repository;
 
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.dashboard.Chart;
-import ovh.equino.actracker.domain.dashboard.ChartBucketData;
-import ovh.equino.actracker.domain.dashboard.DashboardChartData;
+import ovh.equino.actracker.domain.dashboard.generation.BucketType;
+import ovh.equino.actracker.domain.dashboard.generation.ChartBucketData;
+import ovh.equino.actracker.domain.dashboard.generation.DashboardChartData;
 import ovh.equino.actracker.domain.tag.TagId;
 
 import java.math.BigDecimal;
@@ -15,7 +16,6 @@ import java.util.Map;
 
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
-import static ovh.equino.actracker.domain.dashboard.ChartBucketData.Type.TAG;
 
 class TagChartGenerator extends ChartGenerator {
 
@@ -70,7 +70,7 @@ class TagChartGenerator extends ChartGenerator {
                 tag.id().toString(),
                 null,
                 null,
-                TAG,
+                BucketType.TAG,
                 percentageCalculator.percentage(tagDuration, totalDuration),
                 percentageCalculator.percentage(tagDuration, totalDuration),
                 null

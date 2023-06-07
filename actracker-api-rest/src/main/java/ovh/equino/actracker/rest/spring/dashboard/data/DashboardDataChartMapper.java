@@ -1,6 +1,6 @@
 package ovh.equino.actracker.rest.spring.dashboard.data;
 
-import ovh.equino.actracker.domain.dashboard.DashboardChartData;
+import ovh.equino.actracker.domain.dashboard.generation.DashboardChartData;
 import ovh.equino.actracker.rest.spring.PayloadMapper;
 
 import java.util.Collection;

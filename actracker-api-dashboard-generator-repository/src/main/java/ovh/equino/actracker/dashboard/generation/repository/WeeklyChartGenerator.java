@@ -2,7 +2,7 @@ package ovh.equino.actracker.dashboard.generation.repository;
 
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.dashboard.Chart;
-import ovh.equino.actracker.domain.dashboard.ChartBucketData;
+import ovh.equino.actracker.domain.dashboard.generation.BucketType;
 import ovh.equino.actracker.domain.tag.TagId;
 
 import java.time.Instant;
@@ -28,8 +28,8 @@ class WeeklyChartGenerator extends TimeChartGenerator {
     }
 
     @Override
-    protected ChartBucketData.Type bucketType() {
-        return ChartBucketData.Type.WEEK;
+    protected BucketType bucketType() {
+        return BucketType.WEEK;
     }
 
     @Override

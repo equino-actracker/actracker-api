@@ -6,7 +6,7 @@ class DashboardDataMapper extends PayloadMapper {
 
     private final DashboardDataChartMapper chartMapper = new DashboardDataChartMapper();
 
-    DashboardData toResponse(ovh.equino.actracker.domain.dashboard.DashboardData dashboardData) {
+    DashboardData toResponse(ovh.equino.actracker.domain.dashboard.generation.DashboardData dashboardData) {
         return new DashboardData(
                 dashboardData.name(),
                 chartMapper.toResponse(dashboardData.charts())

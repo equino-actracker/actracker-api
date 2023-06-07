@@ -7,7 +7,7 @@ record DashboardDataBucket(
     String id,
     Long rangeStartMillis,
     Long rangeEndMillis,
-    String type,
+    String bucketType,
     BigDecimal value,
     BigDecimal percentage,
     Collection<DashboardDataBucket> buckets

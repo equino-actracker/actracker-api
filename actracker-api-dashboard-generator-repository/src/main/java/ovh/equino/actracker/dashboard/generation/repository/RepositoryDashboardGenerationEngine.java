@@ -3,6 +3,10 @@ package ovh.equino.actracker.dashboard.generation.repository;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivitySearchEngine;
 import ovh.equino.actracker.domain.dashboard.*;
+import ovh.equino.actracker.domain.dashboard.generation.DashboardChartData;
+import ovh.equino.actracker.domain.dashboard.generation.DashboardData;
+import ovh.equino.actracker.domain.dashboard.generation.DashboardGenerationCriteria;
+import ovh.equino.actracker.domain.dashboard.generation.DashboardGenerationEngine;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagSearchEngine;
@@ -103,7 +107,7 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
                 .collect(toUnmodifiableSet());
 
         ChartGenerator generator = switch (chart.groupBy()) {
-            case TAG -> new TagChartGenerator(chart, rangeStart, rangeEnd, activities, tagIds);
+            case SELF -> new TagChartGenerator(chart, rangeStart, rangeEnd, activities, tagIds);
             case DAY ->
                     new DailyChartGenerator(chart, rangeStart, rangeEnd, activities, tagIds, TagChartGenerator::new);
             case WEEK ->

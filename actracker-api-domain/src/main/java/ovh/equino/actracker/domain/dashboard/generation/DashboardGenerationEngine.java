@@ -1,4 +1,6 @@
-package ovh.equino.actracker.domain.dashboard;
+package ovh.equino.actracker.domain.dashboard.generation;
+
+import ovh.equino.actracker.domain.dashboard.DashboardDto;
 
 public interface DashboardGenerationEngine {
 
