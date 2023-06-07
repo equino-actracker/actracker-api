@@ -1,7 +1,7 @@
 package ovh.equino.actracker.rest.spring.dashboard.data;
 
 import org.springframework.web.bind.annotation.*;
-import ovh.equino.actracker.domain.dashboard.DashboardGenerationCriteria;
+import ovh.equino.actracker.domain.dashboard.generation.DashboardGenerationCriteria;
 import ovh.equino.actracker.domain.dashboard.DashboardService;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.security.identity.Identity;
@@ -43,7 +43,7 @@ class DashboardDataController {
                 .withDashboardId(id)
                 .build();
 
-        ovh.equino.actracker.domain.dashboard.DashboardData dashboardData =
+        ovh.equino.actracker.domain.dashboard.generation.DashboardData dashboardData =
                 dashboardService.generateDashboard(dashboardGenerationCriteria);
 
         return mapper.toResponse(dashboardData);

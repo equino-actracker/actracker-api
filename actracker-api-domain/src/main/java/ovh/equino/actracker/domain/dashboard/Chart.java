@@ -10,22 +10,19 @@ public record Chart(
 
         String name,
         GroupBy groupBy,
+        AnalysisMetric analysisMetric,
         Set<UUID> includedTags
 ) {
 
     public Chart {
         includedTags = requireNonNullElse(includedTags, emptySet());
+        if (analysisMetric == null) {
+            throw new IllegalArgumentException("Analysis metric cannot be null");
+        }
     }
 
     public boolean includesAllTags() {
         return includedTags.isEmpty();
     }
 
-    public enum GroupBy {
-        TAG,
-        DAY,
-        WEEK,
-        MONTH,
-        WEEKEND
-    }
 }

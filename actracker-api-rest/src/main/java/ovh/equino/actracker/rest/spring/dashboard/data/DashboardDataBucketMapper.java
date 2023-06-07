@@ -1,6 +1,6 @@
 package ovh.equino.actracker.rest.spring.dashboard.data;
 
-import ovh.equino.actracker.domain.dashboard.ChartBucketData;
+import ovh.equino.actracker.domain.dashboard.generation.ChartBucketData;
 import ovh.equino.actracker.rest.spring.PayloadMapper;
 
 import java.util.Collection;
@@ -15,7 +15,7 @@ class DashboardDataBucketMapper extends PayloadMapper {
                 bucket.id(),
                 instantToTimestamp(bucket.rangeStart()),
                 instantToTimestamp(bucket.rangeEnd()),
-                bucket.type().toString(),
+                bucket.bucketType().toString(),
                 bucket.value(),
                 bucket.percentage(),
                 toResponse(bucket.buckets())

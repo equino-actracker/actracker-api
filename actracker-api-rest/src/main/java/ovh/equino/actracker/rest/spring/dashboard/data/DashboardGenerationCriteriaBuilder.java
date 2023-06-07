@@ -1,6 +1,6 @@
 package ovh.equino.actracker.rest.spring.dashboard.data;
 
-import ovh.equino.actracker.domain.dashboard.DashboardGenerationCriteria;
+import ovh.equino.actracker.domain.dashboard.generation.DashboardGenerationCriteria;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.rest.spring.PayloadMapper;
 

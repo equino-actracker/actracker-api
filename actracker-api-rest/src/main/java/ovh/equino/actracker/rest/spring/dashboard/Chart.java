@@ -6,31 +6,8 @@ record Chart(
 
         String name,
         GroupBy groupBy,
+        AnalysisMetric metric,
         Collection<String> includedTags
 
 ) {
-
-    enum GroupBy {
-        TAG, DAY, WEEK, MONTH, WEEKEND;
-
-        static GroupBy fromDomain(ovh.equino.actracker.domain.dashboard.Chart.GroupBy groupBy) {
-            return switch (groupBy) {
-                case TAG -> TAG;
-                case DAY -> DAY;
-                case WEEK -> WEEK;
-                case MONTH -> MONTH;
-                case WEEKEND -> WEEKEND;
-            };
-        }
-
-        static ovh.equino.actracker.domain.dashboard.Chart.GroupBy toDomain(GroupBy groupBy) {
-            return switch (groupBy) {
-                case TAG -> ovh.equino.actracker.domain.dashboard.Chart.GroupBy.TAG;
-                case DAY -> ovh.equino.actracker.domain.dashboard.Chart.GroupBy.DAY;
-                case WEEK -> ovh.equino.actracker.domain.dashboard.Chart.GroupBy.WEEK;
-                case MONTH -> ovh.equino.actracker.domain.dashboard.Chart.GroupBy.MONTH;
-                case WEEKEND -> ovh.equino.actracker.domain.dashboard.Chart.GroupBy.WEEKEND;
-            };
-        }
-    }
 }

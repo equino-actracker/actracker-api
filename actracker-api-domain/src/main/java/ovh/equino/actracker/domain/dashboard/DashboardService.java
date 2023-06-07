@@ -2,6 +2,8 @@ package ovh.equino.actracker.domain.dashboard;
 
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
+import ovh.equino.actracker.domain.dashboard.generation.DashboardData;
+import ovh.equino.actracker.domain.dashboard.generation.DashboardGenerationCriteria;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.UUID;

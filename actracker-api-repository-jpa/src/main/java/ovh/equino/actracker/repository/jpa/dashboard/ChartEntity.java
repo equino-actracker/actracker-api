@@ -23,6 +23,9 @@ class ChartEntity {
     @Column(name = "group_by")
     String groupBy;
 
+    @Column(name = "metric")
+    String metric;
+
     @ManyToMany
     @JoinTable(
             name = "chart_tag",

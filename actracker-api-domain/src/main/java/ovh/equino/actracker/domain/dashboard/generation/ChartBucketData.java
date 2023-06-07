@@ -1,4 +1,4 @@
-package ovh.equino.actracker.domain.dashboard;
+package ovh.equino.actracker.domain.dashboard.generation;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -10,7 +10,7 @@ public record ChartBucketData(
         String id,
         Instant rangeStart,
         Instant rangeEnd,
-        Type type,
+        BucketType bucketType,
         BigDecimal value,
         BigDecimal percentage,
         Collection<ChartBucketData> buckets
@@ -22,7 +22,4 @@ public record ChartBucketData(
         }
     }
 
-    public enum Type {
-        TAG, DAY, WEEK, MONTH, WEEKEND
-    }
 }

@@ -18,7 +18,8 @@ class ChartMapper extends PayloadMapper {
     ovh.equino.actracker.domain.dashboard.Chart fromRequest(Chart chartRequest) {
         return new ovh.equino.actracker.domain.dashboard.Chart(
                 chartRequest.name(),
-                Chart.GroupBy.toDomain(chartRequest.groupBy()),
+                GroupBy.toDomain(chartRequest.groupBy()),
+                AnalysisMetric.toDomain(chartRequest.metric()),
                 stringsToUuids(chartRequest.includedTags())
         );
     }
@@ -32,7 +33,8 @@ class ChartMapper extends PayloadMapper {
     Chart toResponse(ovh.equino.actracker.domain.dashboard.Chart chart) {
         return new Chart(
                 chart.name(),
-                Chart.GroupBy.fromDomain(chart.groupBy()),
+                GroupBy.fromDomain(chart.groupBy()),
+                AnalysisMetric.fromDomain(chart.analysisMetric()),
                 uuidsToStrings(chart.includedTags())
         );
     }

@@ -5,16 +5,13 @@ import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivitySearchEngine;
-import ovh.equino.actracker.domain.dashboard.DashboardGenerationCriteria;
+import ovh.equino.actracker.domain.dashboard.generation.DashboardGenerationCriteria;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-import static ovh.equino.actracker.dashboard.generation.repository.DashboardUtils.earliestOf;
-import static ovh.equino.actracker.dashboard.generation.repository.DashboardUtils.latestOf;
 
 final class ActivityFinder {
 
