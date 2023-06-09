@@ -3,7 +3,7 @@ package ovh.equino.actracker.dashboard.generation.repository;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.dashboard.Chart;
 import ovh.equino.actracker.domain.dashboard.generation.DashboardChartData;
-import ovh.equino.actracker.domain.tag.TagId;
+import ovh.equino.actracker.domain.tag.TagDto;
 
 import java.time.Instant;
 import java.util.Collection;
@@ -16,18 +16,22 @@ import static ovh.equino.actracker.dashboard.generation.repository.DashboardUtil
 
 abstract class ChartGenerator {
 
-    protected final Set<TagId> tags;
     protected final Chart chartDefinition;
+    protected final Instant rangeStart;
+    protected final Instant rangeEnd;
     protected final List<ActivityDto> activities;
+    protected final Set<TagDto> tags;
 
     protected ChartGenerator(Chart chartDefinition,
                              Instant rangeStart,
                              Instant rangeEnd,
                              Collection<ActivityDto> activities,
-                             Collection<TagId> tags) {
+                             Collection<TagDto> tags) {
 
         this.chartDefinition = chartDefinition;
-        this.activities = alignedTo(rangeStart, rangeEnd, activities);
+        this.rangeStart = rangeStart;
+        this.rangeEnd = rangeEnd;
+        this.activities = alignedToRange(activities);
 
         //@formatter:off
         this.tags = chartDefinition.includesAllTags()
@@ -40,7 +44,7 @@ abstract class ChartGenerator {
 
     abstract DashboardChartData generate();
 
-    private List<ActivityDto> alignedTo(Instant rangeStart, Instant rangeEnd, Collection<ActivityDto> activities) {
+    private List<ActivityDto> alignedToRange(Collection<ActivityDto> activities) {
         return activities.stream()
                 .filter(activity -> !activity.startTime().isAfter(rangeEnd))
                 .filter(activity -> activity.endTime() == null || !activity.endTime().isBefore(rangeStart))

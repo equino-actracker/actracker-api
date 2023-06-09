@@ -2,7 +2,7 @@ package ovh.equino.actracker.dashboard.generation.repository;
 
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.dashboard.Chart;
-import ovh.equino.actracker.domain.tag.TagId;
+import ovh.equino.actracker.domain.tag.TagDto;
 
 import java.time.Instant;
 import java.util.Collection;
@@ -13,6 +13,6 @@ interface ChartGeneratorSupplier {
                                     Instant rangeStart,
                                     Instant rangeEnd,
                                     Collection<ActivityDto> activities,
-                                    Collection<TagId> tags
+                                    Collection<TagDto> tags
     );
 }

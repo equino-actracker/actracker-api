@@ -5,7 +5,7 @@ import ovh.equino.actracker.domain.dashboard.Chart;
 import ovh.equino.actracker.domain.dashboard.generation.BucketType;
 import ovh.equino.actracker.domain.dashboard.generation.ChartBucketData;
 import ovh.equino.actracker.domain.dashboard.generation.DashboardChartData;
-import ovh.equino.actracker.domain.tag.TagId;
+import ovh.equino.actracker.domain.tag.TagDto;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -15,19 +15,15 @@ import java.util.List;
 abstract class TimeChartGenerator extends ChartGenerator {
 
     private final ChartGeneratorSupplier subChartGeneratorSupplier;
-    private final Instant timelineStart;
-    private final Instant timelineEnd;
 
-    public TimeChartGenerator(Chart chartDefinition,
-                              Instant rangeStart,
-                              Instant rangeEnd,
-                              Collection<ActivityDto> activities,
-                              Collection<TagId> tags,
-                              ChartGeneratorSupplier subChartGeneratorSupplier) {
+    protected TimeChartGenerator(Chart chartDefinition,
+                                 Instant rangeStart,
+                                 Instant rangeEnd,
+                                 Collection<ActivityDto> activities,
+                                 Collection<TagDto> tags,
+                                 ChartGeneratorSupplier subChartGeneratorSupplier) {
 
         super(chartDefinition, rangeStart, rangeEnd, activities, tags);
-        this.timelineStart = rangeStart;
-        this.timelineEnd = rangeEnd;
         this.subChartGeneratorSupplier = subChartGeneratorSupplier;
     }
 
@@ -36,8 +32,8 @@ abstract class TimeChartGenerator extends ChartGenerator {
 
         List<ChartBucketData> timeRangeBuckets = new ArrayList<>();
 
-        for (Instant bucket = timelineStart;
-             bucket.isBefore(timelineEnd);
+        for (Instant bucket = rangeStart;
+             bucket.isBefore(rangeEnd);
              bucket = toNextRangeStart(bucket)) {
 
             Instant bucketStartTime = toRangeStart(bucket);

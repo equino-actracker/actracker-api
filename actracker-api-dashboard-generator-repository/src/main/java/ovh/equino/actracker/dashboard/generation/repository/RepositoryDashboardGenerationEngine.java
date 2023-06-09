@@ -2,23 +2,21 @@ package ovh.equino.actracker.dashboard.generation.repository;
 
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivitySearchEngine;
-import ovh.equino.actracker.domain.dashboard.*;
+import ovh.equino.actracker.domain.dashboard.Chart;
+import ovh.equino.actracker.domain.dashboard.DashboardDto;
 import ovh.equino.actracker.domain.dashboard.generation.DashboardChartData;
 import ovh.equino.actracker.domain.dashboard.generation.DashboardData;
 import ovh.equino.actracker.domain.dashboard.generation.DashboardGenerationCriteria;
 import ovh.equino.actracker.domain.dashboard.generation.DashboardGenerationEngine;
 import ovh.equino.actracker.domain.tag.TagDto;
-import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagSearchEngine;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static ovh.equino.actracker.dashboard.generation.repository.DashboardUtils.*;
 
@@ -101,21 +99,22 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
                                         List<TagDto> tags,
                                         List<ActivityDto> activities) {
 
-        Set<TagId> tagIds = tags.stream()
-                .map(TagDto::id)
-                .map(TagId::new)
-                .collect(toUnmodifiableSet());
+        ChartGeneratorSupplier subBucketsGenerator = switch (chart.analysisMetric()) {
+            case TAG_PERCENTAGE -> TagChartGenerator::new;
+            case METRIC_VALUE -> MetricValueChartGenerator::new;
+        };
 
         ChartGenerator generator = switch (chart.groupBy()) {
-            case SELF -> new TagChartGenerator(chart, rangeStart, rangeEnd, activities, tagIds);
+            case SELF ->
+                    new SelfGroupedChartGenerator(chart, rangeStart, rangeEnd, activities, tags, subBucketsGenerator);
             case DAY ->
-                    new DailyChartGenerator(chart, rangeStart, rangeEnd, activities, tagIds, TagChartGenerator::new);
+                    new DailyChartGenerator(chart, rangeStart, rangeEnd, activities, tags, subBucketsGenerator);
             case WEEK ->
-                    new WeeklyChartGenerator(chart, rangeStart, rangeEnd, activities, tagIds, TagChartGenerator::new);
+                    new WeeklyChartGenerator(chart, rangeStart, rangeEnd, activities, tags, subBucketsGenerator);
             case MONTH ->
-                    new MonthlyChartGenerator(chart, rangeStart, rangeEnd, activities, tagIds, TagChartGenerator::new);
+                    new MonthlyChartGenerator(chart, rangeStart, rangeEnd, activities, tags, subBucketsGenerator);
             case WEEKEND ->
-                    new WeekendlyChartGenerator(chart, rangeStart, rangeEnd, activities, tagIds, TagChartGenerator::new);
+                    new WeekendlyChartGenerator(chart, rangeStart, rangeEnd, activities, tags, subBucketsGenerator);
         };
 
         return generator.generate();
