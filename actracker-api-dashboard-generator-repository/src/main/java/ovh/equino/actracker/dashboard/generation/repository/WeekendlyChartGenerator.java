@@ -3,7 +3,7 @@ package ovh.equino.actracker.dashboard.generation.repository;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.dashboard.Chart;
 import ovh.equino.actracker.domain.dashboard.generation.BucketType;
-import ovh.equino.actracker.domain.tag.TagId;
+import ovh.equino.actracker.domain.tag.TagDto;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
@@ -19,12 +19,12 @@ import static ovh.equino.actracker.dashboard.generation.repository.DashboardUtil
 
 class WeekendlyChartGenerator extends TimeChartGenerator {
 
-    public WeekendlyChartGenerator(Chart chartDefinition,
-                                   Instant rangeStart,
-                                   Instant rangeEnd,
-                                   Collection<ActivityDto> activities,
-                                   Collection<TagId> tags,
-                                   ChartGeneratorSupplier subChartGeneratorSupplier) {
+    WeekendlyChartGenerator(Chart chartDefinition,
+                            Instant rangeStart,
+                            Instant rangeEnd,
+                            Collection<ActivityDto> activities,
+                            Collection<TagDto> tags,
+                            ChartGeneratorSupplier subChartGeneratorSupplier) {
 
         super(chartDefinition, rangeStart, rangeEnd, activities, tags, subChartGeneratorSupplier);
     }

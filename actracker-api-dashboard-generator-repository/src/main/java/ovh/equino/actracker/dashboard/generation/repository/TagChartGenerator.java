@@ -5,6 +5,7 @@ import ovh.equino.actracker.domain.dashboard.Chart;
 import ovh.equino.actracker.domain.dashboard.generation.BucketType;
 import ovh.equino.actracker.domain.dashboard.generation.ChartBucketData;
 import ovh.equino.actracker.domain.dashboard.generation.DashboardChartData;
+import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tag.TagId;
 
 import java.math.BigDecimal;
@@ -21,11 +22,11 @@ class TagChartGenerator extends ChartGenerator {
 
     private final PercentageCalculator percentageCalculator = new PercentageCalculator();
 
-    protected TagChartGenerator(Chart chartDefinition,
-                                Instant rangeStart,
-                                Instant rangeEnd,
-                                Collection<ActivityDto> activities,
-                                Collection<TagId> tags) {
+    TagChartGenerator(Chart chartDefinition,
+                      Instant rangeStart,
+                      Instant rangeEnd,
+                      Collection<ActivityDto> activities,
+                      Collection<TagDto> tags) {
 
         super(chartDefinition, rangeStart, rangeEnd, activities, tags);
     }
@@ -33,6 +34,8 @@ class TagChartGenerator extends ChartGenerator {
     @Override
     DashboardChartData generate() {
         Map<TagId, Duration> durationByTag = tags.stream()
+                .map(TagDto::id)
+                .map(TagId::new)
                 .collect(toMap(
                         identity(),
                         tag -> totalDurationOf(activitiesWithTag(tag, activities))
@@ -58,21 +61,20 @@ class TagChartGenerator extends ChartGenerator {
                 .reduce(Duration.ZERO, Duration::plus);
 
         return durationByTag.entrySet().stream()
-                .map(entry -> toBucket(entry, totalMeasuredDuration))
+                .map(entry -> toBucket(entry.getKey(), entry.getValue(), totalMeasuredDuration))
                 .toList();
     }
 
-    private ChartBucketData toBucket(Map.Entry<TagId, Duration> tagWithDuration, Duration totalMeasuredDuration) {
-        TagId tag = tagWithDuration.getKey();
-        BigDecimal tagDuration = BigDecimal.valueOf(tagWithDuration.getValue().toSeconds());
-        BigDecimal totalDuration = BigDecimal.valueOf(totalMeasuredDuration.toSeconds());
+    private ChartBucketData toBucket(TagId tagId, Duration tagDuration, Duration totalMeasuredDuration) {
+        BigDecimal tagDurationSeconds = BigDecimal.valueOf(tagDuration.toSeconds());
+        BigDecimal totalDurationSeconds = BigDecimal.valueOf(totalMeasuredDuration.toSeconds());
         return new ChartBucketData(
-                tag.id().toString(),
+                tagId.id().toString(),
                 null,
                 null,
                 BucketType.TAG,
-                percentageCalculator.percentage(tagDuration, totalDuration),
-                percentageCalculator.percentage(tagDuration, totalDuration),
+                percentageCalculator.percentage(tagDurationSeconds, totalDurationSeconds),
+                percentageCalculator.percentage(tagDurationSeconds, totalDurationSeconds),
                 null
         );
     }
