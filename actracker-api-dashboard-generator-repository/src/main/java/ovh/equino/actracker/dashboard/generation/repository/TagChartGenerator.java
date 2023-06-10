@@ -1,6 +1,7 @@
 package ovh.equino.actracker.dashboard.generation.repository;
 
 import ovh.equino.actracker.domain.activity.ActivityDto;
+import ovh.equino.actracker.domain.dashboard.AnalysisMetric;
 import ovh.equino.actracker.domain.dashboard.Chart;
 import ovh.equino.actracker.domain.dashboard.generation.BucketType;
 import ovh.equino.actracker.domain.dashboard.generation.ChartBucketData;
@@ -8,7 +9,6 @@ import ovh.equino.actracker.domain.dashboard.generation.DashboardChartData;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tag.TagId;
 
-import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
@@ -20,7 +20,7 @@ import static java.util.stream.Collectors.toMap;
 
 class TagChartGenerator extends ChartGenerator {
 
-    private final PercentageCalculator percentageCalculator = new PercentageCalculator();
+    private final DurationTransformer durationTransformer;
 
     TagChartGenerator(Chart chartDefinition,
                       Instant rangeStart,
@@ -29,6 +29,7 @@ class TagChartGenerator extends ChartGenerator {
                       Collection<TagDto> tags) {
 
         super(chartDefinition, rangeStart, rangeEnd, activities, tags);
+        this.durationTransformer = transformerFor(chartDefinition.analysisMetric());
     }
 
     @Override
@@ -66,16 +67,22 @@ class TagChartGenerator extends ChartGenerator {
     }
 
     private ChartBucketData toBucket(TagId tagId, Duration tagDuration, Duration totalMeasuredDuration) {
-        BigDecimal tagDurationSeconds = BigDecimal.valueOf(tagDuration.toSeconds());
-        BigDecimal totalDurationSeconds = BigDecimal.valueOf(totalMeasuredDuration.toSeconds());
         return new ChartBucketData(
                 tagId.id().toString(),
                 null,
                 null,
                 BucketType.TAG,
-                percentageCalculator.percentage(tagDurationSeconds, totalDurationSeconds),
-                percentageCalculator.percentage(tagDurationSeconds, totalDurationSeconds),
+                durationTransformer.transform(tagDuration, totalMeasuredDuration),
+                durationTransformer.transform(tagDuration, totalMeasuredDuration),
                 null
         );
+    }
+
+    private DurationTransformer transformerFor(AnalysisMetric metric) {
+        return switch (metric) {
+            case TAG_DURATION -> new SecondsDurationTransformer();
+            case TAG_PERCENTAGE -> new PercentDurationTransformer();
+            default -> throw new IllegalArgumentException("Illegal metric %s".formatted(metric.toString()));
+        };
     }
 }
