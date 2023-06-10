@@ -101,6 +101,7 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
 
         ChartGeneratorSupplier subBucketsGenerator = switch (chart.analysisMetric()) {
             case TAG_PERCENTAGE -> TagChartGenerator::new;
+            case TAG_DURATION -> TagChartGenerator::new;
             case METRIC_VALUE -> MetricValueChartGenerator::new;
         };
 
