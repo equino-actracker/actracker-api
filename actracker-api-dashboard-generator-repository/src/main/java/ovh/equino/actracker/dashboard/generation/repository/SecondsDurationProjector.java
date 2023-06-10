@@ -3,9 +3,9 @@ package ovh.equino.actracker.dashboard.generation.repository;
 import java.math.BigDecimal;
 import java.time.Duration;
 
-class SecondsDurationTransformer implements DurationTransformer {
+class SecondsDurationProjector implements DurationProjector {
     @Override
-    public BigDecimal transform(Duration measuredDuration, Duration totalDuration) {
+    public BigDecimal project(Duration measuredDuration, Duration totalDuration) {
         if (measuredDuration == null) {
             return null;
         }

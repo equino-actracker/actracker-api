@@ -20,7 +20,7 @@ import static java.util.stream.Collectors.toMap;
 
 class TagChartGenerator extends ChartGenerator {
 
-    private final DurationTransformer durationTransformer;
+    private final DurationProjector durationProjector;
 
     TagChartGenerator(Chart chartDefinition,
                       Instant rangeStart,
@@ -29,7 +29,7 @@ class TagChartGenerator extends ChartGenerator {
                       Collection<TagDto> tags) {
 
         super(chartDefinition, rangeStart, rangeEnd, activities, tags);
-        this.durationTransformer = transformerFor(chartDefinition.analysisMetric());
+        this.durationProjector = projectorFor(chartDefinition.analysisMetric());
     }
 
     @Override
@@ -72,17 +72,17 @@ class TagChartGenerator extends ChartGenerator {
                 null,
                 null,
                 BucketType.TAG,
-                durationTransformer.transform(tagDuration, totalMeasuredDuration),
-                durationTransformer.transform(tagDuration, totalMeasuredDuration),
+                durationProjector.project(tagDuration, totalMeasuredDuration),
+                durationProjector.project(tagDuration, totalMeasuredDuration),
                 null
         );
     }
 
-    private DurationTransformer transformerFor(AnalysisMetric metric) {
+    private DurationProjector projectorFor(AnalysisMetric metric) {
         return switch (metric) {
-            case TAG_DURATION -> new SecondsDurationTransformer();
-            case TAG_PERCENTAGE -> new PercentDurationTransformer();
-            default -> throw new IllegalArgumentException("Illegal metric %s".formatted(metric.toString()));
+            case TAG_DURATION -> new SecondsDurationProjector();
+            case TAG_PERCENTAGE -> new PercentDurationProjector();
+            default -> throw new IllegalArgumentException("No available projector for metric %s".formatted(metric.toString()));
         };
     }
 }

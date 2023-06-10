@@ -3,7 +3,7 @@ package ovh.equino.actracker.dashboard.generation.repository;
 import java.math.BigDecimal;
 import java.time.Duration;
 
-interface DurationTransformer {
+interface DurationProjector {
 
-    BigDecimal transform(Duration measuredDuration, Duration totalDuration);
+    BigDecimal project(Duration measuredDuration, Duration totalDuration);
 }

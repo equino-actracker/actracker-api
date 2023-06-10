@@ -6,10 +6,10 @@ import java.time.Duration;
 import static java.math.RoundingMode.HALF_UP;
 import static java.util.Objects.isNull;
 
-final class PercentDurationTransformer implements DurationTransformer {
+final class PercentDurationProjector implements DurationProjector {
 
     @Override
-    public BigDecimal transform(Duration measuredDuration, Duration totalDuration) {
+    public BigDecimal project(Duration measuredDuration, Duration totalDuration) {
         if (isNull(measuredDuration) || isNull(totalDuration) || totalDuration.equals(Duration.ZERO)) {
             return BigDecimal.ZERO;
         }
