@@ -10,6 +10,10 @@ import static java.util.Objects.requireNonNullElse;
 
 class ShareMapper extends PayloadMapper {
 
+    ovh.equino.actracker.domain.share.Share fromRequest(Share share) {
+        return new ovh.equino.actracker.domain.share.Share(share.granteeName());
+    }
+
     List<Share> toResponse(Collection<ovh.equino.actracker.domain.share.Share> shares) {
         return requireNonNullElse(shares, new ArrayList<ovh.equino.actracker.domain.share.Share>())
                 .stream()

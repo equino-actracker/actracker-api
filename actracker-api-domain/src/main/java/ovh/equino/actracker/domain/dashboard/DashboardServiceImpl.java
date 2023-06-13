@@ -78,14 +78,14 @@ class DashboardServiceImpl implements DashboardService {
     }
 
     @Override
-    public DashboardDto shareDashboard(UUID dashboardId, String granteeName, User granter) {
+    public DashboardDto shareDashboard(UUID dashboardId, Share share, User granter) {
         Dashboard dashboard = getDashboardIfAuthorized(granter, dashboardId);
-        Share newShare = tenantRepository.findByUsername(granteeName)
+        Share newShare = tenantRepository.findByUsername(share.granteeName())
                 .map(tenant -> new Share(
                         new User(tenant.id()),
                         tenant.username()
                 ))
-                .orElse(new Share(granteeName));
+                .orElse(new Share(share.granteeName()));
 
         dashboard.share(newShare);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
