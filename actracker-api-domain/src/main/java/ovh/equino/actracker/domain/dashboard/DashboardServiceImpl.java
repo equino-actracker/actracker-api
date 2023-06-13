@@ -6,6 +6,8 @@ import ovh.equino.actracker.domain.dashboard.generation.DashboardData;
 import ovh.equino.actracker.domain.dashboard.generation.DashboardGenerationCriteria;
 import ovh.equino.actracker.domain.dashboard.generation.DashboardGenerationEngine;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
+import ovh.equino.actracker.domain.share.Share;
+import ovh.equino.actracker.domain.tenant.TenantRepository;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
@@ -16,14 +18,17 @@ class DashboardServiceImpl implements DashboardService {
     private final DashboardRepository dashboardRepository;
     private final DashboardSearchEngine dashboardSearchEngine;
     private final DashboardGenerationEngine dashboardGenerationEngine;
+    private final TenantRepository tenantRepository;
 
     DashboardServiceImpl(DashboardRepository dashboardRepository,
                          DashboardSearchEngine dashboardSearchEngine,
-                         DashboardGenerationEngine dashboardGenerationEngine) {
+                         DashboardGenerationEngine dashboardGenerationEngine,
+                         TenantRepository tenantRepository) {
 
         this.dashboardRepository = dashboardRepository;
         this.dashboardSearchEngine = dashboardSearchEngine;
         this.dashboardGenerationEngine = dashboardGenerationEngine;
+        this.tenantRepository = tenantRepository;
     }
 
     @Override
@@ -70,6 +75,21 @@ class DashboardServiceImpl implements DashboardService {
         UUID dashboardId = generationCriteria.dashboardId();
         Dashboard dashboard = getDashboardIfAuthorized(generationCriteria.generator(), dashboardId);
         return dashboardGenerationEngine.generateDashboard(dashboard.forStorage(), generationCriteria);
+    }
+
+    @Override
+    public DashboardDto shareDashboard(UUID dashboardId, String granteeName, User granter) {
+        Dashboard dashboard = getDashboardIfAuthorized(granter, dashboardId);
+        Share newShare = tenantRepository.findByUsername(granteeName)
+                .map(tenant -> new Share(
+                        new User(tenant.id()),
+                        tenant.username()
+                ))
+                .orElse(new Share(granteeName));
+
+        dashboard.share(newShare);
+        dashboardRepository.update(dashboardId, dashboard.forStorage());
+        return dashboard.forClient();
     }
 
     private Dashboard getDashboardIfAuthorized(User user, UUID dashboardId) {

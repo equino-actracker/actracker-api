@@ -10,6 +10,7 @@ import java.util.List;
 class DashboardMapper extends PayloadMapper {
 
     private final ChartMapper chartMapper = new ChartMapper();
+    private final ShareMapper shareMapper = new ShareMapper();
 
     DashboardDto fromRequest(Dashboard dashboardRequest) {
         return new DashboardDto(
@@ -22,7 +23,8 @@ class DashboardMapper extends PayloadMapper {
         return new Dashboard(
                 uuidToString(dashboard.id()),
                 dashboard.name(),
-                chartMapper.toResponse(dashboard.charts())
+                chartMapper.toResponse(dashboard.charts()),
+                shareMapper.toResponse(dashboard.shares())
         );
     }
 

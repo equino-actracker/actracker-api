@@ -94,4 +94,19 @@ class DashboardController {
 
         dashboardService.deleteDashboard(UUID.fromString(id), requester);
     }
+
+    @RequestMapping(method = POST, path = "/{id}/share")
+    @ResponseStatus(OK)
+    Dashboard shareDashboard(
+            @PathVariable("id") String id,
+            @RequestBody Share share) {
+
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User requester = new User(requesterIdentity.getId());
+
+        String granteeName = share.granteeName();
+
+        DashboardDto sharedDashboard = dashboardService.shareDashboard(UUID.fromString(id), granteeName, requester);
+        return mapper.toResponse(sharedDashboard);
+    }
 }

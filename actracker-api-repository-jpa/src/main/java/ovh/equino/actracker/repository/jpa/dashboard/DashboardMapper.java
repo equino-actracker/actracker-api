@@ -9,6 +9,7 @@ import static java.util.Objects.isNull;
 class DashboardMapper {
 
     private final ChartMapper chartMapper = new ChartMapper();
+    private final DashboardShareMapper shareMapper = new DashboardShareMapper();
 
     DashboardDto toDto(DashboardEntity entity) {
 
@@ -17,6 +18,7 @@ class DashboardMapper {
                 UUID.fromString(entity.creatorId),
                 entity.name,
                 chartMapper.toValueObjects(entity.charts),
+                shareMapper.toValueObjects(entity.shares),
                 entity.deleted
         );
     }
@@ -28,6 +30,7 @@ class DashboardMapper {
         entity.creatorId = isNull(dto.creatorId()) ? null : dto.creatorId().toString();
         entity.name = dto.name();
         entity.charts = chartMapper.toEntities(dto.charts(), entity);
+        entity.shares = shareMapper.toEntities(dto.shares(), entity);
         entity.deleted = dto.deleted();
         return entity;
     }

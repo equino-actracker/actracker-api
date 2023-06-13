@@ -21,4 +21,6 @@ public interface DashboardService {
     void deleteDashboard(UUID dashboardId, User remover);
 
     DashboardData generateDashboard(DashboardGenerationCriteria generationCriteria);
+
+    DashboardDto shareDashboard(UUID dashboardId, String granteeName, User granter);
 }
