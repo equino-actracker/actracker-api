@@ -22,7 +22,8 @@ class DashboardController {
 
     private final DashboardService dashboardService;
     private final IdentityProvider identityProvider;
-    private final DashboardMapper mapper = new DashboardMapper();
+    private final DashboardMapper dashboardMapper = new DashboardMapper();
+    private final ShareMapper shareMapper = new ShareMapper();
 
     DashboardController(DashboardService dashboardService, IdentityProvider identityProvider) {
         this.dashboardService = dashboardService;
@@ -36,7 +37,7 @@ class DashboardController {
         User requester = new User(requestIdentity.getId());
 
         DashboardDto foundDashboard = dashboardService.getDashboard(UUID.fromString(id), requester);
-        return mapper.toResponse(foundDashboard);
+        return dashboardMapper.toResponse(foundDashboard);
     }
 
     @RequestMapping(method = POST)
@@ -45,10 +46,10 @@ class DashboardController {
         Identity requestIdentity = identityProvider.provideIdentity();
         User requester = new User(requestIdentity.getId());
 
-        DashboardDto dashboardDto = mapper.fromRequest(dashboard);
+        DashboardDto dashboardDto = dashboardMapper.fromRequest(dashboard);
         DashboardDto createdDashboard = dashboardService.createDashboard(dashboardDto, requester);
 
-        return mapper.toResponse(createdDashboard);
+        return dashboardMapper.toResponse(createdDashboard);
     }
 
     @RequestMapping(method = PUT, path = "/{id}")
@@ -57,10 +58,10 @@ class DashboardController {
         Identity requestIdentity = identityProvider.provideIdentity();
         User requester = new User(requestIdentity.getId());
 
-        DashboardDto dashboardDto = mapper.fromRequest(dashboard);
+        DashboardDto dashboardDto = dashboardMapper.fromRequest(dashboard);
         DashboardDto updatedDashboard = dashboardService.updateDashboard(UUID.fromString(id), dashboardDto, requester);
 
-        return mapper.toResponse(updatedDashboard);
+        return dashboardMapper.toResponse(updatedDashboard);
     }
 
     @RequestMapping(method = GET, path = "/matching")
@@ -83,7 +84,7 @@ class DashboardController {
                 .build();
 
         EntitySearchResult<DashboardDto> searchResult = dashboardService.searchDashboards(searchCriteria);
-        return mapper.toResponse(searchResult);
+        return dashboardMapper.toResponse(searchResult);
     }
 
     @RequestMapping(method = DELETE, path = "/{id}")
@@ -93,5 +94,20 @@ class DashboardController {
         User requester = new User(requestIdentity.getId());
 
         dashboardService.deleteDashboard(UUID.fromString(id), requester);
+    }
+
+    @RequestMapping(method = POST, path = "/{id}/share")
+    @ResponseStatus(OK)
+    Dashboard shareDashboard(
+            @PathVariable("id") String id,
+            @RequestBody Share share) {
+
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User requester = new User(requesterIdentity.getId());
+
+        ovh.equino.actracker.domain.share.Share newShare = shareMapper.fromRequest(share);
+
+        DashboardDto sharedDashboard = dashboardService.shareDashboard(UUID.fromString(id), newShare, requester);
+        return dashboardMapper.toResponse(sharedDashboard);
     }
 }

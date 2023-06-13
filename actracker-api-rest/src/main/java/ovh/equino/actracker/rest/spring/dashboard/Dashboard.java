@@ -5,6 +5,7 @@ import java.util.List;
 record Dashboard(
         String id,
         String name,
-        List<Chart> charts
+        List<Chart> charts,
+        List<Share> shares
 ) {
 }

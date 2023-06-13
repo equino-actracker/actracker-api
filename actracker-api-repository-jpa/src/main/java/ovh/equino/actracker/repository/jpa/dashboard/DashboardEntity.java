@@ -23,6 +23,9 @@ class DashboardEntity {
     @OneToMany(mappedBy = "dashboard", cascade = ALL, orphanRemoval = true)
     List<ChartEntity> charts;
 
+    @OneToMany(mappedBy = "dashboard", cascade = ALL, orphanRemoval = true)
+    List<DashboardShareEntity> shares;
+
     @Column(name = "deleted")
     boolean deleted;
 }

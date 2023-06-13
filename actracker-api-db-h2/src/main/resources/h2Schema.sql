@@ -84,6 +84,14 @@ CREATE TABLE metric_value (
     metric_value NUMERIC(12, 3) -- Max 999_999_999.999
 );
 
+CREATE TABLE dashboard_share (
+    id VARCHAR(36) UNIQUE NOT NULL,
+    dashboard_id VARCHAR(36) NOT NULL,
+    grantee_id VARCHAR(36),
+    grantee_name VARCHAR(100) NOT NULL,
+    PRIMARY KEY (id)
+);
+
 CREATE SEQUENCE outbox_notification_version_seq INCREMENT BY 1;
 
 CREATE TABLE outbox_notification (

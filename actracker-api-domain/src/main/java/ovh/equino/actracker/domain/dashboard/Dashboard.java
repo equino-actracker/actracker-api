@@ -1,6 +1,7 @@
 package ovh.equino.actracker.domain.dashboard;
 
 import ovh.equino.actracker.domain.Entity;
+import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.ArrayList;
@@ -16,13 +17,21 @@ class Dashboard implements Entity {
     private final User creator;
     private String name;
     private final List<Chart> charts;
+    private final List<Share> shares;
     private boolean deleted;
 
-    private Dashboard(DashboardId id, User creator, String name, List<Chart> charts, boolean deleted) {
+    private Dashboard(DashboardId id,
+                      User creator,
+                      String name,
+                      List<Chart> charts,
+                      List<Share> shares,
+                      boolean deleted) {
+
         this.id = id;
         this.creator = creator;
         this.name = name;
         this.charts = new ArrayList<>(charts);
+        this.shares = new ArrayList<>(shares);
         this.deleted = deleted;
     }
 
@@ -32,6 +41,7 @@ class Dashboard implements Entity {
                 creator,
                 dashboard.name(),
                 dashboard.charts(),
+                emptyList(),
                 false
         );
         newDashboard.validate();
@@ -55,16 +65,21 @@ class Dashboard implements Entity {
                 new User(dashboard.creatorId()),
                 dashboard.name(),
                 dashboard.charts(),
+                dashboard.shares(),
                 dashboard.deleted()
         );
     }
 
     DashboardDto forStorage() {
-        return new DashboardDto(id.id(), creator.id(), name, unmodifiableList(charts), deleted);
+        return new DashboardDto(
+                id.id(), creator.id(), name, unmodifiableList(charts), unmodifiableList(shares), deleted
+        );
     }
 
     DashboardDto forClient() {
-        return new DashboardDto(id.id(), creator.id(), name, unmodifiableList(charts), deleted);
+        return new DashboardDto(
+                id.id(), creator.id(), name, unmodifiableList(charts), unmodifiableList(shares), deleted
+        );
     }
 
     boolean isAvailableFor(User user) {
@@ -73,6 +88,15 @@ class Dashboard implements Entity {
 
     boolean isNotAvailableFor(User user) {
         return !isAvailableFor(user);
+    }
+
+    void share(Share share) {
+        List<String> existingGranteeNames = this.shares.stream()
+                .map(Share::granteeName)
+                .toList();
+        if (!existingGranteeNames.contains(share.granteeName())) {
+            this.shares.add(share);
+        }
     }
 
     @Override
