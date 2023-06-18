@@ -8,6 +8,8 @@ import ovh.equino.actracker.domain.dashboard.DashboardService;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.rest.spring.EntitySearchCriteriaBuilder;
 import ovh.equino.actracker.rest.spring.SearchResponse;
+import ovh.equino.actracker.rest.spring.share.Share;
+import ovh.equino.actracker.rest.spring.share.ShareMapper;
 import ovh.equino.security.identity.Identity;
 import ovh.equino.security.identity.IdentityProvider;
 

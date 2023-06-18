@@ -3,6 +3,8 @@ package ovh.equino.actracker.domain.tag;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
+import ovh.equino.actracker.domain.share.Share;
+import ovh.equino.actracker.domain.tenant.TenantRepository;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
@@ -12,11 +14,17 @@ import java.util.UUID;
 class TagServiceImpl implements TagService {
 
     private final TagRepository tagRepository;
+    private final TenantRepository tenantRepository;
     private final TagSearchEngine tagSearchEngine;
     private final TagNotifier tagNotifier;
 
-    TagServiceImpl(TagRepository tagRepository, TagSearchEngine tagSearchEngine, TagNotifier tagNotifier) {
+    TagServiceImpl(TagRepository tagRepository,
+                   TenantRepository tenantRepository,
+                   TagSearchEngine tagSearchEngine,
+                   TagNotifier tagNotifier) {
+
         this.tagRepository = tagRepository;
+        this.tenantRepository = tenantRepository;
         this.tagSearchEngine = tagSearchEngine;
         this.tagNotifier = tagNotifier;
     }
@@ -62,6 +70,21 @@ class TagServiceImpl implements TagService {
         tag.delete();
         tagRepository.update(tagId, tag.forStorage());
         tagNotifier.notifyChanged(tag.forChangeNotification());
+    }
+
+    @Override
+    public TagDto shareTag(UUID tagId, Share share, User granter) {
+        Tag tag = getTagIfAuthorized(granter, tagId);
+        Share newShare = tenantRepository.findByUsername(share.granteeName())
+                .map(tenant -> new Share(
+                        new User(tenant.id()),
+                        tenant.username()
+                ))
+                .orElse(new Share(share.granteeName()));
+
+        tag.share(newShare, granter);
+        tagRepository.update(tagId, tag.forStorage());
+        return tag.forClient();
     }
 
     private Tag getTagIfAuthorized(User user, UUID tagId) {

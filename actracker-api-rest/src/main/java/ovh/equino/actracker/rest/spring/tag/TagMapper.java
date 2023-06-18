@@ -5,12 +5,14 @@ import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.rest.spring.PayloadMapper;
 import ovh.equino.actracker.rest.spring.SearchResponse;
+import ovh.equino.actracker.rest.spring.share.ShareMapper;
 
 import java.util.List;
 
 class TagMapper extends PayloadMapper {
 
     private final MetricMapper metricMapper = new MetricMapper();
+    private final ShareMapper shareMapper = new ShareMapper();
 
     TagDto fromRequest(Tag tagRequest) {
         return new TagDto(
@@ -23,7 +25,8 @@ class TagMapper extends PayloadMapper {
         return new Tag(
                 uuidToString(tag.id()),
                 tag.name(),
-                metricMapper.toResponse(tag.metrics())
+                metricMapper.toResponse(tag.metrics()),
+                shareMapper.toResponse(tag.shares())
         );
     }
 

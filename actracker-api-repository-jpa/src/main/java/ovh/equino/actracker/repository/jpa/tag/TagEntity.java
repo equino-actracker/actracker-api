@@ -23,6 +23,9 @@ public class TagEntity {
     @OneToMany(mappedBy = "tag", cascade = ALL, orphanRemoval = true)
     List<MetricEntity> metrics;
 
+    @OneToMany(mappedBy = "tag", cascade = ALL, orphanRemoval = true)
+    List<TagShareEntity> shares;
+
     @Column(name = "deleted")
     boolean deleted;
 }

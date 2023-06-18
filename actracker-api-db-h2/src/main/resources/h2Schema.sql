@@ -92,6 +92,14 @@ CREATE TABLE dashboard_share (
     PRIMARY KEY (id)
 );
 
+CREATE TABLE tag_share (
+    id VARCHAR(36) UNIQUE NOT NULL,
+    tag_id VARCHAR(36) NOT NULL,
+    grantee_id VARCHAR(36),
+    grantee_name VARCHAR(100) NOT NULL,
+    PRIMARY KEY (id)
+);
+
 CREATE SEQUENCE outbox_notification_version_seq INCREMENT BY 1;
 
 CREATE TABLE outbox_notification (

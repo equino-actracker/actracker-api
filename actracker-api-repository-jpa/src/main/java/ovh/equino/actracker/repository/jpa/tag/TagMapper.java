@@ -9,6 +9,7 @@ import static java.util.Objects.isNull;
 class TagMapper {
 
     private final MetricMapper metricMapper = new MetricMapper();
+    private final TagShareMapper shareMapper = new TagShareMapper();
 
     TagDto toDto(TagEntity entity) {
         return new TagDto(
@@ -16,6 +17,7 @@ class TagMapper {
                 UUID.fromString(entity.creatorId),
                 entity.name,
                 metricMapper.toDto(entity.metrics),
+                shareMapper.toValueObjects(entity.shares),
                 entity.deleted
         );
     }
@@ -26,6 +28,7 @@ class TagMapper {
         entity.creatorId = isNull(dto.creatorId()) ? null : dto.creatorId().toString();
         entity.name = dto.name();
         entity.metrics = metricMapper.toEntities(dto.metrics(), entity);
+        entity.shares = shareMapper.toEntities(dto.shares(), entity);
         entity.deleted = dto.deleted();
         return entity;
     }
