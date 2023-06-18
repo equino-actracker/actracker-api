@@ -27,8 +27,9 @@ class DashboardQueryBuilder extends JpaQueryBuilder<DashboardEntity> {
 
     private Predicate isGrantee(User user, Join<DashboardEntity, DashboardShareEntity> sharedDashboard) {
         Subquery<Long> subQuery = criteriaQuery.subquery(Long.class);
-        subQuery.select(criteriaBuilder.literal(1L));
-        subQuery.where(criteriaBuilder.equal(sharedDashboard.get("granteeId"), user.id().toString()));
+        subQuery.select(criteriaBuilder.literal(1L))
+                .where(criteriaBuilder.equal(sharedDashboard.get("granteeId"), user.id().toString()))
+                .from(DashboardEntity.class);
         return criteriaBuilder.exists(subQuery);
     }
 

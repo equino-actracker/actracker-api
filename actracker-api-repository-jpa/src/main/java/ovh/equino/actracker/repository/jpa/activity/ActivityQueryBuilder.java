@@ -103,8 +103,9 @@ class ActivityQueryBuilder extends JpaQueryBuilder<ActivityEntity> {
 
     private Predicate hasTag(UUID tagId, Join<ActivityEntity, TagEntity> activityTag) {
         Subquery<Long> subQuery = criteriaQuery.subquery(Long.class);
-        subQuery.select(criteriaBuilder.literal(1L));
-        subQuery.where(criteriaBuilder.equal(activityTag.get("id"), tagId.toString()));
+        subQuery.select(criteriaBuilder.literal(1L))
+                .where(criteriaBuilder.equal(activityTag.get("id"), tagId.toString()))
+                .from(ActivityEntity.class);
         return criteriaBuilder.exists(subQuery);
     }
 
