@@ -47,7 +47,7 @@ class DashboardServiceImpl implements DashboardService {
     @Override
     public DashboardDto updateDashboard(UUID dashboardId, DashboardDto updatedDashboardData, User updater) {
         Dashboard dashboard = getDashboardIfAuthorized(updater, dashboardId);
-        dashboard.updateTo(updatedDashboardData);
+        dashboard.updateTo(updatedDashboardData, updater);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
         return dashboard.forClient();
     }
@@ -66,7 +66,7 @@ class DashboardServiceImpl implements DashboardService {
     @Override
     public void deleteDashboard(UUID dashboardId, User remover) {
         Dashboard dashboard = getDashboardIfAuthorized(remover, dashboardId);
-        dashboard.delete();
+        dashboard.delete(remover);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
     }
 
@@ -87,7 +87,7 @@ class DashboardServiceImpl implements DashboardService {
                 ))
                 .orElse(new Share(share.granteeName()));
 
-        dashboard.share(newShare);
+        dashboard.share(newShare, granter);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
         return dashboard.forClient();
     }
@@ -98,7 +98,7 @@ class DashboardServiceImpl implements DashboardService {
 
         Dashboard dashboard = Dashboard.fromStorage(dashboardDto);
 
-        if (dashboard.isNotAvailableFor(user)) {
+        if (dashboard.isNotAccessibleFor(user)) {
             throw new EntityNotFoundException(Dashboard.class, dashboardId);
         }
         return dashboard;

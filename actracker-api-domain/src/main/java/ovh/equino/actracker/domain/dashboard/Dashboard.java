@@ -1,6 +1,7 @@
 package ovh.equino.actracker.domain.dashboard;
 
 import ovh.equino.actracker.domain.Entity;
+import ovh.equino.actracker.domain.exception.EntityEditForbidden;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.user.User;
 
@@ -50,14 +51,20 @@ class Dashboard implements Entity {
         return newDashboard;
     }
 
-    void updateTo(DashboardDto dashboard) {
+    void updateTo(DashboardDto dashboard, User updater) {
+        if(isEditForbiddenFor(updater)) {
+            throw new EntityEditForbidden(Dashboard.class);
+        }
         this.name = dashboard.name();
         this.charts.clear();
         this.charts.addAll(dashboard.charts());
         this.validate();
     }
 
-    void delete() {
+    void delete(User remover) {
+        if(isEditForbiddenFor(remover)) {
+            throw new EntityEditForbidden(Dashboard.class);
+        }
         this.deleted = true;
     }
 
@@ -84,8 +91,16 @@ class Dashboard implements Entity {
         );
     }
 
-    boolean isAvailableFor(User user) {
+    boolean isAccessibleFor(User user) {
         return creator.equals(user) || isGrantee(user);
+    }
+
+    boolean isNotAccessibleFor(User user) {
+        return !isAccessibleFor(user);
+    }
+
+    boolean isEditForbiddenFor(User user) {
+        return !creator.equals(user);
     }
 
     private boolean isGrantee(User user) {
@@ -95,11 +110,10 @@ class Dashboard implements Entity {
                 .anyMatch(Predicate.isEqual(user));
     }
 
-    boolean isNotAvailableFor(User user) {
-        return !isAvailableFor(user);
-    }
-
-    void share(Share share) {
+    void share(Share share, User granter) {
+        if(isEditForbiddenFor(granter)) {
+            throw new EntityEditForbidden(Dashboard.class);
+        }
         List<String> existingGranteeNames = this.shares.stream()
                 .map(Share::granteeName)
                 .toList();
