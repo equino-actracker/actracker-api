@@ -1,14 +1,15 @@
 package ovh.equino.actracker.repository.jpa.activity;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.*;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Subquery;
 import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.activity.ActivitySortField;
 import ovh.equino.actracker.repository.jpa.JpaQueryBuilder;
 import ovh.equino.actracker.repository.jpa.tag.TagEntity;
 
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -102,7 +103,6 @@ class ActivityQueryBuilder extends JpaQueryBuilder<ActivityEntity> {
 
     private Predicate hasTag(UUID tagId, Join<ActivityEntity, TagEntity> activityTag) {
         Subquery<Long> subQuery = criteriaQuery.subquery(Long.class);
-        Root<ActivityEntity> root = subQuery.from(ActivityEntity.class);
         subQuery.select(criteriaBuilder.literal(1L));
         subQuery.where(criteriaBuilder.equal(activityTag.get("id"), tagId.toString()));
         return criteriaBuilder.exists(subQuery);

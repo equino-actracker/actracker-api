@@ -1,7 +1,10 @@
 package ovh.equino.actracker.repository.jpa.dashboard;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.*;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Subquery;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaQueryBuilder;
 
@@ -22,17 +25,8 @@ class DashboardQueryBuilder extends JpaQueryBuilder<DashboardEntity> {
         );
     }
 
-    private Predicate isCreator(User user, Join<DashboardEntity, DashboardShareEntity> sharedDashboard) {
-        Subquery<Long> subQuery = criteriaQuery.subquery(Long.class);
-        Root<DashboardEntity> root = subQuery.from(DashboardEntity.class);
-        subQuery.select(criteriaBuilder.literal(1L));
-        subQuery.where(criteriaBuilder.equal(root.get("creatorId"), user.id().toString()));
-        return criteriaBuilder.exists(subQuery);
-    }
-
     private Predicate isGrantee(User user, Join<DashboardEntity, DashboardShareEntity> sharedDashboard) {
         Subquery<Long> subQuery = criteriaQuery.subquery(Long.class);
-        Root<DashboardEntity> root = subQuery.from(DashboardEntity.class);
         subQuery.select(criteriaBuilder.literal(1L));
         subQuery.where(criteriaBuilder.equal(sharedDashboard.get("granteeId"), user.id().toString()));
         return criteriaBuilder.exists(subQuery);

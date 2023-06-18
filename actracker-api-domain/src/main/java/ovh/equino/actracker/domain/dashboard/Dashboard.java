@@ -8,10 +8,10 @@ import ovh.equino.actracker.domain.user.User;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Predicate;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
+import static java.util.function.Predicate.isEqual;
 
 
 class Dashboard implements Entity {
@@ -52,7 +52,7 @@ class Dashboard implements Entity {
     }
 
     void updateTo(DashboardDto dashboard, User updater) {
-        if(isEditForbiddenFor(updater)) {
+        if (isEditForbiddenFor(updater)) {
             throw new EntityEditForbidden(Dashboard.class);
         }
         this.name = dashboard.name();
@@ -62,7 +62,7 @@ class Dashboard implements Entity {
     }
 
     void delete(User remover) {
-        if(isEditForbiddenFor(remover)) {
+        if (isEditForbiddenFor(remover)) {
             throw new EntityEditForbidden(Dashboard.class);
         }
         this.deleted = true;
@@ -107,11 +107,11 @@ class Dashboard implements Entity {
         return shares.stream()
                 .map(Share::grantee)
                 .filter(Objects::nonNull)
-                .anyMatch(Predicate.isEqual(user));
+                .anyMatch(isEqual(user));
     }
 
     void share(Share share, User granter) {
-        if(isEditForbiddenFor(granter)) {
+        if (isEditForbiddenFor(granter)) {
             throw new EntityEditForbidden(Dashboard.class);
         }
         List<String> existingGranteeNames = this.shares.stream()
