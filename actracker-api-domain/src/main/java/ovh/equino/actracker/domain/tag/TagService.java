@@ -1,7 +1,8 @@
 package ovh.equino.actracker.domain.tag;
 
-import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchResult;
+import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
@@ -19,4 +20,6 @@ public interface TagService {
     EntitySearchResult<TagDto> searchTags(EntitySearchCriteria searchCriteria);
 
     void deleteTag(UUID tagId, User remover);
+
+    TagDto shareTag(UUID tagId, Share share, User granter);
 }

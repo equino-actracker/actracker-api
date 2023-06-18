@@ -8,6 +8,8 @@ import ovh.equino.actracker.domain.tag.TagService;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.rest.spring.EntitySearchCriteriaBuilder;
 import ovh.equino.actracker.rest.spring.SearchResponse;
+import ovh.equino.actracker.rest.spring.share.Share;
+import ovh.equino.actracker.rest.spring.share.ShareMapper;
 import ovh.equino.security.identity.Identity;
 import ovh.equino.security.identity.IdentityProvider;
 
@@ -24,7 +26,9 @@ class TagController {
 
     private final TagService tagService;
     private final IdentityProvider identityProvider;
-    private final TagMapper mapper = new TagMapper();
+
+    private final TagMapper tagMapper = new TagMapper();
+    private final ShareMapper shareMapper = new ShareMapper();
 
     TagController(TagService tagService, IdentityProvider identityProvider) {
         this.tagService = tagService;
@@ -37,10 +41,10 @@ class TagController {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User requester = new User(requesterIdentity.getId());
 
-        TagDto tagDto = mapper.fromRequest(tag);
+        TagDto tagDto = tagMapper.fromRequest(tag);
         TagDto createdTag = tagService.createTag(tagDto, requester);
 
-        return mapper.toResponse(createdTag);
+        return tagMapper.toResponse(createdTag);
     }
 
     @RequestMapping(method = PUT, path = "/{id}")
@@ -49,10 +53,10 @@ class TagController {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User requester = new User(requesterIdentity.getId());
 
-        TagDto tagDto = mapper.fromRequest(tag);
+        TagDto tagDto = tagMapper.fromRequest(tag);
         TagDto updatedTag = tagService.updateTag(UUID.fromString(id), tagDto, requester);
 
-        return mapper.toResponse(updatedTag);
+        return tagMapper.toResponse(updatedTag);
     }
 
     @RequestMapping(method = GET)
@@ -62,9 +66,9 @@ class TagController {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User requester = new User(requesterIdentity.getId());
 
-        Set<UUID> parsedIds = mapper.parseIds(tagIds);
+        Set<UUID> parsedIds = tagMapper.parseIds(tagIds);
         List<TagDto> foundTags = tagService.getTags(parsedIds, requester);
-        return mapper.toResponse(foundTags);
+        return tagMapper.toResponse(foundTags);
     }
 
     @RequestMapping(method = GET, path = "/matching")
@@ -87,7 +91,7 @@ class TagController {
                 .build();
 
         EntitySearchResult<TagDto> searchResult = tagService.searchTags(searchCriteria);
-        return mapper.toResponse(searchResult);
+        return tagMapper.toResponse(searchResult);
     }
 
     @RequestMapping(method = DELETE, path = "/{id}")
@@ -96,5 +100,20 @@ class TagController {
         User requester = new User(requesterIdentity.getId());
 
         tagService.deleteTag(UUID.fromString(id), requester);
+    }
+
+    @RequestMapping(method = POST, path = "/{id}/share")
+    @ResponseStatus(OK)
+    Tag shareTag(
+            @PathVariable("id") String id,
+            @RequestBody Share share) {
+
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User requester = new User(requesterIdentity.getId());
+
+        ovh.equino.actracker.domain.share.Share newShare = shareMapper.fromRequest(share);
+
+        TagDto sharedTag = tagService.shareTag(UUID.fromString(id), newShare, requester);
+        return tagMapper.toResponse(sharedTag);
     }
 }

@@ -4,6 +4,7 @@ import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
 import ovh.equino.actracker.rest.spring.PayloadMapper;
 import ovh.equino.actracker.rest.spring.SearchResponse;
+import ovh.equino.actracker.rest.spring.share.ShareMapper;
 
 import java.util.List;
 

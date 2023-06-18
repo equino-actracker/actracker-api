@@ -1,6 +1,7 @@
 package ovh.equino.actracker.domain.tag;
 
 import ovh.equino.actracker.domain.Entity;
+import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.*;
@@ -15,6 +16,7 @@ class Tag implements Entity {
     private final User creator;
     private String name;
     private final List<Metric> metrics;
+    private final List<Share> shares;
     private boolean deleted;
 
     private Tag(
@@ -22,13 +24,15 @@ class Tag implements Entity {
             User creator,
             String name,
             Collection<Metric> metrics,
+            List<Share> shares,
             boolean deleted) {
 
         this.id = requireNonNull(id);
         this.creator = requireNonNull(creator);
         this.name = name;
-        this.deleted = deleted;
         this.metrics = new ArrayList<>(metrics);
+        this.shares = new ArrayList<>(shares);
+        this.deleted = deleted;
     }
 
     static Tag create(TagDto tag, User creator) {
@@ -42,6 +46,7 @@ class Tag implements Entity {
                 creator,
                 tag.name(),
                 metrics,
+                tag.shares(),
                 false
         );
 
@@ -77,6 +82,7 @@ class Tag implements Entity {
                 new User(tag.creatorId()),
                 tag.name(),
                 metrics,
+                tag.shares(),
                 tag.deleted()
         );
     }
@@ -85,7 +91,7 @@ class Tag implements Entity {
         List<MetricDto> metrics = this.metrics.stream()
                 .map(Metric::forStorage)
                 .toList();
-        return new TagDto(id.id(), creator.id(), name, metrics, deleted);
+        return new TagDto(id.id(), creator.id(), name, metrics, shares, deleted);
     }
 
     TagDto forClient() {
@@ -93,7 +99,7 @@ class Tag implements Entity {
                 .filter(Metric::isNotDeleted)
                 .map(Metric::forStorage)
                 .toList();
-        return new TagDto(id.id(), creator.id(), name, metrics, deleted);
+        return new TagDto(id.id(), creator.id(), name, metrics, shares, deleted);
     }
 
     TagChangedNotification forChangeNotification() {
@@ -101,7 +107,7 @@ class Tag implements Entity {
                 .filter(Metric::isNotDeleted)
                 .map(Metric::forStorage)
                 .toList();
-        TagDto dto = new TagDto(id.id(), creator.id(), name, metrics, deleted);
+        TagDto dto = new TagDto(id.id(), creator.id(), name, metrics, shares, deleted);
         return new TagChangedNotification(dto);
     }
 
@@ -129,6 +135,15 @@ class Tag implements Entity {
         return !isAvailableFor(user);
     }
 
+    void share(Share share, User granter) {
+        List<String> existingGranteeNames = this.shares.stream()
+                .map(Share::granteeName)
+                .toList();
+        if (!existingGranteeNames.contains(share.granteeName())) {
+            this.shares.add(share);
+        }
+    }
+
     @Override
     public void validate() {
         new TagValidator(this).validate();
@@ -139,14 +154,8 @@ class Tag implements Entity {
     }
 
     private Collection<Metric> findUpdatedMetrics(Collection<MetricDto> requestedMetrics) {
-//        List<UUID> existingMetricIds = this.metrics.stream()
-//                .filter(Metric::isNotDeleted)
-//                .map(Metric::id)
-//                .map(MetricId::id)
-//                .toList();
         return requireNonNullElse(requestedMetrics, new ArrayList<MetricDto>())
                 .stream()
-//                .filter(metric -> existingMetricIds.contains(metric.id()))
                 .map(this::toUpdatedMetric)
                 .filter(Optional::isPresent)
                 .map(Optional::get)

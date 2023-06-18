@@ -1,4 +1,4 @@
-package ovh.equino.actracker.rest.spring.dashboard;
+package ovh.equino.actracker.rest.spring.share;
 
 import ovh.equino.actracker.rest.spring.PayloadMapper;
 
@@ -8,13 +8,13 @@ import java.util.List;
 
 import static java.util.Objects.requireNonNullElse;
 
-class ShareMapper extends PayloadMapper {
+public class ShareMapper extends PayloadMapper {
 
-    ovh.equino.actracker.domain.share.Share fromRequest(Share share) {
+    public ovh.equino.actracker.domain.share.Share fromRequest(Share share) {
         return new ovh.equino.actracker.domain.share.Share(share.granteeName());
     }
 
-    List<Share> toResponse(Collection<ovh.equino.actracker.domain.share.Share> shares) {
+    public List<Share> toResponse(Collection<ovh.equino.actracker.domain.share.Share> shares) {
         return requireNonNullElse(shares, new ArrayList<ovh.equino.actracker.domain.share.Share>())
                 .stream()
                 .map(this::toResponse)
