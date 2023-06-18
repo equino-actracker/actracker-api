@@ -6,6 +6,8 @@ import ovh.equino.actracker.domain.user.User;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Predicate;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
@@ -83,7 +85,14 @@ class Dashboard implements Entity {
     }
 
     boolean isAvailableFor(User user) {
-        return creator.equals(user);
+        return creator.equals(user) || isGrantee(user);
+    }
+
+    private boolean isGrantee(User user) {
+        return shares.stream()
+                .map(Share::grantee)
+                .filter(Objects::nonNull)
+                .anyMatch(Predicate.isEqual(user));
     }
 
     boolean isNotAvailableFor(User user) {
