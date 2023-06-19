@@ -99,7 +99,7 @@ class Dashboard implements Entity {
         return !isAccessibleFor(user);
     }
 
-    boolean isEditForbiddenFor(User user) {
+    private boolean isEditForbiddenFor(User user) {
         return !creator.equals(user);
     }
 

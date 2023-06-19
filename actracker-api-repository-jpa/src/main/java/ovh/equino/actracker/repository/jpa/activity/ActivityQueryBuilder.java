@@ -2,12 +2,15 @@ package ovh.equino.actracker.repository.jpa.activity;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Subquery;
 import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.activity.ActivitySortField;
+import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaQueryBuilder;
 import ovh.equino.actracker.repository.jpa.tag.TagEntity;
+import ovh.equino.actracker.repository.jpa.tag.TagShareEntity;
 
 import java.sql.Timestamp;
 import java.util.Map;
@@ -109,4 +112,21 @@ class ActivityQueryBuilder extends JpaQueryBuilder<ActivityEntity> {
         return criteriaBuilder.exists(subQuery);
     }
 
+    @Override
+    public Predicate isAccessibleFor(User searcher) {
+        return or(
+                super.isAccessibleFor(searcher),
+                isGrantee(searcher)
+        );
+    }
+
+    private Predicate isGrantee(User user) {
+        Join<ActivityEntity, TagEntity> activityWithTag = rootEntity.join("tags", JoinType.LEFT);
+        Join<?, TagShareEntity> sharedActivity = activityWithTag.join("shares", JoinType.LEFT);
+        Subquery<Long> subQuery = criteriaQuery.subquery(Long.class);
+        subQuery.select(criteriaBuilder.literal(1L))
+                .where(criteriaBuilder.equal(sharedActivity.get("granteeId"), user.id().toString()))
+                .from(TagEntity.class);
+        return criteriaBuilder.exists(subQuery);
+    }
 }

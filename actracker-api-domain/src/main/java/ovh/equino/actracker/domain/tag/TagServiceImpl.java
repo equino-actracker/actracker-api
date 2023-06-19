@@ -40,7 +40,7 @@ class TagServiceImpl implements TagService {
     @Override
     public TagDto updateTag(UUID tagId, TagDto updatedTagData, User updater) {
         Tag tag = getTagIfAuthorized(updater, tagId);
-        tag.updateTo(updatedTagData);
+        tag.updateTo(updatedTagData, updater);
         tagRepository.update(tagId, tag.forStorage());
         tagNotifier.notifyChanged(tag.forChangeNotification());
         return tag.forClient();
@@ -67,7 +67,7 @@ class TagServiceImpl implements TagService {
     @Override
     public void deleteTag(UUID tagId, User remover) {
         Tag tag = getTagIfAuthorized(remover, tagId);
-        tag.delete();
+        tag.delete(remover);
         tagRepository.update(tagId, tag.forStorage());
         tagNotifier.notifyChanged(tag.forChangeNotification());
     }
@@ -93,7 +93,7 @@ class TagServiceImpl implements TagService {
 
         Tag tag = Tag.fromStorage(tagDto);
 
-        if (tag.isNotAvailableFor(user)) {
+        if (tag.isNotAccessibleFor(user)) {
             throw new EntityNotFoundException(Tag.class, tagId);
         }
         return tag;

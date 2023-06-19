@@ -18,14 +18,14 @@ class DashboardQueryBuilder extends JpaQueryBuilder<DashboardEntity> {
 
     @Override
     public Predicate isAccessibleFor(User searcher) {
-        Join<DashboardEntity, DashboardShareEntity> sharedDashboard = rootEntity.join("shares", JoinType.LEFT);
         return or(
                 super.isAccessibleFor(searcher),
-                isGrantee(searcher, sharedDashboard)
+                isGrantee(searcher)
         );
     }
 
-    private Predicate isGrantee(User user, Join<DashboardEntity, DashboardShareEntity> sharedDashboard) {
+    private Predicate isGrantee(User user) {
+        Join<DashboardEntity, DashboardShareEntity> sharedDashboard = rootEntity.join("shares", JoinType.LEFT);
         Subquery<Long> subQuery = criteriaQuery.subquery(Long.class);
         subQuery.select(criteriaBuilder.literal(1L))
                 .where(criteriaBuilder.equal(sharedDashboard.get("granteeId"), user.id().toString()))

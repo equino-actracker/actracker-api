@@ -1,6 +1,7 @@
 package ovh.equino.actracker.domain.tag;
 
 import ovh.equino.actracker.domain.Entity;
+import ovh.equino.actracker.domain.exception.EntityEditForbidden;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.user.User;
 
@@ -9,6 +10,7 @@ import java.util.*;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
+import static java.util.function.Predicate.isEqual;
 
 class Tag implements Entity {
 
@@ -54,7 +56,10 @@ class Tag implements Entity {
         return newTag;
     }
 
-    void updateTo(TagDto tag) {
+    void updateTo(TagDto tag, User updater) {
+        if (isEditForbiddenFor(updater)) {
+            throw new EntityEditForbidden(Tag.class);
+        }
 
         Collection<Metric> newMetrics = findNewMetrics(tag.metrics());
         Collection<Metric> deletedMetrics = findDeletedMetrics(tag.metrics());
@@ -68,7 +73,10 @@ class Tag implements Entity {
         validate();
     }
 
-    void delete() {
+    void delete(User remover) {
+        if (isEditForbiddenFor(remover)) {
+            throw new EntityEditForbidden(Tag.class);
+        }
         this.metrics.forEach(Metric::delete);
         this.deleted = true;
     }
@@ -127,15 +135,29 @@ class Tag implements Entity {
         return !isDeleted();
     }
 
-    boolean isAvailableFor(User user) {
-        return creator.equals(user);
+    boolean isAccessibleFor(User user) {
+        return creator.equals(user) || isGrantee(user);
     }
 
-    boolean isNotAvailableFor(User user) {
-        return !isAvailableFor(user);
+    boolean isNotAccessibleFor(User user) {
+        return !isAccessibleFor(user);
+    }
+
+    private boolean isEditForbiddenFor(User user) {
+        return !creator.equals(user);
+    }
+
+    private boolean isGrantee(User user) {
+        return shares.stream()
+                .map(Share::grantee)
+                .filter(Objects::nonNull)
+                .anyMatch(isEqual(user));
     }
 
     void share(Share share, User granter) {
+        if (isEditForbiddenFor(granter)) {
+            throw new EntityEditForbidden(Tag.class);
+        }
         List<String> existingGranteeNames = this.shares.stream()
                 .map(Share::granteeName)
                 .toList();
