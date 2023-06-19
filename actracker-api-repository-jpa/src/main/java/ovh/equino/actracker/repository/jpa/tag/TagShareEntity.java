@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "tag_share")
-class TagShareEntity {
+public class TagShareEntity {
 
     @Id
     @Column(name = "id")
