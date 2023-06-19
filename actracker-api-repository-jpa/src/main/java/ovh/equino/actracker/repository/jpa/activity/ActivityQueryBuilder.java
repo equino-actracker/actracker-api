@@ -121,7 +121,7 @@ class ActivityQueryBuilder extends JpaQueryBuilder<ActivityEntity> {
     }
 
     private Predicate isGrantee(User user) {
-        Join<ActivityEntity, TagEntity> activityWithTag = rootEntity.join("tags", JoinType.RIGHT);
+        Join<ActivityEntity, TagEntity> activityWithTag = rootEntity.join("tags", JoinType.LEFT);
         Join<?, TagShareEntity> sharedActivity = activityWithTag.join("shares", JoinType.LEFT);
         Subquery<Long> subQuery = criteriaQuery.subquery(Long.class);
         subQuery.select(criteriaBuilder.literal(1L))
