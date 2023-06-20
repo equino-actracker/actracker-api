@@ -34,7 +34,7 @@ public abstract class JpaQueryBuilder<ENTITY> {
     }
 
     public CriteriaQuery<ENTITY> select() {
-        return criteriaQuery.select(rootEntity);
+        return criteriaQuery.select(rootEntity).distinct(true);
     }
 
     public Predicate hasId(UUID id) {
