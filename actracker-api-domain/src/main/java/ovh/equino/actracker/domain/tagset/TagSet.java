@@ -103,7 +103,7 @@ public class TagSet implements Entity {
         );
     }
 
-    TagSetDto forStorage() {
+    public TagSetDto forStorage() {
         Set<UUID> tagIds = tags.stream()
                 .map(TagId::id)
                 .collect(toUnmodifiableSet());

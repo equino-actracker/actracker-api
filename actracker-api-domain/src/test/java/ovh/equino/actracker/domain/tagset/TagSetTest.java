@@ -25,6 +25,7 @@ import static org.apache.commons.collections4.CollectionUtils.removeAll;
 import static org.apache.commons.collections4.CollectionUtils.union;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -137,6 +138,22 @@ class TagSetTest {
 
             // then
             assertThat(tagSet.tags()).containsExactlyInAnyOrderElementsOf(tagsAfterAssignment);
+        }
+
+        @Test
+        void shouldNotDuplicateAssignedTag() {
+            // given
+            TagId duplicatedTag = new TagId(randomUUID());
+            Set<TagId> existingTags = Set.of(new TagId(randomUUID()), duplicatedTag);
+            Set<UUID> existingTagIds = existingTags.stream().map(TagId::id).collect(toSet());
+            TagSetDto tagSetDto = new TagSetDto("tag set name", existingTagIds);
+            TagSet tagSet = TagSet.create(tagSetDto, CREATOR, tagsExistenceVerifier);
+
+            // when
+            tagSet.assignTag(duplicatedTag, CREATOR);
+
+            // then
+            assertThat(tagSet.tags()).containsExactlyInAnyOrderElementsOf(existingTags);
         }
 
         @Test
