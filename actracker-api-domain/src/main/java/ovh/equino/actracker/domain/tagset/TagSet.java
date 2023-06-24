@@ -1,6 +1,7 @@
 package ovh.equino.actracker.domain.tagset;
 
 import ovh.equino.actracker.domain.Entity;
+import ovh.equino.actracker.domain.exception.EntityEditForbidden;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
 import ovh.equino.actracker.domain.user.User;
@@ -51,6 +52,33 @@ class TagSet implements Entity {
         return newTagSet;
     }
 
+    void rename(String newName, User updater) {
+        if (isNotAvailableFor(updater)) {
+            throw new EntityEditForbidden(TagSet.class);
+        }
+        this.name = newName;
+        validate();
+    }
+
+    void assignTag(TagId newTag, User updater) {
+        if (isNotAvailableFor(updater)) {
+            throw new EntityEditForbidden(TagSet.class);
+        }
+        this.tags.add(newTag);
+        validate();
+    }
+
+    void removeTag(TagId tag, User updater) {
+        if (isNotAvailableFor(updater)) {
+            throw new EntityEditForbidden(TagSet.class);
+        }
+        this.tags.remove(tag);
+    }
+
+    void delete() {
+        this.deleted = true;
+    }
+
     void updateTo(TagSetDto tagSet) {
         Set<TagId> deletedAssignedTags = tagsExistenceVerifier.notExisting(this.tags);
         this.name = tagSet.name();
@@ -58,10 +86,6 @@ class TagSet implements Entity {
         this.tags.addAll(toTagIds(tagSet));
         this.validate();
         this.tags.addAll(deletedAssignedTags);
-    }
-
-    void delete() {
-        this.deleted = true;
     }
 
     static TagSet fromStorage(TagSetDto tagSet, TagsExistenceVerifier tagsExistenceVerifier) {
