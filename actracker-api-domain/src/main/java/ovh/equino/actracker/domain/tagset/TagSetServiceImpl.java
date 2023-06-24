@@ -30,7 +30,7 @@ class TagSetServiceImpl implements TagSetService {
         TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, creator);
         TagSet tagSet = TagSet.create(newTagSetData, creator, tagsExistenceVerifier);
         tagSetRepository.add(tagSet.forStorage());
-        return tagSet.forClient();
+        return tagSet.forClient(creator);
     }
 
     @Override
@@ -38,7 +38,7 @@ class TagSetServiceImpl implements TagSetService {
         TagSet tagSet = getTagSetIfAuthorized(updater, tagSetId);
         tagSet.updateTo(updatedTagSetData);
         tagSetRepository.update(tagSetId, tagSet.forStorage());
-        return tagSet.forClient();
+        return tagSet.forClient(updater);
     }
 
     @Override
@@ -48,7 +48,7 @@ class TagSetServiceImpl implements TagSetService {
         EntitySearchResult<TagSetDto> searchResult = tagSetSearchEngine.findTagSets(searchCriteria);
         List<TagSetDto> resultForClient = searchResult.results().stream()
                 .map(tagSet -> TagSet.fromStorage(tagSet, tagsExistenceVerifier))
-                .map(TagSet::forClient)
+                .map(tagSet -> tagSet.forClient(searchCriteria.searcher()))
                 .toList();
 
         return new EntitySearchResult<>(searchResult.nextPageId(), resultForClient);
@@ -57,7 +57,7 @@ class TagSetServiceImpl implements TagSetService {
     @Override
     public void deleteTagSet(UUID tagSetId, User remover) {
         TagSet tagSet = getTagSetIfAuthorized(remover, tagSetId);
-        tagSet.delete();
+        tagSet.delete(remover);
         tagSetRepository.update(tagSetId, tagSet.forStorage());
     }
 

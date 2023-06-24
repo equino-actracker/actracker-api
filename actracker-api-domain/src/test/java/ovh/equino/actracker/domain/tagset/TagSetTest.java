@@ -176,7 +176,7 @@ class TagSetTest {
 
     @Nested
     @DisplayName("removeTag")
-    class RemoveTestTag {
+    class RemoveTagTest {
 
         @Test
         void shouldRemoveAssignedTag() {
@@ -236,6 +236,36 @@ class TagSetTest {
             assertThatThrownBy(() ->
                     tagSet.removeTag(new TagId(randomUUID()), unprivilegedUser)
             ).isInstanceOf(EntityEditForbidden.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("delete")
+    class DeleteTest {
+
+        @Test
+        void shouldDeleteTagSet() {
+            // given
+            TagSetDto tagSetDto = new TagSetDto("tag set name", emptySet());
+            TagSet tagSet = TagSet.create(tagSetDto, CREATOR, tagsExistenceVerifier);
+
+            // then
+            tagSet.delete(CREATOR);
+        }
+
+        @Test
+        void shouldFailWhenUserNotAllowed() {
+            // given
+            TagSetDto tagSetDto = new TagSetDto("tag set name", emptySet());
+            TagSet tagSet = TagSet.create(tagSetDto, CREATOR, tagsExistenceVerifier);
+
+            User unprivilegedUser = new User(randomUUID());
+
+            // then
+            assertThatThrownBy(() ->
+                    tagSet.delete(unprivilegedUser)
+            )
+                    .isInstanceOf(EntityEditForbidden.class);
         }
     }
 }
