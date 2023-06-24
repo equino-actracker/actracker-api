@@ -1,6 +1,8 @@
 package ovh.equino.actracker.domain.tagset;
 
 import ovh.equino.actracker.domain.Entity;
+import ovh.equino.actracker.domain.exception.EntityEditForbidden;
+import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
 import ovh.equino.actracker.domain.user.User;
@@ -12,7 +14,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 
-class TagSet implements Entity {
+public class TagSet implements Entity {
 
     private final TagSetId id;
     private final User creator;
@@ -51,6 +53,36 @@ class TagSet implements Entity {
         return newTagSet;
     }
 
+    public void rename(String newName, User updater) {
+        if (isNotAvailableFor(updater)) {
+            throw new EntityEditForbidden(TagSet.class);
+        }
+        this.name = newName;
+        validate();
+    }
+
+    public void assignTag(TagId newTag, User updater) {
+        if (isNotAvailableFor(updater)) {
+            throw new EntityEditForbidden(TagSet.class);
+        }
+        this.tags.add(newTag);
+        validate();
+    }
+
+    public void removeTag(TagId tag, User updater) {
+        if (isNotAvailableFor(updater)) {
+            throw new EntityEditForbidden(TagSet.class);
+        }
+        this.tags.remove(tag);
+    }
+
+    public void delete(User remover) {
+        if (isNotAvailableFor(remover)) {
+            throw new EntityEditForbidden(TagSet.class);
+        }
+        this.deleted = true;
+    }
+
     void updateTo(TagSetDto tagSet) {
         Set<TagId> deletedAssignedTags = tagsExistenceVerifier.notExisting(this.tags);
         this.name = tagSet.name();
@@ -60,11 +92,7 @@ class TagSet implements Entity {
         this.tags.addAll(deletedAssignedTags);
     }
 
-    void delete() {
-        this.deleted = true;
-    }
-
-    static TagSet fromStorage(TagSetDto tagSet, TagsExistenceVerifier tagsExistenceVerifier) {
+    public static TagSet fromStorage(TagSetDto tagSet, TagsExistenceVerifier tagsExistenceVerifier) {
         return new TagSet(
                 new TagSetId(tagSet.id()),
                 new User(tagSet.creatorId()),
@@ -75,14 +103,17 @@ class TagSet implements Entity {
         );
     }
 
-    TagSetDto forStorage() {
+    public TagSetDto forStorage() {
         Set<UUID> tagIds = tags.stream()
                 .map(TagId::id)
                 .collect(toUnmodifiableSet());
         return new TagSetDto(id.id(), creator.id(), name, tagIds, deleted);
     }
 
-    TagSetDto forClient() {
+    public TagSetDto forClient(User client) {
+        if (isNotAvailableFor(client)) {
+            throw new EntityNotFoundException(TagSet.class, this.id.id());
+        }
         Set<UUID> tagIds = tagsExistenceVerifier.existing(tags).stream()
                 .map(TagId::id)
                 .collect(toUnmodifiableSet());
@@ -109,6 +140,10 @@ class TagSet implements Entity {
 
     Set<TagId> tags() {
         return unmodifiableSet(tags);
+    }
+
+    boolean deleted() {
+        return this.deleted;
     }
 
     private static List<TagId> toTagIds(TagSetDto tagSet) {
