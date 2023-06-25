@@ -2,6 +2,7 @@ package ovh.equino.actracker.domain.tag;
 
 import ovh.equino.actracker.domain.Entity;
 import ovh.equino.actracker.domain.exception.EntityEditForbidden;
+import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.user.User;
 
@@ -13,7 +14,7 @@ import static java.util.Objects.requireNonNullElse;
 import static java.util.UUID.randomUUID;
 import static java.util.function.Predicate.isEqual;
 
-class Tag implements Entity {
+public class Tag implements Entity {
 
     private final TagId id;
     private final User creator;
@@ -57,7 +58,7 @@ class Tag implements Entity {
         return newTag;
     }
 
-    void rename(String newName, User updater) {
+    public void rename(String newName, User updater) {
         if (this.isEditForbiddenFor(updater)) {
             throw new EntityEditForbidden(Tag.class);
         }
@@ -65,7 +66,7 @@ class Tag implements Entity {
         validate();
     }
 
-    void addMetric(String name, MetricType type, User updater) {
+    public void addMetric(String name, MetricType type, User updater) {
         if (this.isEditForbiddenFor(updater)) {
             throw new EntityEditForbidden(Tag.class);
         }
@@ -74,7 +75,7 @@ class Tag implements Entity {
         this.metrics.add(newMetric);
     }
 
-    void deleteMetric(MetricId metricId, User updater) {
+    public void deleteMetric(MetricId metricId, User updater) {
         if (this.isEditForbiddenFor(updater)) {
             throw new EntityEditForbidden(Tag.class);
         }
@@ -84,7 +85,7 @@ class Tag implements Entity {
                 .ifPresent(Metric::delete);
     }
 
-    void renameMetric(String newName, MetricId metricId, User updater) {
+    public void renameMetric(String newName, MetricId metricId, User updater) {
         if (this.isEditForbiddenFor(updater)) {
             throw new EntityEditForbidden(Tag.class);
         }
@@ -94,7 +95,7 @@ class Tag implements Entity {
                 .ifPresent(metric -> metric.rename(newName));
     }
 
-    void delete(User remover) {
+    public void delete(User remover) {
         if (isEditForbiddenFor(remover)) {
             throw new EntityEditForbidden(Tag.class);
         }
@@ -119,7 +120,7 @@ class Tag implements Entity {
         validate();
     }
 
-    static Tag fromStorage(TagDto tag) {
+    public static Tag fromStorage(TagDto tag) {
         List<Metric> metrics = tag.metrics().stream()
                 .map(Metric::fromStorage)
                 .toList();
@@ -133,14 +134,17 @@ class Tag implements Entity {
         );
     }
 
-    TagDto forStorage() {
+    public TagDto forStorage() {
         List<MetricDto> metrics = this.metrics.stream()
                 .map(Metric::forStorage)
                 .toList();
         return new TagDto(id.id(), creator.id(), name, metrics, shares, deleted);
     }
 
-    TagDto forClient() {
+    public TagDto forClient(User client) {
+        if (isNotAccessibleFor(client)) {
+            throw new EntityNotFoundException(Tag.class, this.id.id());
+        }
         List<MetricDto> metrics = this.metrics.stream()
                 .filter(Metric::isNotDeleted)
                 .map(Metric::forStorage)
