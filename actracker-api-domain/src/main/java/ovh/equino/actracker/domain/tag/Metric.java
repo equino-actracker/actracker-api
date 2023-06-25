@@ -35,16 +35,20 @@ class Metric implements Entity {
         return newMetric;
     }
 
+    void rename(String newName) {
+        this.name = newName;
+    }
+
+    void delete() {
+        this.deleted = true;
+    }
+
     void updateTo(MetricDto metric) {
         this.name = metric.name();
         if (metric.type() != this.type) {
             throw new EntityInvalidException(Metric.class, singletonList("Metric type cannot be changed."));
         }
         validate();
-    }
-
-    void delete() {
-        this.deleted = true;
     }
 
     static Metric fromStorage(MetricDto metric) {
@@ -91,5 +95,9 @@ class Metric implements Entity {
 
     MetricType type() {
         return type;
+    }
+
+    String name() {
+        return this.name;
     }
 }

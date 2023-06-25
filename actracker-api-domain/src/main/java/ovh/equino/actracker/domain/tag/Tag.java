@@ -10,6 +10,7 @@ import java.util.*;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
+import static java.util.UUID.randomUUID;
 import static java.util.function.Predicate.isEqual;
 
 class Tag implements Entity {
@@ -56,6 +57,51 @@ class Tag implements Entity {
         return newTag;
     }
 
+    void rename(String newName, User updater) {
+        if (this.isEditForbiddenFor(updater)) {
+            throw new EntityEditForbidden(Tag.class);
+        }
+        this.name = newName;
+        validate();
+    }
+
+    void addMetric(String name, MetricType type, User updater) {
+        if (this.isEditForbiddenFor(updater)) {
+            throw new EntityEditForbidden(Tag.class);
+        }
+        MetricDto newMetricDto = new MetricDto(randomUUID(), name, type);
+        Metric newMetric = Metric.create(newMetricDto, creator);
+        this.metrics.add(newMetric);
+    }
+
+    void deleteMetric(MetricId metricId, User updater) {
+        if (this.isEditForbiddenFor(updater)) {
+            throw new EntityEditForbidden(Tag.class);
+        }
+        this.metrics.stream()
+                .filter(metric -> metric.id().equals(metricId))
+                .findFirst()
+                .ifPresent(Metric::delete);
+    }
+
+    void renameMetric(String newName, MetricId metricId, User updater) {
+        if (this.isEditForbiddenFor(updater)) {
+            throw new EntityEditForbidden(Tag.class);
+        }
+        this.metrics.stream()
+                .filter(metric -> metric.id().equals(metricId))
+                .findFirst()
+                .ifPresent(metric -> metric.rename(newName));
+    }
+
+    void delete(User remover) {
+        if (isEditForbiddenFor(remover)) {
+            throw new EntityEditForbidden(Tag.class);
+        }
+        this.metrics.forEach(Metric::delete);
+        this.deleted = true;
+    }
+
     void updateTo(TagDto tag, User updater) {
         if (isEditForbiddenFor(updater)) {
             throw new EntityEditForbidden(Tag.class);
@@ -71,14 +117,6 @@ class Tag implements Entity {
         this.metrics.addAll(deletedMetrics);
         this.metrics.addAll(updatedMetrics);
         validate();
-    }
-
-    void delete(User remover) {
-        if (isEditForbiddenFor(remover)) {
-            throw new EntityEditForbidden(Tag.class);
-        }
-        this.metrics.forEach(Metric::delete);
-        this.deleted = true;
     }
 
     static Tag fromStorage(TagDto tag) {
