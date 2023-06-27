@@ -59,6 +59,7 @@ public class TagApplicationService {
         Tag tag = Tag.fromStorage(tagDto);
 
         tag.renameMetric(newName, new MetricId(metricId), updater);
+        tagRepository.update(tagId, tag.forStorage());
         return tag.forClient(updater);
     }
 }
