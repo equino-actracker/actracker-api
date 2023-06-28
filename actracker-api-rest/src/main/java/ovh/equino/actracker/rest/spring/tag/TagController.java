@@ -108,7 +108,6 @@ class TagController {
         User requester = new User(requesterIdentity.getId());
 
         tagApplicationService.deleteTag(UUID.fromString(id), requester);
-        tagService.deleteTag(UUID.fromString(id), requester);
     }
 
     @RequestMapping(method = POST, path = "/{id}/share")
