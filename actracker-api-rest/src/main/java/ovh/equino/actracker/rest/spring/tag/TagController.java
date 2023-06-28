@@ -112,9 +112,8 @@ class TagController {
 
     @RequestMapping(method = POST, path = "/{id}/share")
     @ResponseStatus(OK)
-    Tag shareTag(
-            @PathVariable("id") String id,
-            @RequestBody Share share) {
+    Tag shareTag(@PathVariable("id") String id,
+                 @RequestBody Share share) {
 
         Identity requesterIdentity = identityProvider.provideIdentity();
         User requester = new User(requesterIdentity.getId());
@@ -125,9 +124,9 @@ class TagController {
         return tagMapper.toResponse(sharedTag);
     }
 
-    @RequestMapping(method = PATCH, path = "/{id}/renamed")
+    @RequestMapping(method = PUT, path = "/{id}/name")
     @ResponseStatus(OK)
-    Tag renameTag(@PathVariable("id") String tagId, @RequestParam(name = "name") String newName) {
+    Tag renameTag(@PathVariable("id") String tagId, @RequestBody String newName) {
 
         Identity requesterIdentity = identityProvider.provideIdentity();
         User requester = new User(requesterIdentity.getId());
@@ -137,11 +136,11 @@ class TagController {
         return tagMapper.toResponse(tagDto);
     }
 
-    @RequestMapping(method = PATCH, path = "/{tagId}/metric/{metricId}/renamed")
+    @RequestMapping(method = PUT, path = "/{tagId}/metric/{metricId}/name")
     @ResponseStatus(OK)
     Tag renameMetric(@PathVariable("tagId") String tagId,
                      @PathVariable("metricId") String metricId,
-                     @RequestParam(name = "name") String newName) {
+                     @RequestBody String newName) {
 
         Identity requesterIdentity = identityProvider.provideIdentity();
         User requester = new User(requesterIdentity.getId());

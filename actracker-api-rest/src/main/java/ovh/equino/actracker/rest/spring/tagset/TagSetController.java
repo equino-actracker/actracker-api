@@ -9,6 +9,7 @@ import ovh.equino.actracker.domain.tagset.TagSetService;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.rest.spring.EntitySearchCriteriaBuilder;
 import ovh.equino.actracker.rest.spring.SearchResponse;
+import ovh.equino.actracker.rest.spring.tag.Tag;
 import ovh.equino.security.identity.Identity;
 import ovh.equino.security.identity.IdentityProvider;
 
@@ -24,7 +25,7 @@ class TagSetController {
     private final TagSetService tagSetService;
     private final TagSetApplicationService tagSetApplicationService;
     private final IdentityProvider identityProvider;
-    private final TagSetMapper mapper = new TagSetMapper();
+    private final TagSetMapper tagSetMapper = new TagSetMapper();
 
     TagSetController(TagSetService tagSetService,
                      TagSetApplicationService tagSetApplicationService,
@@ -41,10 +42,10 @@ class TagSetController {
         Identity requestIdentity = identityProvider.provideIdentity();
         User requester = new User(requestIdentity.getId());
 
-        TagSetDto tagSetDto = mapper.fromRequest(tagSet);
+        TagSetDto tagSetDto = tagSetMapper.fromRequest(tagSet);
         TagSetDto createdTagSet = tagSetService.createTagSet(tagSetDto, requester);
 
-        return mapper.toResponse(createdTagSet);
+        return tagSetMapper.toResponse(createdTagSet);
     }
 
     @RequestMapping(method = PUT, path = "/{id}")
@@ -53,10 +54,10 @@ class TagSetController {
         Identity requestIdentity = identityProvider.provideIdentity();
         User requester = new User(requestIdentity.getId());
 
-        TagSetDto tagSetDto = mapper.fromRequest(tagSet);
+        TagSetDto tagSetDto = tagSetMapper.fromRequest(tagSet);
         TagSetDto updatedTagSet = tagSetService.updateTagSet(UUID.fromString(id), tagSetDto, requester);
 
-        return mapper.toResponse(updatedTagSet);
+        return tagSetMapper.toResponse(updatedTagSet);
     }
 
     @RequestMapping(method = GET, path = "/matching")
@@ -79,7 +80,7 @@ class TagSetController {
                 .build();
 
         EntitySearchResult<TagSetDto> searchResult = tagSetService.searchTagSets(searchCriteria);
-        return mapper.toResponse(searchResult);
+        return tagSetMapper.toResponse(searchResult);
     }
 
     @RequestMapping(method = DELETE, path = "/{id}")
@@ -91,45 +92,45 @@ class TagSetController {
         tagSetApplicationService.deleteTagSet(UUID.fromString(id), requester);
     }
 
-    @RequestMapping(method = PATCH, path = "/{id}/renamed")
+    @RequestMapping(method = PUT, path = "/{id}/name")
     @ResponseStatus(OK)
-    TagSet renameTagSet(@PathVariable("id") String tagSetId, @RequestParam(name = "name") String newName) {
+    TagSet renameTagSet(@PathVariable("id") String tagSetId, @RequestBody String newName) {
         Identity requestIdentity = identityProvider.provideIdentity();
         User requester = new User(requestIdentity.getId());
 
         TagSetDto tagSet = tagSetApplicationService.renameTagSet(newName, UUID.fromString(tagSetId), requester);
 
-        return mapper.toResponse(tagSet);
+        return tagSetMapper.toResponse(tagSet);
     }
 
-    @RequestMapping(method = PATCH, path = "/{id}/withTagAssigned")
+    @RequestMapping(method = POST, path = "/{id}/tag")
     @ResponseStatus(OK)
-    TagSet addTagToSet(@PathVariable("id") String tagSetId, @RequestParam(name = "tagId") String newTagId) {
+    TagSet addTagToSet(@PathVariable("id") String tagSetId, @RequestBody Tag newTag) {
         Identity requestIdentity = identityProvider.provideIdentity();
         User requester = new User(requestIdentity.getId());
 
         TagSetDto tagSet = tagSetApplicationService.addTagToSet(
-                UUID.fromString(newTagId),
+                UUID.fromString(newTag.id()),
                 UUID.fromString(tagSetId),
                 requester
         );
 
-        return mapper.toResponse(tagSet);
+        return tagSetMapper.toResponse(tagSet);
     }
 
-    @RequestMapping(method = PATCH, path = "/{id}/withTagRemoved")
+    @RequestMapping(method = DELETE, path = "/{tagSetId}/tag/{tagId}")
     @ResponseStatus(OK)
-    TagSet removeTagFromSet(@PathVariable("id") String tagSetId, @RequestParam(name = "tagId") String removedTagId) {
+    TagSet removeTagFromSet(@PathVariable("tagSetId") String tagSetId, @PathVariable(name = "tagId") String tagId) {
         Identity requestIdentity = identityProvider.provideIdentity();
         User requester = new User(requestIdentity.getId());
 
         TagSetDto tagSet = tagSetApplicationService.removeTagFromSet(
-                UUID.fromString(removedTagId),
+                UUID.fromString(tagId),
                 UUID.fromString(tagSetId),
                 requester
         );
 
-        return mapper.toResponse(tagSet);
+        return tagSetMapper.toResponse(tagSet);
     }
 
 }
