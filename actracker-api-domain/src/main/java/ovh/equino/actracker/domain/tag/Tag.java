@@ -2,6 +2,7 @@ package ovh.equino.actracker.domain.tag;
 
 import ovh.equino.actracker.domain.Entity;
 import ovh.equino.actracker.domain.exception.EntityEditForbidden;
+import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.user.User;
 
@@ -10,9 +11,10 @@ import java.util.*;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
+import static java.util.UUID.randomUUID;
 import static java.util.function.Predicate.isEqual;
 
-class Tag implements Entity {
+public class Tag implements Entity {
 
     private final TagId id;
     private final User creator;
@@ -56,6 +58,63 @@ class Tag implements Entity {
         return newTag;
     }
 
+    public void rename(String newName, User updater) {
+        if (this.isEditForbiddenFor(updater)) {
+            throw new EntityEditForbidden(Tag.class);
+        }
+        this.name = newName;
+        validate();
+    }
+
+    public void addMetric(String name, MetricType type, User updater) {
+        if (this.isEditForbiddenFor(updater)) {
+            throw new EntityEditForbidden(Tag.class);
+        }
+        MetricDto newMetricDto = new MetricDto(randomUUID(), name, type);
+        Metric newMetric = Metric.create(newMetricDto, creator);
+        this.metrics.add(newMetric);
+    }
+
+    public void deleteMetric(MetricId metricId, User updater) {
+        if (this.isEditForbiddenFor(updater)) {
+            throw new EntityEditForbidden(Tag.class);
+        }
+        this.metrics.stream()
+                .filter(metric -> metric.id().equals(metricId))
+                .findFirst()
+                .ifPresent(Metric::delete);
+    }
+
+    public void renameMetric(String newName, MetricId metricId, User updater) {
+        if (this.isEditForbiddenFor(updater)) {
+            throw new EntityEditForbidden(Tag.class);
+        }
+        this.metrics.stream()
+                .filter(metric -> metric.id().equals(metricId))
+                .findFirst()
+                .ifPresent(metric -> metric.rename(newName));
+    }
+
+    public void delete(User remover) {
+        if (isEditForbiddenFor(remover)) {
+            throw new EntityEditForbidden(Tag.class);
+        }
+        this.metrics.forEach(Metric::delete);
+        this.deleted = true;
+    }
+
+    public void share(Share share, User granter) {
+        if (isEditForbiddenFor(granter)) {
+            throw new EntityEditForbidden(Tag.class);
+        }
+        List<String> existingGranteeNames = this.shares.stream()
+                .map(Share::granteeName)
+                .toList();
+        if (!existingGranteeNames.contains(share.granteeName())) {
+            this.shares.add(share);
+        }
+    }
+
     void updateTo(TagDto tag, User updater) {
         if (isEditForbiddenFor(updater)) {
             throw new EntityEditForbidden(Tag.class);
@@ -73,15 +132,7 @@ class Tag implements Entity {
         validate();
     }
 
-    void delete(User remover) {
-        if (isEditForbiddenFor(remover)) {
-            throw new EntityEditForbidden(Tag.class);
-        }
-        this.metrics.forEach(Metric::delete);
-        this.deleted = true;
-    }
-
-    static Tag fromStorage(TagDto tag) {
+    public static Tag fromStorage(TagDto tag) {
         List<Metric> metrics = tag.metrics().stream()
                 .map(Metric::fromStorage)
                 .toList();
@@ -95,14 +146,17 @@ class Tag implements Entity {
         );
     }
 
-    TagDto forStorage() {
+    public TagDto forStorage() {
         List<MetricDto> metrics = this.metrics.stream()
                 .map(Metric::forStorage)
                 .toList();
         return new TagDto(id.id(), creator.id(), name, metrics, shares, deleted);
     }
 
-    TagDto forClient() {
+    public TagDto forClient(User client) {
+        if (isNotAccessibleFor(client)) {
+            throw new EntityNotFoundException(Tag.class, this.id.id());
+        }
         List<MetricDto> metrics = this.metrics.stream()
                 .filter(Metric::isNotDeleted)
                 .map(Metric::forStorage)
@@ -152,18 +206,6 @@ class Tag implements Entity {
                 .map(Share::grantee)
                 .filter(Objects::nonNull)
                 .anyMatch(isEqual(user));
-    }
-
-    void share(Share share, User granter) {
-        if (isEditForbiddenFor(granter)) {
-            throw new EntityEditForbidden(Tag.class);
-        }
-        List<String> existingGranteeNames = this.shares.stream()
-                .map(Share::granteeName)
-                .toList();
-        if (!existingGranteeNames.contains(share.granteeName())) {
-            this.shares.add(share);
-        }
     }
 
     @Override

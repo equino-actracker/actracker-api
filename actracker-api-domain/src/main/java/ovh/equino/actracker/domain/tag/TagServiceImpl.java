@@ -34,7 +34,7 @@ class TagServiceImpl implements TagService {
         Tag tag = Tag.create(newTagData, creator);
         tagRepository.add(tag.forStorage());
         tagNotifier.notifyChanged(tag.forChangeNotification());
-        return tag.forClient();
+        return tag.forClient(creator);
     }
 
     @Override
@@ -43,14 +43,14 @@ class TagServiceImpl implements TagService {
         tag.updateTo(updatedTagData, updater);
         tagRepository.update(tagId, tag.forStorage());
         tagNotifier.notifyChanged(tag.forChangeNotification());
-        return tag.forClient();
+        return tag.forClient(updater);
     }
 
     @Override
     public List<TagDto> getTags(Set<UUID> tagIds, User searcher) {
         return tagRepository.findByIds(tagIds, searcher).stream()
                 .map(Tag::fromStorage)
-                .map(Tag::forClient)
+                .map(tag -> tag.forClient(searcher))
                 .toList();
     }
 
@@ -59,7 +59,7 @@ class TagServiceImpl implements TagService {
         EntitySearchResult<TagDto> searchResult = tagSearchEngine.findTags(searchCriteria);
         List<TagDto> resultForClient = searchResult.results().stream()
                 .map(Tag::fromStorage)
-                .map(Tag::forClient)
+                .map(tag -> tag.forClient(searchCriteria.searcher()))
                 .toList();
         return new EntitySearchResult<>(searchResult.nextPageId(), resultForClient);
     }
@@ -84,7 +84,7 @@ class TagServiceImpl implements TagService {
 
         tag.share(newShare, granter);
         tagRepository.update(tagId, tag.forStorage());
-        return tag.forClient();
+        return tag.forClient(granter);
     }
 
     private Tag getTagIfAuthorized(User user, UUID tagId) {
