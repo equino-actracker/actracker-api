@@ -103,6 +103,18 @@ public class Tag implements Entity {
         this.deleted = true;
     }
 
+    public void share(Share share, User granter) {
+        if (isEditForbiddenFor(granter)) {
+            throw new EntityEditForbidden(Tag.class);
+        }
+        List<String> existingGranteeNames = this.shares.stream()
+                .map(Share::granteeName)
+                .toList();
+        if (!existingGranteeNames.contains(share.granteeName())) {
+            this.shares.add(share);
+        }
+    }
+
     void updateTo(TagDto tag, User updater) {
         if (isEditForbiddenFor(updater)) {
             throw new EntityEditForbidden(Tag.class);
@@ -194,18 +206,6 @@ public class Tag implements Entity {
                 .map(Share::grantee)
                 .filter(Objects::nonNull)
                 .anyMatch(isEqual(user));
-    }
-
-    void share(Share share, User granter) {
-        if (isEditForbiddenFor(granter)) {
-            throw new EntityEditForbidden(Tag.class);
-        }
-        List<String> existingGranteeNames = this.shares.stream()
-                .map(Share::granteeName)
-                .toList();
-        if (!existingGranteeNames.contains(share.granteeName())) {
-            this.shares.add(share);
-        }
     }
 
     @Override
