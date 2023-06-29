@@ -1,6 +1,7 @@
 package ovh.equino.actracker.domain.activity;
 
 import ovh.equino.actracker.domain.Entity;
+import ovh.equino.actracker.domain.exception.EntityEditForbidden;
 import ovh.equino.actracker.domain.tag.MetricId;
 import ovh.equino.actracker.domain.tag.MetricsExistenceVerifier;
 import ovh.equino.actracker.domain.tag.TagId;
@@ -79,6 +80,58 @@ class Activity implements Entity {
                 .toList();
     }
 
+    void rename(String newTitle, User editor) {
+        if (isNotAvailableFor(editor)) {
+            throw new EntityEditForbidden(Activity.class);
+        }
+        this.title = newTitle;
+    }
+
+    void finish(Instant endTime, User updater) {
+        if (isNotAvailableFor(updater)) {
+            throw new EntityEditForbidden(Activity.class);
+        }
+        this.endTime = endTime;
+        this.validate();
+    }
+
+    void start(Instant startTime, User updater) {
+        if (isNotAvailableFor(updater)) {
+            throw new EntityEditForbidden(Activity.class);
+        }
+        this.startTime = startTime;
+        this.validate();
+    }
+
+    void updateComment(String comment, User updater) {
+        if (isNotAvailableFor(updater)) {
+            throw new EntityEditForbidden(Activity.class);
+        }
+        this.comment = comment;
+    }
+
+    void assignTag(TagId tagId, User updater) {
+        if (isNotAvailableFor(updater)) {
+            throw new EntityEditForbidden(Activity.class);
+        }
+        this.tags.add(tagId);
+        validate();
+    }
+
+    void removeTag(TagId tagId, User updater) {
+        if (isNotAvailableFor(updater)) {
+            throw new EntityEditForbidden(Activity.class);
+        }
+        this.tags.remove(tagId);
+    }
+
+    void delete(User remover) {
+        if (isNotAvailableFor(remover)) {
+            throw new EntityEditForbidden(Activity.class);
+        }
+        this.deleted = true;
+    }
+
     void updateTo(ActivityDto activity) {
         Set<TagId> deletedAssignedTags = tagsExistenceVerifier.notExisting(this.tags);
         Set<MetricId> deletedAssignedMetrics = metricsExistenceVerifier.notExisting(this.tags, this.selectedMetrics());
@@ -103,20 +156,6 @@ class Activity implements Entity {
         return this.metricValues.stream()
                 .filter(metricValue -> metricUUIDs.contains(metricValue.metricId()))
                 .toList();
-    }
-
-    void delete() {
-        this.deleted = true;
-    }
-
-    void finish(Instant endTime) {
-        this.endTime = endTime;
-        this.validate();
-    }
-
-    void start(Instant startTime) {
-        this.startTime = startTime;
-        this.validate();
     }
 
     static Activity fromStorage(ActivityDto activity, TagsExistenceVerifier tagsExistenceVerifier) {
@@ -219,10 +258,22 @@ class Activity implements Entity {
         return unmodifiableSet(tags);
     }
 
+    String comment() {
+        return comment;
+    }
+
     Set<MetricId> selectedMetrics() {
         return metricValues.stream()
                 .map(MetricValue::metricId)
                 .map(MetricId::new)
                 .collect(toUnmodifiableSet());
+    }
+
+    String title() {
+        return this.title;
+    }
+
+    boolean deleted() {
+        return this.deleted;
     }
 }

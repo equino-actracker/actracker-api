@@ -266,8 +266,11 @@ class TagSetTest {
             TagSetDto tagSetDto = new TagSetDto("tag set name", emptySet());
             TagSet tagSet = TagSet.create(tagSetDto, CREATOR, tagsExistenceVerifier);
 
-            // then
+            // when
             tagSet.delete(CREATOR);
+
+            // then
+            assertThat(tagSet.deleted()).isTrue();
         }
 
         @Test
