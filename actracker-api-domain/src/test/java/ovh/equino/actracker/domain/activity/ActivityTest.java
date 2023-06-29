@@ -359,6 +359,13 @@ class ActivityTest {
         }
 
         @Test
+        void shouldAssignTagWhenAnotherDeletedTagExists() {
+            // All edits involving validation, in all entities containing deleted elements in collection fail.
+            // Wrap edit operation for entities.
+            fail();
+        }
+
+        @Test
         void shouldNotDuplicateAssignedTag() {
             // given
             TagId duplicatedTag = new TagId(randomUUID());
@@ -511,9 +518,86 @@ class ActivityTest {
     @Nested
     @DisplayName("metricValues")
     class MetricValuesTest {
-        @Test
-        void implementThem() {
-            fail();
+
+        @Nested
+        @DisplayName("addMetricValue")
+        class AddMetricValueTest {
+
+            @Test
+            void shouldAddMetricValue() {
+                fail();
+            }
+
+            @Test
+            void shouldFailWhenAddingAlreadyExistsMetricValue() {
+                fail();
+            }
+
+            @Test
+            void shouldFailWhenAddingValueOfNonExistingMetric() {
+                fail();
+            }
+
+            @Test
+            void shouldFailWhenAddingValueOfDeletedMetric() {
+                fail();
+            }
+
+            @Test
+            void shouldFailWhenUserNotAllowed() {
+                fail();
+            }
         }
+
+        @Nested
+        @DisplayName("updateMetricValue")
+        class UpdateMetricValueTest {
+
+            @Test
+            void shouldUpdateMetricValue() {
+                fail();
+            }
+
+            @Test
+            void shouldFailUpdatingValueOfNonExistingMetric() {
+                fail();
+            }
+
+            @Test
+            void shouldFailUpdatingValueOfDeletedMetric() {
+                fail();
+            }
+
+            @Test
+            void shouldFailWhenUserNotAllowed() {
+                fail();
+            }
+        }
+
+        @Nested
+        @DisplayName("removeMetricValue")
+        class RemoveMetricValueTest {
+
+            @Test
+            void shouldRemoveMetricValue() {
+                fail();
+            }
+
+            @Test
+            void shouldNotChangeValuesWhenRemovingValueOfNonExistingMetric() {
+                fail();
+            }
+
+            @Test
+            void shouldNotChangeValuesWhenRemovingValueOfDeletedMetric() {
+                fail();
+            }
+
+            @Test
+            void shouldFailWhenUserNotAllowed() {
+                fail();
+            }
+        }
+
     }
 }
