@@ -37,7 +37,7 @@ class ActivityServiceImpl implements ActivityService {
         Activity activity = Activity.create(newActivityData, creator, tagsExistenceVerifier);
         activityRepository.add(activity.forStorage());
         activityNotifier.notifyChanged(activity.forChangeNotification());
-        return activity.forClient();
+        return activity.forClient(creator);
     }
 
     @Override
@@ -46,7 +46,7 @@ class ActivityServiceImpl implements ActivityService {
         activity.updateTo(updatedActivityData);
         activityRepository.update(activityId, activity.forStorage());
         activityNotifier.notifyChanged(activity.forChangeNotification());
-        return activity.forClient();
+        return activity.forClient(updater);
     }
 
     @Override
@@ -56,7 +56,7 @@ class ActivityServiceImpl implements ActivityService {
         EntitySearchResult<ActivityDto> searchResult = activitySearchEngine.findActivities(searchCriteria);
         List<ActivityDto> resultForClient = searchResult.results().stream()
                 .map(activity -> Activity.fromStorage(activity, tagsExistenceVerifier))
-                .map(Activity::forClient)
+                .map(activity -> activity.forClient(searchCriteria.searcher()))
                 .toList();
 
         return new EntitySearchResult<>(searchResult.nextPageId(), resultForClient);
@@ -65,7 +65,7 @@ class ActivityServiceImpl implements ActivityService {
     @Override
     public void deleteActivity(UUID activityId, User remover) {
         Activity activity = getActivityIfAuthorized(remover, activityId);
-        activity.delete();
+        activity.delete(remover);
         activityRepository.update(activityId, activity.forStorage());
         activityNotifier.notifyChanged(activity.forChangeNotification());
     }
@@ -75,13 +75,13 @@ class ActivityServiceImpl implements ActivityService {
         TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, switcher);
         Activity newActivity = Activity.create(activityToSwitch, switcher, tagsExistenceVerifier);
         Instant switchTime = newActivity.isStarted() ? newActivity.startTime() : now();
-        newActivity.start(switchTime);
+        newActivity.start(switchTime, switcher);
 
         List<Activity> activitiesToFinish = activityRepository.findUnfinishedStartedBefore(switchTime, switcher).stream()
                 .map(activity -> Activity.fromStorage(activity, tagsExistenceVerifier))
                 .toList();
 
-        activitiesToFinish.forEach(activity -> activity.finish(switchTime));
+        activitiesToFinish.forEach(activity -> activity.finish(switchTime, switcher));
         activitiesToFinish.stream()
                 .map(Activity::forStorage)
                 .forEach(activity -> activityRepository.update(activity.id(), activity));
@@ -92,7 +92,7 @@ class ActivityServiceImpl implements ActivityService {
         activityRepository.add(newActivity.forStorage());
         activityNotifier.notifyChanged(newActivity.forChangeNotification());
 
-        return newActivity.forClient();
+        return newActivity.forClient(switcher);
     }
 
     private Activity getActivityIfAuthorized(User user, UUID activityId) {

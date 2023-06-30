@@ -1,6 +1,8 @@
 package ovh.equino.actracker.domain.activity;
 
 import ovh.equino.actracker.domain.Entity;
+import ovh.equino.actracker.domain.exception.EntityEditForbidden;
+import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.tag.MetricId;
 import ovh.equino.actracker.domain.tag.MetricsExistenceVerifier;
 import ovh.equino.actracker.domain.tag.TagId;
@@ -15,7 +17,7 @@ import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.*;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 
-class Activity implements Entity {
+public class Activity implements Entity {
 
     private final ActivityId id;
     private final User creator;
@@ -79,6 +81,58 @@ class Activity implements Entity {
                 .toList();
     }
 
+    public void rename(String newTitle, User editor) {
+        if (isNotAvailableFor(editor)) {
+            throw new EntityEditForbidden(Activity.class);
+        }
+        this.title = newTitle;
+    }
+
+    public void finish(Instant endTime, User updater) {
+        if (isNotAvailableFor(updater)) {
+            throw new EntityEditForbidden(Activity.class);
+        }
+        this.endTime = endTime;
+        this.validate();
+    }
+
+    public void start(Instant startTime, User updater) {
+        if (isNotAvailableFor(updater)) {
+            throw new EntityEditForbidden(Activity.class);
+        }
+        this.startTime = startTime;
+        this.validate();
+    }
+
+    public void updateComment(String comment, User updater) {
+        if (isNotAvailableFor(updater)) {
+            throw new EntityEditForbidden(Activity.class);
+        }
+        this.comment = comment;
+    }
+
+    public void assignTag(TagId tagId, User updater) {
+        if (isNotAvailableFor(updater)) {
+            throw new EntityEditForbidden(Activity.class);
+        }
+        this.tags.add(tagId);
+        validate();
+    }
+
+    public void removeTag(TagId tagId, User updater) {
+        if (isNotAvailableFor(updater)) {
+            throw new EntityEditForbidden(Activity.class);
+        }
+        this.tags.remove(tagId);
+    }
+
+    public void delete(User remover) {
+        if (isNotAvailableFor(remover)) {
+            throw new EntityEditForbidden(Activity.class);
+        }
+        this.deleted = true;
+    }
+
     void updateTo(ActivityDto activity) {
         Set<TagId> deletedAssignedTags = tagsExistenceVerifier.notExisting(this.tags);
         Set<MetricId> deletedAssignedMetrics = metricsExistenceVerifier.notExisting(this.tags, this.selectedMetrics());
@@ -105,21 +159,7 @@ class Activity implements Entity {
                 .toList();
     }
 
-    void delete() {
-        this.deleted = true;
-    }
-
-    void finish(Instant endTime) {
-        this.endTime = endTime;
-        this.validate();
-    }
-
-    void start(Instant startTime) {
-        this.startTime = startTime;
-        this.validate();
-    }
-
-    static Activity fromStorage(ActivityDto activity, TagsExistenceVerifier tagsExistenceVerifier) {
+    public static Activity fromStorage(ActivityDto activity, TagsExistenceVerifier tagsExistenceVerifier) {
         return new Activity(
                 new ActivityId(activity.id()),
                 new User(activity.creatorId()),
@@ -134,7 +174,7 @@ class Activity implements Entity {
         );
     }
 
-    ActivityDto forStorage() {
+    public ActivityDto forStorage() {
         Set<UUID> tagIds = tags.stream()
                 .map(TagId::id)
                 .collect(toUnmodifiableSet());
@@ -151,7 +191,10 @@ class Activity implements Entity {
         );
     }
 
-    ActivityDto forClient() {
+    public ActivityDto forClient(User client) {
+        if (isNotAvailableFor(client)) {
+            throw new EntityNotFoundException(Activity.class, this.id.id());
+        }
         Set<UUID> tagIds = tagsExistenceVerifier.existing(tags).stream()
                 .map(TagId::id)
                 .collect(toUnmodifiableSet());
@@ -219,10 +262,22 @@ class Activity implements Entity {
         return unmodifiableSet(tags);
     }
 
+    String comment() {
+        return comment;
+    }
+
     Set<MetricId> selectedMetrics() {
         return metricValues.stream()
                 .map(MetricValue::metricId)
                 .map(MetricId::new)
                 .collect(toUnmodifiableSet());
+    }
+
+    String title() {
+        return this.title;
+    }
+
+    boolean deleted() {
+        return this.deleted;
     }
 }
