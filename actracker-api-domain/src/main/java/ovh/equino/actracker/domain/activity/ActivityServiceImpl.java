@@ -37,7 +37,7 @@ class ActivityServiceImpl implements ActivityService {
         Activity activity = Activity.create(newActivityData, creator, tagsExistenceVerifier);
         activityRepository.add(activity.forStorage());
         activityNotifier.notifyChanged(activity.forChangeNotification());
-        return activity.forClient();
+        return activity.forClient(creator);
     }
 
     @Override
@@ -46,7 +46,7 @@ class ActivityServiceImpl implements ActivityService {
         activity.updateTo(updatedActivityData);
         activityRepository.update(activityId, activity.forStorage());
         activityNotifier.notifyChanged(activity.forChangeNotification());
-        return activity.forClient();
+        return activity.forClient(updater);
     }
 
     @Override
@@ -56,7 +56,7 @@ class ActivityServiceImpl implements ActivityService {
         EntitySearchResult<ActivityDto> searchResult = activitySearchEngine.findActivities(searchCriteria);
         List<ActivityDto> resultForClient = searchResult.results().stream()
                 .map(activity -> Activity.fromStorage(activity, tagsExistenceVerifier))
-                .map(Activity::forClient)
+                .map(activity -> activity.forClient(searchCriteria.searcher()))
                 .toList();
 
         return new EntitySearchResult<>(searchResult.nextPageId(), resultForClient);
@@ -92,7 +92,7 @@ class ActivityServiceImpl implements ActivityService {
         activityRepository.add(newActivity.forStorage());
         activityNotifier.notifyChanged(newActivity.forChangeNotification());
 
-        return newActivity.forClient();
+        return newActivity.forClient(switcher);
     }
 
     private Activity getActivityIfAuthorized(User user, UUID activityId) {
