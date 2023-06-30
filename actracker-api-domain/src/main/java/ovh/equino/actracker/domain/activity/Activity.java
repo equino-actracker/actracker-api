@@ -2,6 +2,7 @@ package ovh.equino.actracker.domain.activity;
 
 import ovh.equino.actracker.domain.Entity;
 import ovh.equino.actracker.domain.exception.EntityEditForbidden;
+import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.tag.MetricId;
 import ovh.equino.actracker.domain.tag.MetricsExistenceVerifier;
 import ovh.equino.actracker.domain.tag.TagId;
@@ -16,7 +17,7 @@ import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.*;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 
-class Activity implements Entity {
+public class Activity implements Entity {
 
     private final ActivityId id;
     private final User creator;
@@ -80,14 +81,14 @@ class Activity implements Entity {
                 .toList();
     }
 
-    void rename(String newTitle, User editor) {
+    public void rename(String newTitle, User editor) {
         if (isNotAvailableFor(editor)) {
             throw new EntityEditForbidden(Activity.class);
         }
         this.title = newTitle;
     }
 
-    void finish(Instant endTime, User updater) {
+    public void finish(Instant endTime, User updater) {
         if (isNotAvailableFor(updater)) {
             throw new EntityEditForbidden(Activity.class);
         }
@@ -95,7 +96,7 @@ class Activity implements Entity {
         this.validate();
     }
 
-    void start(Instant startTime, User updater) {
+    public void start(Instant startTime, User updater) {
         if (isNotAvailableFor(updater)) {
             throw new EntityEditForbidden(Activity.class);
         }
@@ -103,14 +104,14 @@ class Activity implements Entity {
         this.validate();
     }
 
-    void updateComment(String comment, User updater) {
+    public void updateComment(String comment, User updater) {
         if (isNotAvailableFor(updater)) {
             throw new EntityEditForbidden(Activity.class);
         }
         this.comment = comment;
     }
 
-    void assignTag(TagId tagId, User updater) {
+    public void assignTag(TagId tagId, User updater) {
         if (isNotAvailableFor(updater)) {
             throw new EntityEditForbidden(Activity.class);
         }
@@ -118,14 +119,14 @@ class Activity implements Entity {
         validate();
     }
 
-    void removeTag(TagId tagId, User updater) {
+    public void removeTag(TagId tagId, User updater) {
         if (isNotAvailableFor(updater)) {
             throw new EntityEditForbidden(Activity.class);
         }
         this.tags.remove(tagId);
     }
 
-    void delete(User remover) {
+    public void delete(User remover) {
         if (isNotAvailableFor(remover)) {
             throw new EntityEditForbidden(Activity.class);
         }
@@ -158,7 +159,7 @@ class Activity implements Entity {
                 .toList();
     }
 
-    static Activity fromStorage(ActivityDto activity, TagsExistenceVerifier tagsExistenceVerifier) {
+    public static Activity fromStorage(ActivityDto activity, TagsExistenceVerifier tagsExistenceVerifier) {
         return new Activity(
                 new ActivityId(activity.id()),
                 new User(activity.creatorId()),
@@ -173,7 +174,7 @@ class Activity implements Entity {
         );
     }
 
-    ActivityDto forStorage() {
+    public ActivityDto forStorage() {
         Set<UUID> tagIds = tags.stream()
                 .map(TagId::id)
                 .collect(toUnmodifiableSet());
@@ -190,7 +191,10 @@ class Activity implements Entity {
         );
     }
 
-    ActivityDto forClient() {
+    public ActivityDto forClient(User client) {
+        if (isNotAvailableFor(client)) {
+            throw new EntityNotFoundException(Activity.class, this.id.id());
+        }
         Set<UUID> tagIds = tagsExistenceVerifier.existing(tags).stream()
                 .map(TagId::id)
                 .collect(toUnmodifiableSet());
