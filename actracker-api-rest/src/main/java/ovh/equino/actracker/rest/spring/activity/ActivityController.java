@@ -126,20 +126,22 @@ class ActivityController {
 
     @RequestMapping(method = PUT, path = "/{id}/startTime")
     @ResponseStatus(OK)
-    Activity startActivity(@PathVariable("id") String id, @RequestBody Instant newStartTime) {
+    Activity startActivity(@PathVariable("id") String id, @RequestBody Long newStartTimestamp) {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User requester = new User(requesterIdentity.getId());
 
+        Instant newStartTime = Instant.ofEpochMilli(newStartTimestamp);
         ActivityDto activity = activityApplicationService.startActivity(newStartTime, UUID.fromString(id), requester);
         return mapper.toResponse(activity);
     }
 
     @RequestMapping(method = PUT, path = "/{id}/endTime")
     @ResponseStatus(OK)
-    Activity finishActivity(@PathVariable("id") String id, @RequestBody Instant newEndTime) {
+    Activity finishActivity(@PathVariable("id") String id, @RequestBody Long newEndTimestamp) {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User requester = new User(requesterIdentity.getId());
 
+        Instant newEndTime = Instant.ofEpochMilli(newEndTimestamp);
         ActivityDto activity = activityApplicationService.finishActivity(newEndTime, UUID.fromString(id), requester);
         return mapper.toResponse(activity);
     }
