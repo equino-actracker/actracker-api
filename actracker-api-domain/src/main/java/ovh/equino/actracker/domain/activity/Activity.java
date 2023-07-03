@@ -3,10 +3,7 @@ package ovh.equino.actracker.domain.activity;
 import ovh.equino.actracker.domain.Entity;
 import ovh.equino.actracker.domain.exception.EntityEditForbidden;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
-import ovh.equino.actracker.domain.tag.MetricId;
-import ovh.equino.actracker.domain.tag.MetricsExistenceVerifier;
-import ovh.equino.actracker.domain.tag.TagId;
-import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
+import ovh.equino.actracker.domain.tag.*;
 import ovh.equino.actracker.domain.user.User;
 
 import java.time.Instant;
@@ -82,14 +79,14 @@ public class Activity implements Entity {
     }
 
     public void rename(String newTitle, User editor) {
-        if (isNotAvailableFor(editor)) {
+        if (isEditForbiddenFor(editor)) {
             throw new EntityEditForbidden(Activity.class);
         }
         this.title = newTitle;
     }
 
     public void finish(Instant endTime, User updater) {
-        if (isNotAvailableFor(updater)) {
+        if (isEditForbiddenFor(updater)) {
             throw new EntityEditForbidden(Activity.class);
         }
         this.endTime = endTime;
@@ -97,7 +94,7 @@ public class Activity implements Entity {
     }
 
     public void start(Instant startTime, User updater) {
-        if (isNotAvailableFor(updater)) {
+        if (isEditForbiddenFor(updater)) {
             throw new EntityEditForbidden(Activity.class);
         }
         this.startTime = startTime;
@@ -105,14 +102,14 @@ public class Activity implements Entity {
     }
 
     public void updateComment(String comment, User updater) {
-        if (isNotAvailableFor(updater)) {
+        if (isEditForbiddenFor(updater)) {
             throw new EntityEditForbidden(Activity.class);
         }
         this.comment = comment;
     }
 
     public void assignTag(TagId tagId, User updater) {
-        if (isNotAvailableFor(updater)) {
+        if (isEditForbiddenFor(updater)) {
             throw new EntityEditForbidden(Activity.class);
         }
         this.tags.add(tagId);
@@ -120,14 +117,14 @@ public class Activity implements Entity {
     }
 
     public void removeTag(TagId tagId, User updater) {
-        if (isNotAvailableFor(updater)) {
+        if (isEditForbiddenFor(updater)) {
             throw new EntityEditForbidden(Activity.class);
         }
         this.tags.remove(tagId);
     }
 
     public void delete(User remover) {
-        if (isNotAvailableFor(remover)) {
+        if (isEditForbiddenFor(remover)) {
             throw new EntityEditForbidden(Activity.class);
         }
         this.deleted = true;
@@ -233,8 +230,18 @@ public class Activity implements Entity {
         return new ActivityChangedNotification(dto);
     }
 
+    boolean isEditForbiddenFor(User user) {
+        return !creator.equals(user);
+    }
+
     boolean isAvailableFor(User user) {
-        return creator.equals(user);
+        return creator.equals(user) || isSharedWith(user);
+    }
+
+    boolean isSharedWith(User user) {
+        SharedTagsExistenceVerifier sharedTagsExistenceVerifier =
+                new SharedTagsExistenceVerifier(tagsExistenceVerifier, user);
+        return sharedTagsExistenceVerifier.containsSharedTags(this.tags);
     }
 
     boolean isNotAvailableFor(User user) {
