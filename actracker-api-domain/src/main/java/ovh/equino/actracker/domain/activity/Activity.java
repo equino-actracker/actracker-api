@@ -287,4 +287,9 @@ public class Activity implements Entity {
     boolean deleted() {
         return this.deleted;
     }
+
+    @Override
+    public User creator() {
+        return creator;
+    }
 }

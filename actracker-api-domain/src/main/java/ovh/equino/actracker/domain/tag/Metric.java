@@ -100,4 +100,9 @@ class Metric implements Entity {
     String name() {
         return this.name;
     }
+
+    @Override
+    public User creator() {
+        return creator;
+    }
 }

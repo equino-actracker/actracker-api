@@ -151,4 +151,9 @@ public class TagSet implements Entity {
                 .map(TagId::new)
                 .toList();
     }
+
+    @Override
+    public User creator() {
+        return creator;
+    }
 }

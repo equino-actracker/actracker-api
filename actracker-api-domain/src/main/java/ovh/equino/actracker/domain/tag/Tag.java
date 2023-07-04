@@ -261,4 +261,9 @@ public class Tag implements Entity {
                 .map(metric -> Metric.create(metric, this.creator))
                 .toList();
     }
+
+    @Override
+    public User creator() {
+        return creator;
+    }
 }
