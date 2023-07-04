@@ -54,11 +54,9 @@ public class TagSet implements Entity {
     }
 
     public void rename(String newName, User updater) {
-        if (isNotAvailableFor(updater)) {
-            throw new EntityEditForbidden(TagSet.class);
-        }
-        this.name = newName;
-        validate();
+        new TagSetEditOperation(updater, this,
+                () -> this.name = newName
+        ).execute();
     }
 
     public void assignTag(TagId newTag, User updater) {
@@ -77,10 +75,9 @@ public class TagSet implements Entity {
     }
 
     public void delete(User remover) {
-        if (isNotAvailableFor(remover)) {
-            throw new EntityEditForbidden(TagSet.class);
-        }
-        this.deleted = true;
+        new TagSetEditOperation(remover, this,
+                () -> this.deleted = true
+        ).execute();
     }
 
     void updateTo(TagSetDto tagSet) {

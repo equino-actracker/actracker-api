@@ -13,7 +13,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 
 @ExtendWith(MockitoExtension.class)
-class EntityEditorTest {
+class EntityEditOperationTest {
 
     private static final User CREATOR = new User(randomUUID());
 
@@ -34,6 +34,7 @@ class EntityEditorTest {
         executions.verify(operations).beforeEditExecuted();
         executions.verify(operations).editExecuted();
         executions.verify(operations).validationExecuted();
+        executions.verify(operations).afterEditExecuted();
         executions.verifyNoMoreInteractions();
     }
 
@@ -111,6 +112,27 @@ class EntityEditorTest {
         executions.verifyNoMoreInteractions();
     }
 
+    @Test
+    void shouldStopExecutionWhenAfterEditFails() {
+        // given
+        TestEntity testEntity = new TestEntity(CREATOR, operations);
+        doThrow(new RuntimeException()).when(operations).afterEditExecuted();
+
+        // when
+        assertThatThrownBy(() ->
+                testEntity.edit(CREATOR)
+        ).isInstanceOf(RuntimeException.class);
+
+        // then
+        InOrder executions = inOrder(operations);
+        executions.verify(operations).editPermissionChecked();
+        executions.verify(operations).beforeEditExecuted();
+        executions.verify(operations).editExecuted();
+        executions.verify(operations).validationExecuted();
+        executions.verify(operations).afterEditExecuted();
+        executions.verifyNoMoreInteractions();
+    }
+
     private class TestEntity implements Entity {
 
         private final User creator;
@@ -138,16 +160,16 @@ class EntityEditorTest {
         }
 
         private void edit(User editor) {
-            new TestEntityEditor(editor, this, operations::editExecuted, operations)
-                    .run();
+            new TestEntityEditOperation(editor, this, operations::editExecuted, operations)
+                    .execute();
         }
     }
 
-    private class TestEntityEditor extends EntityEditor<TestEntity> {
+    private class TestEntityEditOperation extends EntityEditOperation<TestEntity> {
 
         private final OperationsLog operations;
 
-        protected TestEntityEditor(User editor, TestEntity entity, EntityEditOperation editOperation, OperationsLog operations) {
+        protected TestEntityEditOperation(User editor, TestEntity entity, EntityModification editOperation, OperationsLog operations) {
             super(editor, entity, editOperation);
             this.operations = operations;
         }
@@ -155,6 +177,11 @@ class EntityEditorTest {
         @Override
         protected void beforeEditOperation() {
             operations.beforeEditExecuted();
+        }
+
+        @Override
+        protected void afterEditOperation() {
+            operations.afterEditExecuted();
         }
     }
 
@@ -169,6 +196,9 @@ class EntityEditorTest {
         }
 
         void validationExecuted() {
+        }
+
+        void afterEditExecuted() {
         }
     }
 }

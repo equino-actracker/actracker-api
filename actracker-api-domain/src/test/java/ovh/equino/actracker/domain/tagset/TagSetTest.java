@@ -63,20 +63,6 @@ class TagSetTest {
         }
 
         @Test
-        void shouldFailWhenUserNotAllowed() {
-            // given
-            User unprivilegedUser = new User(randomUUID());
-            TagSetDto tagSetDto = new TagSetDto(OLD_NAME, null);
-            TagSet tagSet = TagSet.create(tagSetDto, CREATOR, tagsExistenceVerifier);
-
-            // then
-            assertThatThrownBy(() ->
-                    tagSet.rename(NEW_NAME, unprivilegedUser)
-            )
-                    .isInstanceOf(EntityEditForbidden.class);
-        }
-
-        @Test
         void shouldFailWhenNameNull() {
             // given
             TagSetDto tagSetDto = new TagSetDto(OLD_NAME, null);
