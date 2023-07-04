@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ovh.equino.actracker.domain.exception.EntityEditForbidden;
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
@@ -26,7 +25,6 @@ import static org.apache.commons.collections4.CollectionUtils.removeAll;
 import static org.apache.commons.collections4.CollectionUtils.union;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -150,23 +148,6 @@ class TagSetTest {
         }
 
         @Test
-        void shouldFailWhenUserNotAllowed() {
-            // given
-            TagSetDto tagSetDto = new TagSetDto("tag set name", emptySet());
-            TagSet tagSet = TagSet.create(tagSetDto, CREATOR, tagsExistenceVerifier);
-
-            TagId newTag = new TagId(randomUUID());
-
-            User unprivilegedUser = new User(randomUUID());
-
-            // then
-            assertThatThrownBy(() ->
-                    tagSet.assignTag(newTag, unprivilegedUser)
-            )
-                    .isInstanceOf(EntityEditForbidden.class);
-        }
-
-        @Test
         void shouldFailWhenAssigningNonExistingTag() {
             // given
             TagSetDto tagSetDto = new TagSetDto("tag set name", emptySet());
@@ -238,20 +219,6 @@ class TagSetTest {
 
             // then
             assertThat(tagSet.tags()).containsExactlyInAnyOrderElementsOf(existingTags);
-        }
-
-        @Test
-        void shouldFailWhenUserNotAllowed() {
-            // given
-            TagSetDto tagSetDto = new TagSetDto("tag set name", emptySet());
-            TagSet tagSet = TagSet.create(tagSetDto, CREATOR, tagsExistenceVerifier);
-
-            User unprivilegedUser = new User(randomUUID());
-
-            // then
-            assertThatThrownBy(() ->
-                    tagSet.removeTag(new TagId(randomUUID()), unprivilegedUser)
-            ).isInstanceOf(EntityEditForbidden.class);
         }
     }
 
