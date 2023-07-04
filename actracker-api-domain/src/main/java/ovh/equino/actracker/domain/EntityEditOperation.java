@@ -6,7 +6,7 @@ import ovh.equino.actracker.domain.user.User;
 public abstract class EntityEditOperation<T extends Entity> {
 
     private final User editor;
-    private final T entity;
+    protected final T entity;
     private final EntityModification entityModification;
 
     protected EntityEditOperation(User editor, T entity, EntityModification entityModification) {

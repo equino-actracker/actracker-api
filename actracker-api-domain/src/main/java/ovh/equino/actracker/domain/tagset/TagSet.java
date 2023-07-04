@@ -1,7 +1,6 @@
 package ovh.equino.actracker.domain.tagset;
 
 import ovh.equino.actracker.domain.Entity;
-import ovh.equino.actracker.domain.exception.EntityEditForbidden;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
@@ -19,18 +18,17 @@ public class TagSet implements Entity {
     private final TagSetId id;
     private final User creator;
     private String name;
-    private final Set<TagId> tags;
+    final Set<TagId> tags;
     private boolean deleted;
 
     private final TagsExistenceVerifier tagsExistenceVerifier;
 
-    private TagSet(
-            TagSetId id,
-            User creator,
-            String name,
-            Collection<TagId> tags,
-            boolean deleted,
-            TagsExistenceVerifier tagsExistenceVerifier) {
+    TagSet(TagSetId id,
+           User creator,
+           String name,
+           Collection<TagId> tags,
+           boolean deleted,
+           TagsExistenceVerifier tagsExistenceVerifier) {
 
         this.id = requireNonNull(id);
         this.creator = requireNonNull(creator);
@@ -54,29 +52,26 @@ public class TagSet implements Entity {
     }
 
     public void rename(String newName, User updater) {
-        new TagSetEditOperation(updater, this,
-                () -> this.name = newName
+        new TagSetEditOperation(updater, this, tagsExistenceVerifier,
+                () -> name = newName
         ).execute();
     }
 
     public void assignTag(TagId newTag, User updater) {
-        if (isNotAvailableFor(updater)) {
-            throw new EntityEditForbidden(TagSet.class);
-        }
-        this.tags.add(newTag);
-        validate();
+        new TagSetEditOperation(updater, this, tagsExistenceVerifier,
+                () -> tags.add(newTag)
+        ).execute();
     }
 
     public void removeTag(TagId tag, User updater) {
-        if (isNotAvailableFor(updater)) {
-            throw new EntityEditForbidden(TagSet.class);
-        }
-        this.tags.remove(tag);
+        new TagSetEditOperation(updater, this, tagsExistenceVerifier,
+                () -> tags.remove(tag)
+        ).execute();
     }
 
     public void delete(User remover) {
-        new TagSetEditOperation(remover, this,
-                () -> this.deleted = true
+        new TagSetEditOperation(remover, this, tagsExistenceVerifier,
+                () -> deleted = true
         ).execute();
     }
 
