@@ -22,14 +22,14 @@ public class Activity implements Entity {
     private Instant startTime;
     private Instant endTime;
     private String comment;
-    private final Set<TagId> tags;
-    private final List<MetricValue> metricValues;
+    final Set<TagId> tags;
+    final List<MetricValue> metricValues;
     private boolean deleted;
 
     private final TagsExistenceVerifier tagsExistenceVerifier;
     private final MetricsExistenceVerifier metricsExistenceVerifier;
 
-    private Activity(
+    Activity(
             ActivityId id,
             User creator,
             String title,
@@ -39,7 +39,8 @@ public class Activity implements Entity {
             Collection<TagId> tags,
             Collection<MetricValue> metricValues,
             boolean deleted,
-            TagsExistenceVerifier tagsExistenceVerifier) {
+            TagsExistenceVerifier tagsExistenceVerifier,
+            MetricsExistenceVerifier metricsExistenceVerifier) {
 
         this.id = requireNonNull(id);
         this.creator = requireNonNull(creator);
@@ -52,10 +53,10 @@ public class Activity implements Entity {
         this.deleted = deleted;
 
         this.tagsExistenceVerifier = tagsExistenceVerifier;
-        this.metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
+        this.metricsExistenceVerifier = metricsExistenceVerifier;
     }
 
-    static Activity create(ActivityDto activity, User creator, TagsExistenceVerifier tagsExistenceVerifier) {
+    static Activity create(ActivityDto activity, User creator, TagsExistenceVerifier tagsExistenceVerifier, MetricsExistenceVerifier metricsExistenceVerifier) {
         Activity newActivity = new Activity(
                 new ActivityId(),
                 creator,
@@ -66,7 +67,8 @@ public class Activity implements Entity {
                 toTagIds(activity),
                 activity.metricValues(),
                 false,
-                tagsExistenceVerifier
+                tagsExistenceVerifier,
+                metricsExistenceVerifier
         );
         newActivity.validate();
         return newActivity;
@@ -79,55 +81,45 @@ public class Activity implements Entity {
     }
 
     public void rename(String newTitle, User editor) {
-        if (isEditForbiddenFor(editor)) {
-            throw new EntityEditForbidden(Activity.class);
-        }
-        this.title = newTitle;
-    }
-
-    public void finish(Instant endTime, User updater) {
-        if (isEditForbiddenFor(updater)) {
-            throw new EntityEditForbidden(Activity.class);
-        }
-        this.endTime = endTime;
-        this.validate();
+        new ActivityEditOperation(editor, this, tagsExistenceVerifier, metricsExistenceVerifier,
+                () -> this.title = newTitle
+        ).execute();
     }
 
     public void start(Instant startTime, User updater) {
-        if (isEditForbiddenFor(updater)) {
-            throw new EntityEditForbidden(Activity.class);
-        }
-        this.startTime = startTime;
-        this.validate();
+        new ActivityEditOperation(updater, this, tagsExistenceVerifier, metricsExistenceVerifier,
+                () -> this.startTime = startTime
+        ).execute();
+    }
+
+    public void finish(Instant endTime, User updater) {
+        new ActivityEditOperation(updater, this, tagsExistenceVerifier, metricsExistenceVerifier,
+                () -> this.endTime = endTime
+        ).execute();
     }
 
     public void updateComment(String comment, User updater) {
-        if (isEditForbiddenFor(updater)) {
-            throw new EntityEditForbidden(Activity.class);
-        }
-        this.comment = comment;
+        new ActivityEditOperation(updater, this, tagsExistenceVerifier, metricsExistenceVerifier,
+                () -> this.comment = comment
+        ).execute();
     }
 
     public void assignTag(TagId tagId, User updater) {
-        if (isEditForbiddenFor(updater)) {
-            throw new EntityEditForbidden(Activity.class);
-        }
-        this.tags.add(tagId);
-        validate();
+        new ActivityEditOperation(updater, this, tagsExistenceVerifier, metricsExistenceVerifier,
+                () -> this.tags.add(tagId)
+        ).execute();
     }
 
     public void removeTag(TagId tagId, User updater) {
-        if (isEditForbiddenFor(updater)) {
-            throw new EntityEditForbidden(Activity.class);
-        }
-        this.tags.remove(tagId);
+        new ActivityEditOperation(updater, this, tagsExistenceVerifier, metricsExistenceVerifier,
+                () -> this.tags.remove(tagId)
+        ).execute();
     }
 
     public void delete(User remover) {
-        if (isEditForbiddenFor(remover)) {
-            throw new EntityEditForbidden(Activity.class);
-        }
-        this.deleted = true;
+        new ActivityEditOperation(remover, this, tagsExistenceVerifier, metricsExistenceVerifier,
+                () -> this.deleted = true
+        ).execute();
     }
 
     void updateTo(ActivityDto activity) {
@@ -156,7 +148,7 @@ public class Activity implements Entity {
                 .toList();
     }
 
-    public static Activity fromStorage(ActivityDto activity, TagsExistenceVerifier tagsExistenceVerifier) {
+    public static Activity fromStorage(ActivityDto activity, TagsExistenceVerifier tagsExistenceVerifier, MetricsExistenceVerifier metricsExistenceVerifier) {
         return new Activity(
                 new ActivityId(activity.id()),
                 new User(activity.creatorId()),
@@ -167,7 +159,8 @@ public class Activity implements Entity {
                 toTagIds(activity),
                 activity.metricValues(),
                 activity.deleted(),
-                tagsExistenceVerifier
+                tagsExistenceVerifier,
+                metricsExistenceVerifier
         );
     }
 
