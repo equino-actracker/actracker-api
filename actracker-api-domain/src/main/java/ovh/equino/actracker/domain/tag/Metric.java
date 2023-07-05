@@ -15,7 +15,7 @@ class Metric implements Entity {
     private final MetricType type;
     private boolean deleted;
 
-    private Metric(MetricId id, User creator, String name, MetricType type, boolean deleted) {
+    Metric(MetricId id, User creator, String name, MetricType type, boolean deleted) {
         this.id = requireNonNull(id);
         this.creator = requireNonNull(creator);
         this.name = name;

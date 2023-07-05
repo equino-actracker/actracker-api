@@ -186,6 +186,7 @@ class EntityEditOperationTest {
     }
 
     private static class OperationsLog {
+
         void editPermissionChecked() {
         }
 

@@ -41,21 +41,6 @@ class TagTest {
         }
 
         @Test
-        void shouldFailWhenUserNotAllowed() {
-            // given
-            TagDto tagDto = new TagDto(OLD_NAME, null);
-            Tag tag = Tag.create(tagDto, CREATOR);
-
-            User unprivilegedUser = new User(randomUUID());
-
-            // then
-            assertThatThrownBy(() ->
-                    tag.rename(NEW_NAME, unprivilegedUser)
-            )
-                    .isInstanceOf(EntityEditForbidden.class);
-        }
-
-        @Test
         void shouldFailWhenNameNull() {
             // given
             TagDto tagDto = new TagDto(OLD_NAME, null);
@@ -99,7 +84,7 @@ class TagTest {
             tag.addMetric(newMetricDto.name(), newMetricDto.type(), CREATOR);
 
             // then
-            assertThat(tag.metrics())
+            assertThat(tag.metrics)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("id")
                     .containsExactly(newMetric);
         }
@@ -123,24 +108,9 @@ class TagTest {
             tag.addMetric(newMetric.name(), newMetric.type(), CREATOR);
 
             // then
-            assertThat(tag.metrics())
+            assertThat(tag.metrics)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("id")
                     .containsExactlyInAnyOrderElementsOf(metricsAfterAdd);
-        }
-
-        @Test
-        void shouldFailWhenUserNotAllowed() {
-            // given
-            TagDto tagDto = new TagDto("tag name", emptyList());
-            Tag tag = Tag.create(tagDto, CREATOR);
-
-            User unprivilegedUser = new User(randomUUID());
-
-            // then
-            assertThatThrownBy(() ->
-                    tag.addMetric("gross", NUMERIC, unprivilegedUser)
-            )
-                    .isInstanceOf(EntityEditForbidden.class);
         }
     }
 
@@ -170,7 +140,7 @@ class TagTest {
             tag.deleteMetric(metricToDeleteId, CREATOR);
 
             // then
-            assertThat(tag.metrics())
+            assertThat(tag.metrics)
                     .extracting(Metric::id, Metric::isDeleted)
                     .containsExactlyInAnyOrderElementsOf(List.of(
                             tuple(existingMetric1Id, !DELETED),
@@ -189,7 +159,7 @@ class TagTest {
             tag.deleteMetric(new MetricId(), CREATOR);
 
             // then
-            assertThat(tag.metrics()).isEmpty();
+            assertThat(tag.metrics).isEmpty();
         }
 
         @Test
@@ -210,7 +180,7 @@ class TagTest {
             tag.deleteMetric(new MetricId(), CREATOR);
 
             // then
-            assertThat(tag.metrics())
+            assertThat(tag.metrics)
                     .extracting(Metric::id, Metric::isDeleted)
                     .containsExactlyInAnyOrderElementsOf(List.of(
                             tuple(existingMetric1Id, !DELETED),
@@ -239,7 +209,7 @@ class TagTest {
             tag.deleteMetric(deletedMetricId, CREATOR);
 
             // then
-            assertThat(tag.metrics())
+            assertThat(tag.metrics)
                     .extracting(Metric::id, Metric::isDeleted)
                     .containsExactlyInAnyOrderElementsOf(List.of(
                             tuple(existingMetric1Id, !DELETED),
@@ -293,7 +263,7 @@ class TagTest {
             tag.renameMetric(newName, metricToRenameId, CREATOR);
 
             // then
-            assertThat(tag.metrics())
+            assertThat(tag.metrics)
                     .extracting(Metric::id, Metric::name)
                     .containsExactlyInAnyOrderElementsOf(List.of(
                             tuple(existingMetric1Id, existingMetric1.name()),
@@ -320,7 +290,7 @@ class TagTest {
             tag.renameMetric("new metric name", new MetricId(), CREATOR);
 
             // then
-            assertThat(tag.metrics())
+            assertThat(tag.metrics)
                     .extracting(Metric::id, Metric::name)
                     .containsExactlyInAnyOrderElementsOf(List.of(
                             tuple(existingMetric1Id, existingMetric1.name()),
@@ -329,21 +299,29 @@ class TagTest {
         }
 
         @Test
-        void shouldFailWhenUserNotAllowed() {
+        void shouldKeepMetricsUnchangedWhenRenamingDeletedMetric() {
             // given
-            MetricId existingMetricId = new MetricId();
-            MetricDto existingMetric = new MetricDto(existingMetricId.id(), CREATOR.id(), "metric 1", NUMERIC, !DELETED);
-            List<MetricDto> existingMetrics = List.of(existingMetric);
+            MetricId notDeletedMetricId = new MetricId();
+            MetricId deletedMetricId = new MetricId();
+            MetricDto notDeletedMetric = new MetricDto(notDeletedMetricId.id(), CREATOR.id(), "metric 1", NUMERIC, !DELETED);
+            MetricDto deletedMetric = new MetricDto(deletedMetricId.id(), CREATOR.id(), "metric 2", NUMERIC, DELETED);
+            List<MetricDto> existingMetrics = List.of(
+                    notDeletedMetric,
+                    deletedMetric
+            );
             TagDto tagDto = new TagDto(randomUUID(), CREATOR.id(), "tag name", existingMetrics, emptyList(), !DELETED);
             Tag tag = Tag.fromStorage(tagDto);
 
-            User unprivilegedUser = new User(randomUUID());
+            // when
+            tag.renameMetric("new metric name", deletedMetricId, CREATOR);
 
             // then
-            assertThatThrownBy(() ->
-                    tag.renameMetric("new metric name", existingMetricId, unprivilegedUser)
-            )
-                    .isInstanceOf(EntityEditForbidden.class);
+            assertThat(tag.metrics)
+                    .extracting(Metric::id, Metric::name)
+                    .containsExactlyInAnyOrderElementsOf(List.of(
+                            tuple(notDeletedMetricId, notDeletedMetric.name()),
+                            tuple(deletedMetricId, deletedMetric.name())
+                    ));
         }
     }
 
@@ -370,27 +348,12 @@ class TagTest {
 
             // then
             assertThat(tag.isDeleted()).isTrue();
-            assertThat(tag.metrics())
+            assertThat(tag.metrics)
                     .extracting(Metric::id, Metric::isDeleted)
                     .containsExactlyInAnyOrderElementsOf(List.of(
                             tuple(existingMetric1Id, DELETED),
                             tuple(existingMetric2Id, DELETED)
                     ));
-        }
-
-        @Test
-        void shouldFailWhenUserNotAllowed() {
-            // given
-            TagDto tagDto = new TagDto(randomUUID(), CREATOR.id(), "tag name", emptyList(), emptyList(), !DELETED);
-            Tag tag = Tag.fromStorage(tagDto);
-
-            User unprivilegedUser = new User(randomUUID());
-
-            // then
-            assertThatThrownBy(() ->
-            tag.delete(unprivilegedUser)
-            )
-                    .isInstanceOf(EntityEditForbidden.class);
         }
     }
 }

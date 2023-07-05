@@ -20,6 +20,7 @@ import static org.mockito.Mockito.when;
 class TagSetEditOperationTest {
 
     private static final User CREATOR = new User(randomUUID());
+    private static final boolean DELETED = true;
 
     @Mock
     private TagsExistenceVerifier tagsExistenceVerifier;
@@ -38,7 +39,7 @@ class TagSetEditOperationTest {
                 CREATOR,
                 "tag set name",
                 List.of(notExistingTag, existingTag),
-                false,
+                !DELETED,
                 tagsExistenceVerifier
         );
         TagSetEditOperation editOperation = new TagSetEditOperation(CREATOR, tagSet, tagsExistenceVerifier, () -> {
@@ -46,12 +47,11 @@ class TagSetEditOperationTest {
 
         // when
         editOperation.beforeEditOperation();
-        List<TagId> tagsBeforeClean = tagSet.tags.stream().toList();
-        tagSet.tags.clear();
+        List<TagId> tagsDuringEdit = tagSet.tags.stream().toList();
         editOperation.afterEditOperation();
 
         // then
-        assertThat(tagsBeforeClean).containsExactly(existingTag);
-        assertThat(tagSet.tags).containsExactly(notExistingTag);
+        assertThat(tagsDuringEdit).containsExactly(existingTag);
+        assertThat(tagSet.tags).containsExactlyInAnyOrder(notExistingTag, existingTag);
     }
 }
