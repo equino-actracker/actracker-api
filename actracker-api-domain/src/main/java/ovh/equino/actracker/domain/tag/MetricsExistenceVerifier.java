@@ -18,7 +18,7 @@ public class MetricsExistenceVerifier {
     public Set<MetricId> existing(Collection<TagId> tags, Collection<MetricId> metrics) {
         List<Tag> existingTags = tagsExistenceVerifier.existingTags(tags);
         Set<MetricId> existingMetrics = existingTags.stream()
-                .map(Tag::metrics)
+                .map(tag -> tag.metrics)
                 .flatMap(Collection::stream)
                 .filter(Metric::isNotDeleted)
                 .map(Metric::id)

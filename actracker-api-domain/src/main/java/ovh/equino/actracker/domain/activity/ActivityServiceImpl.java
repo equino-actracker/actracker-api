@@ -3,6 +3,7 @@ package ovh.equino.actracker.domain.activity;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
+import ovh.equino.actracker.domain.tag.MetricsExistenceVerifier;
 import ovh.equino.actracker.domain.tag.TagRepository;
 import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
 import ovh.equino.actracker.domain.user.User;
@@ -34,7 +35,8 @@ class ActivityServiceImpl implements ActivityService {
     @Override
     public ActivityDto createActivity(ActivityDto newActivityData, User creator) {
         TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, creator);
-        Activity activity = Activity.create(newActivityData, creator, tagsExistenceVerifier);
+        MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
+        Activity activity = Activity.create(newActivityData, creator, tagsExistenceVerifier, metricsExistenceVerifier);
         activityRepository.add(activity.forStorage());
         activityNotifier.notifyChanged(activity.forChangeNotification());
         return activity.forClient(creator);
@@ -52,10 +54,11 @@ class ActivityServiceImpl implements ActivityService {
     @Override
     public EntitySearchResult<ActivityDto> searchActivities(EntitySearchCriteria searchCriteria) {
         TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, searchCriteria.searcher());
+        MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
 
         EntitySearchResult<ActivityDto> searchResult = activitySearchEngine.findActivities(searchCriteria);
         List<ActivityDto> resultForClient = searchResult.results().stream()
-                .map(activity -> Activity.fromStorage(activity, tagsExistenceVerifier))
+                .map(activity -> Activity.fromStorage(activity, tagsExistenceVerifier, metricsExistenceVerifier))
                 .map(activity -> activity.forClient(searchCriteria.searcher()))
                 .toList();
 
@@ -73,12 +76,14 @@ class ActivityServiceImpl implements ActivityService {
     @Override
     public ActivityDto switchToNewActivity(ActivityDto activityToSwitch, User switcher) {
         TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, switcher);
-        Activity newActivity = Activity.create(activityToSwitch, switcher, tagsExistenceVerifier);
+        MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
+
+        Activity newActivity = Activity.create(activityToSwitch, switcher, tagsExistenceVerifier, metricsExistenceVerifier);
         Instant switchTime = newActivity.isStarted() ? newActivity.startTime() : now();
         newActivity.start(switchTime, switcher);
 
         List<Activity> activitiesToFinish = activityRepository.findUnfinishedStartedBefore(switchTime, switcher).stream()
-                .map(activity -> Activity.fromStorage(activity, tagsExistenceVerifier))
+                .map(activity -> Activity.fromStorage(activity, tagsExistenceVerifier, metricsExistenceVerifier))
                 .toList();
 
         activitiesToFinish.forEach(activity -> activity.finish(switchTime, switcher));
@@ -97,11 +102,12 @@ class ActivityServiceImpl implements ActivityService {
 
     private Activity getActivityIfAuthorized(User user, UUID activityId) {
         TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, user);
+        MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
 
         ActivityDto activityDto = activityRepository.findById(activityId)
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
-        Activity activity = Activity.fromStorage(activityDto, tagsExistenceVerifier);
+        Activity activity = Activity.fromStorage(activityDto, tagsExistenceVerifier, metricsExistenceVerifier);
 
         if (activity.isNotAvailableFor(user)) {
             throw new EntityNotFoundException(Activity.class, activityId);

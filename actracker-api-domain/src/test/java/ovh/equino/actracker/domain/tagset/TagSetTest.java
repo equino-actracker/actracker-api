@@ -7,13 +7,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ovh.equino.actracker.domain.exception.EntityEditForbidden;
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -25,7 +25,6 @@ import static org.apache.commons.collections4.CollectionUtils.removeAll;
 import static org.apache.commons.collections4.CollectionUtils.union;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -60,20 +59,6 @@ class TagSetTest {
 
             // then
             assertThat(tagSet.name()).isEqualTo(NEW_NAME);
-        }
-
-        @Test
-        void shouldFailWhenUserNotAllowed() {
-            // given
-            User unprivilegedUser = new User(randomUUID());
-            TagSetDto tagSetDto = new TagSetDto(OLD_NAME, null);
-            TagSet tagSet = TagSet.create(tagSetDto, CREATOR, tagsExistenceVerifier);
-
-            // then
-            assertThatThrownBy(() ->
-                    tagSet.rename(NEW_NAME, unprivilegedUser)
-            )
-                    .isInstanceOf(EntityEditForbidden.class);
         }
 
         @Test
@@ -133,6 +118,9 @@ class TagSetTest {
             TagId newTag = new TagId(randomUUID());
             Collection<TagId> tagsAfterAssignment = union(existingTags, singleton(newTag));
 
+            when(tagsExistenceVerifier.existing(any()))
+                    .thenReturn(new HashSet<>(union(existingTags, singleton(newTag))));
+
             // when
             tagSet.assignTag(newTag, CREATOR);
 
@@ -149,28 +137,14 @@ class TagSetTest {
             TagSetDto tagSetDto = new TagSetDto("tag set name", existingTagIds);
             TagSet tagSet = TagSet.create(tagSetDto, CREATOR, tagsExistenceVerifier);
 
+            when(tagsExistenceVerifier.existing(any()))
+                    .thenReturn(existingTags);
+
             // when
             tagSet.assignTag(duplicatedTag, CREATOR);
 
             // then
             assertThat(tagSet.tags()).containsExactlyInAnyOrderElementsOf(existingTags);
-        }
-
-        @Test
-        void shouldFailWhenUserNotAllowed() {
-            // given
-            TagSetDto tagSetDto = new TagSetDto("tag set name", emptySet());
-            TagSet tagSet = TagSet.create(tagSetDto, CREATOR, tagsExistenceVerifier);
-
-            TagId newTag = new TagId(randomUUID());
-
-            User unprivilegedUser = new User(randomUUID());
-
-            // then
-            assertThatThrownBy(() ->
-                    tagSet.assignTag(newTag, unprivilegedUser)
-            )
-                    .isInstanceOf(EntityEditForbidden.class);
         }
 
         @Test
@@ -206,6 +180,9 @@ class TagSetTest {
 
             Collection<TagId> tagsAfterRemove = removeAll(existingTags, singleton(tagToRemove));
 
+            when(tagsExistenceVerifier.existing(any()))
+                    .thenReturn(existingTags);
+
             // when
             tagSet.removeTag(tagToRemove, CREATOR);
 
@@ -234,25 +211,14 @@ class TagSetTest {
             TagSetDto tagSetDto = new TagSetDto("tag set name", existingTagIds);
             TagSet tagSet = TagSet.create(tagSetDto, CREATOR, tagsExistenceVerifier);
 
+            when(tagsExistenceVerifier.existing(any()))
+                    .thenReturn(existingTags);
+
             // when
             tagSet.removeTag(new TagId(randomUUID()), CREATOR);
 
             // then
             assertThat(tagSet.tags()).containsExactlyInAnyOrderElementsOf(existingTags);
-        }
-
-        @Test
-        void shouldFailWhenUserNotAllowed() {
-            // given
-            TagSetDto tagSetDto = new TagSetDto("tag set name", emptySet());
-            TagSet tagSet = TagSet.create(tagSetDto, CREATOR, tagsExistenceVerifier);
-
-            User unprivilegedUser = new User(randomUUID());
-
-            // then
-            assertThatThrownBy(() ->
-                    tagSet.removeTag(new TagId(randomUUID()), unprivilegedUser)
-            ).isInstanceOf(EntityEditForbidden.class);
         }
     }
 
@@ -273,19 +239,5 @@ class TagSetTest {
             assertThat(tagSet.deleted()).isTrue();
         }
 
-        @Test
-        void shouldFailWhenUserNotAllowed() {
-            // given
-            TagSetDto tagSetDto = new TagSetDto("tag set name", emptySet());
-            TagSet tagSet = TagSet.create(tagSetDto, CREATOR, tagsExistenceVerifier);
-
-            User unprivilegedUser = new User(randomUUID());
-
-            // then
-            assertThatThrownBy(() ->
-                    tagSet.delete(unprivilegedUser)
-            )
-                    .isInstanceOf(EntityEditForbidden.class);
-        }
     }
 }

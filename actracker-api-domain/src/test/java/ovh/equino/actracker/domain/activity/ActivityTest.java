@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ovh.equino.actracker.domain.exception.EntityEditForbidden;
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
+import ovh.equino.actracker.domain.tag.MetricsExistenceVerifier;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
 import ovh.equino.actracker.domain.user.User;
@@ -39,6 +40,8 @@ class ActivityTest {
 
     @Mock
     private TagsExistenceVerifier tagsExistenceVerifier;
+    @Mock
+    private MetricsExistenceVerifier metricsExistenceVerifier;
 
     @BeforeEach
     void init() {
@@ -56,7 +59,7 @@ class ActivityTest {
         void shouldChangeTitle() {
             // given
             ActivityDto activityDto = new ActivityDto(OLD_TITLE, null, null, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier);
+            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
 
             // when
             activity.rename(NEW_TITLE, CREATOR);
@@ -69,7 +72,7 @@ class ActivityTest {
         void shouldChangeTitleToNull() {
             // given
             ActivityDto activityDto = new ActivityDto(OLD_TITLE, null, null, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier);
+            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
 
             // when
             activity.rename(null, CREATOR);
@@ -82,28 +85,13 @@ class ActivityTest {
         void shouldChangeTitleToBlank() {
             // given
             ActivityDto activityDto = new ActivityDto(OLD_TITLE, null, null, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier);
+            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
 
             // when
             activity.rename(" ", CREATOR);
 
             // then
             assertThat(activity.title()).isEqualTo(" ");
-        }
-
-        @Test
-        void shouldFailWhenUserNotAllowed() {
-            // given
-            ActivityDto activityDto = new ActivityDto(OLD_TITLE, null, null, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier);
-
-            User unprivilegedUser = new User(randomUUID());
-
-            // then
-            assertThatThrownBy(() ->
-                    activity.rename(NEW_TITLE, unprivilegedUser)
-            )
-                    .isInstanceOf(EntityEditForbidden.class);
         }
     }
 
@@ -115,7 +103,7 @@ class ActivityTest {
         void shouldUpdateStartTime() {
             // given
             ActivityDto activityDto = new ActivityDto("activity name", OLD_START_TIME, OLD_END_TIME, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier);
+            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
 
             // when
             activity.start(NEW_TIME, CREATOR);
@@ -128,7 +116,7 @@ class ActivityTest {
         void shouldSetStartTimeToEndTime() {
             // given
             ActivityDto activityDto = new ActivityDto("activity name", OLD_START_TIME, OLD_END_TIME, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier);
+            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
 
             // when
             activity.start(OLD_END_TIME, CREATOR);
@@ -141,7 +129,7 @@ class ActivityTest {
         void shouldSetStartTimeNull() {
             // given
             ActivityDto activityDto = new ActivityDto("activity name", OLD_START_TIME, OLD_END_TIME, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier);
+            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
 
             // when
             activity.start(null, CREATOR);
@@ -154,7 +142,7 @@ class ActivityTest {
         void shouldFailWhenStartTimeSetAfterEndTime() {
             // given
             ActivityDto activityDto = new ActivityDto("activity name", OLD_START_TIME, OLD_END_TIME, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier);
+            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
 
             // then
             assertThatThrownBy(() ->
@@ -163,20 +151,6 @@ class ActivityTest {
                     .isInstanceOf(EntityInvalidException.class);
         }
 
-        @Test
-        void shouldFailWhenUserNotAllowed() {
-            // given
-            ActivityDto activityDto = new ActivityDto("activity name", OLD_START_TIME, OLD_END_TIME, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier);
-
-            User unprivilegedUser = new User(randomUUID());
-
-            // then
-            assertThatThrownBy(() ->
-                    activity.start(NEW_TIME, unprivilegedUser)
-            )
-                    .isInstanceOf(EntityEditForbidden.class);
-        }
     }
 
     @Nested
@@ -187,7 +161,7 @@ class ActivityTest {
         void shouldUpdateEndTime() {
             // given
             ActivityDto activityDto = new ActivityDto("activity name", OLD_START_TIME, OLD_END_TIME, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier);
+            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
 
             // when
             activity.finish(NEW_TIME, CREATOR);
@@ -200,7 +174,7 @@ class ActivityTest {
         void shouldSetEndTimeToStartTime() {
             // given
             ActivityDto activityDto = new ActivityDto("activity name", OLD_START_TIME, OLD_END_TIME, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier);
+            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
 
             // when
             activity.finish(OLD_START_TIME, CREATOR);
@@ -213,7 +187,7 @@ class ActivityTest {
         void shouldSetEndTimeNull() {
             // given
             ActivityDto activityDto = new ActivityDto("activity name", OLD_START_TIME, OLD_END_TIME, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier);
+            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
 
             // when
             activity.finish(null, CREATOR);
@@ -226,7 +200,7 @@ class ActivityTest {
         void shouldFailWhenEndTimeSetBeforeStartTime() {
             // given
             ActivityDto activityDto = new ActivityDto("activity name", OLD_START_TIME, OLD_END_TIME, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier);
+            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
 
             // then
             assertThatThrownBy(() ->
@@ -236,21 +210,6 @@ class ActivityTest {
 
         }
 
-        @Test
-        void shouldFailWhenUserNotAllowed() {
-            // given
-            ActivityDto activityDto = new ActivityDto("activity name", OLD_START_TIME, OLD_END_TIME, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier);
-
-            User unprivilegedUser = new User(randomUUID());
-
-            // then
-            assertThatThrownBy(() ->
-                    activity.finish(NEW_TIME, unprivilegedUser)
-            )
-                    .isInstanceOf(EntityEditForbidden.class);
-
-        }
     }
 
     @Nested
@@ -264,7 +223,7 @@ class ActivityTest {
         void shouldUpdateComment() {
             // given
             ActivityDto activityDto = new ActivityDto("activity title", null, null, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier);
+            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
 
             // when
             activity.updateComment(NEW_COMMENT, CREATOR);
@@ -277,7 +236,7 @@ class ActivityTest {
         void shouldChangeCommentToNull() {
             // given
             ActivityDto activityDto = new ActivityDto("activity title", null, null, OLD_COMMENT, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier);
+            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
 
             // when
             activity.updateComment(null, CREATOR);
@@ -290,7 +249,7 @@ class ActivityTest {
         void shouldChangeCommentToBlank() {
             // given
             ActivityDto activityDto = new ActivityDto("activity title", null, null, OLD_COMMENT, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier);
+            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
 
             // when
             activity.updateComment(" ", CREATOR);
@@ -299,20 +258,6 @@ class ActivityTest {
             assertThat(activity.comment()).isEqualTo(" ");
         }
 
-        @Test
-        void shouldFailWhenUserNotAllowed() {
-            // given
-            ActivityDto activityDto = new ActivityDto("activity title", null, null, OLD_COMMENT, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier);
-
-            User unprivilegedUser = new User(randomUUID());
-
-            // then
-            assertThatThrownBy(() ->
-                    activity.updateComment(NEW_COMMENT, unprivilegedUser)
-            )
-                    .isInstanceOf(EntityEditForbidden.class);
-        }
     }
 
     @Nested
@@ -323,7 +268,7 @@ class ActivityTest {
         void shouldAssignFirstTag() {
             // given
             ActivityDto activityDto = new ActivityDto("activity title", null, null, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier);
+            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
 
             TagId newTag = new TagId(randomUUID());
 
@@ -339,8 +284,10 @@ class ActivityTest {
             // given
             Set<TagId> existingTags = Set.of(new TagId(randomUUID()), new TagId(randomUUID()));
             Set<UUID> existingTagIds = existingTags.stream().map(TagId::id).collect(toSet());
+            when(tagsExistenceVerifier.existing(any()))
+                    .thenReturn(existingTags);
             ActivityDto activityDto = new ActivityDto("activity title", null, null, null, existingTagIds, emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier);
+            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
 
             TagId newTag = new TagId(randomUUID());
             Collection<TagId> tagsAfterAssignment = union(existingTags, singleton(newTag));
@@ -358,8 +305,10 @@ class ActivityTest {
             TagId duplicatedTag = new TagId(randomUUID());
             Set<TagId> existingTags = Set.of(new TagId(randomUUID()), duplicatedTag);
             Set<UUID> existingTagIds = existingTags.stream().map(TagId::id).collect(toSet());
+            when(tagsExistenceVerifier.existing(any()))
+                    .thenReturn(existingTags);
             ActivityDto activityDto = new ActivityDto("activity title", null, null, null, existingTagIds, emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier);
+            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
 
             // when
             activity.assignTag(duplicatedTag, CREATOR);
@@ -369,27 +318,10 @@ class ActivityTest {
         }
 
         @Test
-        void shouldFailWhenUserNotAllowed() {
-            // given
-            ActivityDto activityDto = new ActivityDto("activity title", null, null, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier);
-
-            TagId newTag = new TagId(randomUUID());
-
-            User unprivilegedUser = new User(randomUUID());
-
-            // then
-            assertThatThrownBy(() ->
-                    activity.assignTag(newTag, unprivilegedUser)
-            )
-                    .isInstanceOf(EntityEditForbidden.class);
-        }
-
-        @Test
         void shouldFailWhenAssigningNonExistingTag() {
             // given
             ActivityDto activityDto = new ActivityDto("activity title", null, null, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier);
+            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
 
             TagId notExistingTag = new TagId(randomUUID());
 
@@ -408,13 +340,16 @@ class ActivityTest {
     class RemoveTagTest {
 
         @Test
-        void shouldRemoveAssignedTag() {
+        void
+        shouldRemoveAssignedTag() {
             // given
             TagId tagToRemove = new TagId(randomUUID());
             Set<TagId> existingTags = Set.of(new TagId(randomUUID()), new TagId(randomUUID()), tagToRemove);
             Set<UUID> existingTagIds = existingTags.stream().map(TagId::id).collect(toSet());
+            when(tagsExistenceVerifier.existing(any()))
+                    .thenReturn(existingTags);
             ActivityDto activityDto = new ActivityDto("activity title", null, null, null, existingTagIds, emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier);
+            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
 
             Collection<TagId> tagsAfterRemove = removeAll(existingTags, singleton(tagToRemove));
 
@@ -430,7 +365,7 @@ class ActivityTest {
         void shouldKeepTagsEmptyWhenRemovingFromEmptyTags() {
             // given
             ActivityDto activityDto = new ActivityDto("activity title", null, null, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier);
+            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
 
             // when
             activity.removeTag(new TagId(randomUUID()), CREATOR);
@@ -444,8 +379,10 @@ class ActivityTest {
             // given
             Set<TagId> existingTags = Set.of(new TagId(randomUUID()), new TagId(randomUUID()), new TagId(randomUUID()));
             Set<UUID> existingTagIds = existingTags.stream().map(TagId::id).collect(toSet());
+            when(tagsExistenceVerifier.existing(any()))
+                    .thenReturn(existingTags);
             ActivityDto activityDto = new ActivityDto("activity title", null, null, null, existingTagIds, emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier);
+            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
 
             // when
             activity.removeTag(new TagId(randomUUID()), CREATOR);
@@ -454,19 +391,6 @@ class ActivityTest {
             assertThat(activity.tags()).containsExactlyInAnyOrderElementsOf(existingTags);
         }
 
-        @Test
-        void shouldFailWhenUserNotAllowed() {
-            // given
-            ActivityDto activityDto = new ActivityDto("activity title", null, null, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier);
-
-            User unprivilegedUser = new User(randomUUID());
-
-            // then
-            assertThatThrownBy(() ->
-                    activity.removeTag(new TagId(randomUUID()), unprivilegedUser)
-            ).isInstanceOf(EntityEditForbidden.class);
-        }
     }
 
     @Nested
@@ -477,28 +401,13 @@ class ActivityTest {
         void shouldDeleteActivity() {
             // given
             ActivityDto activityDto = new ActivityDto("activity title", null, null, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier);
+            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
 
             // when
             activity.delete(CREATOR);
 
             // then
             assertThat(activity.deleted()).isTrue();
-        }
-
-        @Test
-        void shouldFailWhenUserNotAllowed() {
-            // given
-            ActivityDto activityDto = new ActivityDto("activity title", null, null, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier);
-
-            User unprivilegedUser = new User(randomUUID());
-
-            // then
-            assertThatThrownBy(() ->
-                    activity.delete(unprivilegedUser)
-            )
-                    .isInstanceOf(EntityEditForbidden.class);
         }
     }
 }

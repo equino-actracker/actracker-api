@@ -8,7 +8,6 @@ import ovh.equino.actracker.domain.user.User;
 
 import java.util.*;
 
-import static java.util.Collections.unmodifiableList;
 import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
 import static java.util.UUID.randomUUID;
@@ -19,17 +18,16 @@ public class Tag implements Entity {
     private final TagId id;
     private final User creator;
     private String name;
-    private final List<Metric> metrics;
+    final List<Metric> metrics;
     private final List<Share> shares;
     private boolean deleted;
 
-    private Tag(
-            TagId id,
-            User creator,
-            String name,
-            Collection<Metric> metrics,
-            List<Share> shares,
-            boolean deleted) {
+    Tag(TagId id,
+        User creator,
+        String name,
+        Collection<Metric> metrics,
+        List<Share> shares,
+        boolean deleted) {
 
         this.id = requireNonNull(id);
         this.creator = requireNonNull(creator);
@@ -59,48 +57,41 @@ public class Tag implements Entity {
     }
 
     public void rename(String newName, User updater) {
-        if (this.isEditForbiddenFor(updater)) {
-            throw new EntityEditForbidden(Tag.class);
-        }
-        this.name = newName;
-        validate();
+        new TagEditOperation(updater, this, () ->
+                this.name = newName
+        ).execute();
     }
 
     public void addMetric(String name, MetricType type, User updater) {
-        if (this.isEditForbiddenFor(updater)) {
-            throw new EntityEditForbidden(Tag.class);
-        }
-        MetricDto newMetricDto = new MetricDto(randomUUID(), name, type);
-        Metric newMetric = Metric.create(newMetricDto, creator);
-        this.metrics.add(newMetric);
+        Metric newMetric = new Metric(new MetricId(randomUUID()), updater, name, type, false);
+        new TagEditOperation(updater, this, () ->
+                this.metrics.add(newMetric)
+        ).execute();
     }
 
     public void deleteMetric(MetricId metricId, User updater) {
-        if (this.isEditForbiddenFor(updater)) {
-            throw new EntityEditForbidden(Tag.class);
-        }
-        this.metrics.stream()
-                .filter(metric -> metric.id().equals(metricId))
-                .findFirst()
-                .ifPresent(Metric::delete);
+        new TagEditOperation(updater, this, () ->
+                this.metrics.stream()
+                        .filter(metric -> metric.id().equals(metricId))
+                        .findFirst()
+                        .ifPresent(Metric::delete)
+        ).execute();
     }
 
     public void renameMetric(String newName, MetricId metricId, User updater) {
-        if (this.isEditForbiddenFor(updater)) {
-            throw new EntityEditForbidden(Tag.class);
-        }
-        this.metrics.stream()
-                .filter(metric -> metric.id().equals(metricId))
-                .findFirst()
-                .ifPresent(metric -> metric.rename(newName));
+        new TagEditOperation(updater, this, () ->
+                this.metrics.stream()
+                        .filter(metric -> metric.id().equals(metricId))
+                        .findFirst()
+                        .ifPresent(metric -> metric.rename(newName))
+        ).execute();
     }
 
     public void delete(User remover) {
-        if (isEditForbiddenFor(remover)) {
-            throw new EntityEditForbidden(Tag.class);
-        }
-        this.metrics.forEach(Metric::delete);
-        this.deleted = true;
+        new TagEditOperation(remover, this, () -> {
+            this.metrics.forEach(Metric::delete);
+            this.deleted = true;
+        }).execute();
     }
 
     public void share(Share share, User granter) {
@@ -177,10 +168,6 @@ public class Tag implements Entity {
         return id;
     }
 
-    Collection<Metric> metrics() {
-        return unmodifiableList(metrics);
-    }
-
     boolean isDeleted() {
         return deleted;
     }
@@ -193,19 +180,19 @@ public class Tag implements Entity {
         return creator.equals(user) || isGrantee(user);
     }
 
+    private boolean isGrantee(User user) {
+        return shares.stream()
+                .map(Share::grantee)
+                .filter(Objects::nonNull)
+                .anyMatch(isEqual(user));
+    }
+
     boolean isNotAccessibleFor(User user) {
         return !isAccessibleFor(user);
     }
 
     private boolean isEditForbiddenFor(User user) {
         return !creator.equals(user);
-    }
-
-    private boolean isGrantee(User user) {
-        return shares.stream()
-                .map(Share::grantee)
-                .filter(Objects::nonNull)
-                .anyMatch(isEqual(user));
     }
 
     @Override
@@ -260,5 +247,10 @@ public class Tag implements Entity {
                 .filter(metric -> !existingMetricIds.contains(metric.id()))
                 .map(metric -> Metric.create(metric, this.creator))
                 .toList();
+    }
+
+    @Override
+    public User creator() {
+        return creator;
     }
 }
