@@ -19,7 +19,7 @@ public class Tag implements Entity {
     private final User creator;
     private String name;
     final List<Metric> metrics;
-    private final List<Share> shares;
+    final List<Share> shares;
     private boolean deleted;
 
     Tag(TagId id,
@@ -94,16 +94,29 @@ public class Tag implements Entity {
         }).execute();
     }
 
-    public void share(Share share, User granter) {
-        if (isEditForbiddenFor(granter)) {
-            throw new EntityEditForbidden(Tag.class);
-        }
-        List<String> existingGranteeNames = this.shares.stream()
-                .map(Share::granteeName)
-                .toList();
-        if (!existingGranteeNames.contains(share.granteeName())) {
-            this.shares.add(share);
-        }
+    public void share(Share newShare, User granter) {
+        new TagEditOperation(granter, this, () -> {
+
+            List<String> existingGranteeNames = this.shares.stream()
+                    .map(Share::granteeName)
+                    .toList();
+            if (!existingGranteeNames.contains(newShare.granteeName())) {
+                this.shares.add(newShare);
+            }
+
+        }).execute();
+    }
+
+    public void unshare(String granteeName, User granter) {
+        new TagEditOperation(granter, this, () -> {
+
+            List<Share> sharesWithExclusion = this.shares.stream()
+                    .filter(share -> !share.granteeName().equals(granteeName))
+                    .toList();
+            this.shares.clear();
+            this.shares.addAll(sharesWithExclusion);
+
+        }).execute();
     }
 
     void updateTo(TagDto tag, User updater) {
