@@ -31,7 +31,17 @@ class TagServiceImpl implements TagService {
 
     @Override
     public TagDto createTag(TagDto newTagData, User creator) {
-        Tag tag = Tag.create(newTagData, creator);
+        TagDto tagDataWithSharesResolved = new TagDto(
+                newTagData.id(),
+                newTagData.creatorId(),
+                newTagData.name(),
+                newTagData.metrics(),
+                newTagData.shares().stream()
+                        .map(this::resolveShare)
+                        .toList(),
+                newTagData.deleted()
+        );
+        Tag tag = Tag.create(tagDataWithSharesResolved, creator);
         tagRepository.add(tag.forStorage());
         tagNotifier.notifyChanged(tag.forChangeNotification());
         return tag.forClient(creator);
@@ -75,16 +85,20 @@ class TagServiceImpl implements TagService {
     @Override
     public TagDto shareTag(UUID tagId, Share share, User granter) {
         Tag tag = getTagIfAuthorized(granter, tagId);
-        Share newShare = tenantRepository.findByUsername(share.granteeName())
+        Share newShare = resolveShare(share);
+
+        tag.share(newShare, granter);
+        tagRepository.update(tagId, tag.forStorage());
+        return tag.forClient(granter);
+    }
+
+    private Share resolveShare(Share share) {
+        return tenantRepository.findByUsername(share.granteeName())
                 .map(tenant -> new Share(
                         new User(tenant.id()),
                         tenant.username()
                 ))
                 .orElse(new Share(share.granteeName()));
-
-        tag.share(newShare, granter);
-        tagRepository.update(tagId, tag.forStorage());
-        return tag.forClient(granter);
     }
 
     private Tag getTagIfAuthorized(User user, UUID tagId) {

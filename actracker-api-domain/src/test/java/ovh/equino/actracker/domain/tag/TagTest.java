@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import ovh.equino.actracker.domain.exception.EntityEditForbidden;
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
+import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
@@ -30,7 +31,7 @@ class TagTest {
         @Test
         void shouldChangeName() {
             // given
-            TagDto tagDto = new TagDto(OLD_NAME, null);
+            TagDto tagDto = new TagDto(OLD_NAME, emptyList(), emptyList());
             Tag tag = Tag.create(tagDto, CREATOR);
 
             // when
@@ -43,7 +44,7 @@ class TagTest {
         @Test
         void shouldFailWhenNameNull() {
             // given
-            TagDto tagDto = new TagDto(OLD_NAME, null);
+            TagDto tagDto = new TagDto(OLD_NAME, emptyList(), emptyList());
             Tag tag = Tag.create(tagDto, CREATOR);
 
             // then
@@ -56,7 +57,7 @@ class TagTest {
         @Test
         void shouldFailWhenNameBlank() {
             // given
-            TagDto tagDto = new TagDto(OLD_NAME, null);
+            TagDto tagDto = new TagDto(OLD_NAME, emptyList(), emptyList());
             Tag tag = Tag.create(tagDto, CREATOR);
 
             // then
@@ -74,7 +75,7 @@ class TagTest {
         @Test
         void shouldAddFirstMetric() {
             // given
-            TagDto tagDto = new TagDto("tag name", emptyList());
+            TagDto tagDto = new TagDto("tag name", emptyList(), emptyList());
             Tag tag = Tag.create(tagDto, CREATOR);
 
             MetricDto newMetricDto = new MetricDto(randomUUID(), "gross", NUMERIC);
@@ -96,7 +97,7 @@ class TagTest {
                     new MetricDto(randomUUID(), "weight", NUMERIC),
                     new MetricDto(randomUUID(), "height", NUMERIC)
             );
-            TagDto tagDto = new TagDto("tag name", existingMetrics);
+            TagDto tagDto = new TagDto("tag name", existingMetrics, emptyList());
             Tag tag = Tag.create(tagDto, CREATOR);
 
             MetricDto newMetric = new MetricDto(randomUUID(), "gross", NUMERIC);
@@ -354,6 +355,214 @@ class TagTest {
                             tuple(existingMetric1Id, DELETED),
                             tuple(existingMetric2Id, DELETED)
                     ));
+        }
+    }
+
+    @Nested
+    @DisplayName("share")
+    class ShareTagTest {
+
+        private static final String GRANTEE_NAME = "grantee name";
+
+        @Test
+        void shouldAddNewShareWithoutId() {
+            // given
+            List<Share> existingShares = emptyList();
+            Share newShare = new Share(GRANTEE_NAME);
+            Tag tag = new Tag(
+                    new TagId(randomUUID()),
+                    CREATOR,
+                    "tag name",
+                    emptyList(),
+                    existingShares,
+                    !DELETED
+            );
+
+            // when
+            tag.share(newShare, CREATOR);
+
+            // then
+            assertThat(tag.shares).containsExactly(newShare);
+        }
+
+        @Test
+        void shouldAddNewShareWithId() {
+            // given
+            List<Share> existingShares = emptyList();
+            Share newShare = new Share(new User(randomUUID()), GRANTEE_NAME);
+            Tag tag = new Tag(
+                    new TagId(randomUUID()),
+                    CREATOR,
+                    "tag name",
+                    emptyList(),
+                    existingShares,
+                    !DELETED
+            );
+
+            // when
+            tag.share(newShare, CREATOR);
+
+            // then
+            assertThat(tag.shares).containsExactly(newShare);
+        }
+
+        @Test
+        void shouldNotAddNewShareWithIdWhenShareWithIdAlreadyExists() {
+            // given
+            List<Share> existingShares = singletonList(new Share(new User(randomUUID()), GRANTEE_NAME));
+            Share newShare = new Share(new User(randomUUID()), GRANTEE_NAME);
+            Tag tag = new Tag(
+                    new TagId(randomUUID()),
+                    CREATOR,
+                    "tag name",
+                    emptyList(),
+                    existingShares,
+                    !DELETED
+            );
+
+            // when
+            tag.share(newShare, CREATOR);
+
+            // then
+            assertThat(tag.shares).containsExactlyInAnyOrderElementsOf(existingShares);
+        }
+
+        @Test
+        void shouldNotAddNewShareWithIdWhenShareWithoutIdAlreadyExists() {
+            // given
+            List<Share> existingShares = singletonList(new Share(GRANTEE_NAME));
+            Share newShare = new Share(new User(randomUUID()), GRANTEE_NAME);
+            Tag tag = new Tag(
+                    new TagId(randomUUID()),
+                    CREATOR,
+                    "tag name",
+                    emptyList(),
+                    existingShares,
+                    !DELETED
+            );
+
+            // when
+            tag.share(newShare, CREATOR);
+
+            // then
+            assertThat(tag.shares).containsExactlyInAnyOrderElementsOf(existingShares);
+        }
+
+        @Test
+        void shouldNotAddNewShareWithoutIdWhenShareWithIdAlreadyExists() {
+            // given
+            List<Share> existingShares = singletonList(new Share(new User(randomUUID()), GRANTEE_NAME));
+            Share newShare = new Share(GRANTEE_NAME);
+            Tag tag = new Tag(
+                    new TagId(randomUUID()),
+                    CREATOR,
+                    "tag name",
+                    emptyList(),
+                    existingShares,
+                    !DELETED
+            );
+
+            // when
+            tag.share(newShare, CREATOR);
+
+            // then
+            assertThat(tag.shares).containsExactlyInAnyOrderElementsOf(existingShares);
+
+        }
+
+        @Test
+        void shouldNotAddNewShareWithoutIdWhenShareWithoutIdAlreadyExists() {
+            // given
+            List<Share> existingShares = singletonList(new Share(GRANTEE_NAME));
+            Share newShare = new Share(GRANTEE_NAME);
+            Tag tag = new Tag(
+                    new TagId(randomUUID()),
+                    CREATOR,
+                    "tag name",
+                    emptyList(),
+                    existingShares,
+                    !DELETED
+            );
+
+            // when
+            tag.share(newShare, CREATOR);
+
+            // then
+            assertThat(tag.shares).containsExactlyInAnyOrderElementsOf(existingShares);
+
+        }
+    }
+
+    @Nested
+    @DisplayName("unshare")
+    class UnshareTagTest {
+
+        private static final String GRANTEE_NAME = "grantee name";
+
+        @Test
+        void shouldUnshareTagWhenSharedWithId() {
+            // given
+            Share existingShare = new Share(new User(randomUUID()), GRANTEE_NAME);
+            List<Share> existingShares = singletonList(existingShare);
+            Tag tag = new Tag(
+                    new TagId(randomUUID()),
+                    CREATOR,
+                    "tag name",
+                    emptyList(),
+                    existingShares,
+                    !DELETED
+            );
+
+            // when
+            tag.unshare(existingShare.granteeName(), CREATOR);
+
+            // then
+            assertThat(tag.shares).isEmpty();
+        }
+
+        @Test
+        void shouldUnshareTagWhenSharedWithoutId() {
+            // given
+            Share existingShare = new Share(GRANTEE_NAME);
+            List<Share> existingShares = singletonList(existingShare);
+            Tag tag = new Tag(
+                    new TagId(randomUUID()),
+                    CREATOR,
+                    "tag name",
+                    emptyList(),
+                    existingShares,
+                    !DELETED
+            );
+
+            // when
+            tag.unshare(existingShare.granteeName(), CREATOR);
+
+            // then
+            assertThat(tag.shares).isEmpty();
+
+        }
+
+        @Test
+        void shouldLeaveSharesUnchangedWhenNotShared() {
+            // given
+            List<Share> existingShares = List.of(
+                    new Share("%s_1".formatted(GRANTEE_NAME)),
+                    new Share(new User(randomUUID()), "%s_2".formatted(GRANTEE_NAME))
+            );
+            Tag tag = new Tag(
+                    new TagId(randomUUID()),
+                    CREATOR,
+                    "tag name",
+                    emptyList(),
+                    existingShares,
+                    !DELETED
+            );
+
+            // when
+            tag.unshare(GRANTEE_NAME, CREATOR);
+
+            // then
+            assertThat(tag.shares).containsExactlyInAnyOrderElementsOf(existingShares);
         }
     }
 }

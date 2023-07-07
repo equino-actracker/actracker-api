@@ -120,8 +120,18 @@ class TagController {
 
         ovh.equino.actracker.domain.share.Share newShare = shareMapper.fromRequest(share);
 
-        TagDto sharedTag = tagService.shareTag(UUID.fromString(id), newShare, requester);
+        TagDto sharedTag = tagApplicationService.shareTag(newShare, UUID.fromString(id), requester);
         return tagMapper.toResponse(sharedTag);
+    }
+
+    @RequestMapping(method = DELETE, path = "/{id}/share/{granteeName}")
+    @ResponseStatus(OK)
+    Tag unshareTag(@PathVariable("id") String tagId, @PathVariable("granteeName") String granteeName) {
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User requester = new User(requesterIdentity.getId());
+
+        TagDto unsharedTag = tagApplicationService.unshareTag(granteeName, UUID.fromString(tagId), requester);
+        return tagMapper.toResponse(unsharedTag);
     }
 
     @RequestMapping(method = PUT, path = "/{id}/name")

@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-import static java.util.Collections.emptyList;
+import static java.util.Objects.requireNonNull;
 
 public record TagDto(
 
@@ -19,9 +19,14 @@ public record TagDto(
 
 ) {
 
+    public TagDto {
+        requireNonNull(metrics);
+        requireNonNull(shares);
+    }
+
     // Constructor for data provided from input
-    public TagDto(String name, Collection<MetricDto> metrics) {
-        this(null, null, name, metrics, emptyList(), false);
+    public TagDto(String name, Collection<MetricDto> metrics, List<Share> shares) {
+        this(null, null, name, metrics, shares, false);
     }
 
 }
