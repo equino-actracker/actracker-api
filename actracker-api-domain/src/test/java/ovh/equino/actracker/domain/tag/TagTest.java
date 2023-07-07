@@ -31,7 +31,7 @@ class TagTest {
         @Test
         void shouldChangeName() {
             // given
-            TagDto tagDto = new TagDto(OLD_NAME, null);
+            TagDto tagDto = new TagDto(OLD_NAME, emptyList(), emptyList());
             Tag tag = Tag.create(tagDto, CREATOR);
 
             // when
@@ -44,7 +44,7 @@ class TagTest {
         @Test
         void shouldFailWhenNameNull() {
             // given
-            TagDto tagDto = new TagDto(OLD_NAME, null);
+            TagDto tagDto = new TagDto(OLD_NAME, emptyList(), emptyList());
             Tag tag = Tag.create(tagDto, CREATOR);
 
             // then
@@ -57,7 +57,7 @@ class TagTest {
         @Test
         void shouldFailWhenNameBlank() {
             // given
-            TagDto tagDto = new TagDto(OLD_NAME, null);
+            TagDto tagDto = new TagDto(OLD_NAME, emptyList(), emptyList());
             Tag tag = Tag.create(tagDto, CREATOR);
 
             // then
@@ -75,7 +75,7 @@ class TagTest {
         @Test
         void shouldAddFirstMetric() {
             // given
-            TagDto tagDto = new TagDto("tag name", emptyList());
+            TagDto tagDto = new TagDto("tag name", emptyList(), emptyList());
             Tag tag = Tag.create(tagDto, CREATOR);
 
             MetricDto newMetricDto = new MetricDto(randomUUID(), "gross", NUMERIC);
@@ -97,7 +97,7 @@ class TagTest {
                     new MetricDto(randomUUID(), "weight", NUMERIC),
                     new MetricDto(randomUUID(), "height", NUMERIC)
             );
-            TagDto tagDto = new TagDto("tag name", existingMetrics);
+            TagDto tagDto = new TagDto("tag name", existingMetrics, emptyList());
             Tag tag = Tag.create(tagDto, CREATOR);
 
             MetricDto newMetric = new MetricDto(randomUUID(), "gross", NUMERIC);

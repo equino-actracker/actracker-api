@@ -17,7 +17,8 @@ class TagMapper extends PayloadMapper {
     TagDto fromRequest(Tag tagRequest) {
         return new TagDto(
                 tagRequest.name(),
-                metricMapper.fromRequest(tagRequest.metrics())
+                metricMapper.fromRequest(tagRequest.metrics()),
+                shareMapper.fromRequest(tagRequest.shares())
         );
     }
 
