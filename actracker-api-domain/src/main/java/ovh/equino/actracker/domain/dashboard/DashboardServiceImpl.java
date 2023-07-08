@@ -34,7 +34,7 @@ class DashboardServiceImpl implements DashboardService {
     @Override
     public DashboardDto getDashboard(UUID dashboardId, User searcher) {
         Dashboard dashboard = getDashboardIfAuthorized(searcher, dashboardId);
-        return dashboard.forClient();
+        return dashboard.forClient(searcher);
     }
 
     @Override
@@ -51,7 +51,7 @@ class DashboardServiceImpl implements DashboardService {
         );
         Dashboard dashboard = Dashboard.create(dashboardDataWithSharesResolved, creator);
         dashboardRepository.add(dashboard.forStorage());
-        return dashboard.forClient();
+        return dashboard.forClient(creator);
     }
 
     @Override
@@ -59,7 +59,7 @@ class DashboardServiceImpl implements DashboardService {
         Dashboard dashboard = getDashboardIfAuthorized(updater, dashboardId);
         dashboard.updateTo(updatedDashboardData, updater);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
-        return dashboard.forClient();
+        return dashboard.forClient(updater);
     }
 
     @Override
@@ -67,7 +67,7 @@ class DashboardServiceImpl implements DashboardService {
         EntitySearchResult<DashboardDto> searchResult = dashboardSearchEngine.findDashboards(searchCriteria);
         List<DashboardDto> resultForClient = searchResult.results().stream()
                 .map(Dashboard::fromStorage)
-                .map(Dashboard::forClient)
+                .map(dashboard -> dashboard.forClient(searchCriteria.searcher()))
                 .toList();
 
         return new EntitySearchResult<>(searchResult.nextPageId(), resultForClient);
@@ -94,7 +94,7 @@ class DashboardServiceImpl implements DashboardService {
 
         dashboard.share(newShare, granter);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
-        return dashboard.forClient();
+        return dashboard.forClient(granter);
     }
 
     private Share resolveShare(Share share) {

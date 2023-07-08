@@ -2,7 +2,9 @@ package ovh.equino.actracker.domain.dashboard;
 
 import ovh.equino.actracker.domain.Entity;
 import ovh.equino.actracker.domain.exception.EntityEditForbidden;
+import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.share.Share;
+import ovh.equino.actracker.domain.tag.Tag;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.ArrayList;
@@ -13,7 +15,7 @@ import static java.util.Collections.unmodifiableList;
 import static java.util.function.Predicate.isEqual;
 
 
-class Dashboard implements Entity {
+public class Dashboard implements Entity {
 
     private final DashboardId id;
     private final User creator;
@@ -97,7 +99,7 @@ class Dashboard implements Entity {
         this.validate();
     }
 
-    static Dashboard fromStorage(DashboardDto dashboard) {
+    public static Dashboard fromStorage(DashboardDto dashboard) {
         return new Dashboard(
                 new DashboardId(dashboard.id()),
                 new User(dashboard.creatorId()),
@@ -108,13 +110,16 @@ class Dashboard implements Entity {
         );
     }
 
-    DashboardDto forStorage() {
+    public DashboardDto forStorage() {
         return new DashboardDto(
                 id.id(), creator.id(), name, unmodifiableList(charts), unmodifiableList(shares), deleted
         );
     }
 
-    DashboardDto forClient() {
+    public DashboardDto forClient(User client) {
+        if (isNotAccessibleFor(client)) {
+            throw new EntityNotFoundException(Tag.class, this.id.id());
+        }
         return new DashboardDto(
                 id.id(), creator.id(), name, unmodifiableList(charts), unmodifiableList(shares), deleted
         );
