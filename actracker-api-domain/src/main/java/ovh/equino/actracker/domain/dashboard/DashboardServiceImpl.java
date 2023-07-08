@@ -39,7 +39,17 @@ class DashboardServiceImpl implements DashboardService {
 
     @Override
     public DashboardDto createDashboard(DashboardDto newDashboardData, User creator) {
-        Dashboard dashboard = Dashboard.create(newDashboardData, creator);
+        DashboardDto dashboardDataWithSharesResolved = new DashboardDto(
+                newDashboardData.id(),
+                newDashboardData.creatorId(),
+                newDashboardData.name(),
+                newDashboardData.charts(),
+                newDashboardData.shares().stream()
+                        .map(this::resolveShare)
+                        .toList(),
+                newDashboardData.deleted()
+        );
+        Dashboard dashboard = Dashboard.create(dashboardDataWithSharesResolved, creator);
         dashboardRepository.add(dashboard.forStorage());
         return dashboard.forClient();
     }
@@ -80,16 +90,20 @@ class DashboardServiceImpl implements DashboardService {
     @Override
     public DashboardDto shareDashboard(UUID dashboardId, Share share, User granter) {
         Dashboard dashboard = getDashboardIfAuthorized(granter, dashboardId);
-        Share newShare = tenantRepository.findByUsername(share.granteeName())
+        Share newShare = resolveShare(share);
+
+        dashboard.share(newShare, granter);
+        dashboardRepository.update(dashboardId, dashboard.forStorage());
+        return dashboard.forClient();
+    }
+
+    private Share resolveShare(Share share) {
+        return tenantRepository.findByUsername(share.granteeName())
                 .map(tenant -> new Share(
                         new User(tenant.id()),
                         tenant.username()
                 ))
                 .orElse(new Share(share.granteeName()));
-
-        dashboard.share(newShare, granter);
-        dashboardRepository.update(dashboardId, dashboard.forStorage());
-        return dashboard.forClient();
     }
 
     private Dashboard getDashboardIfAuthorized(User user, UUID dashboardId) {

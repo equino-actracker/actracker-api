@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
 import static java.util.function.Predicate.isEqual;
 
@@ -44,7 +43,7 @@ class Dashboard implements Entity {
                 creator,
                 dashboard.name(),
                 dashboard.charts(),
-                emptyList(),
+                dashboard.shares(),
                 false
         );
         newDashboard.validate();
