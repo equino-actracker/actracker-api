@@ -63,15 +63,16 @@ class Dashboard implements Entity {
     }
 
     public void share(Share share, User granter) {
-        if (isEditForbiddenFor(granter)) {
-            throw new EntityEditForbidden(Dashboard.class);
-        }
-        List<String> existingGranteeNames = this.shares.stream()
-                .map(Share::granteeName)
-                .toList();
-        if (!existingGranteeNames.contains(share.granteeName())) {
-            this.shares.add(share);
-        }
+        new DashboardEditOperation(granter, this, () -> {
+
+            List<String> existingGranteeNames = this.shares.stream()
+                    .map(Share::granteeName)
+                    .toList();
+            if (!existingGranteeNames.contains(share.granteeName())) {
+                this.shares.add(share);
+            }
+
+        }).execute();
     }
 
     public void unshare(String granteeName, User granter) {
