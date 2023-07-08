@@ -20,15 +20,15 @@ class Dashboard implements Entity {
     private final User creator;
     private String name;
     private final List<Chart> charts;
-    private final List<Share> shares;
+    final List<Share> shares;
     private boolean deleted;
 
-    private Dashboard(DashboardId id,
-                      User creator,
-                      String name,
-                      List<Chart> charts,
-                      List<Share> shares,
-                      boolean deleted) {
+    Dashboard(DashboardId id,
+              User creator,
+              String name,
+              List<Chart> charts,
+              List<Share> shares,
+              boolean deleted) {
 
         this.id = id;
         this.creator = creator;
@@ -51,6 +51,42 @@ class Dashboard implements Entity {
         return newDashboard;
     }
 
+    public void rename(String newName, User editor) {
+        new DashboardEditOperation(editor, this,
+                () -> this.name = newName
+        ).execute();
+    }
+
+    public void delete(User remover) {
+        new DashboardEditOperation(remover, this,
+                () -> this.deleted = true
+        ).execute();
+    }
+
+    public void share(Share share, User granter) {
+        if (isEditForbiddenFor(granter)) {
+            throw new EntityEditForbidden(Dashboard.class);
+        }
+        List<String> existingGranteeNames = this.shares.stream()
+                .map(Share::granteeName)
+                .toList();
+        if (!existingGranteeNames.contains(share.granteeName())) {
+            this.shares.add(share);
+        }
+    }
+
+    public void unshare(String granteeName, User granter) {
+        new DashboardEditOperation(granter, this, () -> {
+
+            List<Share> sharesWithExclusion = this.shares.stream()
+                    .filter(share -> !share.granteeName().equals(granteeName))
+                    .toList();
+            this.shares.clear();
+            this.shares.addAll(sharesWithExclusion);
+
+        }).execute();
+    }
+
     void updateTo(DashboardDto dashboard, User updater) {
         if (isEditForbiddenFor(updater)) {
             throw new EntityEditForbidden(Dashboard.class);
@@ -59,13 +95,6 @@ class Dashboard implements Entity {
         this.charts.clear();
         this.charts.addAll(dashboard.charts());
         this.validate();
-    }
-
-    void delete(User remover) {
-        if (isEditForbiddenFor(remover)) {
-            throw new EntityEditForbidden(Dashboard.class);
-        }
-        this.deleted = true;
     }
 
     static Dashboard fromStorage(DashboardDto dashboard) {
@@ -110,18 +139,6 @@ class Dashboard implements Entity {
                 .anyMatch(isEqual(user));
     }
 
-    void share(Share share, User granter) {
-        if (isEditForbiddenFor(granter)) {
-            throw new EntityEditForbidden(Dashboard.class);
-        }
-        List<String> existingGranteeNames = this.shares.stream()
-                .map(Share::granteeName)
-                .toList();
-        if (!existingGranteeNames.contains(share.granteeName())) {
-            this.shares.add(share);
-        }
-    }
-
     @Override
     public void validate() {
         new DashboardValidator(this).validate();
@@ -134,5 +151,9 @@ class Dashboard implements Entity {
     @Override
     public User creator() {
         return creator;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
     }
 }

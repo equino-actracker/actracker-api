@@ -467,7 +467,6 @@ class TagTest {
 
             // then
             assertThat(tag.shares).containsExactlyInAnyOrderElementsOf(existingShares);
-
         }
 
         @Test
@@ -489,7 +488,6 @@ class TagTest {
 
             // then
             assertThat(tag.shares).containsExactlyInAnyOrderElementsOf(existingShares);
-
         }
     }
 
