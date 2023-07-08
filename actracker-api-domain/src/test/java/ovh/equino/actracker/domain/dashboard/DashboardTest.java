@@ -89,7 +89,6 @@ class DashboardTest {
     @DisplayName("delete")
     class DeleteDashboardTest {
 
-        // TODO shouldDeleteDashboardAndAllCharts when implemented
         @Test
         void shouldDeleteDashboard() {
             // given
