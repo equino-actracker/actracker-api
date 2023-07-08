@@ -1,6 +1,7 @@
 package ovh.equino.actracker.rest.spring.dashboard;
 
 import org.springframework.web.bind.annotation.*;
+import ovh.equino.actracker.application.dashboard.DashboardApplicationService;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
@@ -23,12 +24,17 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 class DashboardController {
 
     private final DashboardService dashboardService;
+    private final DashboardApplicationService dashboardApplicationService;
     private final IdentityProvider identityProvider;
     private final DashboardMapper dashboardMapper = new DashboardMapper();
     private final ShareMapper shareMapper = new ShareMapper();
 
-    DashboardController(DashboardService dashboardService, IdentityProvider identityProvider) {
+    DashboardController(DashboardService dashboardService,
+                        DashboardApplicationService dashboardApplicationService,
+                        IdentityProvider identityProvider) {
+
         this.dashboardService = dashboardService;
+        this.dashboardApplicationService = dashboardApplicationService;
         this.identityProvider = identityProvider;
     }
 
@@ -95,7 +101,7 @@ class DashboardController {
         Identity requestIdentity = identityProvider.provideIdentity();
         User requester = new User(requestIdentity.getId());
 
-        dashboardService.deleteDashboard(UUID.fromString(id), requester);
+        dashboardApplicationService.deleteDashboard(UUID.fromString(id), requester);
     }
 
     @RequestMapping(method = POST, path = "/{id}/share")
@@ -109,7 +115,30 @@ class DashboardController {
 
         ovh.equino.actracker.domain.share.Share newShare = shareMapper.fromRequest(share);
 
-        DashboardDto sharedDashboard = dashboardService.shareDashboard(UUID.fromString(id), newShare, requester);
+        DashboardDto sharedDashboard = dashboardApplicationService.shareDashboard(newShare, UUID.fromString(id), requester);
         return dashboardMapper.toResponse(sharedDashboard);
     }
+
+    @RequestMapping(method = DELETE, path = "/{id}/share/{granteeName}")
+    @ResponseStatus(OK)
+    Dashboard unshareDashboard(@PathVariable("id") String dashboardId, @PathVariable("granteeName") String granteeName) {
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User requester = new User(requesterIdentity.getId());
+
+        DashboardDto unsharedDashboard = dashboardApplicationService.unshareDashboard(granteeName, UUID.fromString(dashboardId), requester);
+        return dashboardMapper.toResponse(unsharedDashboard);
+    }
+
+    @RequestMapping(method = PUT, path = "/{id}/name")
+    @ResponseStatus(OK)
+    Dashboard renameDashboard(@PathVariable("id") String dashboardId, @RequestBody String newName) {
+
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User requester = new User(requesterIdentity.getId());
+
+        DashboardDto renamedDashboard = dashboardApplicationService.renameDashboard(newName, UUID.fromString(dashboardId), requester);
+
+        return dashboardMapper.toResponse(renamedDashboard);
+    }
+
 }
