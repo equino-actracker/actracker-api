@@ -16,7 +16,8 @@ class DashboardMapper extends PayloadMapper {
     DashboardDto fromRequest(Dashboard dashboardRequest) {
         return new DashboardDto(
                 dashboardRequest.name(),
-                chartMapper.fromRequest(dashboardRequest.charts())
+                chartMapper.fromRequest(dashboardRequest.charts()),
+                shareMapper.fromRequest(dashboardRequest.shares())
         );
     }
 

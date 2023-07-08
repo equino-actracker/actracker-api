@@ -17,7 +17,7 @@ public record DashboardDto(
 ) {
 
     // Constructor for data provided from input
-    public DashboardDto(String name, List<Chart> charts) {
-        this(null, null, name, charts, emptyList(), false);
+    public DashboardDto(String name, List<Chart> charts, List<Share> shares) {
+        this(null, null, name, charts, shares, false);
     }
 }
