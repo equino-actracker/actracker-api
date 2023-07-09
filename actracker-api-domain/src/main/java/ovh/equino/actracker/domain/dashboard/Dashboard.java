@@ -20,7 +20,7 @@ public class Dashboard implements Entity {
     private final DashboardId id;
     private final User creator;
     private String name;
-    private final List<Chart> charts;
+    final List<Chart> charts;
     final List<Share> shares;
     private boolean deleted;
 
@@ -59,9 +59,16 @@ public class Dashboard implements Entity {
     }
 
     public void delete(User remover) {
-        new DashboardEditOperation(remover, this,
-                () -> this.deleted = true
-        ).execute();
+        new DashboardEditOperation(remover, this, () -> {
+
+            List<Chart> allChartsDeleted = this.charts.stream()
+                    .map(Chart::deleted)
+                    .toList();
+            this.charts.clear();
+            this.charts.addAll(allChartsDeleted);
+            this.deleted = true;
+
+        }).execute();
     }
 
     public void share(Share share, User granter) {

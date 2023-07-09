@@ -9,8 +9,7 @@ import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
+import static java.util.Collections.*;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -90,13 +89,21 @@ class DashboardTest {
     class DeleteDashboardTest {
 
         @Test
-        void shouldDeleteDashboard() {
+        void shouldDeleteDashboardAndCharts() {
             // given
+            Chart existingChart = new Chart(
+                    new ChartId(),
+                    "chart name",
+                    GroupBy.SELF,
+                    AnalysisMetric.METRIC_VALUE,
+                    emptySet(),
+                    !DELETED
+            );
             Dashboard dashboard = new Dashboard(
                     new DashboardId(randomUUID()),
                     CREATOR,
                     "dashboard name",
-                    emptyList(),
+                    singletonList(existingChart),
                     emptyList(),
                     !DELETED
             );
@@ -106,6 +113,9 @@ class DashboardTest {
 
             // then
             assertThat(dashboard.isDeleted()).isTrue();
+            assertThat(dashboard.charts).allSatisfy(
+                    chart -> assertThat(chart.isDeleted()).isTrue()
+            );
         }
 
         @Test

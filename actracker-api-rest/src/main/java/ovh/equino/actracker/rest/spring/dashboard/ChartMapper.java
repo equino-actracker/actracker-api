@@ -32,6 +32,7 @@ class ChartMapper extends PayloadMapper {
 
     Chart toResponse(ovh.equino.actracker.domain.dashboard.Chart chart) {
         return new Chart(
+                chart.id().toString(),
                 chart.name(),
                 GroupBy.fromDomain(chart.groupBy()),
                 AnalysisMetric.fromDomain(chart.analysisMetric()),

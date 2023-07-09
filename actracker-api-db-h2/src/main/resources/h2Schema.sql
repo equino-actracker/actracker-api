@@ -58,6 +58,7 @@ CREATE TABLE chart (
     group_by VARCHAR(20) NOT NULL,
     metric VARCHAR(50) NOT NULL,
     name TEXT,
+    deleted BOOLEAN,
     PRIMARY KEY (id)
 );
 
