@@ -11,8 +11,7 @@ import java.util.List;
 
 import static java.util.Collections.*;
 import static java.util.UUID.randomUUID;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 
 class DashboardTest {
 
@@ -341,6 +340,189 @@ class DashboardTest {
 
             // then
             assertThat(dashboard.shares).containsExactlyInAnyOrderElementsOf(existingShares);
+        }
+    }
+
+    @Nested
+    @DisplayName("addChart")
+    class AddChartTest {
+
+        @Test
+        void shouldAddFirstChart() {
+            // given
+            Chart newChart = new Chart("new Chart", GroupBy.SELF, AnalysisMetric.METRIC_VALUE, emptySet());
+            Dashboard dashboard = new Dashboard(
+                    new DashboardId(),
+                    CREATOR,
+                    "dashboard name",
+                    emptyList(),
+                    emptyList(),
+                    !DELETED
+            );
+
+            // when
+            dashboard.addChart(newChart, CREATOR);
+
+            // then
+            assertThat(dashboard.charts).containsOnly(newChart);
+        }
+
+        @Test
+        void shouldAddAnotherChart() {
+            // given
+            Chart existingNonDeletedChart = new Chart(
+                    "existingChart1",
+                    GroupBy.SELF,
+                    AnalysisMetric.METRIC_VALUE,
+                    emptySet()
+            );
+            Chart existingDeletedChart = new Chart(
+                    "existingChart2",
+                    GroupBy.SELF,
+                    AnalysisMetric.METRIC_VALUE,
+                    emptySet()
+            ).deleted();
+
+            Dashboard dashboard = new Dashboard(
+                    new DashboardId(),
+                    CREATOR,
+                    "dashboard name",
+                    List.of(
+                            existingNonDeletedChart,
+                            existingDeletedChart
+                    ),
+                    emptyList(),
+                    !DELETED
+            );
+
+            Chart newChart = new Chart("new chart", GroupBy.SELF, AnalysisMetric.METRIC_VALUE, emptySet());
+
+            // when
+            dashboard.addChart(newChart, CREATOR);
+
+            // then
+            assertThat(dashboard.charts)
+                    .containsExactlyInAnyOrder(existingNonDeletedChart, existingDeletedChart, newChart);
+        }
+    }
+
+    @Nested
+    @DisplayName("deleteChart")
+    class DeleteChartTest {
+
+        @Test
+        void shouldDeleteExistingChart() {
+            // given
+            Chart existingNonDeletedChart = new Chart(
+                    "existingChart",
+                    GroupBy.SELF,
+                    AnalysisMetric.METRIC_VALUE,
+                    emptySet()
+            );
+            Chart existingDeletedChart = new Chart(
+                    "existingChart",
+                    GroupBy.SELF,
+                    AnalysisMetric.METRIC_VALUE,
+                    emptySet()
+            ).deleted();
+            Chart chartToDelete = new Chart(
+                    "chart to delete",
+                    GroupBy.SELF,
+                    AnalysisMetric.METRIC_VALUE,
+                    emptySet()
+            );
+
+            Dashboard dashboard = new Dashboard(
+                    new DashboardId(),
+                    CREATOR,
+                    "dashboard name",
+                    List.of(existingNonDeletedChart, existingDeletedChart, chartToDelete),
+                    emptyList(),
+                    !DELETED
+            );
+
+            // when
+            dashboard.deleteChart(chartToDelete.id(), CREATOR);
+
+            // then
+            assertThat(dashboard.charts)
+                    .extracting(Chart::id, Chart::isDeleted)
+                    .containsExactlyInAnyOrder(
+                            tuple(existingNonDeletedChart.id(), !DELETED),
+                            tuple(existingDeletedChart.id(), DELETED),
+                            tuple(chartToDelete.id(), DELETED)
+                    );
+        }
+
+        @Test
+        void shouldKeepChartsEmptyWhenRemovingFromEmptyCharts() {
+            // given
+            Dashboard dashboard = new Dashboard(
+                    new DashboardId(),
+                    CREATOR,
+                    "dashboard name",
+                    emptyList(),
+                    emptyList(),
+                    !DELETED
+            );
+
+            // when
+            dashboard.deleteChart(new ChartId(), CREATOR);
+
+            // then
+            assertThat(dashboard.charts).isEmpty();
+        }
+
+        @Test
+        void shouldKeepChartsUnchangedWhenDeletingNotExistingChart() {
+            // given
+            Chart existingChart = new Chart("chart name", GroupBy.SELF, AnalysisMetric.METRIC_VALUE, emptySet());
+            Dashboard dashboard = new Dashboard(
+                    new DashboardId(),
+                    CREATOR,
+                    "dashboard name",
+                    singletonList(existingChart),
+                    emptyList(),
+                    !DELETED
+            );
+
+            // when
+            dashboard.deleteChart(new ChartId(), CREATOR);
+
+            // then
+            assertThat(dashboard.charts).containsExactly(existingChart);
+        }
+
+        @Test
+        void shouldKeepChartsUnchangedWhenDeletingAlreadyDeletedChart() {
+            // given
+            Chart existingDeletedChart = new Chart(
+                    "deleted chart name",
+                    GroupBy.SELF,
+                    AnalysisMetric.METRIC_VALUE,
+                    emptySet()
+            ).deleted();
+            Chart existingNonDeletedChart = new Chart(
+                    "non deleted chart",
+                    GroupBy.SELF,
+                    AnalysisMetric.METRIC_VALUE,
+                    emptySet()
+            );
+
+            Dashboard dashboard = new Dashboard(
+                    new DashboardId(),
+                    CREATOR,
+                    "dashboard name",
+                    List.of(existingNonDeletedChart, existingDeletedChart),
+                    emptyList(),
+                    !DELETED
+            );
+
+            // when
+            dashboard.deleteChart(existingDeletedChart.id(), CREATOR);
+
+            // then
+            assertThat(dashboard.charts).containsExactlyInAnyOrder(existingDeletedChart, existingNonDeletedChart);
         }
     }
 }

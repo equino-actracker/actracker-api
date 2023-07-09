@@ -53,9 +53,32 @@ public class Dashboard implements Entity {
     }
 
     public void rename(String newName, User editor) {
-        new DashboardEditOperation(editor, this,
-                () -> this.name = newName
+        new DashboardEditOperation(editor, this, () ->
+                this.name = newName
         ).execute();
+    }
+
+    public void addChart(Chart newChart, User editor) {
+        new DashboardEditOperation(editor, this, () ->
+                charts.add(newChart)
+        ).execute();
+    }
+
+    public void deleteChart(ChartId chartId, User editor) {
+        new DashboardEditOperation(editor, this, () -> {
+
+            List<Chart> deletedCharts = charts.stream()
+                    .filter(chart -> chart.id().equals(chartId))
+                    .map(Chart::deleted)
+                    .toList();
+            List<Chart> remainingCharts = charts.stream()
+                    .filter(chart -> !chart.id().equals(chartId))
+                    .toList();
+            charts.clear();
+            charts.addAll(deletedCharts);
+            charts.addAll(remainingCharts);
+
+        }).execute();
     }
 
     public void delete(User remover) {

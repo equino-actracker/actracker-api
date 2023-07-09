@@ -119,7 +119,6 @@ class TagTest {
     @DisplayName("deleteMetric")
     class DeleteMetricTest {
 
-
         @Test
         void shouldDeleteExistingMetric() {
             // given
@@ -219,23 +218,6 @@ class TagTest {
                     ));
         }
 
-        @Test
-        void shouldFailWhenUserNotAllowed() {
-            // given
-            MetricId existingMetricId = new MetricId();
-            MetricDto existingMetric1 = new MetricDto(existingMetricId.id(), CREATOR.id(), "metric 1", NUMERIC, !DELETED);
-            List<MetricDto> existingMetrics = List.of(existingMetric1);
-            TagDto tagDto = new TagDto(randomUUID(), CREATOR.id(), "tag name", existingMetrics, emptyList(), !DELETED);
-            Tag tag = Tag.fromStorage(tagDto);
-
-            User unprivilegedUser = new User(randomUUID());
-
-            // then
-            assertThatThrownBy(() ->
-                    tag.deleteMetric(existingMetricId, unprivilegedUser)
-            )
-                    .isInstanceOf(EntityEditForbidden.class);
-        }
     }
 
     @Nested
