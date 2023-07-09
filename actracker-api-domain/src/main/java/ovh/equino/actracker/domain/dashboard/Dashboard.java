@@ -13,6 +13,7 @@ import java.util.Objects;
 
 import static java.util.Collections.unmodifiableList;
 import static java.util.function.Predicate.isEqual;
+import static java.util.function.Predicate.not;
 
 
 public class Dashboard implements Entity {
@@ -150,8 +151,11 @@ public class Dashboard implements Entity {
         if (isNotAccessibleFor(client)) {
             throw new EntityNotFoundException(Tag.class, this.id.id());
         }
+        List<Chart> nonDeletedCharts = charts.stream()
+                .filter(not(Chart::isDeleted))
+                .toList();
         return new DashboardDto(
-                id.id(), creator.id(), name, unmodifiableList(charts), unmodifiableList(shares), deleted
+                id.id(), creator.id(), name, nonDeletedCharts, unmodifiableList(shares), deleted
         );
     }
 
