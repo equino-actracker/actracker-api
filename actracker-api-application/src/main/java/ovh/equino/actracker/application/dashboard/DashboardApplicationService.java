@@ -1,8 +1,6 @@
 package ovh.equino.actracker.application.dashboard;
 
-import ovh.equino.actracker.domain.dashboard.Dashboard;
-import ovh.equino.actracker.domain.dashboard.DashboardDto;
-import ovh.equino.actracker.domain.dashboard.DashboardRepository;
+import ovh.equino.actracker.domain.dashboard.*;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tenant.TenantRepository;
@@ -37,6 +35,27 @@ public class DashboardApplicationService {
 
         dashboard.delete(remover);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
+    }
+
+    public DashboardDto addChart(Chart newChart, UUID dashboardId, User editor) {
+        DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
+                .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
+        Dashboard dashboard = Dashboard.fromStorage(dashboardDto);
+
+        dashboard.addChart(newChart, editor);
+        dashboardRepository.update(dashboardId, dashboard.forStorage());
+        return dashboard.forClient(editor);
+    }
+
+    public DashboardDto deleteChart(UUID chartId, UUID dashboardId, User editor) {
+        DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
+                .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
+        Dashboard dashboard = Dashboard.fromStorage(dashboardDto);
+
+        dashboard.deleteChart(new ChartId(chartId), editor);
+        dashboardRepository.update(dashboardId, dashboard.forStorage());
+        return dashboard.forClient(editor);
+
     }
 
     public DashboardDto shareDashboard(Share newShare, UUID dashboardId, User granter) {

@@ -27,6 +27,7 @@ class DashboardController {
     private final DashboardApplicationService dashboardApplicationService;
     private final IdentityProvider identityProvider;
     private final DashboardMapper dashboardMapper = new DashboardMapper();
+    private final ChartMapper chartMapper = new ChartMapper();
     private final ShareMapper shareMapper = new ShareMapper();
 
     DashboardController(DashboardService dashboardService,
@@ -141,4 +142,32 @@ class DashboardController {
         return dashboardMapper.toResponse(renamedDashboard);
     }
 
+    @RequestMapping(method = POST, path = "/{dashboardId}/chart")
+    @ResponseStatus(OK)
+    Dashboard addChart(@PathVariable("dashboardId") String dashboardId, @RequestBody Chart chart) {
+
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User requester = new User(requesterIdentity.getId());
+
+        ovh.equino.actracker.domain.dashboard.Chart newChart = chartMapper.fromRequest(chart);
+
+        DashboardDto updatedDashboard = dashboardApplicationService
+                .addChart(newChart, UUID.fromString(dashboardId), requester);
+
+        return dashboardMapper.toResponse(updatedDashboard);
+    }
+
+    @RequestMapping(method = DELETE, path = "/{dashboardId}/chart/{chartId}")
+    @ResponseStatus(OK)
+    Dashboard deleteChart(@PathVariable("dashboardId") String dashboardId, @PathVariable("chartId") String chartId) {
+
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User requester = new User(requesterIdentity.getId());
+
+        DashboardDto updatedDashboard = dashboardApplicationService
+                .deleteChart(UUID.fromString(chartId), UUID.fromString(dashboardId), requester);
+
+        return dashboardMapper.toResponse(updatedDashboard);
+
+    }
 }

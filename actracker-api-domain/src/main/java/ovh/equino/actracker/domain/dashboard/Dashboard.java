@@ -13,6 +13,7 @@ import java.util.Objects;
 
 import static java.util.Collections.unmodifiableList;
 import static java.util.function.Predicate.isEqual;
+import static java.util.function.Predicate.not;
 
 
 public class Dashboard implements Entity {
@@ -20,7 +21,7 @@ public class Dashboard implements Entity {
     private final DashboardId id;
     private final User creator;
     private String name;
-    private final List<Chart> charts;
+    final List<Chart> charts;
     final List<Share> shares;
     private boolean deleted;
 
@@ -53,15 +54,45 @@ public class Dashboard implements Entity {
     }
 
     public void rename(String newName, User editor) {
-        new DashboardEditOperation(editor, this,
-                () -> this.name = newName
+        new DashboardEditOperation(editor, this, () ->
+                this.name = newName
         ).execute();
     }
 
-    public void delete(User remover) {
-        new DashboardEditOperation(remover, this,
-                () -> this.deleted = true
+    public void addChart(Chart newChart, User editor) {
+        new DashboardEditOperation(editor, this, () ->
+                charts.add(newChart)
         ).execute();
+    }
+
+    public void deleteChart(ChartId chartId, User editor) {
+        new DashboardEditOperation(editor, this, () -> {
+
+            List<Chart> deletedCharts = charts.stream()
+                    .filter(chart -> chart.id().equals(chartId))
+                    .map(Chart::deleted)
+                    .toList();
+            List<Chart> remainingCharts = charts.stream()
+                    .filter(chart -> !chart.id().equals(chartId))
+                    .toList();
+            charts.clear();
+            charts.addAll(deletedCharts);
+            charts.addAll(remainingCharts);
+
+        }).execute();
+    }
+
+    public void delete(User remover) {
+        new DashboardEditOperation(remover, this, () -> {
+
+            List<Chart> allChartsDeleted = this.charts.stream()
+                    .map(Chart::deleted)
+                    .toList();
+            this.charts.clear();
+            this.charts.addAll(allChartsDeleted);
+            this.deleted = true;
+
+        }).execute();
     }
 
     public void share(Share share, User granter) {
@@ -120,8 +151,11 @@ public class Dashboard implements Entity {
         if (isNotAccessibleFor(client)) {
             throw new EntityNotFoundException(Tag.class, this.id.id());
         }
+        List<Chart> nonDeletedCharts = charts.stream()
+                .filter(not(Chart::isDeleted))
+                .toList();
         return new DashboardDto(
-                id.id(), creator.id(), name, unmodifiableList(charts), unmodifiableList(shares), deleted
+                id.id(), creator.id(), name, nonDeletedCharts, unmodifiableList(shares), deleted
         );
     }
 

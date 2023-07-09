@@ -2,6 +2,7 @@ package ovh.equino.actracker.repository.jpa.dashboard;
 
 import ovh.equino.actracker.domain.dashboard.AnalysisMetric;
 import ovh.equino.actracker.domain.dashboard.Chart;
+import ovh.equino.actracker.domain.dashboard.ChartId;
 import ovh.equino.actracker.domain.dashboard.GroupBy;
 import ovh.equino.actracker.repository.jpa.tag.TagEntity;
 
@@ -25,10 +26,12 @@ class ChartMapper {
                 .map(UUID::fromString)
                 .collect(toUnmodifiableSet());
         return new Chart(
+                new ChartId(entity.id),
                 entity.name,
                 GroupBy.valueOf(entity.groupBy),
                 AnalysisMetric.valueOf(entity.metric),
-                entityTags
+                entityTags,
+                entity.deleted
         );
     }
 
@@ -45,12 +48,13 @@ class ChartMapper {
                 .collect(toUnmodifiableSet());
 
         ChartEntity entity = new ChartEntity();
-        entity.id = randomUUID().toString();
+        entity.id = chart.id().toString();
         entity.name = chart.name();
         entity.dashboard = dashboard;
         entity.groupBy = chart.groupBy().toString();
         entity.metric = chart.analysisMetric().toString();
         entity.tags = dtoTags;
+        entity.deleted = chart.isDeleted();
         return entity;
     }
 

@@ -33,4 +33,7 @@ class ChartEntity {
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     Set<TagEntity> tags;
+
+    @Column(name = "deleted")
+    boolean deleted;
 }
