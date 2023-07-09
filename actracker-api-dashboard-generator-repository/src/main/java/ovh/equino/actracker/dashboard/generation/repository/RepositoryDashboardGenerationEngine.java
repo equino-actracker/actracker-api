@@ -17,6 +17,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Collections.emptyList;
+import static java.util.function.Predicate.not;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static ovh.equino.actracker.dashboard.generation.repository.DashboardUtils.*;
 
@@ -52,6 +53,7 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
 
         List<DashboardChartData> chartsData = dashboard.charts()
                 .stream()
+                .filter(not(Chart::isDeleted))
                 .map(chart -> generate(chart, rangeStartTime.get(), rangeEndTime.get(), tags, activities))
                 .toList();
 
@@ -124,6 +126,7 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
     DashboardData empty(DashboardDto dashboard) {
         List<DashboardChartData> emptyCharts = dashboard.charts()
                 .stream()
+                .filter(not(Chart::isDeleted))
                 .map(chart -> new DashboardChartData(chart.name(), emptyList()))
                 .toList();
         return new DashboardData(dashboard.name(), emptyCharts);
