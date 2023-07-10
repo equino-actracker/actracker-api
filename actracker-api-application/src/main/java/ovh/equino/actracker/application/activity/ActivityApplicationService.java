@@ -3,13 +3,12 @@ package ovh.equino.actracker.application.activity;
 import ovh.equino.actracker.domain.activity.Activity;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivityRepository;
+import ovh.equino.actracker.domain.activity.MetricValue;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
-import ovh.equino.actracker.domain.tag.MetricsExistenceVerifier;
-import ovh.equino.actracker.domain.tag.TagId;
-import ovh.equino.actracker.domain.tag.TagRepository;
-import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
+import ovh.equino.actracker.domain.tag.*;
 import ovh.equino.actracker.domain.user.User;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -102,6 +101,34 @@ public class ActivityApplicationService {
 
         Activity activity = Activity.fromStorage(activityDto, tagsExistenceVerifier, metricsExistenceVerifier);
         activity.removeTag(new TagId(tagId), updater);
+
+        activityRepository.update(activityId, activity.forStorage());
+        return activity.forClient(updater);
+    }
+
+    public ActivityDto setMetricValue(UUID metricId, BigDecimal value, UUID activityId, User updater) {
+        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, updater);
+        MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
+
+        ActivityDto activityDto = activityRepository.findById(activityId)
+                .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
+
+        Activity activity = Activity.fromStorage(activityDto, tagsExistenceVerifier, metricsExistenceVerifier);
+        activity.setMetricValue(new MetricValue(metricId, value), updater);
+
+        activityRepository.update(activityId, activity.forStorage());
+        return activity.forClient(updater);
+    }
+
+    public ActivityDto unsetMetricValue(UUID metricId, UUID activityId, User updater) {
+        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, updater);
+        MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
+
+        ActivityDto activityDto = activityRepository.findById(activityId)
+                .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
+
+        Activity activity = Activity.fromStorage(activityDto, tagsExistenceVerifier, metricsExistenceVerifier);
+        activity.unsetMetricValue(new MetricId(metricId), updater);
 
         activityRepository.update(activityId, activity.forStorage());
         return activity.forClient(updater);

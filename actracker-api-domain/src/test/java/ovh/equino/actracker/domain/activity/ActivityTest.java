@@ -28,7 +28,6 @@ import static org.apache.commons.collections4.CollectionUtils.removeAll;
 import static org.apache.commons.collections4.CollectionUtils.union;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -506,7 +505,8 @@ class ActivityTest {
             assertThatThrownBy(() ->
                     activity.setMetricValue(newMetricValue, CREATOR)
             )
-                    .isInstanceOf(EntityInvalidException.class);        }
+                    .isInstanceOf(EntityInvalidException.class);
+        }
 
         @Test
         void shouldFailWhenMetricNonExistValueSet() {
