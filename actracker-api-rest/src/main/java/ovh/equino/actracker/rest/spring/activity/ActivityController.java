@@ -14,6 +14,7 @@ import ovh.equino.actracker.rest.spring.tag.Tag;
 import ovh.equino.security.identity.Identity;
 import ovh.equino.security.identity.IdentityProvider;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -179,5 +180,38 @@ class ActivityController {
                 requester
         );
         return mapper.toResponse(activity);
+    }
+
+    @RequestMapping(method = PUT, path = "/{activityId}/metric/{metricId}/value")
+    @ResponseStatus(OK)
+    Activity setActivityMetricValue(@PathVariable("activityId") String activityId,
+                                    @PathVariable("metricId") String metricId,
+                                    @RequestBody BigDecimal value) {
+
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User requester = new User(requesterIdentity.getId());
+
+        ActivityDto updatedActivity = activityApplicationService.setMetricValue(
+                UUID.fromString(metricId),
+                value,
+                UUID.fromString(activityId),
+                requester);
+        return mapper.toResponse(updatedActivity);
+    }
+
+    @RequestMapping(method = DELETE, path = "/{activityId}/metric/{metricId}/value")
+    @ResponseStatus(OK)
+    Activity unsetActivityMetricValue(@PathVariable("activityId") String activityId,
+                                      @PathVariable("metricId") String metricId) {
+
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User requester = new User(requesterIdentity.getId());
+
+        ActivityDto updatedActivity = activityApplicationService.unsetMetricValue(
+                UUID.fromString(metricId),
+                UUID.fromString(activityId),
+                requester
+        );
+        return mapper.toResponse(updatedActivity);
     }
 }
