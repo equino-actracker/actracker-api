@@ -7,8 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ovh.equino.actracker.domain.exception.EntityEditForbidden;
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
+import ovh.equino.actracker.domain.tag.MetricId;
 import ovh.equino.actracker.domain.tag.MetricsExistenceVerifier;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
@@ -16,9 +16,11 @@ import ovh.equino.actracker.domain.user.User;
 
 import java.time.Instant;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static java.math.BigDecimal.*;
 import static java.util.Collections.*;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toSet;
@@ -26,6 +28,7 @@ import static org.apache.commons.collections4.CollectionUtils.removeAll;
 import static org.apache.commons.collections4.CollectionUtils.union;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -33,6 +36,7 @@ import static org.mockito.Mockito.when;
 class ActivityTest {
 
     private static final User CREATOR = new User(randomUUID());
+    private static final boolean DELETED = true;
 
     private static final Instant OLD_START_TIME = Instant.ofEpochMilli(1000);
     private static final Instant OLD_END_TIME = Instant.ofEpochMilli(2000);
@@ -408,6 +412,241 @@ class ActivityTest {
 
             // then
             assertThat(activity.deleted()).isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("setMetricValue")
+    class SetMetricValue {
+
+        private static final MetricId EXISTING_METRIC_ID = new MetricId();
+        private static final MetricId NON_EXISTING_METRIC_ID = new MetricId();
+        private static final MetricValue EXISTING_METRIC_VALUE = new MetricValue(EXISTING_METRIC_ID.id(), ZERO);
+        private static final MetricValue NON_EXISTING_METRIC_VALUE = new MetricValue(NON_EXISTING_METRIC_ID.id(), ONE);
+
+        @BeforeEach
+        void setUp() {
+            when(metricsExistenceVerifier.existing(any(), any())).thenReturn(singleton(EXISTING_METRIC_ID));
+            when(metricsExistenceVerifier.notExisting(any(), any()))
+                    .thenReturn(singleton(NON_EXISTING_METRIC_ID))
+                    .thenReturn(emptySet());
+        }
+
+        @Test
+        void shouldSetNewValueIfExistingMetricNotSet() {
+            // given
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    "activity title",
+                    null,
+                    null,
+                    null,
+                    emptyList(),
+                    List.of(NON_EXISTING_METRIC_VALUE),
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier
+            );
+            MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
+
+            // when
+            activity.setMetricValue(newMetricValue, CREATOR);
+
+            // then
+            assertThat(activity.metricValues).containsExactlyInAnyOrder(NON_EXISTING_METRIC_VALUE, newMetricValue);
+        }
+
+        @Test
+        void shouldSetNewValueIfExistingMetricAlreadySet() {
+            // given
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    "activity title",
+                    null,
+                    null,
+                    null,
+                    emptyList(),
+                    List.of(EXISTING_METRIC_VALUE, NON_EXISTING_METRIC_VALUE),
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier
+            );
+            MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
+
+            // when
+            activity.setMetricValue(newMetricValue, CREATOR);
+
+            // then
+            assertThat(activity.metricValues).containsExactlyInAnyOrder(NON_EXISTING_METRIC_VALUE, newMetricValue);
+        }
+
+        @Test
+        void shouldFailWhenMetricNonExistValueNotSet() {
+            // given
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    "activity title",
+                    null,
+                    null,
+                    null,
+                    emptyList(),
+                    List.of(EXISTING_METRIC_VALUE),
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier
+            );
+            MetricValue newMetricValue = new MetricValue(NON_EXISTING_METRIC_ID.id(), TEN);
+            when(metricsExistenceVerifier.notExisting(any(), any()))
+                    .thenReturn(singleton(NON_EXISTING_METRIC_ID));
+
+            // then
+            assertThatThrownBy(() ->
+                    activity.setMetricValue(newMetricValue, CREATOR)
+            )
+                    .isInstanceOf(EntityInvalidException.class);        }
+
+        @Test
+        void shouldFailWhenMetricNonExistValueSet() {
+            // given
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    "activity title",
+                    null,
+                    null,
+                    null,
+                    emptyList(),
+                    List.of(EXISTING_METRIC_VALUE, NON_EXISTING_METRIC_VALUE),
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier
+            );
+            MetricValue newMetricValue = new MetricValue(NON_EXISTING_METRIC_ID.id(), TEN);
+            when(metricsExistenceVerifier.notExisting(any(), any()))
+                    .thenReturn(singleton(NON_EXISTING_METRIC_ID));
+
+            // then
+            assertThatThrownBy(() ->
+                    activity.setMetricValue(newMetricValue, CREATOR)
+            )
+                    .isInstanceOf(EntityInvalidException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("unsetMetricValue")
+    class UnsetMetricValue {
+
+        private static final MetricId EXISTING_METRIC_ID = new MetricId();
+        private static final MetricId NON_EXISTING_METRIC_ID = new MetricId();
+        private static final MetricValue EXISTING_METRIC_VALUE = new MetricValue(EXISTING_METRIC_ID.id(), ZERO);
+        private static final MetricValue NON_EXISTING_METRIC_VALUE = new MetricValue(NON_EXISTING_METRIC_ID.id(), ONE);
+
+        @BeforeEach
+        void setUp() {
+            when(metricsExistenceVerifier.existing(any(), any())).thenReturn(singleton(EXISTING_METRIC_ID));
+            when(metricsExistenceVerifier.notExisting(any(), any()))
+                    .thenReturn(singleton(NON_EXISTING_METRIC_ID))
+                    .thenReturn(emptySet());
+        }
+
+        @Test
+        void shouldRemoveValueWhenExistingMetricValueSet() {
+            // given
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    "activity title",
+                    null,
+                    null,
+                    null,
+                    emptyList(),
+                    List.of(EXISTING_METRIC_VALUE, NON_EXISTING_METRIC_VALUE),
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier
+            );
+
+            // when
+            activity.unsetMetricValue(EXISTING_METRIC_ID, CREATOR);
+
+            // then
+            assertThat(activity.metricValues).containsExactlyInAnyOrder(NON_EXISTING_METRIC_VALUE);
+        }
+
+        @Test
+        void shouldLeaveValuesUnchangedWhenExistingMetricValueNotSet() {
+            // given
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    "activity title",
+                    null,
+                    null,
+                    null,
+                    emptyList(),
+                    List.of(NON_EXISTING_METRIC_VALUE),
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier
+            );
+
+            // when
+            activity.unsetMetricValue(EXISTING_METRIC_ID, CREATOR);
+
+            // then
+            assertThat(activity.metricValues).containsExactlyInAnyOrder(NON_EXISTING_METRIC_VALUE);
+        }
+
+        @Test
+        void shouldLeaveValuesUnchangedWhenNonExistingMetricValueSet() {
+            // given
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    "activity title",
+                    null,
+                    null,
+                    null,
+                    emptyList(),
+                    List.of(EXISTING_METRIC_VALUE, NON_EXISTING_METRIC_VALUE),
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier
+            );
+
+            // when
+            activity.unsetMetricValue(NON_EXISTING_METRIC_ID, CREATOR);
+
+            // then
+            assertThat(activity.metricValues).containsExactlyInAnyOrder(NON_EXISTING_METRIC_VALUE, EXISTING_METRIC_VALUE);
+        }
+
+        @Test
+        void shouldLeaveValuesUnchangedWhenNonExistingMetricValueNotSet() {
+            // given
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    "activity title",
+                    null,
+                    null,
+                    null,
+                    emptyList(),
+                    List.of(EXISTING_METRIC_VALUE),
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier
+            );
+
+            // when
+            activity.unsetMetricValue(NON_EXISTING_METRIC_ID, CREATOR);
+
+            // then
+            assertThat(activity.metricValues).containsExactlyInAnyOrder(EXISTING_METRIC_VALUE);
         }
     }
 }

@@ -20,10 +20,13 @@ final class ActivityValidator extends EntityValidator<Activity> {
     private final TagsExistenceVerifier tagsExistenceVerifier;
     private final MetricsExistenceVerifier metricsExistenceVerifier;
 
-    ActivityValidator(Activity activity, TagsExistenceVerifier tagsExistenceVerifier) {
+    ActivityValidator(Activity activity,
+                      TagsExistenceVerifier tagsExistenceVerifier,
+                      MetricsExistenceVerifier metricsExistenceVerifier) {
+
         this.activity = activity;
         this.tagsExistenceVerifier = tagsExistenceVerifier;
-        this.metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
+        this.metricsExistenceVerifier = metricsExistenceVerifier;
     }
 
     @Override
