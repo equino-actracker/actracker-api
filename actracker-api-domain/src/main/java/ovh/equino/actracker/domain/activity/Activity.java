@@ -1,7 +1,6 @@
 package ovh.equino.actracker.domain.activity;
 
 import ovh.equino.actracker.domain.Entity;
-import ovh.equino.actracker.domain.exception.EntityEditForbidden;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.tag.*;
 import ovh.equino.actracker.domain.user.User;
@@ -116,6 +115,31 @@ public class Activity implements Entity {
         ).execute();
     }
 
+    public void setMetricValue(MetricValue newMetricValue, User updater) {
+        new ActivityEditOperation(updater, this, tagsExistenceVerifier, metricsExistenceVerifier, () -> {
+
+            List<MetricValue> otherValues = metricValues.stream()
+                    .filter(value -> !value.metricId().equals(newMetricValue.metricId()))
+                    .toList();
+            metricValues.clear();
+            metricValues.addAll(otherValues);
+            metricValues.add(newMetricValue);
+
+        }).execute();
+    }
+
+    public void unsetMetricValue(MetricId metricId, User updater) {
+        new ActivityEditOperation(updater, this, tagsExistenceVerifier, metricsExistenceVerifier, () -> {
+
+            List<MetricValue> remainingMetricValues = metricValues.stream()
+                    .filter(value -> !value.metricId().equals(metricId.id()))
+                    .toList();
+            metricValues.clear();
+            metricValues.addAll(remainingMetricValues);
+
+        }).execute();
+    }
+
     public void delete(User remover) {
         new ActivityEditOperation(remover, this, tagsExistenceVerifier, metricsExistenceVerifier,
                 () -> this.deleted = true
@@ -223,10 +247,6 @@ public class Activity implements Entity {
         return new ActivityChangedNotification(dto);
     }
 
-    boolean isEditForbiddenFor(User user) {
-        return !creator.equals(user);
-    }
-
     boolean isAvailableFor(User user) {
         return creator.equals(user) || isSharedWith(user);
     }
@@ -247,7 +267,7 @@ public class Activity implements Entity {
 
     @Override
     public void validate() {
-        new ActivityValidator(this, tagsExistenceVerifier).validate();
+        new ActivityValidator(this, tagsExistenceVerifier, metricsExistenceVerifier).validate();
     }
 
     Instant startTime() {
