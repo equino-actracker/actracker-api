@@ -12,13 +12,11 @@ import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
 import ovh.equino.actracker.domain.user.User;
 
-import java.util.*;
+import java.util.List;
+import java.util.Set;
 
 import static java.util.Collections.*;
 import static java.util.UUID.randomUUID;
-import static java.util.stream.Collectors.toSet;
-import static org.apache.commons.collections4.CollectionUtils.removeAll;
-import static org.apache.commons.collections4.CollectionUtils.union;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -99,8 +97,15 @@ class TagSetTest {
         @Test
         void shouldAssignFirstTag() {
             // given
-            TagSetDto tagSetDto = new TagSetDto("tag set name", emptySet());
-            TagSet tagSet = TagSet.create(tagSetDto, CREATOR, tagsExistenceVerifier);
+            TagSet tagSet = new TagSet(
+                    new TagSetId(),
+                    CREATOR,
+                    TAG_SET_NAME,
+                    EMPTY_TAGS,
+                    !DELETED,
+                    validator,
+                    tagsExistenceVerifier
+            );
 
             TagId newTag = new TagId(randomUUID());
 
@@ -114,41 +119,48 @@ class TagSetTest {
         @Test
         void shouldAssignAnotherTag() {
             // given
-            Set<TagId> existingTags = Set.of(new TagId(randomUUID()), new TagId(randomUUID()));
-            Set<UUID> existingTagIds = existingTags.stream().map(TagId::id).collect(toSet());
-            TagSetDto tagSetDto = new TagSetDto("tag set name", existingTagIds);
-            TagSet tagSet = TagSet.create(tagSetDto, CREATOR, tagsExistenceVerifier);
-
-            TagId newTag = new TagId(randomUUID());
-            Collection<TagId> tagsAfterAssignment = union(existingTags, singleton(newTag));
-
+            TagId existingTag = new TagId();
+            TagSet tagSet = new TagSet(
+                    new TagSetId(),
+                    CREATOR,
+                    TAG_SET_NAME,
+                    singleton(existingTag),
+                    !DELETED,
+                    validator,
+                    tagsExistenceVerifier
+            );
             when(tagsExistenceVerifier.existing(any()))
-                    .thenReturn(new HashSet<>(union(existingTags, singleton(newTag))));
+                    .thenReturn(singleton(existingTag));
+            TagId newTag = new TagId();
 
             // when
             tagSet.assignTag(newTag, CREATOR);
 
             // then
-            assertThat(tagSet.tags()).containsExactlyInAnyOrderElementsOf(tagsAfterAssignment);
+            assertThat(tagSet.tags()).containsExactlyInAnyOrder(existingTag, newTag);
         }
 
         @Test
         void shouldNotDuplicateAssignedTag() {
             // given
-            TagId duplicatedTag = new TagId(randomUUID());
-            Set<TagId> existingTags = Set.of(new TagId(randomUUID()), duplicatedTag);
-            Set<UUID> existingTagIds = existingTags.stream().map(TagId::id).collect(toSet());
-            TagSetDto tagSetDto = new TagSetDto("tag set name", existingTagIds);
-            TagSet tagSet = TagSet.create(tagSetDto, CREATOR, tagsExistenceVerifier);
-
+            TagId existingTag = new TagId();
+            TagSet tagSet = new TagSet(
+                    new TagSetId(),
+                    CREATOR,
+                    TAG_SET_NAME,
+                    singleton(existingTag),
+                    !DELETED,
+                    validator,
+                    tagsExistenceVerifier
+            );
             when(tagsExistenceVerifier.existing(any()))
-                    .thenReturn(existingTags);
+                    .thenReturn(singleton(existingTag));
 
             // when
-            tagSet.assignTag(duplicatedTag, CREATOR);
+            tagSet.assignTag(existingTag, CREATOR);
 
             // then
-            assertThat(tagSet.tags()).containsExactlyInAnyOrderElementsOf(existingTags);
+            assertThat(tagSet.tags()).containsExactly(existingTag);
         }
 
         @Test
@@ -181,32 +193,42 @@ class TagSetTest {
         @Test
         void shouldRemoveAssignedTag() {
             // given
-            TagId tagToRemove = new TagId(randomUUID());
-            Set<TagId> existingTags = Set.of(new TagId(randomUUID()), new TagId(randomUUID()), tagToRemove);
-            Set<UUID> existingTagIds = existingTags.stream().map(TagId::id).collect(toSet());
-            TagSetDto tagSetDto = new TagSetDto("tag set name", existingTagIds);
-            TagSet tagSet = TagSet.create(tagSetDto, CREATOR, tagsExistenceVerifier);
-
-            Collection<TagId> tagsAfterRemove = removeAll(existingTags, singleton(tagToRemove));
-
+            TagId tagToPreserve = new TagId();
+            TagId tagToRemove = new TagId();
+            TagSet tagSet = new TagSet(
+                    new TagSetId(),
+                    CREATOR,
+                    TAG_SET_NAME,
+                    List.of(tagToPreserve, tagToRemove),
+                    !DELETED,
+                    validator,
+                    tagsExistenceVerifier
+            );
             when(tagsExistenceVerifier.existing(any()))
-                    .thenReturn(existingTags);
+                    .thenReturn(Set.of(tagToPreserve, tagToRemove));
 
             // when
             tagSet.removeTag(tagToRemove, CREATOR);
 
             // then
-            assertThat(tagSet.tags()).containsExactlyInAnyOrderElementsOf(tagsAfterRemove);
+            assertThat(tagSet.tags()).containsExactly(tagToPreserve);
         }
 
         @Test
         void shouldKeepTagsEmptyWhenRemovingFromEmptyTags() {
             // given
-            TagSetDto tagSetDto = new TagSetDto("tag set name", emptySet());
-            TagSet tagSet = TagSet.create(tagSetDto, CREATOR, tagsExistenceVerifier);
+            TagSet tagSet = new TagSet(
+                    new TagSetId(),
+                    CREATOR,
+                    TAG_SET_NAME,
+                    EMPTY_TAGS,
+                    !DELETED,
+                    validator,
+                    tagsExistenceVerifier
+            );
 
             // when
-            tagSet.removeTag(new TagId(randomUUID()), CREATOR);
+            tagSet.removeTag(new TagId(), CREATOR);
 
             // then
             assertThat(tagSet.tags()).isEmpty();
@@ -215,19 +237,46 @@ class TagSetTest {
         @Test
         void shouldKeepTagsUnchangedWhenRemovingUnassignedTag() {
             // given
-            Set<TagId> existingTags = Set.of(new TagId(randomUUID()), new TagId(randomUUID()), new TagId(randomUUID()));
-            Set<UUID> existingTagIds = existingTags.stream().map(TagId::id).collect(toSet());
-            TagSetDto tagSetDto = new TagSetDto("tag set name", existingTagIds);
-            TagSet tagSet = TagSet.create(tagSetDto, CREATOR, tagsExistenceVerifier);
+            TagId existingTag = new TagId();
+            TagSet tagSet = new TagSet(
+                    new TagSetId(),
+                    CREATOR,
+                    TAG_SET_NAME,
+                    singleton(existingTag),
+                    !DELETED,
+                    validator,
+                    tagsExistenceVerifier
+            );
 
             when(tagsExistenceVerifier.existing(any()))
-                    .thenReturn(existingTags);
+                    .thenReturn(singleton(existingTag));
 
             // when
-            tagSet.removeTag(new TagId(randomUUID()), CREATOR);
+            tagSet.removeTag(new TagId(), CREATOR);
 
             // then
-            assertThat(tagSet.tags()).containsExactlyInAnyOrderElementsOf(existingTags);
+            assertThat(tagSet.tags()).containsExactly(existingTag);
+        }
+
+        @Test
+        void shouldFailWhenTagSetInvalid() {
+            // given
+            TagSet tagSet = new TagSet(
+                    new TagSetId(),
+                    CREATOR,
+                    TAG_SET_NAME,
+                    EMPTY_TAGS,
+                    !DELETED,
+                    validator,
+                    tagsExistenceVerifier
+            );
+            doThrow(EntityInvalidException.class).when(validator).validate(any());
+
+            // then
+            assertThatThrownBy(() ->
+                    tagSet.removeTag(new TagId(), CREATOR)
+            )
+                    .isInstanceOf(EntityInvalidException.class);
         }
     }
 
@@ -238,8 +287,15 @@ class TagSetTest {
         @Test
         void shouldDeleteTagSet() {
             // given
-            TagSetDto tagSetDto = new TagSetDto("tag set name", emptySet());
-            TagSet tagSet = TagSet.create(tagSetDto, CREATOR, tagsExistenceVerifier);
+            TagSet tagSet = new TagSet(
+                    new TagSetId(),
+                    CREATOR,
+                    TAG_SET_NAME,
+                    EMPTY_TAGS,
+                    !DELETED,
+                    validator,
+                    tagsExistenceVerifier
+            );
 
             // when
             tagSet.delete(CREATOR);
@@ -248,5 +304,26 @@ class TagSetTest {
             assertThat(tagSet.deleted()).isTrue();
         }
 
+    }
+
+    @Test
+    void shouldFailWhenTagSetInvalid() {
+        // given
+        TagSet tagSet = new TagSet(
+                new TagSetId(),
+                CREATOR,
+                TAG_SET_NAME,
+                EMPTY_TAGS,
+                !DELETED,
+                validator,
+                tagsExistenceVerifier
+        );
+        doThrow(EntityInvalidException.class).when(validator).validate(any());
+
+        // then
+        assertThatThrownBy(() ->
+                tagSet.delete(CREATOR)
+        )
+                .isInstanceOf(EntityInvalidException.class);
     }
 }
