@@ -22,12 +22,14 @@ public class TagSet implements Entity {
     private boolean deleted;
 
     private final TagsExistenceVerifier tagsExistenceVerifier;
+    private final TagSetValidator validator;
 
     TagSet(TagSetId id,
            User creator,
            String name,
            Collection<TagId> tags,
            boolean deleted,
+           TagSetValidator validator,
            TagsExistenceVerifier tagsExistenceVerifier) {
 
         this.id = requireNonNull(id);
@@ -35,6 +37,8 @@ public class TagSet implements Entity {
         this.name = name;
         this.tags = new HashSet<>(tags);
         this.deleted = deleted;
+
+        this.validator = validator;
         this.tagsExistenceVerifier = tagsExistenceVerifier;
     }
 
@@ -45,6 +49,7 @@ public class TagSet implements Entity {
                 tagSet.name(),
                 toTagIds(tagSet),
                 false,
+                new TagSetValidator(tagsExistenceVerifier),
                 tagsExistenceVerifier
         );
         newTagSet.validate();
@@ -91,6 +96,7 @@ public class TagSet implements Entity {
                 tagSet.name(),
                 toTagIds(tagSet),
                 tagSet.deleted(),
+                new TagSetValidator(tagsExistenceVerifier),
                 tagsExistenceVerifier
         );
     }
@@ -123,7 +129,7 @@ public class TagSet implements Entity {
 
     @Override
     public void validate() {
-        new TagSetValidator(this, tagsExistenceVerifier).validate();
+        validator.validate(this);
     }
 
     String name() {

@@ -40,6 +40,7 @@ class TagSetEditOperationTest {
                 "tag set name",
                 List.of(notExistingTag, existingTag),
                 !DELETED,
+                new TagSetValidator(tagsExistenceVerifier),
                 tagsExistenceVerifier
         );
         TagSetEditOperation editOperation = new TagSetEditOperation(CREATOR, tagSet, tagsExistenceVerifier, () -> {

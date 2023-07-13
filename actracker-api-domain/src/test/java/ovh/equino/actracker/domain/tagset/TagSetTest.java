@@ -12,13 +12,9 @@ import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
 import ovh.equino.actracker.domain.user.User;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
-import static java.util.Collections.emptySet;
-import static java.util.Collections.singleton;
+import static java.util.Collections.*;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.collections4.CollectionUtils.removeAll;
@@ -26,15 +22,21 @@ import static org.apache.commons.collections4.CollectionUtils.union;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TagSetTest {
 
     private static final User CREATOR = new User(randomUUID());
+    private static final String TAG_SET_NAME = "tag set name";
+    private static final List<TagId> EMPTY_TAGS = emptyList();
+    private static final boolean DELETED = true;
 
     @Mock
     private TagsExistenceVerifier tagsExistenceVerifier;
+    @Mock
+    private TagSetValidator validator;
 
     @BeforeEach
     void init() {
@@ -45,14 +47,21 @@ class TagSetTest {
     @Nested
     @DisplayName("rename")
     class RenameTest {
+
         private static final String NEW_NAME = "tag set new name";
-        private static final String OLD_NAME = "tag set old name";
 
         @Test
         void shouldChangeName() {
             // given
-            TagSetDto tagSetDto = new TagSetDto(OLD_NAME, null);
-            TagSet tagSet = TagSet.create(tagSetDto, CREATOR, tagsExistenceVerifier);
+            TagSet tagSet = new TagSet(
+                    new TagSetId(),
+                    CREATOR,
+                    TAG_SET_NAME,
+                    EMPTY_TAGS,
+                    !DELETED,
+                    validator,
+                    tagsExistenceVerifier
+            );
 
             // when
             tagSet.rename(NEW_NAME, CREATOR);
@@ -62,27 +71,22 @@ class TagSetTest {
         }
 
         @Test
-        void shouldFailWhenNameNull() {
+        void shouldFailWhenEntityInvalid() {
             // given
-            TagSetDto tagSetDto = new TagSetDto(OLD_NAME, null);
-            TagSet tagSet = TagSet.create(tagSetDto, CREATOR, tagsExistenceVerifier);
+            TagSet tagSet = new TagSet(
+                    new TagSetId(),
+                    CREATOR,
+                    TAG_SET_NAME,
+                    EMPTY_TAGS,
+                    !DELETED,
+                    validator,
+                    tagsExistenceVerifier
+            );
+            doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
             assertThatThrownBy(() ->
-                    tagSet.rename(null, CREATOR)
-            )
-                    .isInstanceOf(EntityInvalidException.class);
-        }
-
-        @Test
-        void shouldFailWhenNameBlank() {
-            // given
-            TagSetDto tagSetDto = new TagSetDto(OLD_NAME, null);
-            TagSet tagSet = TagSet.create(tagSetDto, CREATOR, tagsExistenceVerifier);
-
-            // then
-            assertThatThrownBy(() ->
-                    tagSet.rename(" ", CREATOR)
+                    tagSet.rename(NEW_NAME, CREATOR)
             )
                     .isInstanceOf(EntityInvalidException.class);
         }
@@ -148,18 +152,23 @@ class TagSetTest {
         }
 
         @Test
-        void shouldFailWhenAssigningNonExistingTag() {
+        void shouldFailWhenEntityInvalid() {
             // given
-            TagSetDto tagSetDto = new TagSetDto("tag set name", emptySet());
-            TagSet tagSet = TagSet.create(tagSetDto, CREATOR, tagsExistenceVerifier);
-
-            TagId notExistingTag = new TagId(randomUUID());
-
-            when(tagsExistenceVerifier.notExisting(any())).thenReturn(Set.of(notExistingTag));
+            TagId newTag = new TagId();
+            TagSet tagSet = new TagSet(
+                    new TagSetId(),
+                    CREATOR,
+                    TAG_SET_NAME,
+                    EMPTY_TAGS,
+                    !DELETED,
+                    validator,
+                    tagsExistenceVerifier
+            );
+            doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
             assertThatThrownBy(() ->
-                    tagSet.assignTag(notExistingTag, CREATOR)
+                    tagSet.assignTag(newTag, CREATOR)
             )
                     .isInstanceOf(EntityInvalidException.class);
         }
