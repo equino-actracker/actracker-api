@@ -1,22 +1,21 @@
 package ovh.equino.actracker.domain.tag;
 
-import ovh.equino.actracker.domain.EntityValidator;
+import ovh.equino.actracker.domain.EntityNgValidator;
 
 import java.util.LinkedList;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-final class TagValidator extends EntityValidator<Tag> {
+class TagValidator extends EntityNgValidator<Tag> {
 
-    private final Tag tag;
-
-    TagValidator(Tag tag) {
-        this.tag = tag;
+    @Override
+    protected Class<Tag> entityType() {
+        return Tag.class;
     }
 
     @Override
-    protected List<String> collectValidationErrors() {
+    protected List<String> collectValidationErrors(Tag tag) {
         List<String> validationErrors = new LinkedList<>();
 
         if (isBlank(tag.name())) {
@@ -24,10 +23,5 @@ final class TagValidator extends EntityValidator<Tag> {
         }
 
         return validationErrors;
-    }
-
-    @Override
-    protected Class<Tag> entityType() {
-        return Tag.class;
     }
 }

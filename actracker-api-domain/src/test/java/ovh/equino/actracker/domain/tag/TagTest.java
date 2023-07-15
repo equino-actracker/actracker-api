@@ -3,36 +3,51 @@ package ovh.equino.actracker.domain.tag;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import ovh.equino.actracker.domain.exception.EntityEditForbidden;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
+import static java.util.Collections.*;
 import static java.util.UUID.randomUUID;
-import static org.apache.commons.collections4.CollectionUtils.union;
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static ovh.equino.actracker.domain.tag.MetricType.NUMERIC;
 
+@ExtendWith(MockitoExtension.class)
 class TagTest {
 
     private static final User CREATOR = new User(randomUUID());
+    private static final String TAG_NAME = "tag name";
+    private static final List<Metric> EMPTY_METRICS = emptyList();
+    private static final List<Share> EMPTY_SHARES = emptyList();
     private static final boolean DELETED = true;
+
+    @Mock
+    private TagValidator validator;
 
     @Nested
     @DisplayName("rename")
-    class RenameTest {
+    class RenameTagTest {
         private static final String NEW_NAME = "tag new name";
-        private static final String OLD_NAME = "tag old name";
 
         @Test
         void shouldChangeName() {
             // given
-            TagDto tagDto = new TagDto(OLD_NAME, emptyList(), emptyList());
-            Tag tag = Tag.create(tagDto, CREATOR);
+            Tag tag = new Tag(
+                    new TagId(),
+                    CREATOR,
+                    TAG_NAME,
+                    EMPTY_METRICS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
+            );
 
             // when
             tag.rename(NEW_NAME, CREATOR);
@@ -42,27 +57,22 @@ class TagTest {
         }
 
         @Test
-        void shouldFailWhenNameNull() {
+        void shouldFailWhenEntityInvalid() {
             // given
-            TagDto tagDto = new TagDto(OLD_NAME, emptyList(), emptyList());
-            Tag tag = Tag.create(tagDto, CREATOR);
+            Tag tag = new Tag(
+                    new TagId(),
+                    CREATOR,
+                    TAG_NAME,
+                    EMPTY_METRICS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
+            );
+            doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
             assertThatThrownBy(() ->
-                    tag.rename(null, CREATOR)
-            )
-                    .isInstanceOf(EntityInvalidException.class);
-        }
-
-        @Test
-        void shouldFailWhenNameBlank() {
-            // given
-            TagDto tagDto = new TagDto(OLD_NAME, emptyList(), emptyList());
-            Tag tag = Tag.create(tagDto, CREATOR);
-
-            // then
-            assertThatThrownBy(() ->
-                    tag.rename(" ", CREATOR)
+                    tag.rename(NEW_NAME, CREATOR)
             )
                     .isInstanceOf(EntityInvalidException.class);
         }
@@ -72,17 +82,30 @@ class TagTest {
     @DisplayName("addMetric")
     class AddMetricTest {
 
+        private static final String METRIC_NAME = "metric name";
+
         @Test
         void shouldAddFirstMetric() {
             // given
-            TagDto tagDto = new TagDto("tag name", emptyList(), emptyList());
-            Tag tag = Tag.create(tagDto, CREATOR);
-
-            MetricDto newMetricDto = new MetricDto(randomUUID(), "gross", NUMERIC);
-            Metric newMetric = Metric.create(newMetricDto, CREATOR);
+            Tag tag = new Tag(
+                    new TagId(),
+                    CREATOR,
+                    TAG_NAME,
+                    EMPTY_METRICS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
+            );
+            Metric newMetric = new Metric(
+                    new MetricId(),
+                    CREATOR,
+                    METRIC_NAME + 1,
+                    NUMERIC,
+                    !DELETED
+            );
 
             // when
-            tag.addMetric(newMetricDto.name(), newMetricDto.type(), CREATOR);
+            tag.addMetric(newMetric.name(), newMetric.type(), CREATOR);
 
             // then
             assertThat(tag.metrics)
@@ -93,17 +116,29 @@ class TagTest {
         @Test
         void shouldAddAnotherMetric() {
             // given
-            List<MetricDto> existingMetrics = List.of(
-                    new MetricDto(randomUUID(), "weight", NUMERIC),
-                    new MetricDto(randomUUID(), "height", NUMERIC)
+            Metric existingMetric = new Metric(
+                    new MetricId(),
+                    CREATOR,
+                    METRIC_NAME + 1,
+                    NUMERIC,
+                    !DELETED
             );
-            TagDto tagDto = new TagDto("tag name", existingMetrics, emptyList());
-            Tag tag = Tag.create(tagDto, CREATOR);
-
-            MetricDto newMetric = new MetricDto(randomUUID(), "gross", NUMERIC);
-            List<Metric> metricsAfterAdd = union(existingMetrics, singletonList(newMetric)).stream()
-                    .map(metricDto -> Metric.create(metricDto, CREATOR))
-                    .toList();
+            Tag tag = new Tag(
+                    new TagId(),
+                    CREATOR,
+                    TAG_NAME,
+                    singleton(existingMetric),
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
+            );
+            Metric newMetric = new Metric(
+                    new MetricId(),
+                    CREATOR,
+                    METRIC_NAME + 2,
+                    NUMERIC,
+                    !DELETED
+            );
 
             // when
             tag.addMetric(newMetric.name(), newMetric.type(), CREATOR);
@@ -111,7 +146,29 @@ class TagTest {
             // then
             assertThat(tag.metrics)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("id")
-                    .containsExactlyInAnyOrderElementsOf(metricsAfterAdd);
+                    .containsExactlyInAnyOrder(existingMetric, newMetric);
+        }
+
+        @Test
+        void shouldFailWhenEntityInvalid() {
+            // given
+            Metric newMetric = new Metric(new MetricId(), CREATOR, METRIC_NAME, NUMERIC, !DELETED);
+            Tag tag = new Tag(
+                    new TagId(),
+                    CREATOR,
+                    TAG_NAME,
+                    EMPTY_METRICS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
+            );
+            doThrow(EntityInvalidException.class).when(validator).validate(any());
+
+            // then
+            assertThatThrownBy(() ->
+                    tag.addMetric(newMetric.name(), newMetric.type(), CREATOR)
+            )
+                    .isInstanceOf(EntityInvalidException.class);
         }
     }
 
@@ -119,41 +176,49 @@ class TagTest {
     @DisplayName("deleteMetric")
     class DeleteMetricTest {
 
+        private static final String METRIC_NAME = "metric name";
+
         @Test
         void shouldDeleteExistingMetric() {
             // given
-            MetricId metricToDeleteId = new MetricId();
-            MetricId existingMetric1Id = new MetricId();
-            MetricId existingMetric2Id = new MetricId();
-            MetricDto metricToDelete = new MetricDto(metricToDeleteId.id(), CREATOR.id(), "metric to delete", NUMERIC, !DELETED);
-            MetricDto existingMetric1 = new MetricDto(existingMetric1Id.id(), CREATOR.id(), "metric 1", NUMERIC, !DELETED);
-            MetricDto existingMetric2 = new MetricDto(existingMetric2Id.id(), CREATOR.id(), "metric 2", NUMERIC, !DELETED);
-            List<MetricDto> existingMetrics = List.of(
-                    existingMetric1,
-                    existingMetric2,
-                    metricToDelete
+            Metric existingMetric1 = new Metric(new MetricId(), CREATOR, METRIC_NAME + 1, NUMERIC, !DELETED);
+            Metric existingMetric2 = new Metric(new MetricId(), CREATOR, METRIC_NAME + 2, NUMERIC, !DELETED);
+            Metric metricToDelete = new Metric(new MetricId(), CREATOR, METRIC_NAME + 3, NUMERIC, !DELETED);
+            Tag tag = new Tag(
+                    new TagId(),
+                    CREATOR,
+                    TAG_NAME,
+                    List.of(existingMetric1, existingMetric2, metricToDelete),
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
             );
-            TagDto tagDto = new TagDto(randomUUID(), CREATOR.id(), "tag name", existingMetrics, emptyList(), !DELETED);
-            Tag tag = Tag.fromStorage(tagDto);
 
             // when
-            tag.deleteMetric(metricToDeleteId, CREATOR);
+            tag.deleteMetric(metricToDelete.id(), CREATOR);
 
             // then
             assertThat(tag.metrics)
                     .extracting(Metric::id, Metric::isDeleted)
-                    .containsExactlyInAnyOrderElementsOf(List.of(
-                            tuple(existingMetric1Id, !DELETED),
-                            tuple(existingMetric2Id, !DELETED),
-                            tuple(metricToDeleteId, DELETED)
-                    ));
+                    .containsExactlyInAnyOrder(
+                            tuple(existingMetric1.id(), !DELETED),
+                            tuple(existingMetric2.id(), !DELETED),
+                            tuple(metricToDelete.id(), DELETED)
+                    );
         }
 
         @Test
         void shouldKeepMetricsEmptyWhenRemovingFromEmptyMetrics() {
             // given
-            TagDto tagDto = new TagDto(randomUUID(), CREATOR.id(), "tag name", emptyList(), emptyList(), !DELETED);
-            Tag tag = Tag.fromStorage(tagDto);
+            Tag tag = new Tag(
+                    new TagId(),
+                    CREATOR,
+                    TAG_NAME,
+                    EMPTY_METRICS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
+            );
 
             // when
             tag.deleteMetric(new MetricId(), CREATOR);
@@ -165,16 +230,16 @@ class TagTest {
         @Test
         void shouldKeepMetricsUnchangedWhenDeletingNotExistingMetrics() {
             // given
-            MetricId existingMetric1Id = new MetricId();
-            MetricId existingMetric2Id = new MetricId();
-            MetricDto existingMetric1 = new MetricDto(existingMetric1Id.id(), CREATOR.id(), "metric 1", NUMERIC, !DELETED);
-            MetricDto existingMetric2 = new MetricDto(existingMetric2Id.id(), CREATOR.id(), "metric 2", NUMERIC, !DELETED);
-            List<MetricDto> existingMetrics = List.of(
-                    existingMetric1,
-                    existingMetric2
+            Metric existingMetric = new Metric(new MetricId(), CREATOR, METRIC_NAME, NUMERIC, !DELETED);
+            Tag tag = new Tag(
+                    new TagId(),
+                    CREATOR,
+                    TAG_NAME,
+                    singleton(existingMetric),
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
             );
-            TagDto tagDto = new TagDto(randomUUID(), CREATOR.id(), "tag name", existingMetrics, emptyList(), !DELETED);
-            Tag tag = Tag.fromStorage(tagDto);
 
             // when
             tag.deleteMetric(new MetricId(), CREATOR);
@@ -182,129 +247,165 @@ class TagTest {
             // then
             assertThat(tag.metrics)
                     .extracting(Metric::id, Metric::isDeleted)
-                    .containsExactlyInAnyOrderElementsOf(List.of(
-                            tuple(existingMetric1Id, !DELETED),
-                            tuple(existingMetric2Id, !DELETED)
-                    ));
+                    .containsExactlyInAnyOrder(
+                            tuple(existingMetric.id(), !DELETED)
+                    );
         }
 
         @Test
         void shouldKeepMetricsUnchangedWhenDeletingAlreadyDeletedMetric() {
             // given
-            MetricId deletedMetricId = new MetricId();
-            MetricId existingMetric1Id = new MetricId();
-            MetricId existingMetric2Id = new MetricId();
-            MetricDto deletedMetric = new MetricDto(deletedMetricId.id(), CREATOR.id(), "metric to delete", NUMERIC, DELETED);
-            MetricDto existingMetric1 = new MetricDto(existingMetric1Id.id(), CREATOR.id(), "metric 1", NUMERIC, !DELETED);
-            MetricDto existingMetric2 = new MetricDto(existingMetric2Id.id(), CREATOR.id(), "metric 2", NUMERIC, !DELETED);
-            List<MetricDto> existingMetrics = List.of(
-                    existingMetric1,
-                    existingMetric2,
-                    deletedMetric
+            Metric deletedMetric = new Metric(new MetricId(), CREATOR, METRIC_NAME + 1, NUMERIC, DELETED);
+            Metric existingMetric = new Metric(new MetricId(), CREATOR, METRIC_NAME + 2, NUMERIC, !DELETED);
+            Tag tag = new Tag(
+                    new TagId(),
+                    CREATOR,
+                    TAG_NAME,
+                    List.of(deletedMetric, existingMetric),
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
             );
-            TagDto tagDto = new TagDto(randomUUID(), CREATOR.id(), "tag name", existingMetrics, emptyList(), !DELETED);
-            Tag tag = Tag.fromStorage(tagDto);
 
             // when
-            tag.deleteMetric(deletedMetricId, CREATOR);
+            tag.deleteMetric(deletedMetric.id(), CREATOR);
 
             // then
             assertThat(tag.metrics)
                     .extracting(Metric::id, Metric::isDeleted)
-                    .containsExactlyInAnyOrderElementsOf(List.of(
-                            tuple(existingMetric1Id, !DELETED),
-                            tuple(existingMetric2Id, !DELETED),
-                            tuple(deletedMetricId, DELETED)
-                    ));
+                    .containsExactlyInAnyOrder(
+                            tuple(existingMetric.id(), !DELETED),
+                            tuple(deletedMetric.id(), DELETED)
+                    );
         }
 
+        @Test
+        void shouldFailWhenEntityInvalid() {
+            // given
+            Tag tag = new Tag(
+                    new TagId(),
+                    CREATOR,
+                    TAG_NAME,
+                    EMPTY_METRICS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
+            );
+            doThrow(EntityInvalidException.class).when(validator).validate(any());
+
+            // then
+            assertThatThrownBy(() ->
+                    tag.deleteMetric(new MetricId(), CREATOR)
+            )
+                    .isInstanceOf(EntityInvalidException.class);
+        }
     }
 
     @Nested
     @DisplayName("renameMetric")
     class RenameMetricTest {
 
+        private static final String METRIC_NAME = "metric name";
+        private static final String NEW_METRIC_NAME = "new metric name";
+
         @Test
         void shouldRenameExistingMetric() {
             // given
-            final String newName = "new metric name";
-            MetricId metricToRenameId = new MetricId();
-            MetricId existingMetric1Id = new MetricId();
-            MetricId existingMetric2Id = new MetricId();
-            MetricDto metricToRename = new MetricDto(metricToRenameId.id(), CREATOR.id(), "metric to rename", NUMERIC, !DELETED);
-            MetricDto existingMetric1 = new MetricDto(existingMetric1Id.id(), CREATOR.id(), "metric 1", NUMERIC, !DELETED);
-            MetricDto existingMetric2 = new MetricDto(existingMetric2Id.id(), CREATOR.id(), "metric 2", NUMERIC, !DELETED);
-            List<MetricDto> existingMetrics = List.of(
-                    existingMetric1,
-                    existingMetric2,
-                    metricToRename
+            Metric existingMetric = new Metric(new MetricId(), CREATOR, METRIC_NAME + 1, NUMERIC, !DELETED);
+            Metric metricToRename = new Metric(new MetricId(), CREATOR, METRIC_NAME + 2, NUMERIC, !DELETED);
+            Tag tag = new Tag(
+                    new TagId(),
+                    CREATOR,
+                    TAG_NAME,
+                    List.of(existingMetric, metricToRename),
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
             );
-            TagDto tagDto = new TagDto(randomUUID(), CREATOR.id(), "tag name", existingMetrics, emptyList(), !DELETED);
-            Tag tag = Tag.fromStorage(tagDto);
 
             // when
-            tag.renameMetric(newName, metricToRenameId, CREATOR);
+            tag.renameMetric(NEW_METRIC_NAME, metricToRename.id(), CREATOR);
 
             // then
             assertThat(tag.metrics)
                     .extracting(Metric::id, Metric::name)
-                    .containsExactlyInAnyOrderElementsOf(List.of(
-                            tuple(existingMetric1Id, existingMetric1.name()),
-                            tuple(existingMetric2Id, existingMetric2.name()),
-                            tuple(metricToRenameId, newName)
-                    ));
+                    .containsExactlyInAnyOrder(
+                            tuple(existingMetric.id(), existingMetric.name()),
+                            tuple(metricToRename.id(), NEW_METRIC_NAME)
+                    );
         }
 
         @Test
         void shouldKeepMetricsUnchangedWhenRenamingNotExistingMetric() {
             // given
-            MetricId existingMetric1Id = new MetricId();
-            MetricId existingMetric2Id = new MetricId();
-            MetricDto existingMetric1 = new MetricDto(existingMetric1Id.id(), CREATOR.id(), "metric 1", NUMERIC, !DELETED);
-            MetricDto existingMetric2 = new MetricDto(existingMetric2Id.id(), CREATOR.id(), "metric 2", NUMERIC, !DELETED);
-            List<MetricDto> existingMetrics = List.of(
-                    existingMetric1,
-                    existingMetric2
+            Metric existingMetric = new Metric(new MetricId(), CREATOR, METRIC_NAME, NUMERIC, !DELETED);
+            Tag tag = new Tag(
+                    new TagId(),
+                    CREATOR,
+                    TAG_NAME,
+                    singleton(existingMetric),
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
             );
-            TagDto tagDto = new TagDto(randomUUID(), CREATOR.id(), "tag name", existingMetrics, emptyList(), !DELETED);
-            Tag tag = Tag.fromStorage(tagDto);
 
             // when
-            tag.renameMetric("new metric name", new MetricId(), CREATOR);
+            tag.renameMetric(NEW_METRIC_NAME, new MetricId(), CREATOR);
 
             // then
             assertThat(tag.metrics)
                     .extracting(Metric::id, Metric::name)
-                    .containsExactlyInAnyOrderElementsOf(List.of(
-                            tuple(existingMetric1Id, existingMetric1.name()),
-                            tuple(existingMetric2Id, existingMetric2.name())
-                    ));
+                    .containsExactlyInAnyOrder(
+                            tuple(existingMetric.id(), existingMetric.name())
+                    );
         }
 
         @Test
         void shouldKeepMetricsUnchangedWhenRenamingDeletedMetric() {
             // given
-            MetricId notDeletedMetricId = new MetricId();
-            MetricId deletedMetricId = new MetricId();
-            MetricDto notDeletedMetric = new MetricDto(notDeletedMetricId.id(), CREATOR.id(), "metric 1", NUMERIC, !DELETED);
-            MetricDto deletedMetric = new MetricDto(deletedMetricId.id(), CREATOR.id(), "metric 2", NUMERIC, DELETED);
-            List<MetricDto> existingMetrics = List.of(
-                    notDeletedMetric,
-                    deletedMetric
+            Metric nonDeletedMetric = new Metric(new MetricId(), CREATOR, METRIC_NAME + 1, NUMERIC, !DELETED);
+            Metric deletedMetric = new Metric(new MetricId(), CREATOR, METRIC_NAME + 2, NUMERIC, DELETED);
+            Tag tag = new Tag(
+                    new TagId(),
+                    CREATOR,
+                    TAG_NAME,
+                    List.of(nonDeletedMetric, deletedMetric),
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
             );
-            TagDto tagDto = new TagDto(randomUUID(), CREATOR.id(), "tag name", existingMetrics, emptyList(), !DELETED);
-            Tag tag = Tag.fromStorage(tagDto);
 
             // when
-            tag.renameMetric("new metric name", deletedMetricId, CREATOR);
+            tag.renameMetric(NEW_METRIC_NAME, deletedMetric.id(), CREATOR);
 
             // then
             assertThat(tag.metrics)
                     .extracting(Metric::id, Metric::name)
-                    .containsExactlyInAnyOrderElementsOf(List.of(
-                            tuple(notDeletedMetricId, notDeletedMetric.name()),
-                            tuple(deletedMetricId, deletedMetric.name())
-                    ));
+                    .containsExactlyInAnyOrder(
+                            tuple(nonDeletedMetric.id(), nonDeletedMetric.name()),
+                            tuple(deletedMetric.id(), deletedMetric.name())
+                    );
+        }
+
+        @Test
+        void shouldFailWhenEntityInvalid() {
+            // given
+            Tag tag = new Tag(
+                    new TagId(),
+                    CREATOR,
+                    TAG_NAME,
+                    EMPTY_METRICS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
+            );
+            doThrow(EntityInvalidException.class).when(validator).validate(any());
+
+            // then
+            assertThatThrownBy(() ->
+                    tag.renameMetric(NEW_METRIC_NAME, new MetricId(), CREATOR)
+            )
+                    .isInstanceOf(EntityInvalidException.class);
         }
     }
 
@@ -312,19 +413,22 @@ class TagTest {
     @DisplayName("delete")
     class DeleteTagTest {
 
+        private static final String METRIC_NAME = "metric name";
+
         @Test
         void shouldDeleteTagAndAllItsMetrics() {
             // given
-            MetricId existingMetric1Id = new MetricId();
-            MetricId existingMetric2Id = new MetricId();
-            MetricDto existingMetric1 = new MetricDto(existingMetric1Id.id(), CREATOR.id(), "metric 1", NUMERIC, !DELETED);
-            MetricDto existingMetric2 = new MetricDto(existingMetric2Id.id(), CREATOR.id(), "metric 2", NUMERIC, !DELETED);
-            List<MetricDto> existingMetrics = List.of(
-                    existingMetric1,
-                    existingMetric2
+            Metric metric1 = new Metric(new MetricId(), CREATOR, METRIC_NAME + 1, NUMERIC, !DELETED);
+            Metric metric2 = new Metric(new MetricId(), CREATOR, METRIC_NAME + 2, NUMERIC, !DELETED);
+            Tag tag = new Tag(
+                    new TagId(),
+                    CREATOR,
+                    TAG_NAME,
+                    List.of(metric1, metric2),
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
             );
-            TagDto tagDto = new TagDto(randomUUID(), CREATOR.id(), "tag name", existingMetrics, emptyList(), !DELETED);
-            Tag tag = Tag.fromStorage(tagDto);
 
             // when
             tag.delete(CREATOR);
@@ -333,10 +437,31 @@ class TagTest {
             assertThat(tag.isDeleted()).isTrue();
             assertThat(tag.metrics)
                     .extracting(Metric::id, Metric::isDeleted)
-                    .containsExactlyInAnyOrderElementsOf(List.of(
-                            tuple(existingMetric1Id, DELETED),
-                            tuple(existingMetric2Id, DELETED)
-                    ));
+                    .containsExactlyInAnyOrder(
+                            tuple(metric1.id(), DELETED),
+                            tuple(metric2.id(), DELETED)
+                    );
+        }
+
+        @Test
+        void shouldFailWhenEntityInvalid() {
+            // given
+            Tag tag = new Tag(
+                    new TagId(),
+                    CREATOR,
+                    TAG_NAME,
+                    EMPTY_METRICS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
+            );
+            doThrow(EntityInvalidException.class).when(validator).validate(any());
+
+            // then
+            assertThatThrownBy(() ->
+                    tag.delete(CREATOR)
+            )
+                    .isInstanceOf(EntityInvalidException.class);
         }
     }
 
@@ -349,15 +474,15 @@ class TagTest {
         @Test
         void shouldAddNewShareWithoutId() {
             // given
-            List<Share> existingShares = emptyList();
             Share newShare = new Share(GRANTEE_NAME);
             Tag tag = new Tag(
-                    new TagId(randomUUID()),
+                    new TagId(),
                     CREATOR,
-                    "tag name",
-                    emptyList(),
-                    existingShares,
-                    !DELETED
+                    TAG_NAME,
+                    EMPTY_METRICS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
             );
 
             // when
@@ -370,15 +495,15 @@ class TagTest {
         @Test
         void shouldAddNewShareWithId() {
             // given
-            List<Share> existingShares = emptyList();
             Share newShare = new Share(new User(randomUUID()), GRANTEE_NAME);
             Tag tag = new Tag(
                     new TagId(randomUUID()),
                     CREATOR,
-                    "tag name",
-                    emptyList(),
-                    existingShares,
-                    !DELETED
+                    TAG_NAME,
+                    EMPTY_METRICS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
             );
 
             // when
@@ -391,85 +516,111 @@ class TagTest {
         @Test
         void shouldNotAddNewShareWithIdWhenShareWithIdAlreadyExists() {
             // given
-            List<Share> existingShares = singletonList(new Share(new User(randomUUID()), GRANTEE_NAME));
+            Share existingShare = new Share(new User(randomUUID()), GRANTEE_NAME);
             Share newShare = new Share(new User(randomUUID()), GRANTEE_NAME);
             Tag tag = new Tag(
-                    new TagId(randomUUID()),
+                    new TagId(),
                     CREATOR,
-                    "tag name",
-                    emptyList(),
-                    existingShares,
-                    !DELETED
+                    TAG_NAME,
+                    EMPTY_METRICS,
+                    singletonList(existingShare),
+                    !DELETED,
+                    validator
             );
 
             // when
             tag.share(newShare, CREATOR);
 
             // then
-            assertThat(tag.shares).containsExactlyInAnyOrderElementsOf(existingShares);
+            assertThat(tag.shares).containsExactlyInAnyOrder(existingShare);
         }
 
         @Test
         void shouldNotAddNewShareWithIdWhenShareWithoutIdAlreadyExists() {
             // given
-            List<Share> existingShares = singletonList(new Share(GRANTEE_NAME));
+            Share existingShare = new Share(GRANTEE_NAME);
             Share newShare = new Share(new User(randomUUID()), GRANTEE_NAME);
             Tag tag = new Tag(
-                    new TagId(randomUUID()),
+                    new TagId(),
                     CREATOR,
-                    "tag name",
-                    emptyList(),
-                    existingShares,
-                    !DELETED
+                    TAG_NAME,
+                    EMPTY_METRICS,
+                    singletonList(existingShare),
+                    !DELETED,
+                    validator
             );
 
             // when
             tag.share(newShare, CREATOR);
 
             // then
-            assertThat(tag.shares).containsExactlyInAnyOrderElementsOf(existingShares);
+            assertThat(tag.shares).containsExactlyInAnyOrder(existingShare);
         }
 
         @Test
         void shouldNotAddNewShareWithoutIdWhenShareWithIdAlreadyExists() {
             // given
-            List<Share> existingShares = singletonList(new Share(new User(randomUUID()), GRANTEE_NAME));
+            Share existingShare = new Share(new User(randomUUID()), GRANTEE_NAME);
             Share newShare = new Share(GRANTEE_NAME);
             Tag tag = new Tag(
-                    new TagId(randomUUID()),
+                    new TagId(),
                     CREATOR,
-                    "tag name",
-                    emptyList(),
-                    existingShares,
-                    !DELETED
+                    TAG_NAME,
+                    EMPTY_METRICS,
+                    singletonList(existingShare),
+                    !DELETED,
+                    validator
             );
 
             // when
             tag.share(newShare, CREATOR);
 
             // then
-            assertThat(tag.shares).containsExactlyInAnyOrderElementsOf(existingShares);
+            assertThat(tag.shares).containsExactlyInAnyOrder(existingShare);
         }
 
         @Test
         void shouldNotAddNewShareWithoutIdWhenShareWithoutIdAlreadyExists() {
             // given
-            List<Share> existingShares = singletonList(new Share(GRANTEE_NAME));
+            Share existingShare = new Share(GRANTEE_NAME);
             Share newShare = new Share(GRANTEE_NAME);
             Tag tag = new Tag(
-                    new TagId(randomUUID()),
+                    new TagId(),
                     CREATOR,
-                    "tag name",
-                    emptyList(),
-                    existingShares,
-                    !DELETED
+                    TAG_NAME,
+                    EMPTY_METRICS,
+                    singletonList(existingShare),
+                    !DELETED,
+                    validator
             );
 
             // when
             tag.share(newShare, CREATOR);
 
             // then
-            assertThat(tag.shares).containsExactlyInAnyOrderElementsOf(existingShares);
+            assertThat(tag.shares).containsExactlyInAnyOrder(existingShare);
+        }
+
+        @Test
+        void shouldFailWhenEntityInvalid() {
+            // given
+            Tag tag = new Tag(
+                    new TagId(),
+                    CREATOR,
+                    TAG_NAME,
+                    EMPTY_METRICS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
+            );
+            Share newShare = new Share(GRANTEE_NAME);
+            doThrow(EntityInvalidException.class).when(validator).validate(any());
+
+            // then
+            assertThatThrownBy(() ->
+                    tag.share(newShare, CREATOR)
+            )
+                    .isInstanceOf(EntityInvalidException.class);
         }
     }
 
@@ -483,14 +634,14 @@ class TagTest {
         void shouldUnshareTagWhenSharedWithId() {
             // given
             Share existingShare = new Share(new User(randomUUID()), GRANTEE_NAME);
-            List<Share> existingShares = singletonList(existingShare);
             Tag tag = new Tag(
-                    new TagId(randomUUID()),
+                    new TagId(),
                     CREATOR,
-                    "tag name",
-                    emptyList(),
-                    existingShares,
-                    !DELETED
+                    TAG_NAME,
+                    EMPTY_METRICS,
+                    singletonList(existingShare),
+                    !DELETED,
+                    validator
             );
 
             // when
@@ -504,14 +655,14 @@ class TagTest {
         void shouldUnshareTagWhenSharedWithoutId() {
             // given
             Share existingShare = new Share(GRANTEE_NAME);
-            List<Share> existingShares = singletonList(existingShare);
             Tag tag = new Tag(
-                    new TagId(randomUUID()),
+                    new TagId(),
                     CREATOR,
-                    "tag name",
-                    emptyList(),
-                    existingShares,
-                    !DELETED
+                    TAG_NAME,
+                    EMPTY_METRICS,
+                    singletonList(existingShare),
+                    !DELETED,
+                    validator
             );
 
             // when
@@ -519,30 +670,49 @@ class TagTest {
 
             // then
             assertThat(tag.shares).isEmpty();
-
         }
 
         @Test
         void shouldLeaveSharesUnchangedWhenNotShared() {
             // given
-            List<Share> existingShares = List.of(
-                    new Share("%s_1".formatted(GRANTEE_NAME)),
-                    new Share(new User(randomUUID()), "%s_2".formatted(GRANTEE_NAME))
-            );
+            Share share1 = new Share(GRANTEE_NAME + 1);
+            Share share2 = new Share(new User(randomUUID()), GRANTEE_NAME + 2);
             Tag tag = new Tag(
-                    new TagId(randomUUID()),
+                    new TagId(),
                     CREATOR,
-                    "tag name",
-                    emptyList(),
-                    existingShares,
-                    !DELETED
+                    TAG_NAME,
+                    EMPTY_METRICS,
+                    List.of(share1, share2),
+                    !DELETED,
+                    validator
             );
 
             // when
             tag.unshare(GRANTEE_NAME, CREATOR);
 
             // then
-            assertThat(tag.shares).containsExactlyInAnyOrderElementsOf(existingShares);
+            assertThat(tag.shares).containsExactlyInAnyOrder(share1, share2);
+        }
+
+        @Test
+        void shouldFailWhenEntityInvalid() {
+            // given
+            Tag tag = new Tag(
+                    new TagId(),
+                    CREATOR,
+                    TAG_NAME,
+                    EMPTY_METRICS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
+            );
+            doThrow(EntityInvalidException.class).when(validator).validate(any());
+
+            // then
+            assertThatThrownBy(() ->
+                    tag.unshare(GRANTEE_NAME, CREATOR)
+            )
+                    .isInstanceOf(EntityInvalidException.class);
         }
     }
 }
