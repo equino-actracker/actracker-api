@@ -22,9 +22,10 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class TagSetValidatorTest {
 
-    private static final String VALIDATION_ERROR = "TagSet invalid: %s";
     private static final User CREATOR = new User(randomUUID());
     private static final boolean DELETED = true;
+
+    private static final String VALIDATION_ERROR = "TagSet invalid: %s";
     private static final String EMPTY_NAME_ERROR = "Name is empty";
     private static final String NOT_EXISTING_TAGS_ERROR = "Selected tags do not exist: %s";
 
@@ -53,7 +54,7 @@ class TagSetValidatorTest {
         );
 
         // then
-        assertThatCode(tagSet::validate).doesNotThrowAnyException();
+        assertThatCode(() -> validator.validate(tagSet)).doesNotThrowAnyException();
     }
 
     @Test
@@ -72,7 +73,7 @@ class TagSetValidatorTest {
         List<String> validationErrors = List.of(EMPTY_NAME_ERROR);
 
         // then
-        assertThatThrownBy(tagSet::validate)
+        assertThatThrownBy(() -> validator.validate(tagSet))
                 .isInstanceOf(EntityInvalidException.class)
                 .hasMessage(VALIDATION_ERROR.formatted(validationErrors));
     }
@@ -93,7 +94,7 @@ class TagSetValidatorTest {
         List<String> validationErrors = List.of(EMPTY_NAME_ERROR);
 
         // then
-        assertThatThrownBy(tagSet::validate)
+        assertThatThrownBy(() -> validator.validate(tagSet))
                 .isInstanceOf(EntityInvalidException.class)
                 .hasMessage(VALIDATION_ERROR.formatted(validationErrors));
     }
@@ -117,7 +118,7 @@ class TagSetValidatorTest {
         );
 
         // then
-        assertThatThrownBy(tagSet::validate)
+        assertThatThrownBy(() -> validator.validate(tagSet))
                 .isInstanceOf(EntityInvalidException.class)
                 .hasMessage(VALIDATION_ERROR.formatted(validationErrors));
     }
@@ -142,7 +143,7 @@ class TagSetValidatorTest {
         );
 
         // then
-        assertThatThrownBy(tagSet::validate)
+        assertThatThrownBy(() -> validator.validate(tagSet))
                 .isInstanceOf(EntityInvalidException.class)
                 .hasMessage(VALIDATION_ERROR.formatted(validationErrors));
 

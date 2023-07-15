@@ -22,12 +22,15 @@ public class Tag implements Entity {
     final List<Share> shares;
     private boolean deleted;
 
+    private final TagValidator validator;
+
     Tag(TagId id,
         User creator,
         String name,
         Collection<Metric> metrics,
         List<Share> shares,
-        boolean deleted) {
+        boolean deleted,
+        TagValidator validator) {
 
         this.id = requireNonNull(id);
         this.creator = requireNonNull(creator);
@@ -35,6 +38,8 @@ public class Tag implements Entity {
         this.metrics = new ArrayList<>(metrics);
         this.shares = new ArrayList<>(shares);
         this.deleted = deleted;
+
+        this.validator = validator;
     }
 
     static Tag create(TagDto tag, User creator) {
@@ -49,7 +54,8 @@ public class Tag implements Entity {
                 tag.name(),
                 metrics,
                 tag.shares(),
-                false
+                false,
+                new TagValidator()
         );
 
         newTag.validate();
@@ -146,7 +152,8 @@ public class Tag implements Entity {
                 tag.name(),
                 metrics,
                 tag.shares(),
-                tag.deleted()
+                tag.deleted(),
+                new TagValidator()
         );
     }
 
@@ -210,7 +217,7 @@ public class Tag implements Entity {
 
     @Override
     public void validate() {
-        new TagValidator(this).validate();
+        validator.validate(this);
     }
 
     String name() {

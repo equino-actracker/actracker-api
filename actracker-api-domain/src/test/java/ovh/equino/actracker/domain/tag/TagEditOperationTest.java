@@ -37,7 +37,8 @@ class TagEditOperationTest {
                 "tagName",
                 List.of(deletedMetric, nonDeletedMetric),
                 emptyList(),
-                !DELETED
+                !DELETED,
+                new TagValidator()
         );
         TagEditOperation editOperation = new TagEditOperation(CREATOR, tag, () -> {
         });
