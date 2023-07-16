@@ -6,7 +6,6 @@ import java.util.List;
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
-// TODO rename to EntityValidator after removing old entity validator
 public abstract class EntityValidator<T extends Entity> {
 
     protected abstract Class<T> entityType();
