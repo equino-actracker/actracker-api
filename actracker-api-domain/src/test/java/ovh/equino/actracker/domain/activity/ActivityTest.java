@@ -53,7 +53,7 @@ class ActivityTest {
     @Mock
     private MetricsExistenceVerifier metricsExistenceVerifier;
     @Mock
-    private ActivityNgValidator validator;
+    private ActivityValidator validator;
 
     @BeforeEach
     void init() {

@@ -1,13 +1,13 @@
 package ovh.equino.actracker.domain.dashboard;
 
-import ovh.equino.actracker.domain.EntityNgValidator;
+import ovh.equino.actracker.domain.EntityValidator;
 
 import java.util.LinkedList;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-class DashboardValidator extends EntityNgValidator<Dashboard> {
+class DashboardValidator extends EntityValidator<Dashboard> {
 
     @Override
     protected Class<Dashboard> entityType() {

@@ -31,7 +31,7 @@ class ActivityEditOperationTest {
     @Mock
     private MetricsExistenceVerifier metricsExistenceVerifier;
     @Mock
-    private ActivityNgValidator validator;
+    private ActivityValidator validator;
 
     @Test
     void shouldPreserveAssignedNotExistingTags() {

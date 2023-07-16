@@ -27,7 +27,7 @@ public class Activity implements Entity {
 
     private final TagsExistenceVerifier tagsExistenceVerifier;
     private final MetricsExistenceVerifier metricsExistenceVerifier;
-    private final ActivityNgValidator validator;
+    private final ActivityValidator validator;
 
     Activity(
             ActivityId id,
@@ -41,7 +41,7 @@ public class Activity implements Entity {
             boolean deleted,
             TagsExistenceVerifier tagsExistenceVerifier,
             MetricsExistenceVerifier metricsExistenceVerifier,
-            ActivityNgValidator validator) {
+            ActivityValidator validator) {
 
         this.id = requireNonNull(id);
         this.creator = requireNonNull(creator);
@@ -71,7 +71,7 @@ public class Activity implements Entity {
                 false,
                 tagsExistenceVerifier,
                 metricsExistenceVerifier,
-                new ActivityNgValidator(tagsExistenceVerifier, metricsExistenceVerifier)
+                new ActivityValidator(tagsExistenceVerifier, metricsExistenceVerifier)
         );
         newActivity.validate();
         return newActivity;
@@ -189,7 +189,7 @@ public class Activity implements Entity {
                 activity.deleted(),
                 tagsExistenceVerifier,
                 metricsExistenceVerifier,
-                new ActivityNgValidator(tagsExistenceVerifier, metricsExistenceVerifier)
+                new ActivityValidator(tagsExistenceVerifier, metricsExistenceVerifier)
         );
     }
 

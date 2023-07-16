@@ -25,7 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ActivityNgValidatorTest {
+class ActivityValidatorTest {
 
     private static final User CREATOR = new User(randomUUID());
     private static final String ACTIVITY_TITLE = "activity name";
@@ -46,11 +46,11 @@ class ActivityNgValidatorTest {
     @Mock
     private MetricsExistenceVerifier metricsExistenceVerifier;
 
-    private ActivityNgValidator validator;
+    private ActivityValidator validator;
 
     @BeforeEach
     void setUp() {
-        this.validator = new ActivityNgValidator(tagsExistenceVerifier, metricsExistenceVerifier);
+        this.validator = new ActivityValidator(tagsExistenceVerifier, metricsExistenceVerifier);
     }
 
     @Test
