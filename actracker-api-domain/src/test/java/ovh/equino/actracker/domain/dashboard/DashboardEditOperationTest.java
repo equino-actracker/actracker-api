@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
-import java.util.UUID;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
@@ -27,7 +26,8 @@ class DashboardEditOperationTest {
                 "dashboard",
                 List.of(deletedChart, nonDeletedChart),
                 emptyList(),
-                !DELETED
+                !DELETED,
+                new DashboardNgValidator()
         );
         DashboardEditOperation editOperation = new DashboardEditOperation(CREATOR, dashboard, () -> {
         });

@@ -3,6 +3,9 @@ package ovh.equino.actracker.domain.dashboard;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.user.User;
@@ -13,10 +16,14 @@ import static java.util.Collections.*;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.*;
 
+@ExtendWith(MockitoExtension.class)
 class DashboardTest {
 
     private static final User CREATOR = new User(randomUUID());
     private static final boolean DELETED = true;
+
+    @Mock
+    private DashboardNgValidator validator;
 
     @Nested
     @DisplayName("rename")
@@ -34,7 +41,8 @@ class DashboardTest {
                     OLD_NAME,
                     emptyList(),
                     emptyList(),
-                    !DELETED
+                    !DELETED,
+                    validator
             );
 
             // when
@@ -53,7 +61,8 @@ class DashboardTest {
                     OLD_NAME,
                     emptyList(),
                     emptyList(),
-                    !DELETED
+                    !DELETED,
+                    validator
             );
 
             // then
@@ -72,7 +81,8 @@ class DashboardTest {
                     OLD_NAME,
                     emptyList(),
                     emptyList(),
-                    !DELETED
+                    !DELETED,
+                    validator
             );
 
             // then
@@ -104,7 +114,8 @@ class DashboardTest {
                     "dashboard name",
                     singletonList(existingChart),
                     emptyList(),
-                    !DELETED
+                    !DELETED,
+                    validator
             );
 
             // when
@@ -126,7 +137,8 @@ class DashboardTest {
                     "dashboard name",
                     emptyList(),
                     emptyList(),
-                    DELETED
+                    DELETED,
+                    validator
             );
 
             // when
@@ -154,7 +166,8 @@ class DashboardTest {
                     "dashboard name",
                     emptyList(),
                     existingShares,
-                    !DELETED
+                    !DELETED,
+                    validator
             );
 
             // when
@@ -175,7 +188,8 @@ class DashboardTest {
                     "dashboard name",
                     emptyList(),
                     existingShares,
-                    !DELETED
+                    !DELETED,
+                    validator
             );
 
             // when
@@ -196,7 +210,8 @@ class DashboardTest {
                     "dashboard name",
                     emptyList(),
                     existingShares,
-                    !DELETED
+                    !DELETED,
+                    validator
             );
 
             // when
@@ -217,7 +232,8 @@ class DashboardTest {
                     "dashboard name",
                     emptyList(),
                     existingShares,
-                    !DELETED
+                    !DELETED,
+                    validator
             );
 
             // when
@@ -238,7 +254,8 @@ class DashboardTest {
                     "dashboard name",
                     emptyList(),
                     existingShares,
-                    !DELETED
+                    !DELETED,
+                    validator
             );
 
             // when
@@ -259,7 +276,8 @@ class DashboardTest {
                     "dashboard name",
                     emptyList(),
                     existingShares,
-                    !DELETED
+                    !DELETED,
+                    validator
             );
 
             // when
@@ -287,7 +305,8 @@ class DashboardTest {
                     "dashboard name",
                     emptyList(),
                     existingShares,
-                    !DELETED
+                    !DELETED,
+                    validator
             );
 
             // when
@@ -308,7 +327,8 @@ class DashboardTest {
                     "dashboard name",
                     emptyList(),
                     existingShares,
-                    !DELETED
+                    !DELETED,
+                    validator
             );
 
             // when
@@ -332,7 +352,8 @@ class DashboardTest {
                     "dashboard name",
                     emptyList(),
                     existingShares,
-                    !DELETED
+                    !DELETED,
+                    validator
             );
 
             // when
@@ -357,7 +378,8 @@ class DashboardTest {
                     "dashboard name",
                     emptyList(),
                     emptyList(),
-                    !DELETED
+                    !DELETED,
+                    validator
             );
 
             // when
@@ -392,7 +414,8 @@ class DashboardTest {
                             existingDeletedChart
                     ),
                     emptyList(),
-                    !DELETED
+                    !DELETED,
+                    validator
             );
 
             Chart newChart = new Chart("new chart", GroupBy.SELF, AnalysisMetric.METRIC_VALUE, emptySet());
@@ -438,7 +461,8 @@ class DashboardTest {
                     "dashboard name",
                     List.of(existingNonDeletedChart, existingDeletedChart, chartToDelete),
                     emptyList(),
-                    !DELETED
+                    !DELETED,
+                    validator
             );
 
             // when
@@ -463,7 +487,8 @@ class DashboardTest {
                     "dashboard name",
                     emptyList(),
                     emptyList(),
-                    !DELETED
+                    !DELETED,
+                    validator
             );
 
             // when
@@ -483,7 +508,8 @@ class DashboardTest {
                     "dashboard name",
                     singletonList(existingChart),
                     emptyList(),
-                    !DELETED
+                    !DELETED,
+                    validator
             );
 
             // when
@@ -515,7 +541,8 @@ class DashboardTest {
                     "dashboard name",
                     List.of(existingNonDeletedChart, existingDeletedChart),
                     emptyList(),
-                    !DELETED
+                    !DELETED,
+                    validator
             );
 
             // when

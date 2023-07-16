@@ -12,7 +12,6 @@ import static java.util.Collections.emptyList;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.fail;
 
 class DashboardNgValidatorTest {
 
@@ -40,7 +39,8 @@ class DashboardNgValidatorTest {
                 "dashboard name",
                 EMPTY_CHARTS,
                 EMPTY_SHARES,
-                !DELETED
+                !DELETED,
+                validator
         );
 
         // then
@@ -56,7 +56,8 @@ class DashboardNgValidatorTest {
                 null,
                 EMPTY_CHARTS,
                 EMPTY_SHARES,
-                !DELETED
+                !DELETED,
+                validator
         );
         List<String> validationErrors = List.of(EMPTY_NAME_ERROR);
 
@@ -75,7 +76,8 @@ class DashboardNgValidatorTest {
                 "   ",
                 EMPTY_CHARTS,
                 EMPTY_SHARES,
-                !DELETED
+                !DELETED,
+                validator
         );
         List<String> validationErrors = List.of(EMPTY_NAME_ERROR);
 
