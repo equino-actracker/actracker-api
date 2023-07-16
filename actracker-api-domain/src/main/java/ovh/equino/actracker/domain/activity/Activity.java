@@ -272,7 +272,7 @@ public class Activity implements Entity {
 
     @Override
     public void validate() {
-        new ActivityValidator(this, tagsExistenceVerifier, metricsExistenceVerifier).validate();
+        validator.validate(this);
     }
 
     Instant startTime() {
