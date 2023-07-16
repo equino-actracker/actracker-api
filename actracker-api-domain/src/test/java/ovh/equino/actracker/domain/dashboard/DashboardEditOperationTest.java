@@ -27,7 +27,7 @@ class DashboardEditOperationTest {
                 List.of(deletedChart, nonDeletedChart),
                 emptyList(),
                 !DELETED,
-                new DashboardNgValidator()
+                new DashboardValidator()
         );
         DashboardEditOperation editOperation = new DashboardEditOperation(CREATOR, dashboard, () -> {
         });

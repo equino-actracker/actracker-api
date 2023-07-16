@@ -25,7 +25,7 @@ public class Dashboard implements Entity {
     final List<Share> shares;
     private boolean deleted;
 
-    private final DashboardNgValidator validator;
+    private final DashboardValidator validator;
 
     Dashboard(DashboardId id,
               User creator,
@@ -33,7 +33,7 @@ public class Dashboard implements Entity {
               List<Chart> charts,
               List<Share> shares,
               boolean deleted,
-              DashboardNgValidator validator) {
+              DashboardValidator validator) {
 
         this.id = id;
         this.creator = creator;
@@ -53,7 +53,7 @@ public class Dashboard implements Entity {
                 dashboard.charts(),
                 dashboard.shares(),
                 false,
-                new DashboardNgValidator()
+                new DashboardValidator()
         );
         newDashboard.validate();
         return newDashboard;
@@ -144,7 +144,7 @@ public class Dashboard implements Entity {
                 dashboard.charts(),
                 dashboard.shares(),
                 dashboard.deleted(),
-                new DashboardNgValidator()
+                new DashboardValidator()
         );
     }
 
@@ -187,7 +187,7 @@ public class Dashboard implements Entity {
 
     @Override
     public void validate() {
-        new DashboardValidator(this).validate();
+        validator.validate(this);
     }
 
     String name() {

@@ -11,36 +11,42 @@ import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import static java.util.Collections.*;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 
 @ExtendWith(MockitoExtension.class)
 class DashboardTest {
 
     private static final User CREATOR = new User(randomUUID());
+    private static final String DASHBOARD_NAME = "dashboard name";
+    private static final List<Chart> EMPTY_CHARTS = emptyList();
+    private static final List<Share> EMPTY_SHARES = emptyList();
     private static final boolean DELETED = true;
 
     @Mock
-    private DashboardNgValidator validator;
+    private DashboardValidator validator;
 
     @Nested
     @DisplayName("rename")
     class RenameDashboardTest {
 
-        private static final String OLD_NAME = "old dashboard name";
         private static final String NEW_NAME = "new dashboard name";
 
         @Test
         void shouldRenameDashboard() {
             // given
             Dashboard dashboard = new Dashboard(
-                    new DashboardId(randomUUID()),
+                    new DashboardId(),
                     CREATOR,
-                    OLD_NAME,
-                    emptyList(),
-                    emptyList(),
+                    DASHBOARD_NAME,
+                    EMPTY_CHARTS,
+                    EMPTY_SHARES,
                     !DELETED,
                     validator
             );
@@ -53,41 +59,22 @@ class DashboardTest {
         }
 
         @Test
-        void shouldFailWhenNewNameNull() {
+        void shouldFailWhenDashboardInvalid() {
             // given
             Dashboard dashboard = new Dashboard(
-                    new DashboardId(randomUUID()),
+                    new DashboardId(),
                     CREATOR,
-                    OLD_NAME,
-                    emptyList(),
-                    emptyList(),
+                    DASHBOARD_NAME,
+                    EMPTY_CHARTS,
+                    EMPTY_SHARES,
                     !DELETED,
                     validator
             );
+            doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
             assertThatThrownBy(() ->
-                    dashboard.rename(null, CREATOR)
-            )
-                    .isInstanceOf(EntityInvalidException.class);
-        }
-
-        @Test
-        void shouldFailWhenNewNameBlank() {
-            // given
-            Dashboard dashboard = new Dashboard(
-                    new DashboardId(randomUUID()),
-                    CREATOR,
-                    OLD_NAME,
-                    emptyList(),
-                    emptyList(),
-                    !DELETED,
-                    validator
-            );
-
-            // then
-            assertThatThrownBy(() ->
-                    dashboard.rename("  ", CREATOR)
+                    dashboard.rename(NEW_NAME, CREATOR)
             )
                     .isInstanceOf(EntityInvalidException.class);
         }
@@ -146,6 +133,27 @@ class DashboardTest {
 
             // then
             assertThat(dashboard.isDeleted()).isTrue();
+        }
+
+        @Test
+        void shouldFailWhenDashboardInvalid() {
+            // given
+            Dashboard dashboard = new Dashboard(
+                    new DashboardId(),
+                    CREATOR,
+                    DASHBOARD_NAME,
+                    EMPTY_CHARTS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
+            );
+            doThrow(EntityInvalidException.class).when(validator).validate(any());
+
+            // then
+            assertThatThrownBy(() ->
+                    dashboard.delete(CREATOR)
+            )
+                    .isInstanceOf(EntityInvalidException.class);
         }
     }
 
@@ -286,6 +294,28 @@ class DashboardTest {
             // then
             assertThat(dashboard.shares).containsExactlyInAnyOrderElementsOf(existingShares);
         }
+
+        @Test
+        void shouldFailWhenDashboardInvalid() {
+            // given
+            Dashboard dashboard = new Dashboard(
+                    new DashboardId(),
+                    CREATOR,
+                    DASHBOARD_NAME,
+                    EMPTY_CHARTS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
+            );
+            Share newShare = new Share(GRANTEE_NAME);
+            doThrow(EntityInvalidException.class).when(validator).validate(any());
+
+            // then
+            assertThatThrownBy(() ->
+                    dashboard.share(newShare, CREATOR)
+            )
+                    .isInstanceOf(EntityInvalidException.class);
+        }
     }
 
     @Nested
@@ -362,11 +392,35 @@ class DashboardTest {
             // then
             assertThat(dashboard.shares).containsExactlyInAnyOrderElementsOf(existingShares);
         }
+
+        @Test
+        void shouldFailWhenDashboardInvalid() {
+            // given
+            Dashboard dashboard = new Dashboard(
+                    new DashboardId(),
+                    CREATOR,
+                    DASHBOARD_NAME,
+                    EMPTY_CHARTS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
+            );
+            doThrow(EntityInvalidException.class).when(validator).validate(any());
+
+            // then
+            assertThatThrownBy(() ->
+                    dashboard.unshare(GRANTEE_NAME, CREATOR)
+            )
+                    .isInstanceOf(EntityInvalidException.class);
+        }
     }
 
     @Nested
     @DisplayName("addChart")
     class AddChartTest {
+
+        private static final String CHART_NAME = "chart name";
+        private static final Set<UUID> EMPTY_TAGS = emptySet();
 
         @Test
         void shouldAddFirstChart() {
@@ -426,6 +480,28 @@ class DashboardTest {
             // then
             assertThat(dashboard.charts)
                     .containsExactlyInAnyOrder(existingNonDeletedChart, existingDeletedChart, newChart);
+        }
+
+        @Test
+        void shouldFailWhenDashboardInvalid() {
+            // given
+            Chart newChart = new Chart(CHART_NAME, GroupBy.SELF, AnalysisMetric.METRIC_VALUE, EMPTY_TAGS);
+            Dashboard dashboard = new Dashboard(
+                    new DashboardId(),
+                    CREATOR,
+                    DASHBOARD_NAME,
+                    EMPTY_CHARTS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
+            );
+            doThrow(EntityInvalidException.class).when(validator).validate(any());
+
+            // then
+            assertThatThrownBy(() ->
+                    dashboard.addChart(newChart, CREATOR)
+            )
+                    .isInstanceOf(EntityInvalidException.class);
         }
     }
 
@@ -550,6 +626,27 @@ class DashboardTest {
 
             // then
             assertThat(dashboard.charts).containsExactlyInAnyOrder(existingDeletedChart, existingNonDeletedChart);
+        }
+
+        @Test
+        void shouldFailWhenDashboardInvalid() {
+            // given
+            Dashboard dashboard = new Dashboard(
+                    new DashboardId(),
+                    CREATOR,
+                    DASHBOARD_NAME,
+                    EMPTY_CHARTS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
+            );
+            doThrow(EntityInvalidException.class).when(validator).validate(any());
+
+            // then
+            assertThatThrownBy(() ->
+                    dashboard.deleteChart(new ChartId(), CREATOR)
+            )
+                    .isInstanceOf(EntityInvalidException.class);
         }
     }
 }

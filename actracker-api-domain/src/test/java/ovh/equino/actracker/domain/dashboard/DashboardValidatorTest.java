@@ -13,7 +13,7 @@ import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class DashboardNgValidatorTest {
+class DashboardValidatorTest {
 
     private static final User CREATOR = new User(randomUUID());
     private static final List<Chart> EMPTY_CHARTS = emptyList();
@@ -23,11 +23,11 @@ class DashboardNgValidatorTest {
     private static final String VALIDATION_ERROR = "Dashboard invalid: %s";
     private static final String EMPTY_NAME_ERROR = "Name is empty";
 
-    private DashboardNgValidator validator;
+    private DashboardValidator validator;
 
     @BeforeEach
     void setUp() {
-        validator = new DashboardNgValidator();
+        validator = new DashboardValidator();
     }
 
     @Test
