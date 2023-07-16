@@ -45,6 +45,8 @@ class ActivityTest {
     private TagsExistenceVerifier tagsExistenceVerifier;
     @Mock
     private MetricsExistenceVerifier metricsExistenceVerifier;
+    @Mock
+    private ActivityNgValidator validator;
 
     @BeforeEach
     void init() {
@@ -445,7 +447,8 @@ class ActivityTest {
                     List.of(NON_EXISTING_METRIC_VALUE),
                     !DELETED,
                     tagsExistenceVerifier,
-                    metricsExistenceVerifier
+                    metricsExistenceVerifier,
+                    validator
             );
             MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
 
@@ -470,7 +473,8 @@ class ActivityTest {
                     List.of(EXISTING_METRIC_VALUE, NON_EXISTING_METRIC_VALUE),
                     !DELETED,
                     tagsExistenceVerifier,
-                    metricsExistenceVerifier
+                    metricsExistenceVerifier,
+                    validator
             );
             MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
 
@@ -495,7 +499,8 @@ class ActivityTest {
                     List.of(EXISTING_METRIC_VALUE),
                     !DELETED,
                     tagsExistenceVerifier,
-                    metricsExistenceVerifier
+                    metricsExistenceVerifier,
+                    validator
             );
             MetricValue newMetricValue = new MetricValue(NON_EXISTING_METRIC_ID.id(), TEN);
             when(metricsExistenceVerifier.notExisting(any(), any()))
@@ -522,7 +527,8 @@ class ActivityTest {
                     List.of(EXISTING_METRIC_VALUE, NON_EXISTING_METRIC_VALUE),
                     !DELETED,
                     tagsExistenceVerifier,
-                    metricsExistenceVerifier
+                    metricsExistenceVerifier,
+                    validator
             );
             MetricValue newMetricValue = new MetricValue(NON_EXISTING_METRIC_ID.id(), TEN);
             when(metricsExistenceVerifier.notExisting(any(), any()))
@@ -567,7 +573,8 @@ class ActivityTest {
                     List.of(EXISTING_METRIC_VALUE, NON_EXISTING_METRIC_VALUE),
                     !DELETED,
                     tagsExistenceVerifier,
-                    metricsExistenceVerifier
+                    metricsExistenceVerifier,
+                    validator
             );
 
             // when
@@ -591,7 +598,8 @@ class ActivityTest {
                     List.of(NON_EXISTING_METRIC_VALUE),
                     !DELETED,
                     tagsExistenceVerifier,
-                    metricsExistenceVerifier
+                    metricsExistenceVerifier,
+                    validator
             );
 
             // when
@@ -615,7 +623,8 @@ class ActivityTest {
                     List.of(EXISTING_METRIC_VALUE, NON_EXISTING_METRIC_VALUE),
                     !DELETED,
                     tagsExistenceVerifier,
-                    metricsExistenceVerifier
+                    metricsExistenceVerifier,
+                    validator
             );
 
             // when
@@ -639,7 +648,8 @@ class ActivityTest {
                     List.of(EXISTING_METRIC_VALUE),
                     !DELETED,
                     tagsExistenceVerifier,
-                    metricsExistenceVerifier
+                    metricsExistenceVerifier,
+                    validator
             );
 
             // when

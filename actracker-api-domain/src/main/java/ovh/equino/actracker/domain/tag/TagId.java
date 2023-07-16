@@ -16,4 +16,9 @@ public record TagId(UUID id) {
     public TagId() {
         this(randomUUID());
     }
+
+    @Override
+    public String toString() {
+        return id.toString();
+    }
 }
