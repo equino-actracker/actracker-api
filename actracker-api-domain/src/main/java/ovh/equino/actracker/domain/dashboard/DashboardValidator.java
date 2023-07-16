@@ -1,22 +1,21 @@
 package ovh.equino.actracker.domain.dashboard;
 
-import ovh.equino.actracker.domain.EntityValidator;
+import ovh.equino.actracker.domain.EntityNgValidator;
 
 import java.util.LinkedList;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-final class DashboardValidator extends EntityValidator<Dashboard> {
+class DashboardValidator extends EntityNgValidator<Dashboard> {
 
-    private final Dashboard dashboard;
-
-    DashboardValidator(Dashboard dashboard) {
-        this.dashboard = dashboard;
+    @Override
+    protected Class<Dashboard> entityType() {
+        return Dashboard.class;
     }
 
     @Override
-    protected List<String> collectValidationErrors() {
+    protected List<String> collectValidationErrors(Dashboard dashboard) {
         List<String> validationErrors = new LinkedList<>();
 
         if (isBlank(dashboard.name())) {
@@ -24,10 +23,5 @@ final class DashboardValidator extends EntityValidator<Dashboard> {
         }
 
         return validationErrors;
-    }
-
-    @Override
-    protected Class<Dashboard> entityType() {
-        return Dashboard.class;
     }
 }

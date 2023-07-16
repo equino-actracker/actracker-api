@@ -25,12 +25,15 @@ public class Dashboard implements Entity {
     final List<Share> shares;
     private boolean deleted;
 
+    private final DashboardValidator validator;
+
     Dashboard(DashboardId id,
               User creator,
               String name,
               List<Chart> charts,
               List<Share> shares,
-              boolean deleted) {
+              boolean deleted,
+              DashboardValidator validator) {
 
         this.id = id;
         this.creator = creator;
@@ -38,6 +41,8 @@ public class Dashboard implements Entity {
         this.charts = new ArrayList<>(charts);
         this.shares = new ArrayList<>(shares);
         this.deleted = deleted;
+
+        this.validator = validator;
     }
 
     static Dashboard create(DashboardDto dashboard, User creator) {
@@ -47,7 +52,8 @@ public class Dashboard implements Entity {
                 dashboard.name(),
                 dashboard.charts(),
                 dashboard.shares(),
-                false
+                false,
+                new DashboardValidator()
         );
         newDashboard.validate();
         return newDashboard;
@@ -137,7 +143,8 @@ public class Dashboard implements Entity {
                 dashboard.name(),
                 dashboard.charts(),
                 dashboard.shares(),
-                dashboard.deleted()
+                dashboard.deleted(),
+                new DashboardValidator()
         );
     }
 
@@ -180,7 +187,7 @@ public class Dashboard implements Entity {
 
     @Override
     public void validate() {
-        new DashboardValidator(this).validate();
+        validator.validate(this);
     }
 
     String name() {
