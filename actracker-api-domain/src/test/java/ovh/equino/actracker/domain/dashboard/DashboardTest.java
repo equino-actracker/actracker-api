@@ -84,23 +84,26 @@ class DashboardTest {
     @DisplayName("delete")
     class DeleteDashboardTest {
 
+        private static final String CHART_NAME = "chart name";
+        private static final Set<UUID> EMPTY_TAGS = emptySet();
+
         @Test
         void shouldDeleteDashboardAndCharts() {
             // given
             Chart existingChart = new Chart(
                     new ChartId(),
-                    "chart name",
+                    CHART_NAME,
                     GroupBy.SELF,
                     AnalysisMetric.METRIC_VALUE,
-                    emptySet(),
+                    EMPTY_TAGS,
                     !DELETED
             );
             Dashboard dashboard = new Dashboard(
-                    new DashboardId(randomUUID()),
+                    new DashboardId(),
                     CREATOR,
-                    "dashboard name",
+                    DASHBOARD_NAME,
                     singletonList(existingChart),
-                    emptyList(),
+                    EMPTY_SHARES,
                     !DELETED,
                     validator
             );
@@ -119,11 +122,11 @@ class DashboardTest {
         void shouldLeaveDashboardUnchangedWhenAlreadyDeleted() {
             // given
             Dashboard dashboard = new Dashboard(
-                    new DashboardId(randomUUID()),
+                    new DashboardId(),
                     CREATOR,
-                    "dashboard name",
-                    emptyList(),
-                    emptyList(),
+                    DASHBOARD_NAME,
+                    EMPTY_CHARTS,
+                    EMPTY_SHARES,
                     DELETED,
                     validator
             );
@@ -166,17 +169,16 @@ class DashboardTest {
         @Test
         void shouldAddNewShareWithoutId() {
             // given
-            List<Share> existingShares = emptyList();
-            Share newShare = new Share(GRANTEE_NAME);
             Dashboard dashboard = new Dashboard(
-                    new DashboardId(randomUUID()),
+                    new DashboardId(),
                     CREATOR,
-                    "dashboard name",
-                    emptyList(),
-                    existingShares,
+                    DASHBOARD_NAME,
+                    EMPTY_CHARTS,
+                    EMPTY_SHARES,
                     !DELETED,
                     validator
             );
+            Share newShare = new Share(GRANTEE_NAME);
 
             // when
             dashboard.share(newShare, CREATOR);
@@ -188,17 +190,16 @@ class DashboardTest {
         @Test
         void shouldAddNewShareWithId() {
             // given
-            List<Share> existingShares = emptyList();
-            Share newShare = new Share(new User(randomUUID()), GRANTEE_NAME);
             Dashboard dashboard = new Dashboard(
-                    new DashboardId(randomUUID()),
+                    new DashboardId(),
                     CREATOR,
-                    "dashboard name",
-                    emptyList(),
-                    existingShares,
+                    DASHBOARD_NAME,
+                    EMPTY_CHARTS,
+                    EMPTY_SHARES,
                     !DELETED,
                     validator
             );
+            Share newShare = new Share(new User(randomUUID()), GRANTEE_NAME);
 
             // when
             dashboard.share(newShare, CREATOR);
@@ -210,89 +211,89 @@ class DashboardTest {
         @Test
         void shouldNotAddNewShareWithIdWhenShareWithIdAlreadyExists() {
             // given
-            List<Share> existingShares = singletonList(new Share(new User(randomUUID()), GRANTEE_NAME));
-            Share newShare = new Share(new User(randomUUID()), GRANTEE_NAME);
+            Share existingShare = new Share(new User(randomUUID()), GRANTEE_NAME);
             Dashboard dashboard = new Dashboard(
-                    new DashboardId(randomUUID()),
+                    new DashboardId(),
                     CREATOR,
-                    "dashboard name",
-                    emptyList(),
-                    existingShares,
+                    DASHBOARD_NAME,
+                    EMPTY_CHARTS,
+                    singletonList(existingShare),
                     !DELETED,
                     validator
             );
+            Share newShare = new Share(new User(randomUUID()), GRANTEE_NAME);
 
             // when
             dashboard.share(newShare, CREATOR);
 
             // then
-            assertThat(dashboard.shares).containsExactlyInAnyOrderElementsOf(existingShares);
+            assertThat(dashboard.shares).containsExactlyInAnyOrder(existingShare);
         }
 
         @Test
         void shouldNotAddNewShareWithIdWhenShareWithoutIdAlreadyExists() {
             // given
-            List<Share> existingShares = singletonList(new Share(GRANTEE_NAME));
-            Share newShare = new Share(new User(randomUUID()), GRANTEE_NAME);
+            Share existingShare = new Share(GRANTEE_NAME);
             Dashboard dashboard = new Dashboard(
-                    new DashboardId(randomUUID()),
+                    new DashboardId(),
                     CREATOR,
-                    "dashboard name",
-                    emptyList(),
-                    existingShares,
+                    DASHBOARD_NAME,
+                    EMPTY_CHARTS,
+                    singletonList(existingShare),
                     !DELETED,
                     validator
             );
+            Share newShare = new Share(new User(randomUUID()), GRANTEE_NAME);
 
             // when
             dashboard.share(newShare, CREATOR);
 
             // then
-            assertThat(dashboard.shares).containsExactlyInAnyOrderElementsOf(existingShares);
+            assertThat(dashboard.shares).containsExactlyInAnyOrder(existingShare);
         }
 
         @Test
         void shouldNotAddNewShareWithoutIdWhenShareWithIdAlreadyExists() {
             // given
-            List<Share> existingShares = singletonList(new Share(new User(randomUUID()), GRANTEE_NAME));
-            Share newShare = new Share(GRANTEE_NAME);
+            Share existingShare = new Share(new User(randomUUID()), GRANTEE_NAME);
             Dashboard dashboard = new Dashboard(
-                    new DashboardId(randomUUID()),
+                    new DashboardId(),
                     CREATOR,
-                    "dashboard name",
-                    emptyList(),
-                    existingShares,
+                    DASHBOARD_NAME,
+                    EMPTY_CHARTS,
+                    singletonList(existingShare),
                     !DELETED,
                     validator
             );
+            Share newShare = new Share(GRANTEE_NAME);
 
             // when
             dashboard.share(newShare, CREATOR);
 
             // then
-            assertThat(dashboard.shares).containsExactlyInAnyOrderElementsOf(existingShares);
+            assertThat(dashboard.shares).containsExactly(existingShare);
         }
 
         @Test
         void shouldNotAddNewShareWithoutIdWhenShareWithoutIdAlreadyExists() {
             // given
-            List<Share> existingShares = singletonList(new Share(GRANTEE_NAME));
-            Share newShare = new Share(GRANTEE_NAME);
+            Share existingShare = new Share(GRANTEE_NAME);
             Dashboard dashboard = new Dashboard(
-                    new DashboardId(randomUUID()),
+                    new DashboardId(),
                     CREATOR,
-                    "dashboard name",
-                    emptyList(),
-                    existingShares,
+                    DASHBOARD_NAME,
+                    EMPTY_CHARTS,
+                    singletonList(existingShare),
                     !DELETED,
                     validator
             );
+            Share newShare = new Share(GRANTEE_NAME);
 
             // when
             dashboard.share(newShare, CREATOR);
 
             // then
-            assertThat(dashboard.shares).containsExactlyInAnyOrderElementsOf(existingShares);
+            assertThat(dashboard.shares).containsExactly(existingShare);
         }
 
         @Test
@@ -328,13 +329,12 @@ class DashboardTest {
         void shouldUnshareTagWhenSharedWithId() {
             // given
             Share existingShare = new Share(new User(randomUUID()), GRANTEE_NAME);
-            List<Share> existingShares = singletonList(existingShare);
             Dashboard dashboard = new Dashboard(
-                    new DashboardId(randomUUID()),
+                    new DashboardId(),
                     CREATOR,
-                    "dashboard name",
-                    emptyList(),
-                    existingShares,
+                    DASHBOARD_NAME,
+                    EMPTY_CHARTS,
+                    singletonList(existingShare),
                     !DELETED,
                     validator
             );
@@ -350,13 +350,12 @@ class DashboardTest {
         void shouldUnshareTagWhenSharedWithoutId() {
             // given
             Share existingShare = new Share(GRANTEE_NAME);
-            List<Share> existingShares = singletonList(existingShare);
             Dashboard dashboard = new Dashboard(
-                    new DashboardId(randomUUID()),
+                    new DashboardId(),
                     CREATOR,
-                    "dashboard name",
-                    emptyList(),
-                    existingShares,
+                    DASHBOARD_NAME,
+                    EMPTY_CHARTS,
+                    singletonList(existingShare),
                     !DELETED,
                     validator
             );
@@ -372,16 +371,14 @@ class DashboardTest {
         @Test
         void shouldLeaveSharesUnchangedWhenNotShared() {
             // given
-            List<Share> existingShares = List.of(
-                    new Share("%s_1".formatted(GRANTEE_NAME)),
-                    new Share(new User(randomUUID()), "%s_2".formatted(GRANTEE_NAME))
-            );
+            Share existingShare1 = new Share("%s_1".formatted(GRANTEE_NAME));
+            Share existingShare2 = new Share(new User(randomUUID()), "%s_2".formatted(GRANTEE_NAME));
             Dashboard dashboard = new Dashboard(
-                    new DashboardId(randomUUID()),
+                    new DashboardId(),
                     CREATOR,
-                    "dashboard name",
-                    emptyList(),
-                    existingShares,
+                    DASHBOARD_NAME,
+                    EMPTY_CHARTS,
+                    List.of(existingShare1, existingShare2),
                     !DELETED,
                     validator
             );
@@ -390,7 +387,7 @@ class DashboardTest {
             dashboard.unshare(GRANTEE_NAME, CREATOR);
 
             // then
-            assertThat(dashboard.shares).containsExactlyInAnyOrderElementsOf(existingShares);
+            assertThat(dashboard.shares).containsExactlyInAnyOrder(existingShare1, existingShare2);
         }
 
         @Test
@@ -425,13 +422,13 @@ class DashboardTest {
         @Test
         void shouldAddFirstChart() {
             // given
-            Chart newChart = new Chart("new Chart", GroupBy.SELF, AnalysisMetric.METRIC_VALUE, emptySet());
+            Chart newChart = new Chart(CHART_NAME, GroupBy.SELF, AnalysisMetric.METRIC_VALUE, EMPTY_TAGS);
             Dashboard dashboard = new Dashboard(
                     new DashboardId(),
                     CREATOR,
-                    "dashboard name",
-                    emptyList(),
-                    emptyList(),
+                    CHART_NAME,
+                    EMPTY_CHARTS,
+                    EMPTY_SHARES,
                     !DELETED,
                     validator
             );
@@ -440,39 +437,36 @@ class DashboardTest {
             dashboard.addChart(newChart, CREATOR);
 
             // then
-            assertThat(dashboard.charts).containsOnly(newChart);
+            assertThat(dashboard.charts).containsExactly(newChart);
         }
 
         @Test
         void shouldAddAnotherChart() {
             // given
             Chart existingNonDeletedChart = new Chart(
-                    "existingChart1",
+                    CHART_NAME + 1,
                     GroupBy.SELF,
                     AnalysisMetric.METRIC_VALUE,
-                    emptySet()
+                    EMPTY_TAGS
             );
             Chart existingDeletedChart = new Chart(
-                    "existingChart2",
+                    CHART_NAME + 2,
                     GroupBy.SELF,
                     AnalysisMetric.METRIC_VALUE,
-                    emptySet()
+                    EMPTY_TAGS
             ).deleted();
 
             Dashboard dashboard = new Dashboard(
                     new DashboardId(),
                     CREATOR,
-                    "dashboard name",
-                    List.of(
-                            existingNonDeletedChart,
-                            existingDeletedChart
-                    ),
-                    emptyList(),
+                    DASHBOARD_NAME,
+                    List.of(existingNonDeletedChart, existingDeletedChart),
+                    EMPTY_SHARES,
                     !DELETED,
                     validator
             );
 
-            Chart newChart = new Chart("new chart", GroupBy.SELF, AnalysisMetric.METRIC_VALUE, emptySet());
+            Chart newChart = new Chart(CHART_NAME + 3, GroupBy.SELF, AnalysisMetric.METRIC_VALUE, EMPTY_TAGS);
 
             // when
             dashboard.addChart(newChart, CREATOR);
@@ -509,34 +503,37 @@ class DashboardTest {
     @DisplayName("deleteChart")
     class DeleteChartTest {
 
+        private static final String CHART_NAME = "chart name";
+        private static final Set<UUID> EMPTY_TAGS = emptySet();
+
         @Test
         void shouldDeleteExistingChart() {
             // given
             Chart existingNonDeletedChart = new Chart(
-                    "existingChart",
+                    CHART_NAME + 1,
                     GroupBy.SELF,
                     AnalysisMetric.METRIC_VALUE,
-                    emptySet()
+                    EMPTY_TAGS
             );
             Chart existingDeletedChart = new Chart(
-                    "existingChart",
+                    CHART_NAME + 2,
                     GroupBy.SELF,
                     AnalysisMetric.METRIC_VALUE,
-                    emptySet()
+                    EMPTY_TAGS
             ).deleted();
             Chart chartToDelete = new Chart(
-                    "chart to delete",
+                    CHART_NAME + 3,
                     GroupBy.SELF,
                     AnalysisMetric.METRIC_VALUE,
-                    emptySet()
+                    EMPTY_TAGS
             );
 
             Dashboard dashboard = new Dashboard(
                     new DashboardId(),
                     CREATOR,
-                    "dashboard name",
+                    DASHBOARD_NAME,
                     List.of(existingNonDeletedChart, existingDeletedChart, chartToDelete),
-                    emptyList(),
+                    EMPTY_SHARES,
                     !DELETED,
                     validator
             );
@@ -560,9 +557,9 @@ class DashboardTest {
             Dashboard dashboard = new Dashboard(
                     new DashboardId(),
                     CREATOR,
-                    "dashboard name",
-                    emptyList(),
-                    emptyList(),
+                    DASHBOARD_NAME,
+                    EMPTY_CHARTS,
+                    EMPTY_SHARES,
                     !DELETED,
                     validator
             );
@@ -577,13 +574,13 @@ class DashboardTest {
         @Test
         void shouldKeepChartsUnchangedWhenDeletingNotExistingChart() {
             // given
-            Chart existingChart = new Chart("chart name", GroupBy.SELF, AnalysisMetric.METRIC_VALUE, emptySet());
+            Chart existingChart = new Chart(CHART_NAME, GroupBy.SELF, AnalysisMetric.METRIC_VALUE, EMPTY_TAGS);
             Dashboard dashboard = new Dashboard(
                     new DashboardId(),
                     CREATOR,
-                    "dashboard name",
+                    DASHBOARD_NAME,
                     singletonList(existingChart),
-                    emptyList(),
+                    EMPTY_SHARES,
                     !DELETED,
                     validator
             );
@@ -599,24 +596,24 @@ class DashboardTest {
         void shouldKeepChartsUnchangedWhenDeletingAlreadyDeletedChart() {
             // given
             Chart existingDeletedChart = new Chart(
-                    "deleted chart name",
+                    CHART_NAME + 1,
                     GroupBy.SELF,
                     AnalysisMetric.METRIC_VALUE,
-                    emptySet()
+                    EMPTY_TAGS
             ).deleted();
             Chart existingNonDeletedChart = new Chart(
-                    "non deleted chart",
+                    CHART_NAME + 2,
                     GroupBy.SELF,
                     AnalysisMetric.METRIC_VALUE,
-                    emptySet()
+                    EMPTY_TAGS
             );
 
             Dashboard dashboard = new Dashboard(
                     new DashboardId(),
                     CREATOR,
-                    "dashboard name",
+                    DASHBOARD_NAME,
                     List.of(existingNonDeletedChart, existingDeletedChart),
-                    emptyList(),
+                    EMPTY_SHARES,
                     !DELETED,
                     validator
             );
