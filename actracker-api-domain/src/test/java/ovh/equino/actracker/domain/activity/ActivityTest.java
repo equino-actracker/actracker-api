@@ -37,16 +37,12 @@ class ActivityTest {
 
     private static final User CREATOR = new User(randomUUID());
     private static final String ACTIVITY_TITLE = "activity title";
-    private static final Instant EMPTY_START_TIME = null;
-    private static final Instant EMPTY_END_TIME = null;
-    private static final String EMPTY_COMMENT = null;
+    private static final Instant START_TIME = Instant.ofEpochMilli(1000);
+    private static final Instant END_TIME = Instant.ofEpochMilli(2000);
+    private static final String ACTIVITY_COMMENT = "activity comment";
     private static final List<TagId> EMPTY_TAGS = emptyList();
     private static final List<MetricValue> EMPTY_METRIC_VALUES = emptyList();
     private static final boolean DELETED = true;
-
-    private static final Instant OLD_START_TIME = Instant.ofEpochMilli(1000);
-    private static final Instant OLD_END_TIME = Instant.ofEpochMilli(2000);
-    private static final Instant NEW_TIME = Instant.ofEpochMilli(1500);
 
     @Mock
     private TagsExistenceVerifier tagsExistenceVerifier;
@@ -59,19 +55,32 @@ class ActivityTest {
     void init() {
         when(tagsExistenceVerifier.notExisting(any()))
                 .thenReturn(emptySet());
+        when(metricsExistenceVerifier.notExisting(any(), any()))
+                .thenReturn(emptySet());
     }
 
     @Nested
     @DisplayName("rename")
     class RenameTest {
         private static final String NEW_TITLE = "activity new title";
-        private static final String OLD_TITLE = "activity old title";
 
         @Test
         void shouldChangeTitle() {
             // given
-            ActivityDto activityDto = new ActivityDto(OLD_TITLE, null, null, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
             activity.rename(NEW_TITLE, CREATOR);
@@ -83,8 +92,20 @@ class ActivityTest {
         @Test
         void shouldChangeTitleToNull() {
             // given
-            ActivityDto activityDto = new ActivityDto(OLD_TITLE, null, null, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
             activity.rename(null, CREATOR);
@@ -96,8 +117,20 @@ class ActivityTest {
         @Test
         void shouldChangeTitleToBlank() {
             // given
-            ActivityDto activityDto = new ActivityDto(OLD_TITLE, null, null, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
             activity.rename(" ", CREATOR);
@@ -113,9 +146,9 @@ class ActivityTest {
                     new ActivityId(),
                     CREATOR,
                     ACTIVITY_TITLE,
-                    EMPTY_START_TIME,
-                    EMPTY_END_TIME,
-                    EMPTY_COMMENT,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
@@ -135,37 +168,75 @@ class ActivityTest {
     @DisplayName("updateStartTime")
     class UpdateStartTimeTest {
 
+        private static final Instant NEW_START_TIME = Instant.ofEpochMilli(500);
+
         @Test
         void shouldUpdateStartTime() {
             // given
-            ActivityDto activityDto = new ActivityDto("activity name", OLD_START_TIME, OLD_END_TIME, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
-            activity.start(NEW_TIME, CREATOR);
+            activity.start(NEW_START_TIME, CREATOR);
 
             // then
-            assertThat(activity.startTime()).isEqualTo(NEW_TIME);
+            assertThat(activity.startTime()).isEqualTo(NEW_START_TIME);
         }
 
         @Test
         void shouldSetStartTimeToEndTime() {
             // given
-            ActivityDto activityDto = new ActivityDto("activity name", OLD_START_TIME, OLD_END_TIME, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
-            activity.start(OLD_END_TIME, CREATOR);
+            activity.start(END_TIME, CREATOR);
 
             // then
-            assertThat(activity.startTime()).isEqualTo(OLD_END_TIME);
+            assertThat(activity.startTime()).isEqualTo(END_TIME);
         }
 
         @Test
         void shouldSetStartTimeNull() {
             // given
-            ActivityDto activityDto = new ActivityDto("activity name", OLD_START_TIME, OLD_END_TIME, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
             activity.start(null, CREATOR);
@@ -181,9 +252,9 @@ class ActivityTest {
                     new ActivityId(),
                     CREATOR,
                     ACTIVITY_TITLE,
-                    EMPTY_START_TIME,
-                    EMPTY_END_TIME,
-                    EMPTY_COMMENT,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
@@ -194,7 +265,7 @@ class ActivityTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> activity.start(NEW_TIME, CREATOR))
+            assertThatThrownBy(() -> activity.start(NEW_START_TIME, CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
         }
     }
@@ -203,37 +274,75 @@ class ActivityTest {
     @DisplayName("updateEndTime")
     class UpdateEndTimeTest {
 
+        private static final Instant NEW_END_TIME = Instant.ofEpochMilli(2500);
+
         @Test
         void shouldUpdateEndTime() {
             // given
-            ActivityDto activityDto = new ActivityDto("activity name", OLD_START_TIME, OLD_END_TIME, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
-            activity.finish(NEW_TIME, CREATOR);
+            activity.finish(NEW_END_TIME, CREATOR);
 
             // then
-            assertThat(activity.endTime()).isEqualTo(NEW_TIME);
+            assertThat(activity.endTime()).isEqualTo(NEW_END_TIME);
         }
 
         @Test
         void shouldSetEndTimeToStartTime() {
             // given
-            ActivityDto activityDto = new ActivityDto("activity name", OLD_START_TIME, OLD_END_TIME, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
-            activity.finish(OLD_START_TIME, CREATOR);
+            activity.finish(START_TIME, CREATOR);
 
             // then
-            assertThat(activity.endTime()).isEqualTo(OLD_START_TIME);
+            assertThat(activity.endTime()).isEqualTo(START_TIME);
         }
 
         @Test
         void shouldSetEndTimeNull() {
             // given
-            ActivityDto activityDto = new ActivityDto("activity name", OLD_START_TIME, OLD_END_TIME, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
             activity.finish(null, CREATOR);
@@ -249,9 +358,9 @@ class ActivityTest {
                     new ActivityId(),
                     CREATOR,
                     ACTIVITY_TITLE,
-                    EMPTY_START_TIME,
-                    EMPTY_END_TIME,
-                    EMPTY_COMMENT,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
@@ -262,7 +371,7 @@ class ActivityTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> activity.finish(NEW_TIME, CREATOR))
+            assertThatThrownBy(() -> activity.finish(NEW_END_TIME, CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
         }
     }
@@ -271,14 +380,25 @@ class ActivityTest {
     @DisplayName("updateComment")
     class UpdateCommentTest {
 
-        private static final String NEW_COMMENT = "activity new title";
-        private static final String OLD_COMMENT = "activity old title";
+        private static final String NEW_COMMENT = "activity new comment";
 
         @Test
         void shouldUpdateComment() {
             // given
-            ActivityDto activityDto = new ActivityDto("activity title", null, null, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
             activity.updateComment(NEW_COMMENT, CREATOR);
@@ -290,8 +410,20 @@ class ActivityTest {
         @Test
         void shouldChangeCommentToNull() {
             // given
-            ActivityDto activityDto = new ActivityDto("activity title", null, null, OLD_COMMENT, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
             activity.updateComment(null, CREATOR);
@@ -303,8 +435,20 @@ class ActivityTest {
         @Test
         void shouldChangeCommentToBlank() {
             // given
-            ActivityDto activityDto = new ActivityDto("activity title", null, null, OLD_COMMENT, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
             activity.updateComment(" ", CREATOR);
@@ -320,9 +464,9 @@ class ActivityTest {
                     new ActivityId(),
                     CREATOR,
                     ACTIVITY_TITLE,
-                    EMPTY_START_TIME,
-                    EMPTY_END_TIME,
-                    EMPTY_COMMENT,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
@@ -402,9 +546,9 @@ class ActivityTest {
                     new ActivityId(),
                     CREATOR,
                     ACTIVITY_TITLE,
-                    EMPTY_START_TIME,
-                    EMPTY_END_TIME,
-                    EMPTY_COMMENT,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
@@ -483,9 +627,9 @@ class ActivityTest {
                     new ActivityId(),
                     CREATOR,
                     ACTIVITY_TITLE,
-                    EMPTY_START_TIME,
-                    EMPTY_END_TIME,
-                    EMPTY_COMMENT,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
@@ -525,9 +669,9 @@ class ActivityTest {
                     new ActivityId(),
                     CREATOR,
                     ACTIVITY_TITLE,
-                    EMPTY_START_TIME,
-                    EMPTY_END_TIME,
-                    EMPTY_COMMENT,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
@@ -619,9 +763,9 @@ class ActivityTest {
                     new ActivityId(),
                     CREATOR,
                     ACTIVITY_TITLE,
-                    EMPTY_START_TIME,
-                    EMPTY_END_TIME,
-                    EMPTY_COMMENT,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
@@ -762,9 +906,9 @@ class ActivityTest {
                     new ActivityId(),
                     CREATOR,
                     ACTIVITY_TITLE,
-                    EMPTY_START_TIME,
-                    EMPTY_END_TIME,
-                    EMPTY_COMMENT,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
