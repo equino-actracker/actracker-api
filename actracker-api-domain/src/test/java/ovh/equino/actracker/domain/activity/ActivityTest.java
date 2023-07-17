@@ -15,17 +15,12 @@ import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
 import ovh.equino.actracker.domain.user.User;
 
 import java.time.Instant;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import static java.math.BigDecimal.*;
 import static java.util.Collections.*;
 import static java.util.UUID.randomUUID;
-import static java.util.stream.Collectors.toSet;
-import static org.apache.commons.collections4.CollectionUtils.removeAll;
-import static org.apache.commons.collections4.CollectionUtils.union;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -772,10 +767,10 @@ class ActivityTest {
 
         @BeforeEach
         void setUp() {
-            when(metricsExistenceVerifier.existing(any(), any())).thenReturn(singleton(EXISTING_METRIC_ID));
+            when(metricsExistenceVerifier.existing(any(), any()))
+                    .thenReturn(singleton(EXISTING_METRIC_ID));
             when(metricsExistenceVerifier.notExisting(any(), any()))
-                    .thenReturn(singleton(NON_EXISTING_METRIC_ID))
-                    .thenReturn(emptySet());
+                    .thenReturn(singleton(NON_EXISTING_METRIC_ID));
         }
 
         @Test
@@ -784,11 +779,11 @@ class ActivityTest {
             Activity activity = new Activity(
                     new ActivityId(),
                     CREATOR,
-                    "activity title",
-                    null,
-                    null,
-                    null,
-                    emptyList(),
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_TITLE,
+                    EMPTY_TAGS,
                     List.of(NON_EXISTING_METRIC_VALUE),
                     !DELETED,
                     tagsExistenceVerifier,
@@ -810,11 +805,11 @@ class ActivityTest {
             Activity activity = new Activity(
                     new ActivityId(),
                     CREATOR,
-                    "activity title",
-                    null,
-                    null,
-                    null,
-                    emptyList(),
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
                     List.of(EXISTING_METRIC_VALUE, NON_EXISTING_METRIC_VALUE),
                     !DELETED,
                     tagsExistenceVerifier,
@@ -867,10 +862,10 @@ class ActivityTest {
 
         @BeforeEach
         void setUp() {
-            when(metricsExistenceVerifier.existing(any(), any())).thenReturn(singleton(EXISTING_METRIC_ID));
+            when(metricsExistenceVerifier.existing(any(), any()))
+                    .thenReturn(singleton(EXISTING_METRIC_ID));
             when(metricsExistenceVerifier.notExisting(any(), any()))
-                    .thenReturn(singleton(NON_EXISTING_METRIC_ID))
-                    .thenReturn(emptySet());
+                    .thenReturn(singleton(NON_EXISTING_METRIC_ID));
         }
 
         @Test
@@ -879,11 +874,11 @@ class ActivityTest {
             Activity activity = new Activity(
                     new ActivityId(),
                     CREATOR,
-                    "activity title",
-                    null,
-                    null,
-                    null,
-                    emptyList(),
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
                     List.of(EXISTING_METRIC_VALUE, NON_EXISTING_METRIC_VALUE),
                     !DELETED,
                     tagsExistenceVerifier,
@@ -904,11 +899,11 @@ class ActivityTest {
             Activity activity = new Activity(
                     new ActivityId(),
                     CREATOR,
-                    "activity title",
-                    null,
-                    null,
-                    null,
-                    emptyList(),
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
                     List.of(NON_EXISTING_METRIC_VALUE),
                     !DELETED,
                     tagsExistenceVerifier,
@@ -929,11 +924,11 @@ class ActivityTest {
             Activity activity = new Activity(
                     new ActivityId(),
                     CREATOR,
-                    "activity title",
-                    null,
-                    null,
-                    null,
-                    emptyList(),
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
                     List.of(EXISTING_METRIC_VALUE, NON_EXISTING_METRIC_VALUE),
                     !DELETED,
                     tagsExistenceVerifier,
@@ -954,11 +949,11 @@ class ActivityTest {
             Activity activity = new Activity(
                     new ActivityId(),
                     CREATOR,
-                    "activity title",
-                    null,
-                    null,
-                    null,
-                    emptyList(),
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
                     List.of(EXISTING_METRIC_VALUE),
                     !DELETED,
                     tagsExistenceVerifier,
