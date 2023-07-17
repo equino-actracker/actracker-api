@@ -27,6 +27,7 @@ public class Activity implements Entity {
 
     private final TagsExistenceVerifier tagsExistenceVerifier;
     private final MetricsExistenceVerifier metricsExistenceVerifier;
+    private final ActivityValidator validator;
 
     Activity(
             ActivityId id,
@@ -39,7 +40,8 @@ public class Activity implements Entity {
             Collection<MetricValue> metricValues,
             boolean deleted,
             TagsExistenceVerifier tagsExistenceVerifier,
-            MetricsExistenceVerifier metricsExistenceVerifier) {
+            MetricsExistenceVerifier metricsExistenceVerifier,
+            ActivityValidator validator) {
 
         this.id = requireNonNull(id);
         this.creator = requireNonNull(creator);
@@ -53,6 +55,7 @@ public class Activity implements Entity {
 
         this.tagsExistenceVerifier = tagsExistenceVerifier;
         this.metricsExistenceVerifier = metricsExistenceVerifier;
+        this.validator = validator;
     }
 
     static Activity create(ActivityDto activity, User creator, TagsExistenceVerifier tagsExistenceVerifier, MetricsExistenceVerifier metricsExistenceVerifier) {
@@ -67,7 +70,8 @@ public class Activity implements Entity {
                 activity.metricValues(),
                 false,
                 tagsExistenceVerifier,
-                metricsExistenceVerifier
+                metricsExistenceVerifier,
+                new ActivityValidator(tagsExistenceVerifier, metricsExistenceVerifier)
         );
         newActivity.validate();
         return newActivity;
@@ -184,7 +188,8 @@ public class Activity implements Entity {
                 activity.metricValues(),
                 activity.deleted(),
                 tagsExistenceVerifier,
-                metricsExistenceVerifier
+                metricsExistenceVerifier,
+                new ActivityValidator(tagsExistenceVerifier, metricsExistenceVerifier)
         );
     }
 
@@ -267,7 +272,7 @@ public class Activity implements Entity {
 
     @Override
     public void validate() {
-        new ActivityValidator(this, tagsExistenceVerifier, metricsExistenceVerifier).validate();
+        validator.validate(this);
     }
 
     Instant startTime() {

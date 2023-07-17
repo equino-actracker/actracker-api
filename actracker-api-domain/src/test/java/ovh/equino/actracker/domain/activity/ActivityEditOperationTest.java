@@ -30,6 +30,8 @@ class ActivityEditOperationTest {
     private TagsExistenceVerifier tagsExistenceVerifier;
     @Mock
     private MetricsExistenceVerifier metricsExistenceVerifier;
+    @Mock
+    private ActivityValidator validator;
 
     @Test
     void shouldPreserveAssignedNotExistingTags() {
@@ -52,7 +54,8 @@ class ActivityEditOperationTest {
                 emptyList(),
                 !DELETED,
                 tagsExistenceVerifier,
-                metricsExistenceVerifier
+                metricsExistenceVerifier,
+                validator
         );
         ActivityEditOperation editOperation = new ActivityEditOperation(
                 CREATOR, activity, tagsExistenceVerifier, metricsExistenceVerifier, () -> {
@@ -91,7 +94,8 @@ class ActivityEditOperationTest {
                 List.of(valueOfExistingMetric, valueOfNonExistingMetric),
                 !DELETED,
                 tagsExistenceVerifier,
-                metricsExistenceVerifier
+                metricsExistenceVerifier,
+                validator
         );
         ActivityEditOperation editOperation = new ActivityEditOperation(
                 CREATOR, activity, tagsExistenceVerifier, metricsExistenceVerifier, () -> {

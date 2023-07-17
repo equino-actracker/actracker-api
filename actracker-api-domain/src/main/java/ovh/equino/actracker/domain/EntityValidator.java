@@ -10,10 +10,10 @@ public abstract class EntityValidator<T extends Entity> {
 
     protected abstract Class<T> entityType();
 
-    protected abstract List<String> collectValidationErrors();
+    protected abstract List<String> collectValidationErrors(T entity);
 
-    public final void validate() {
-        List<String> validationErrors = collectValidationErrors();
+    public final void validate(T entity) {
+        List<String> validationErrors = collectValidationErrors(entity);
         if (isNotEmpty(validationErrors)) {
             throw new EntityInvalidException(entityType(), validationErrors);
         }

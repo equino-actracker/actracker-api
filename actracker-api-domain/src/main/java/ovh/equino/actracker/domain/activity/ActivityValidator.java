@@ -7,59 +7,44 @@ import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
 
 import java.time.Instant;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
-final class ActivityValidator extends EntityValidator<Activity> {
+class ActivityValidator extends EntityValidator<Activity> {
 
-    private final Activity activity;
     private final TagsExistenceVerifier tagsExistenceVerifier;
     private final MetricsExistenceVerifier metricsExistenceVerifier;
 
-    ActivityValidator(Activity activity,
-                      TagsExistenceVerifier tagsExistenceVerifier,
-                      MetricsExistenceVerifier metricsExistenceVerifier) {
-
-        this.activity = activity;
+    ActivityValidator(TagsExistenceVerifier tagsExistenceVerifier, MetricsExistenceVerifier metricsExistenceVerifier) {
         this.tagsExistenceVerifier = tagsExistenceVerifier;
         this.metricsExistenceVerifier = metricsExistenceVerifier;
     }
 
     @Override
-    protected List<String> collectValidationErrors() {
+    protected Class<Activity> entityType() {
+        return Activity.class;
+    }
+
+    @Override
+    protected List<String> collectValidationErrors(Activity activity) {
         List<String> validationErrors = new LinkedList<>();
 
-        if (endTimeBeforeStartTime()) {
-            validationErrors.add("End time is before start time");
-        }
-
-        Set<TagId> notExistingTags = tagsExistenceVerifier.notExisting(activity.tags());
-        if (isNotEmpty(notExistingTags)) {
-            List<UUID> notExistingTagIds = notExistingTags.stream()
-                    .map(TagId::id)
-                    .toList();
-            validationErrors.add("Selected tags do not exist: %s".formatted(notExistingTagIds));
-        }
-
-        Set<MetricId> notExistingMetrics = metricsExistenceVerifier.notExisting(
-                activity.tags(),
-                activity.selectedMetrics()
-        );
-        if (isNotEmpty(notExistingMetrics)) {
-            List<UUID> notExistingMetricIds = notExistingMetrics.stream()
-                    .map(MetricId::id)
-                    .toList();
-            validationErrors.add("Selected metrics do not exist in selected tags: %s".formatted(notExistingMetricIds));
-        }
+        checkEndTimeBeforeStartTime(activity).ifPresent(validationErrors::add);
+        checkContainsNonExistingTags(activity).ifPresent(validationErrors::add);
+        checkContainsValuesOfNonExistingMetrics(activity).ifPresent(validationErrors::add);
 
         return validationErrors;
     }
 
-    private boolean endTimeBeforeStartTime() {
+    private Optional<String> checkEndTimeBeforeStartTime(Activity activity) {
+        if (endTimeBeforeStartTime(activity)) {
+            return Optional.of("End time is before start time");
+        }
+        return Optional.empty();
+    }
+
+    private boolean endTimeBeforeStartTime(Activity activity) {
         Instant activityStartTime = activity.startTime();
         Instant activityEndTime = activity.endTime();
 
@@ -69,8 +54,29 @@ final class ActivityValidator extends EntityValidator<Activity> {
         return activityEndTime.isBefore(activityStartTime);
     }
 
-    @Override
-    protected Class<Activity> entityType() {
-        return Activity.class;
+    private Optional<String> checkContainsNonExistingTags(Activity activity) {
+        Set<TagId> notExistingTags = tagsExistenceVerifier.notExisting(activity.tags());
+        if (isEmpty(notExistingTags)) {
+            return Optional.empty();
+        }
+        List<UUID> notExistingTagIds = notExistingTags.stream()
+                .map(TagId::id)
+                .toList();
+        return Optional.of("Selected tags do not exist: %s".formatted(notExistingTagIds));
+    }
+
+    private Optional<String> checkContainsValuesOfNonExistingMetrics(Activity activity) {
+
+        Set<MetricId> notExistingMetrics = metricsExistenceVerifier.notExisting(
+                activity.tags(),
+                activity.selectedMetrics()
+        );
+        if (isEmpty(notExistingMetrics)) {
+            return Optional.empty();
+        }
+        List<UUID> notExistingMetricIds = notExistingMetrics.stream()
+                .map(MetricId::id)
+                .toList();
+        return Optional.of("Selected metrics do not exist in selected tags: %s".formatted(notExistingMetricIds));
     }
 }

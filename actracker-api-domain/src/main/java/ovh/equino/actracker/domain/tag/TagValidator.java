@@ -1,13 +1,13 @@
 package ovh.equino.actracker.domain.tag;
 
-import ovh.equino.actracker.domain.EntityNgValidator;
+import ovh.equino.actracker.domain.EntityValidator;
 
 import java.util.LinkedList;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-class TagValidator extends EntityNgValidator<Tag> {
+class TagValidator extends EntityValidator<Tag> {
 
     @Override
     protected Class<Tag> entityType() {

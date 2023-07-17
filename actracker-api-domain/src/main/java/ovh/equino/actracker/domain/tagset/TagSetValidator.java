@@ -1,6 +1,6 @@
 package ovh.equino.actracker.domain.tagset;
 
-import ovh.equino.actracker.domain.EntityNgValidator;
+import ovh.equino.actracker.domain.EntityValidator;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
 
@@ -9,7 +9,7 @@ import java.util.*;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-class TagSetValidator extends EntityNgValidator<TagSet> {
+class TagSetValidator extends EntityValidator<TagSet> {
 
     private final TagsExistenceVerifier tagsExistenceVerifier;
 

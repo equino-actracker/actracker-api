@@ -15,40 +15,42 @@ import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
 import ovh.equino.actracker.domain.user.User;
 
 import java.time.Instant;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import static java.math.BigDecimal.*;
 import static java.util.Collections.*;
 import static java.util.UUID.randomUUID;
-import static java.util.stream.Collectors.toSet;
-import static org.apache.commons.collections4.CollectionUtils.removeAll;
-import static org.apache.commons.collections4.CollectionUtils.union;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ActivityTest {
 
     private static final User CREATOR = new User(randomUUID());
+    private static final String ACTIVITY_TITLE = "activity title";
+    private static final Instant START_TIME = Instant.ofEpochMilli(1000);
+    private static final Instant END_TIME = Instant.ofEpochMilli(2000);
+    private static final String ACTIVITY_COMMENT = "activity comment";
+    private static final List<TagId> EMPTY_TAGS = emptyList();
+    private static final List<MetricValue> EMPTY_METRIC_VALUES = emptyList();
     private static final boolean DELETED = true;
-
-    private static final Instant OLD_START_TIME = Instant.ofEpochMilli(1000);
-    private static final Instant OLD_END_TIME = Instant.ofEpochMilli(2000);
-    private static final Instant NEW_TIME = Instant.ofEpochMilli(1500);
 
     @Mock
     private TagsExistenceVerifier tagsExistenceVerifier;
     @Mock
     private MetricsExistenceVerifier metricsExistenceVerifier;
+    @Mock
+    private ActivityValidator validator;
 
     @BeforeEach
     void init() {
         when(tagsExistenceVerifier.notExisting(any()))
+                .thenReturn(emptySet());
+        when(metricsExistenceVerifier.notExisting(any(), any()))
                 .thenReturn(emptySet());
     }
 
@@ -56,13 +58,24 @@ class ActivityTest {
     @DisplayName("rename")
     class RenameTest {
         private static final String NEW_TITLE = "activity new title";
-        private static final String OLD_TITLE = "activity old title";
 
         @Test
         void shouldChangeTitle() {
             // given
-            ActivityDto activityDto = new ActivityDto(OLD_TITLE, null, null, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
             activity.rename(NEW_TITLE, CREATOR);
@@ -74,8 +87,20 @@ class ActivityTest {
         @Test
         void shouldChangeTitleToNull() {
             // given
-            ActivityDto activityDto = new ActivityDto(OLD_TITLE, null, null, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
             activity.rename(null, CREATOR);
@@ -87,8 +112,20 @@ class ActivityTest {
         @Test
         void shouldChangeTitleToBlank() {
             // given
-            ActivityDto activityDto = new ActivityDto(OLD_TITLE, null, null, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
             activity.rename(" ", CREATOR);
@@ -96,43 +133,105 @@ class ActivityTest {
             // then
             assertThat(activity.title()).isEqualTo(" ");
         }
+
+        @Test
+        void shouldFailWhenEntityInvalid() {
+            // given
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
+            doThrow(EntityInvalidException.class).when(validator).validate(any());
+
+            // then
+            assertThatThrownBy(() -> activity.rename(NEW_TITLE, CREATOR))
+                    .isInstanceOf(EntityInvalidException.class);
+        }
     }
 
     @Nested
     @DisplayName("updateStartTime")
     class UpdateStartTimeTest {
 
+        private static final Instant NEW_START_TIME = Instant.ofEpochMilli(500);
+
         @Test
         void shouldUpdateStartTime() {
             // given
-            ActivityDto activityDto = new ActivityDto("activity name", OLD_START_TIME, OLD_END_TIME, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
-            activity.start(NEW_TIME, CREATOR);
+            activity.start(NEW_START_TIME, CREATOR);
 
             // then
-            assertThat(activity.startTime()).isEqualTo(NEW_TIME);
+            assertThat(activity.startTime()).isEqualTo(NEW_START_TIME);
         }
 
         @Test
         void shouldSetStartTimeToEndTime() {
             // given
-            ActivityDto activityDto = new ActivityDto("activity name", OLD_START_TIME, OLD_END_TIME, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
-            activity.start(OLD_END_TIME, CREATOR);
+            activity.start(END_TIME, CREATOR);
 
             // then
-            assertThat(activity.startTime()).isEqualTo(OLD_END_TIME);
+            assertThat(activity.startTime()).isEqualTo(END_TIME);
         }
 
         @Test
         void shouldSetStartTimeNull() {
             // given
-            ActivityDto activityDto = new ActivityDto("activity name", OLD_START_TIME, OLD_END_TIME, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
             activity.start(null, CREATOR);
@@ -142,55 +241,103 @@ class ActivityTest {
         }
 
         @Test
-        void shouldFailWhenStartTimeSetAfterEndTime() {
+        void shouldFailWhenEntityInvalid() {
             // given
-            ActivityDto activityDto = new ActivityDto("activity name", OLD_START_TIME, OLD_END_TIME, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
+            doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() ->
-                    activity.start(OLD_END_TIME.plusMillis(1), CREATOR)
-            )
+            assertThatThrownBy(() -> activity.start(NEW_START_TIME, CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
         }
-
     }
 
     @Nested
     @DisplayName("updateEndTime")
     class UpdateEndTimeTest {
 
+        private static final Instant NEW_END_TIME = Instant.ofEpochMilli(2500);
+
         @Test
         void shouldUpdateEndTime() {
             // given
-            ActivityDto activityDto = new ActivityDto("activity name", OLD_START_TIME, OLD_END_TIME, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
-            activity.finish(NEW_TIME, CREATOR);
+            activity.finish(NEW_END_TIME, CREATOR);
 
             // then
-            assertThat(activity.endTime()).isEqualTo(NEW_TIME);
+            assertThat(activity.endTime()).isEqualTo(NEW_END_TIME);
         }
 
         @Test
         void shouldSetEndTimeToStartTime() {
             // given
-            ActivityDto activityDto = new ActivityDto("activity name", OLD_START_TIME, OLD_END_TIME, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
-            activity.finish(OLD_START_TIME, CREATOR);
+            activity.finish(START_TIME, CREATOR);
 
             // then
-            assertThat(activity.endTime()).isEqualTo(OLD_START_TIME);
+            assertThat(activity.endTime()).isEqualTo(START_TIME);
         }
 
         @Test
         void shouldSetEndTimeNull() {
             // given
-            ActivityDto activityDto = new ActivityDto("activity name", OLD_START_TIME, OLD_END_TIME, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
             activity.finish(null, CREATOR);
@@ -200,33 +347,53 @@ class ActivityTest {
         }
 
         @Test
-        void shouldFailWhenEndTimeSetBeforeStartTime() {
+        void shouldFailWhenEntityInvalid() {
             // given
-            ActivityDto activityDto = new ActivityDto("activity name", OLD_START_TIME, OLD_END_TIME, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
+            doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() ->
-                    activity.finish(OLD_START_TIME.minusMillis(1), CREATOR)
-            )
+            assertThatThrownBy(() -> activity.finish(NEW_END_TIME, CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
-
         }
-
     }
 
     @Nested
     @DisplayName("updateComment")
     class UpdateCommentTest {
 
-        private static final String NEW_COMMENT = "activity new title";
-        private static final String OLD_COMMENT = "activity old title";
+        private static final String NEW_COMMENT = "activity new comment";
 
         @Test
         void shouldUpdateComment() {
             // given
-            ActivityDto activityDto = new ActivityDto("activity title", null, null, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
             activity.updateComment(NEW_COMMENT, CREATOR);
@@ -238,8 +405,20 @@ class ActivityTest {
         @Test
         void shouldChangeCommentToNull() {
             // given
-            ActivityDto activityDto = new ActivityDto("activity title", null, null, OLD_COMMENT, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
             activity.updateComment(null, CREATOR);
@@ -251,8 +430,20 @@ class ActivityTest {
         @Test
         void shouldChangeCommentToBlank() {
             // given
-            ActivityDto activityDto = new ActivityDto("activity title", null, null, OLD_COMMENT, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
             activity.updateComment(" ", CREATOR);
@@ -261,6 +452,29 @@ class ActivityTest {
             assertThat(activity.comment()).isEqualTo(" ");
         }
 
+        @Test
+        void shouldFailWhenEntityInvalid() {
+            // given
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
+            doThrow(EntityInvalidException.class).when(validator).validate(any());
+
+            // then
+            assertThatThrownBy(() -> activity.updateComment(NEW_COMMENT, CREATOR))
+                    .isInstanceOf(EntityInvalidException.class);
+        }
     }
 
     @Nested
@@ -270,10 +484,21 @@ class ActivityTest {
         @Test
         void shouldAssignFirstTag() {
             // given
-            ActivityDto activityDto = new ActivityDto("activity title", null, null, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
-
-            TagId newTag = new TagId(randomUUID());
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
+            TagId newTag = new TagId();
 
             // when
             activity.assignTag(newTag, CREATOR);
@@ -285,55 +510,81 @@ class ActivityTest {
         @Test
         void shouldAssignAnotherTag() {
             // given
-            Set<TagId> existingTags = Set.of(new TagId(randomUUID()), new TagId(randomUUID()));
-            Set<UUID> existingTagIds = existingTags.stream().map(TagId::id).collect(toSet());
+            TagId existingTag = new TagId();
             when(tagsExistenceVerifier.existing(any()))
-                    .thenReturn(existingTags);
-            ActivityDto activityDto = new ActivityDto("activity title", null, null, null, existingTagIds, emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
-
-            TagId newTag = new TagId(randomUUID());
-            Collection<TagId> tagsAfterAssignment = union(existingTags, singleton(newTag));
+                    .thenReturn(singleton(existingTag));
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    singleton(existingTag),
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
+            TagId newTag = new TagId();
 
             // when
             activity.assignTag(newTag, CREATOR);
 
             // then
-            assertThat(activity.tags()).containsExactlyInAnyOrderElementsOf(tagsAfterAssignment);
+            assertThat(activity.tags()).containsExactlyInAnyOrder(existingTag, newTag);
         }
 
         @Test
         void shouldNotDuplicateAssignedTag() {
             // given
-            TagId duplicatedTag = new TagId(randomUUID());
-            Set<TagId> existingTags = Set.of(new TagId(randomUUID()), duplicatedTag);
-            Set<UUID> existingTagIds = existingTags.stream().map(TagId::id).collect(toSet());
+            TagId existingTag = new TagId();
             when(tagsExistenceVerifier.existing(any()))
-                    .thenReturn(existingTags);
-            ActivityDto activityDto = new ActivityDto("activity title", null, null, null, existingTagIds, emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+                    .thenReturn(singleton(existingTag));
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    singleton(existingTag),
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
-            activity.assignTag(duplicatedTag, CREATOR);
+            activity.assignTag(existingTag, CREATOR);
 
             // then
-            assertThat(activity.tags()).containsExactlyInAnyOrderElementsOf(existingTags);
+            assertThat(activity.tags()).containsExactly(existingTag);
         }
 
         @Test
-        void shouldFailWhenAssigningNonExistingTag() {
+        void shouldFailWhenEntityInvalid() {
             // given
-            ActivityDto activityDto = new ActivityDto("activity title", null, null, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
-
-            TagId notExistingTag = new TagId(randomUUID());
-
-            when(tagsExistenceVerifier.notExisting(any())).thenReturn(Set.of(notExistingTag));
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
+            doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() ->
-                    activity.assignTag(notExistingTag, CREATOR)
-            )
+            assertThatThrownBy(() -> activity.assignTag(new TagId(), CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
         }
     }
@@ -347,31 +598,52 @@ class ActivityTest {
         shouldRemoveAssignedTag() {
             // given
             TagId tagToRemove = new TagId(randomUUID());
-            Set<TagId> existingTags = Set.of(new TagId(randomUUID()), new TagId(randomUUID()), tagToRemove);
-            Set<UUID> existingTagIds = existingTags.stream().map(TagId::id).collect(toSet());
+            TagId existingTag = new TagId(randomUUID());
             when(tagsExistenceVerifier.existing(any()))
-                    .thenReturn(existingTags);
-            ActivityDto activityDto = new ActivityDto("activity title", null, null, null, existingTagIds, emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
-
-            Collection<TagId> tagsAfterRemove = removeAll(existingTags, singleton(tagToRemove));
+                    .thenReturn(Set.of(existingTag, tagToRemove));
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    Set.of(existingTag, tagToRemove),
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
             activity.removeTag(tagToRemove, CREATOR);
 
             // then
-            assertThat(activity.tags()).containsExactlyInAnyOrderElementsOf(tagsAfterRemove);
+            assertThat(activity.tags()).containsExactly(existingTag);
 
         }
 
         @Test
         void shouldKeepTagsEmptyWhenRemovingFromEmptyTags() {
             // given
-            ActivityDto activityDto = new ActivityDto("activity title", null, null, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
-            activity.removeTag(new TagId(randomUUID()), CREATOR);
+            activity.removeTag(new TagId(), CREATOR);
 
             // then
             assertThat(activity.tags()).isEmpty();
@@ -380,20 +652,54 @@ class ActivityTest {
         @Test
         void shouldKeepTagsUnchangedWhenRemovingUnassignedTag() {
             // given
-            Set<TagId> existingTags = Set.of(new TagId(randomUUID()), new TagId(randomUUID()), new TagId(randomUUID()));
-            Set<UUID> existingTagIds = existingTags.stream().map(TagId::id).collect(toSet());
+            TagId existingTag = new TagId();
             when(tagsExistenceVerifier.existing(any()))
-                    .thenReturn(existingTags);
-            ActivityDto activityDto = new ActivityDto("activity title", null, null, null, existingTagIds, emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+                    .thenReturn(singleton(existingTag));
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    singleton(existingTag),
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
-            activity.removeTag(new TagId(randomUUID()), CREATOR);
+            activity.removeTag(new TagId(), CREATOR);
 
             // then
-            assertThat(activity.tags()).containsExactlyInAnyOrderElementsOf(existingTags);
+            assertThat(activity.tags()).containsExactly(existingTag);
         }
 
+        @Test
+        void shouldFailWhenEntityInvalid() {
+            // given
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
+            doThrow(EntityInvalidException.class).when(validator).validate(any());
+
+            // then
+            assertThatThrownBy(() -> activity.removeTag(new TagId(), CREATOR))
+                    .isInstanceOf(EntityInvalidException.class);
+        }
     }
 
     @Nested
@@ -403,14 +709,50 @@ class ActivityTest {
         @Test
         void shouldDeleteActivity() {
             // given
-            ActivityDto activityDto = new ActivityDto("activity title", null, null, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
             activity.delete(CREATOR);
 
             // then
             assertThat(activity.deleted()).isTrue();
+        }
+
+        @Test
+        void shouldFailWhenEntityInvalid() {
+            // given
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
+            doThrow(EntityInvalidException.class).when(validator).validate(any());
+
+            // then
+            assertThatThrownBy(() -> activity.delete(CREATOR))
+                    .isInstanceOf(EntityInvalidException.class);
         }
     }
 
@@ -425,10 +767,10 @@ class ActivityTest {
 
         @BeforeEach
         void setUp() {
-            when(metricsExistenceVerifier.existing(any(), any())).thenReturn(singleton(EXISTING_METRIC_ID));
+            when(metricsExistenceVerifier.existing(any(), any()))
+                    .thenReturn(singleton(EXISTING_METRIC_ID));
             when(metricsExistenceVerifier.notExisting(any(), any()))
-                    .thenReturn(singleton(NON_EXISTING_METRIC_ID))
-                    .thenReturn(emptySet());
+                    .thenReturn(singleton(NON_EXISTING_METRIC_ID));
         }
 
         @Test
@@ -437,15 +779,16 @@ class ActivityTest {
             Activity activity = new Activity(
                     new ActivityId(),
                     CREATOR,
-                    "activity title",
-                    null,
-                    null,
-                    null,
-                    emptyList(),
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_TITLE,
+                    EMPTY_TAGS,
                     List.of(NON_EXISTING_METRIC_VALUE),
                     !DELETED,
                     tagsExistenceVerifier,
-                    metricsExistenceVerifier
+                    metricsExistenceVerifier,
+                    validator
             );
             MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
 
@@ -462,15 +805,16 @@ class ActivityTest {
             Activity activity = new Activity(
                     new ActivityId(),
                     CREATOR,
-                    "activity title",
-                    null,
-                    null,
-                    null,
-                    emptyList(),
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
                     List.of(EXISTING_METRIC_VALUE, NON_EXISTING_METRIC_VALUE),
                     !DELETED,
                     tagsExistenceVerifier,
-                    metricsExistenceVerifier
+                    metricsExistenceVerifier,
+                    validator
             );
             MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
 
@@ -482,56 +826,27 @@ class ActivityTest {
         }
 
         @Test
-        void shouldFailWhenMetricNonExistValueNotSet() {
+        void shouldFailWhenEntityInvalid() {
             // given
             Activity activity = new Activity(
                     new ActivityId(),
                     CREATOR,
-                    "activity title",
-                    null,
-                    null,
-                    null,
-                    emptyList(),
-                    List.of(EXISTING_METRIC_VALUE),
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
                     !DELETED,
                     tagsExistenceVerifier,
-                    metricsExistenceVerifier
+                    metricsExistenceVerifier,
+                    validator
             );
-            MetricValue newMetricValue = new MetricValue(NON_EXISTING_METRIC_ID.id(), TEN);
-            when(metricsExistenceVerifier.notExisting(any(), any()))
-                    .thenReturn(singleton(NON_EXISTING_METRIC_ID));
+            doThrow(EntityInvalidException.class).when(validator).validate(any());
+            MetricValue newMetricValue = new MetricValue(randomUUID(), TEN);
 
             // then
-            assertThatThrownBy(() ->
-                    activity.setMetricValue(newMetricValue, CREATOR)
-            )
-                    .isInstanceOf(EntityInvalidException.class);
-        }
-
-        @Test
-        void shouldFailWhenMetricNonExistValueSet() {
-            // given
-            Activity activity = new Activity(
-                    new ActivityId(),
-                    CREATOR,
-                    "activity title",
-                    null,
-                    null,
-                    null,
-                    emptyList(),
-                    List.of(EXISTING_METRIC_VALUE, NON_EXISTING_METRIC_VALUE),
-                    !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier
-            );
-            MetricValue newMetricValue = new MetricValue(NON_EXISTING_METRIC_ID.id(), TEN);
-            when(metricsExistenceVerifier.notExisting(any(), any()))
-                    .thenReturn(singleton(NON_EXISTING_METRIC_ID));
-
-            // then
-            assertThatThrownBy(() ->
-                    activity.setMetricValue(newMetricValue, CREATOR)
-            )
+            assertThatThrownBy(() -> activity.setMetricValue(newMetricValue, CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
         }
     }
@@ -547,10 +862,10 @@ class ActivityTest {
 
         @BeforeEach
         void setUp() {
-            when(metricsExistenceVerifier.existing(any(), any())).thenReturn(singleton(EXISTING_METRIC_ID));
+            when(metricsExistenceVerifier.existing(any(), any()))
+                    .thenReturn(singleton(EXISTING_METRIC_ID));
             when(metricsExistenceVerifier.notExisting(any(), any()))
-                    .thenReturn(singleton(NON_EXISTING_METRIC_ID))
-                    .thenReturn(emptySet());
+                    .thenReturn(singleton(NON_EXISTING_METRIC_ID));
         }
 
         @Test
@@ -559,15 +874,16 @@ class ActivityTest {
             Activity activity = new Activity(
                     new ActivityId(),
                     CREATOR,
-                    "activity title",
-                    null,
-                    null,
-                    null,
-                    emptyList(),
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
                     List.of(EXISTING_METRIC_VALUE, NON_EXISTING_METRIC_VALUE),
                     !DELETED,
                     tagsExistenceVerifier,
-                    metricsExistenceVerifier
+                    metricsExistenceVerifier,
+                    validator
             );
 
             // when
@@ -583,15 +899,16 @@ class ActivityTest {
             Activity activity = new Activity(
                     new ActivityId(),
                     CREATOR,
-                    "activity title",
-                    null,
-                    null,
-                    null,
-                    emptyList(),
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
                     List.of(NON_EXISTING_METRIC_VALUE),
                     !DELETED,
                     tagsExistenceVerifier,
-                    metricsExistenceVerifier
+                    metricsExistenceVerifier,
+                    validator
             );
 
             // when
@@ -607,15 +924,16 @@ class ActivityTest {
             Activity activity = new Activity(
                     new ActivityId(),
                     CREATOR,
-                    "activity title",
-                    null,
-                    null,
-                    null,
-                    emptyList(),
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
                     List.of(EXISTING_METRIC_VALUE, NON_EXISTING_METRIC_VALUE),
                     !DELETED,
                     tagsExistenceVerifier,
-                    metricsExistenceVerifier
+                    metricsExistenceVerifier,
+                    validator
             );
 
             // when
@@ -631,15 +949,16 @@ class ActivityTest {
             Activity activity = new Activity(
                     new ActivityId(),
                     CREATOR,
-                    "activity title",
-                    null,
-                    null,
-                    null,
-                    emptyList(),
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
                     List.of(EXISTING_METRIC_VALUE),
                     !DELETED,
                     tagsExistenceVerifier,
-                    metricsExistenceVerifier
+                    metricsExistenceVerifier,
+                    validator
             );
 
             // when
@@ -647,6 +966,30 @@ class ActivityTest {
 
             // then
             assertThat(activity.metricValues).containsExactlyInAnyOrder(EXISTING_METRIC_VALUE);
+        }
+
+        @Test
+        void shouldFailWhenEntityInvalid() {
+            // given
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
+            doThrow(EntityInvalidException.class).when(validator).validate(any());
+
+            // then
+            assertThatThrownBy(() -> activity.unsetMetricValue(new MetricId(), CREATOR))
+                    .isInstanceOf(EntityInvalidException.class);
         }
     }
 }
