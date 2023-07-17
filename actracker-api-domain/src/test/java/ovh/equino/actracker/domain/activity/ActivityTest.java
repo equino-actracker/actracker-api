@@ -489,10 +489,21 @@ class ActivityTest {
         @Test
         void shouldAssignFirstTag() {
             // given
-            ActivityDto activityDto = new ActivityDto("activity title", null, null, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
-
-            TagId newTag = new TagId(randomUUID());
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
+            TagId newTag = new TagId();
 
             // when
             activity.assignTag(newTag, CREATOR);
@@ -504,39 +515,58 @@ class ActivityTest {
         @Test
         void shouldAssignAnotherTag() {
             // given
-            Set<TagId> existingTags = Set.of(new TagId(randomUUID()), new TagId(randomUUID()));
-            Set<UUID> existingTagIds = existingTags.stream().map(TagId::id).collect(toSet());
+            TagId existingTag = new TagId();
             when(tagsExistenceVerifier.existing(any()))
-                    .thenReturn(existingTags);
-            ActivityDto activityDto = new ActivityDto("activity title", null, null, null, existingTagIds, emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
-
-            TagId newTag = new TagId(randomUUID());
-            Collection<TagId> tagsAfterAssignment = union(existingTags, singleton(newTag));
+                    .thenReturn(singleton(existingTag));
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    singleton(existingTag),
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
+            TagId newTag = new TagId();
 
             // when
             activity.assignTag(newTag, CREATOR);
 
             // then
-            assertThat(activity.tags()).containsExactlyInAnyOrderElementsOf(tagsAfterAssignment);
+            assertThat(activity.tags()).containsExactlyInAnyOrder(existingTag, newTag);
         }
 
         @Test
         void shouldNotDuplicateAssignedTag() {
             // given
-            TagId duplicatedTag = new TagId(randomUUID());
-            Set<TagId> existingTags = Set.of(new TagId(randomUUID()), duplicatedTag);
-            Set<UUID> existingTagIds = existingTags.stream().map(TagId::id).collect(toSet());
+            TagId existingTag = new TagId();
             when(tagsExistenceVerifier.existing(any()))
-                    .thenReturn(existingTags);
-            ActivityDto activityDto = new ActivityDto("activity title", null, null, null, existingTagIds, emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+                    .thenReturn(singleton(existingTag));
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    singleton(existingTag),
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
-            activity.assignTag(duplicatedTag, CREATOR);
+            activity.assignTag(existingTag, CREATOR);
 
             // then
-            assertThat(activity.tags()).containsExactlyInAnyOrderElementsOf(existingTags);
+            assertThat(activity.tags()).containsExactly(existingTag);
         }
 
         @Test
@@ -573,31 +603,52 @@ class ActivityTest {
         shouldRemoveAssignedTag() {
             // given
             TagId tagToRemove = new TagId(randomUUID());
-            Set<TagId> existingTags = Set.of(new TagId(randomUUID()), new TagId(randomUUID()), tagToRemove);
-            Set<UUID> existingTagIds = existingTags.stream().map(TagId::id).collect(toSet());
+            TagId existingTag = new TagId(randomUUID());
             when(tagsExistenceVerifier.existing(any()))
-                    .thenReturn(existingTags);
-            ActivityDto activityDto = new ActivityDto("activity title", null, null, null, existingTagIds, emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
-
-            Collection<TagId> tagsAfterRemove = removeAll(existingTags, singleton(tagToRemove));
+                    .thenReturn(Set.of(existingTag, tagToRemove));
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    Set.of(existingTag, tagToRemove),
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
             activity.removeTag(tagToRemove, CREATOR);
 
             // then
-            assertThat(activity.tags()).containsExactlyInAnyOrderElementsOf(tagsAfterRemove);
+            assertThat(activity.tags()).containsExactly(existingTag);
 
         }
 
         @Test
         void shouldKeepTagsEmptyWhenRemovingFromEmptyTags() {
             // given
-            ActivityDto activityDto = new ActivityDto("activity title", null, null, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
-            activity.removeTag(new TagId(randomUUID()), CREATOR);
+            activity.removeTag(new TagId(), CREATOR);
 
             // then
             assertThat(activity.tags()).isEmpty();
@@ -606,18 +657,29 @@ class ActivityTest {
         @Test
         void shouldKeepTagsUnchangedWhenRemovingUnassignedTag() {
             // given
-            Set<TagId> existingTags = Set.of(new TagId(randomUUID()), new TagId(randomUUID()), new TagId(randomUUID()));
-            Set<UUID> existingTagIds = existingTags.stream().map(TagId::id).collect(toSet());
+            TagId existingTag = new TagId();
             when(tagsExistenceVerifier.existing(any()))
-                    .thenReturn(existingTags);
-            ActivityDto activityDto = new ActivityDto("activity title", null, null, null, existingTagIds, emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+                    .thenReturn(singleton(existingTag));
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    singleton(existingTag),
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
-            activity.removeTag(new TagId(randomUUID()), CREATOR);
+            activity.removeTag(new TagId(), CREATOR);
 
             // then
-            assertThat(activity.tags()).containsExactlyInAnyOrderElementsOf(existingTags);
+            assertThat(activity.tags()).containsExactly(existingTag);
         }
 
         @Test
@@ -652,8 +714,20 @@ class ActivityTest {
         @Test
         void shouldDeleteActivity() {
             // given
-            ActivityDto activityDto = new ActivityDto("activity title", null, null, null, emptySet(), emptyList());
-            Activity activity = Activity.create(activityDto, CREATOR, tagsExistenceVerifier, metricsExistenceVerifier);
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
 
             // when
             activity.delete(CREATOR);
