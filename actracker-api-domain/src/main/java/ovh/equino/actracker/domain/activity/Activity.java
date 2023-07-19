@@ -270,6 +270,10 @@ public class Activity implements Entity {
         return nonNull(this.startTime);
     }
 
+    boolean isFinished() {
+        return nonNull(this.endTime);
+    }
+
     @Override
     public void validate() {
         validator.validate(this);
