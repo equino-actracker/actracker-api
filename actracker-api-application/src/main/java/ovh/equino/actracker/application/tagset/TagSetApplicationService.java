@@ -1,5 +1,6 @@
 package ovh.equino.actracker.application.tagset;
 
+import ovh.equino.actracker.application.SearchResult;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
@@ -35,18 +36,22 @@ public class TagSetApplicationService {
         this.identityProvider = identityProvider;
     }
 
-    public TagSetDto createTagSet(TagSetDto newTagSetData) {
+    public TagSetResult createTagSet(CreateTagSetCommand createTagSetCommand) {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User creator = new User(requesterIdentity.getId());
+
+        TagSetDto newTagSetData = new TagSetDto(createTagSetCommand.name(), createTagSetCommand.tags());
 
         TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, creator);
 
         TagSet tagSet = TagSet.create(newTagSetData, creator, tagsExistenceVerifier);
         tagSetRepository.add(tagSet.forStorage());
-        return tagSet.forClient(creator);
+        TagSetDto tagSetResult = tagSet.forClient(creator);
+
+        return toTagSetResult(tagSetResult);
     }
 
-    public EntitySearchResult<TagSetDto> searchTagSets(TagSetsSearchQuery tagSetsSearchQuery) {
+    public SearchResult<TagSetResult> searchTagSets(SearchTagSetsQuery searchTagSetsQuery) {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User searcher = new User(requesterIdentity.getId());
 
@@ -54,76 +59,92 @@ public class TagSetApplicationService {
 
         EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
                 searcher,
-                tagSetsSearchQuery.pageSize(),
-                tagSetsSearchQuery.pageId(),
-                tagSetsSearchQuery.term(),
+                searchTagSetsQuery.pageSize(),
+                searchTagSetsQuery.pageId(),
+                searchTagSetsQuery.term(),
                 null,
                 null,
-                tagSetsSearchQuery.excludeFilter(),
+                searchTagSetsQuery.excludeFilter(),
                 null,
                 null
         );
         EntitySearchResult<TagSetDto> searchResult = tagSetSearchEngine.findTagSets(searchCriteria);
-        List<TagSetDto> resultForClient = searchResult.results().stream()
+        List<TagSetResult> resultForClient = searchResult.results().stream()
                 .map(tagSet -> TagSet.fromStorage(tagSet, tagsExistenceVerifier))
                 .map(tagSet -> tagSet.forClient(searchCriteria.searcher()))
+                .map(this::toTagSetResult)
                 .toList();
 
-        return new EntitySearchResult<>(searchResult.nextPageId(), resultForClient);
+        return new SearchResult<>(searchResult.nextPageId(), resultForClient);
     }
 
-    public TagSetDto renameTagSet(String newName, UUID tagSetId) {
+    public TagSetResult renameTagSet(String newName, UUID tagSetId) {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
+        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, updater);
+
         TagSetDto tagSetDto = tagSetRepository.findById(tagSetId)
                 .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));
-        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, updater);
-        TagSet tagSet = TagSet.fromStorage(tagSetDto, tagsExistenceVerifier);
 
+        TagSet tagSet = TagSet.fromStorage(tagSetDto, tagsExistenceVerifier);
         tagSet.rename(newName, updater);
         tagSetRepository.update(tagSetId, tagSet.forStorage());
-        return tagSet.forClient(updater);
+        TagSetDto tagSetResult = tagSet.forClient(updater);
+
+        return toTagSetResult(tagSetResult);
     }
 
-    public TagSetDto addTagToSet(UUID tagId, UUID tagSetId) {
+    public TagSetResult addTagToSet(UUID tagId, UUID tagSetId) {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
+        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, updater);
+
         TagSetDto tagSetDto = tagSetRepository.findById(tagSetId)
                 .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));
-        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, updater);
-        TagSet tagSet = TagSet.fromStorage(tagSetDto, tagsExistenceVerifier);
 
+        TagSet tagSet = TagSet.fromStorage(tagSetDto, tagsExistenceVerifier);
         tagSet.assignTag(new TagId(tagId), updater);
         tagSetRepository.update(tagSetId, tagSet.forStorage());
-        return tagSet.forClient(updater);
+        TagSetDto tagSetResult = tagSet.forClient(updater);
+
+        return toTagSetResult(tagSetResult);
     }
 
-    public TagSetDto removeTagFromSet(UUID tagId, UUID tagSetId) {
+    public TagSetResult removeTagFromSet(UUID tagId, UUID tagSetId) {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
+        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, updater);
+
         TagSetDto tagSetDto = tagSetRepository.findById(tagSetId)
                 .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));
-        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, updater);
-        TagSet tagSet = TagSet.fromStorage(tagSetDto, tagsExistenceVerifier);
 
+        TagSet tagSet = TagSet.fromStorage(tagSetDto, tagsExistenceVerifier);
         tagSet.removeTag(new TagId(tagId), updater);
         tagSetRepository.update(tagSetId, tagSet.forStorage());
-        return tagSet.forClient(updater);
+        TagSetDto tagSetResult = tagSet.forClient(updater);
+
+        return toTagSetResult(tagSetResult);
     }
 
     public void deleteTagSet(UUID tagSetId) {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User remover = new User(requesterIdentity.getId());
 
+        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, remover);
+
         TagSetDto tagSetDto = tagSetRepository.findById(tagSetId)
                 .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));
-        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, remover);
+
         TagSet tagSet = TagSet.fromStorage(tagSetDto, tagsExistenceVerifier);
 
         tagSet.delete(remover);
         tagSetRepository.update(tagSetId, tagSet.forStorage());
+    }
+
+    private TagSetResult toTagSetResult(TagSetDto tagSetResult) {
+        return new TagSetResult(tagSetResult.id(), tagSetResult.name(), tagSetResult.tags());
     }
 }
