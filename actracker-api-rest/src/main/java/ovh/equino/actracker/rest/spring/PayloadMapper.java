@@ -13,42 +13,42 @@ import static org.apache.commons.lang3.StringUtils.split;
 
 abstract public class PayloadMapper {
 
-    protected Instant timestampToInstant(Long timestamp) {
+    public Instant timestampToInstant(Long timestamp) {
         if (isNull(timestamp)) {
             return null;
         }
         return Instant.ofEpochMilli(timestamp);
     }
 
-    protected Long instantToTimestamp(Instant instant) {
+    public Long instantToTimestamp(Instant instant) {
         if (isNull(instant)) {
             return null;
         }
         return instant.toEpochMilli();
     }
 
-    protected Set<UUID> stringsToUuids(Collection<String> strings) {
+    public Set<UUID> stringsToUuids(Collection<String> strings) {
         return requireNonNullElse(strings, new ArrayList<String>()).stream()
                 .filter(Objects::nonNull)
                 .map(UUID::fromString)
                 .collect(toUnmodifiableSet());
     }
 
-    protected UUID stringToUuid(String string) {
+    public UUID stringToUuid(String string) {
         if(isNull(string)) {
             return null;
         }
         return UUID.fromString(string);
     }
 
-    protected Set<String> uuidsToStrings(Collection<UUID> uuids) {
+    public Set<String> uuidsToStrings(Collection<UUID> uuids) {
         return requireNonNullElse(uuids, new ArrayList<UUID>()).stream()
                 .filter(Objects::nonNull)
                 .map(this::uuidToString)
                 .collect(toUnmodifiableSet());
     }
 
-    protected String uuidToString(UUID uuid) {
+    public String uuidToString(UUID uuid) {
         if (isNull(uuid)) {
             return null;
         }
