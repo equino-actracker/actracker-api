@@ -42,7 +42,7 @@ public class TagSet implements Entity {
         this.tagsExistenceVerifier = tagsExistenceVerifier;
     }
 
-    static TagSet create(TagSetDto tagSet, User creator, TagsExistenceVerifier tagsExistenceVerifier) {
+    public static TagSet create(TagSetDto tagSet, User creator, TagsExistenceVerifier tagsExistenceVerifier) {
         TagSet newTagSet = new TagSet(
                 new TagSetId(),
                 creator,

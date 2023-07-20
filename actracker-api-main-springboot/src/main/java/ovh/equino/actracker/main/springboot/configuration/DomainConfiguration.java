@@ -6,7 +6,6 @@ import org.springframework.context.annotation.FilterType;
 import ovh.equino.actracker.domain.activity.ActivityService;
 import ovh.equino.actracker.domain.dashboard.DashboardService;
 import ovh.equino.actracker.domain.tag.TagService;
-import ovh.equino.actracker.domain.tagset.TagSetService;
 
 @Configuration
 @ComponentScan(
@@ -16,7 +15,6 @@ import ovh.equino.actracker.domain.tagset.TagSetService;
                 classes = {
                         ActivityService.class,
                         TagService.class,
-                        TagSetService.class,
                         DashboardService.class
                 }
         )
