@@ -46,9 +46,23 @@ public class TagSetApplicationService {
         return tagSet.forClient(creator);
     }
 
-    public EntitySearchResult<TagSetDto> searchTagSets(EntitySearchCriteria searchCriteria) {
-        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, searchCriteria.searcher());
+    public EntitySearchResult<TagSetDto> searchTagSets(TagSetsSearchQuery tagSetsSearchQuery) {
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User searcher = new User(requesterIdentity.getId());
 
+        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, searcher);
+
+        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
+                searcher,
+                tagSetsSearchQuery.pageSize(),
+                tagSetsSearchQuery.pageId(),
+                tagSetsSearchQuery.term(),
+                null,
+                null,
+                tagSetsSearchQuery.excludeFilter(),
+                null,
+                null
+        );
         EntitySearchResult<TagSetDto> searchResult = tagSetSearchEngine.findTagSets(searchCriteria);
         List<TagSetDto> resultForClient = searchResult.results().stream()
                 .map(tagSet -> TagSet.fromStorage(tagSet, tagsExistenceVerifier))

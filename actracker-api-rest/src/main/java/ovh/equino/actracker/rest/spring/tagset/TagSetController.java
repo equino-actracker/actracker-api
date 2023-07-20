@@ -2,15 +2,11 @@ package ovh.equino.actracker.rest.spring.tagset;
 
 import org.springframework.web.bind.annotation.*;
 import ovh.equino.actracker.application.tagset.TagSetApplicationService;
-import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.application.tagset.TagSetsSearchQuery;
 import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.tagset.TagSetDto;
-import ovh.equino.actracker.domain.user.User;
-import ovh.equino.actracker.rest.spring.EntitySearchCriteriaBuilder;
 import ovh.equino.actracker.rest.spring.SearchResponse;
 import ovh.equino.actracker.rest.spring.tag.Tag;
-import ovh.equino.security.identity.Identity;
-import ovh.equino.security.identity.IdentityProvider;
 
 import java.util.UUID;
 
@@ -22,14 +18,10 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 class TagSetController {
 
     private final TagSetApplicationService tagSetApplicationService;
-    private final IdentityProvider identityProvider;
     private final TagSetMapper tagSetMapper = new TagSetMapper();
 
-    TagSetController(TagSetApplicationService tagSetApplicationService,
-                     IdentityProvider identityProvider) {
-
+    TagSetController(TagSetApplicationService tagSetApplicationService) {
         this.tagSetApplicationService = tagSetApplicationService;
-        this.identityProvider = identityProvider;
     }
 
     @RequestMapping(method = POST)
@@ -42,43 +34,40 @@ class TagSetController {
 
     @RequestMapping(method = GET, path = "/matching")
     @ResponseStatus(OK)
-    SearchResponse<TagSet> searchTagSets(
-            @RequestParam(name = "pageId", required = false) String pageId,
-            @RequestParam(name = "pageSize", required = false) Integer pageSize,
-            @RequestParam(name = "term", required = false) String term,
-            @RequestParam(name = "excludedTagSets", required = false) String excludedTagSets) {
+    SearchResponse<TagSet> searchTagSets(@RequestParam(name = "pageId", required = false) String pageId,
+                                         @RequestParam(name = "pageSize", required = false) Integer pageSize,
+                                         @RequestParam(name = "term", required = false) String term,
+                                         @RequestParam(name = "excludedTagSets", required = false) String excludedTagSets) {
 
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User requester = new User(requesterIdentity.getId());
+        TagSetsSearchQuery tagSetsSearchQuery = new TagSetsSearchQuery(
+                pageSize,
+                pageId,
+                term,
+                tagSetMapper.parseIds(excludedTagSets)
+        );
 
-        EntitySearchCriteria searchCriteria = new EntitySearchCriteriaBuilder()
-                .withSearcher(requester)
-                .withPageId(pageId)
-                .withPageSize(pageSize)
-                .withTerm(term)
-                .withExcludedIdsJointWithComma(excludedTagSets)
-                .build();
-
-        EntitySearchResult<TagSetDto> searchResult = tagSetApplicationService.searchTagSets(searchCriteria);
+        EntitySearchResult<TagSetDto> searchResult = tagSetApplicationService.searchTagSets(tagSetsSearchQuery);
         return tagSetMapper.toResponse(searchResult);
     }
 
-    @RequestMapping(method = DELETE, path = "/{id}")
+    @RequestMapping(method = DELETE, path = "/{tagSetId}")
     @ResponseStatus(OK)
-    void deleteTagSet(@PathVariable("id") String id) {
-        tagSetApplicationService.deleteTagSet(UUID.fromString(id));
+    void deleteTagSet(@PathVariable("tagSetId") String tagSetId) {
+        tagSetApplicationService.deleteTagSet(UUID.fromString(tagSetId));
     }
 
-    @RequestMapping(method = PUT, path = "/{id}/name")
+    @RequestMapping(method = PUT, path = "/{tagSetId}/name")
     @ResponseStatus(OK)
-    TagSet renameTagSet(@PathVariable("id") String tagSetId, @RequestBody String newName) {
+    TagSet replaceTagSetName(@PathVariable("tagSetId") String tagSetId,
+                             @RequestBody String newName) {
         TagSetDto tagSet = tagSetApplicationService.renameTagSet(newName, UUID.fromString(tagSetId));
         return tagSetMapper.toResponse(tagSet);
     }
 
-    @RequestMapping(method = POST, path = "/{id}/tag")
+    @RequestMapping(method = POST, path = "/{tagSetId}/tag")
     @ResponseStatus(OK)
-    TagSet addTagToSet(@PathVariable("id") String tagSetId, @RequestBody Tag newTag) {
+    TagSet addTagToTagSet(@PathVariable("tagSetId") String tagSetId,
+                          @RequestBody Tag newTag) {
 
         TagSetDto tagSet = tagSetApplicationService.addTagToSet(
                 UUID.fromString(newTag.id()),
@@ -90,7 +79,8 @@ class TagSetController {
 
     @RequestMapping(method = DELETE, path = "/{tagSetId}/tag/{tagId}")
     @ResponseStatus(OK)
-    TagSet removeTagFromSet(@PathVariable("tagSetId") String tagSetId, @PathVariable(name = "tagId") String tagId) {
+    TagSet removeTagFromTagSet(@PathVariable("tagSetId") String tagSetId,
+                               @PathVariable(name = "tagId") String tagId) {
 
         TagSetDto tagSet = tagSetApplicationService.removeTagFromSet(
                 UUID.fromString(tagId),
