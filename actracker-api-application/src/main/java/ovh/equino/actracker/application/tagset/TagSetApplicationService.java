@@ -25,10 +25,10 @@ public class TagSetApplicationService {
     private final TagRepository tagRepository;
     private final IdentityProvider identityProvider;
 
-    TagSetApplicationService(TagSetRepository tagSetRepository,
-                             TagSetSearchEngine tagSetSearchEngine,
-                             TagRepository tagRepository,
-                             IdentityProvider identityProvider) {
+    public TagSetApplicationService(TagSetRepository tagSetRepository,
+                                    TagSetSearchEngine tagSetSearchEngine,
+                                    TagRepository tagRepository,
+                                    IdentityProvider identityProvider) {
 
         this.tagSetRepository = tagSetRepository;
         this.tagSetSearchEngine = tagSetSearchEngine;

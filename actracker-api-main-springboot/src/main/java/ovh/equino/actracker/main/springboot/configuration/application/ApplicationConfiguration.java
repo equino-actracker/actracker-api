@@ -1,4 +1,4 @@
-package ovh.equino.actracker.main.springboot.configuration;
+package ovh.equino.actracker.main.springboot.configuration.application;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -6,7 +6,6 @@ import org.springframework.context.annotation.FilterType;
 import ovh.equino.actracker.application.activity.ActivityApplicationService;
 import ovh.equino.actracker.application.dashboard.DashboardApplicationService;
 import ovh.equino.actracker.application.tag.TagApplicationService;
-import ovh.equino.actracker.application.tagset.TagSetApplicationService;
 
 @Configuration
 @ComponentScan(
@@ -16,7 +15,6 @@ import ovh.equino.actracker.application.tagset.TagSetApplicationService;
                 classes = {
                         ActivityApplicationService.class,
                         TagApplicationService.class,
-                        TagSetApplicationService.class,
                         DashboardApplicationService.class
                 }
         )

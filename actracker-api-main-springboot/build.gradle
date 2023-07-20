@@ -20,5 +20,6 @@ dependencies {
 
     implementation 'org.flywaydb:flyway-core:9.11.0'
 
+    implementation 'ovh.equino.security:equino-security:0.3.2'
     implementation 'ovh.equino.security:equino-security-basic-spring:0.3.2'
 }
