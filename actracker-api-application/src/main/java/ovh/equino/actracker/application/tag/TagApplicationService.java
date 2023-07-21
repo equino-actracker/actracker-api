@@ -1,5 +1,6 @@
 package ovh.equino.actracker.application.tag;
 
+import ovh.equino.actracker.application.SearchResult;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
@@ -50,7 +51,6 @@ public class TagApplicationService {
                         .map(this::resolveShare)
                         .toList()
         );
-
         Tag tag = Tag.create(tagData, creator);
         tagRepository.add(tag.forStorage());
         TagDto tagResult = tag.forClient(creator);
@@ -69,7 +69,7 @@ public class TagApplicationService {
                 .toList();
     }
 
-    public EntitySearchResult<TagDto> searchTags(SearchTagsQuery searchTagsQuery) {
+    public SearchResult<TagResult> searchTags(SearchTagsQuery searchTagsQuery) {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User searcher = new User(requesterIdentity.getId());
 
@@ -84,13 +84,14 @@ public class TagApplicationService {
                 null,
                 null
         );
-
         EntitySearchResult<TagDto> searchResult = tagSearchEngine.findTags(searchCriteria);
-        List<TagDto> resultForClient = searchResult.results().stream()
+        List<TagResult> resultForClient = searchResult.results().stream()
                 .map(Tag::fromStorage)
                 .map(tag -> tag.forClient(searchCriteria.searcher()))
+                .map(this::toTagResult)
                 .toList();
-        return new EntitySearchResult<>(searchResult.nextPageId(), resultForClient);
+
+        return new SearchResult<>(searchResult.nextPageId(), resultForClient);
     }
 
     public TagResult renameTag(String newName, UUID tagId) {

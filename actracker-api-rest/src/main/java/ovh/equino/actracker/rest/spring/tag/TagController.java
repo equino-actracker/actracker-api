@@ -1,8 +1,8 @@
 package ovh.equino.actracker.rest.spring.tag;
 
 import org.springframework.web.bind.annotation.*;
+import ovh.equino.actracker.application.SearchResult;
 import ovh.equino.actracker.application.tag.*;
-import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.tag.MetricDto;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.rest.spring.SearchResponse;
@@ -73,9 +73,11 @@ class TagController {
                 term,
                 tagMapper.parseIds(excludedTags)
         );
-
-        EntitySearchResult<TagDto> searchResult = tagApplicationService.searchTags(searchTagsQuery);
-        return tagMapper.toResponse(searchResult);
+        SearchResult<TagResult> searchResult = tagApplicationService.searchTags(searchTagsQuery);
+        List<Tag> foundResults = searchResult.results().stream()
+                .map(this::toResponse)
+                .toList();
+        return new SearchResponse<>(searchResult.nextPageId(), foundResults);
     }
 
     @RequestMapping(method = DELETE, path = "/{id}")
