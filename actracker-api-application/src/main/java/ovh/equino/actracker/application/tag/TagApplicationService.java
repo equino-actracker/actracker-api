@@ -21,10 +21,10 @@ public class TagApplicationService {
     private final IdentityProvider identityProvider;
     private final TenantRepository tenantRepository;
 
-    TagApplicationService(TagRepository tagRepository,
-                          TagSearchEngine tagSearchEngine,
-                          IdentityProvider identityProvider,
-                          TenantRepository tenantRepository) {
+    public TagApplicationService(TagRepository tagRepository,
+                                 TagSearchEngine tagSearchEngine,
+                                 IdentityProvider identityProvider,
+                                 TenantRepository tenantRepository) {
 
         this.tagRepository = tagRepository;
         this.tagSearchEngine = tagSearchEngine;
@@ -61,9 +61,21 @@ public class TagApplicationService {
                 .toList();
     }
 
-    public EntitySearchResult<TagDto> searchTags(EntitySearchCriteria searchCriteria) {
+    public EntitySearchResult<TagDto> searchTags(SearchTagsQuery searchTagsQuery) {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User searcher = new User(requesterIdentity.getId());
+
+        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
+                searcher,
+                searchTagsQuery.pageSize(),
+                searchTagsQuery.pageId(),
+                searchTagsQuery.term(),
+                null,
+                null,
+                searchTagsQuery.excludeFilter(),
+                null,
+                null
+        );
 
         EntitySearchResult<TagDto> searchResult = tagSearchEngine.findTags(searchCriteria);
         List<TagDto> resultForClient = searchResult.results().stream()

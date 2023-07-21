@@ -1,18 +1,14 @@
 package ovh.equino.actracker.rest.spring.tag;
 
 import org.springframework.web.bind.annotation.*;
+import ovh.equino.actracker.application.tag.SearchTagsQuery;
 import ovh.equino.actracker.application.tag.TagApplicationService;
-import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.tag.MetricDto;
 import ovh.equino.actracker.domain.tag.TagDto;
-import ovh.equino.actracker.domain.user.User;
-import ovh.equino.actracker.rest.spring.EntitySearchCriteriaBuilder;
 import ovh.equino.actracker.rest.spring.SearchResponse;
 import ovh.equino.actracker.rest.spring.share.Share;
 import ovh.equino.actracker.rest.spring.share.ShareMapper;
-import ovh.equino.security.identity.Identity;
-import ovh.equino.security.identity.IdentityProvider;
 
 import java.util.List;
 import java.util.Set;
@@ -26,15 +22,13 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 class TagController {
 
     private final TagApplicationService tagApplicationService;
-    private final IdentityProvider identityProvider;
 
     private final TagMapper tagMapper = new TagMapper();
     private final MetricMapper metricMapper = new MetricMapper();
     private final ShareMapper shareMapper = new ShareMapper();
 
-    TagController(TagApplicationService tagApplicationService, IdentityProvider identityProvider) {
+    TagController(TagApplicationService tagApplicationService) {
         this.tagApplicationService = tagApplicationService;
-        this.identityProvider = identityProvider;
     }
 
     @RequestMapping(method = POST)
@@ -62,18 +56,14 @@ class TagController {
             @RequestParam(name = "term", required = false) String term,
             @RequestParam(name = "excludedTags", required = false) String excludedTags) {
 
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User requester = new User(requesterIdentity.getId());
+        SearchTagsQuery searchTagsQuery = new SearchTagsQuery(
+                pageSize,
+                pageId,
+                term,
+                tagMapper.parseIds(excludedTags)
+        );
 
-        EntitySearchCriteria searchCriteria = new EntitySearchCriteriaBuilder()
-                .withSearcher(requester)
-                .withPageId(pageId)
-                .withPageSize(pageSize)
-                .withTerm(term)
-                .withExcludedIdsJointWithComma(excludedTags)
-                .build();
-
-        EntitySearchResult<TagDto> searchResult = tagApplicationService.searchTags(searchCriteria);
+        EntitySearchResult<TagDto> searchResult = tagApplicationService.searchTags(searchTagsQuery);
         return tagMapper.toResponse(searchResult);
     }
 
