@@ -46,7 +46,7 @@ class TagController {
 
     @RequestMapping(method = GET)
     @ResponseStatus(OK)
-    List<Tag> resolveTags(@RequestParam(name = "ids", required = false) String tagIds) {
+    List<Tag> getTags(@RequestParam(name = "ids", required = false) String tagIds) {
         Set<UUID> parsedIds = tagMapper.parseIds(tagIds);
         List<TagResult> tagResults = tagApplicationService.resolveTags(parsedIds);
         return tagResults.stream()
@@ -56,11 +56,10 @@ class TagController {
 
     @RequestMapping(method = GET, path = "/matching")
     @ResponseStatus(OK)
-    SearchResponse<Tag> searchTags(
-            @RequestParam(name = "pageId", required = false) String pageId,
-            @RequestParam(name = "pageSize", required = false) Integer pageSize,
-            @RequestParam(name = "term", required = false) String term,
-            @RequestParam(name = "excludedTags", required = false) String excludedTags) {
+    SearchResponse<Tag> searchTags(@RequestParam(name = "pageId", required = false) String pageId,
+                                   @RequestParam(name = "pageSize", required = false) Integer pageSize,
+                                   @RequestParam(name = "term", required = false) String term,
+                                   @RequestParam(name = "excludedTags", required = false) String excludedTags) {
 
         SearchTagsQuery searchTagsQuery = new SearchTagsQuery(
                 pageSize,
@@ -82,8 +81,8 @@ class TagController {
 
     @RequestMapping(method = POST, path = "/{id}/share")
     @ResponseStatus(OK)
-    Tag shareTag(@PathVariable("id") String id,
-                 @RequestBody Share share) {
+    Tag addShareToTag(@PathVariable("id") String id,
+                      @RequestBody Share share) {
 
         TagResult updatedTag = tagApplicationService.shareTag(share.granteeName(), UUID.fromString(id));
         return toResponse(updatedTag);
@@ -91,23 +90,27 @@ class TagController {
 
     @RequestMapping(method = DELETE, path = "/{id}/share/{granteeName}")
     @ResponseStatus(OK)
-    Tag unshareTag(@PathVariable("id") String tagId, @PathVariable("granteeName") String granteeName) {
+    Tag removeShareFromTag(@PathVariable("id") String tagId,
+                           @PathVariable("granteeName") String granteeName) {
+
         TagResult updatedTag = tagApplicationService.unshareTag(granteeName, UUID.fromString(tagId));
         return toResponse(updatedTag);
     }
 
     @RequestMapping(method = PUT, path = "/{id}/name")
     @ResponseStatus(OK)
-    Tag renameTag(@PathVariable("id") String tagId, @RequestBody String newName) {
+    Tag replaceTagName(@PathVariable("id") String tagId,
+                       @RequestBody String newName) {
+
         TagResult updatedTag = tagApplicationService.renameTag(newName, UUID.fromString(tagId));
         return toResponse(updatedTag);
     }
 
     @RequestMapping(method = PUT, path = "/{tagId}/metric/{metricId}/name")
     @ResponseStatus(OK)
-    Tag renameMetric(@PathVariable("tagId") String tagId,
-                     @PathVariable("metricId") String metricId,
-                     @RequestBody String newName) {
+    Tag replaceMetricName(@PathVariable("tagId") String tagId,
+                          @PathVariable("metricId") String metricId,
+                          @RequestBody String newName) {
 
         TagResult updatedTag = tagApplicationService.renameMetric(
                 newName,
@@ -120,7 +123,9 @@ class TagController {
 
     @RequestMapping(method = POST, path = "/{tagId}/metric")
     @ResponseStatus(OK)
-    Tag addMetric(@PathVariable("tagId") String tagId, @RequestBody Metric metric) {
+    Tag createMetric(@PathVariable("tagId") String tagId,
+                     @RequestBody Metric metric) {
+
         TagResult updatedTag = tagApplicationService
                 .addMetricToTag(metric.name(), metric.type(), UUID.fromString(tagId));
 
@@ -129,7 +134,9 @@ class TagController {
 
     @RequestMapping(method = DELETE, path = "/{tagId}/metric/{metricId}")
     @ResponseStatus(OK)
-    Tag deleteMetric(@PathVariable("tagId") String tagId, @PathVariable("metricId") String metricId) {
+    Tag deleteMetric(@PathVariable("tagId") String tagId,
+                     @PathVariable("metricId") String metricId) {
+
         TagResult updatedTag = tagApplicationService
                 .deleteMetric(UUID.fromString(metricId), UUID.fromString(tagId));
 
