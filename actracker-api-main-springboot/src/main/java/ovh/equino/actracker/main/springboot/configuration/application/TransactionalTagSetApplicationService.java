@@ -18,10 +18,10 @@ import java.util.UUID;
 @Service
 class TransactionalTagSetApplicationService extends TagSetApplicationService {
 
-    public TransactionalTagSetApplicationService(TagSetRepository tagSetRepository,
-                                                 TagSetSearchEngine tagSetSearchEngine,
-                                                 TagRepository tagRepository,
-                                                 IdentityProvider identityProvider) {
+    TransactionalTagSetApplicationService(TagSetRepository tagSetRepository,
+                                          TagSetSearchEngine tagSetSearchEngine,
+                                          TagRepository tagRepository,
+                                          IdentityProvider identityProvider) {
         super(tagSetRepository, tagSetSearchEngine, tagRepository, identityProvider);
     }
 
