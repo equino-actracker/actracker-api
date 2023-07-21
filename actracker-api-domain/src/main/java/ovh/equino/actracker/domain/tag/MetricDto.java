@@ -14,4 +14,8 @@ public record MetricDto(
     public MetricDto(UUID id, String name, MetricType type) {
         this(id, null, name, type, false);
     }
+
+    public MetricDto(String name, MetricType type) {
+        this(null, name, type);
+    }
 }

@@ -3,7 +3,7 @@ package ovh.equino.actracker.rest.spring.tag;
 record Metric(
         String id,
         String name,
-        MetricType type
+        String type
 ) {
 
     enum MetricType {
