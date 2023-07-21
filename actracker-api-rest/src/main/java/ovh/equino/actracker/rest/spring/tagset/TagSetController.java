@@ -96,11 +96,11 @@ class TagSetController {
         return toResponse(updatedTagSet);
     }
 
-    private TagSet toResponse(TagSetResult updatedTagSet) {
+    private TagSet toResponse(TagSetResult tagSetResult) {
         return new TagSet(
-                tagSetMapper.uuidToString(updatedTagSet.id()),
-                updatedTagSet.name(),
-                tagSetMapper.uuidsToStrings(updatedTagSet.tags())
+                tagSetMapper.uuidToString(tagSetResult.id()),
+                tagSetResult.name(),
+                tagSetMapper.uuidsToStrings(tagSetResult.tags())
         );
     }
 

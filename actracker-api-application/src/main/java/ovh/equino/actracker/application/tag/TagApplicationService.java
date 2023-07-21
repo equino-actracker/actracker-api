@@ -32,32 +32,40 @@ public class TagApplicationService {
         this.tenantRepository = tenantRepository;
     }
 
-    public TagDto createTag(TagDto newTagData) {
+    public TagResult createTag(CreateTagCommand createTagCommand) {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User creator = new User(requesterIdentity.getId());
 
-        TagDto tagDataWithSharesResolved = new TagDto(
-                newTagData.id(),
-                newTagData.creatorId(),
-                newTagData.name(),
-                newTagData.metrics(),
-                newTagData.shares().stream()
-                        .map(this::resolveShare)
+        TagDto tagData = new TagDto(
+                createTagCommand.tagName(),
+                createTagCommand.assignedMetrics().stream()
+                        .map(assignedMetric ->
+                                new MetricDto(
+                                        assignedMetric.name(),
+                                        MetricType.valueOf(assignedMetric.type())
+                                )
+                        )
                         .toList(),
-                newTagData.deleted()
+                createTagCommand.grantedShares().stream()
+                        .map(this::resolveShare)
+                        .toList()
         );
-        Tag tag = Tag.create(tagDataWithSharesResolved, creator);
+
+        Tag tag = Tag.create(tagData, creator);
         tagRepository.add(tag.forStorage());
-        return tag.forClient(creator);
+        TagDto tagResult = tag.forClient(creator);
+
+        return toTagResult(tagResult);
     }
 
-    public List<TagDto> resolveTags(Set<UUID> tagIds) {
+    public List<TagResult> resolveTags(Set<UUID> tagIds) {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User searcher = new User(requesterIdentity.getId());
 
         return tagRepository.findByIds(tagIds, searcher).stream()
                 .map(Tag::fromStorage)
                 .map(tag -> tag.forClient(searcher))
+                .map(this::toTagResult)
                 .toList();
     }
 
@@ -85,7 +93,7 @@ public class TagApplicationService {
         return new EntitySearchResult<>(searchResult.nextPageId(), resultForClient);
     }
 
-    public TagDto renameTag(String newName, UUID tagId) {
+    public TagResult renameTag(String newName, UUID tagId) {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
@@ -95,7 +103,8 @@ public class TagApplicationService {
 
         tag.rename(newName, updater);
         tagRepository.update(tagId, tag.forStorage());
-        return tag.forClient(updater);
+        TagDto tagResult = tag.forClient(updater);
+        return toTagResult(tagResult);
     }
 
     public void deleteTag(UUID tagId) {
@@ -157,7 +166,7 @@ public class TagApplicationService {
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
         Tag tag = Tag.fromStorage(tagDto);
 
-        Share share = resolveShare(newShare);
+        Share share = resolveShare(newShare.granteeName());
 
         tag.share(share, granter);
         tagRepository.update(tagId, tag.forStorage());
@@ -177,13 +186,26 @@ public class TagApplicationService {
         return tag.forClient(granter);
     }
 
-    private Share resolveShare(Share share) {
-        return tenantRepository.findByUsername(share.granteeName())
+    private Share resolveShare(String share) {
+        return tenantRepository.findByUsername(share)
                 .map(tenant -> new Share(
                         new User(tenant.id()),
                         tenant.username()
                 ))
-                .orElse(new Share(share.granteeName()));
+                .orElse(new Share(share));
     }
 
+    private TagResult toTagResult(TagDto tagDto) {
+        List<MetricResult> metricResults = tagDto.metrics().stream()
+                .map(this::toMetricResult)
+                .toList();
+        List<String> shares = tagDto.shares().stream()
+                .map(Share::granteeName)
+                .toList();
+        return new TagResult(tagDto.id(), tagDto.name(), metricResults, shares);
+    }
+
+    private MetricResult toMetricResult(MetricDto metricDto) {
+        return new MetricResult(metricDto.id(), metricDto.name(), metricDto.type().toString());
+    }
 }

@@ -1,8 +1,7 @@
 package ovh.equino.actracker.rest.spring.tag;
 
 import org.springframework.web.bind.annotation.*;
-import ovh.equino.actracker.application.tag.SearchTagsQuery;
-import ovh.equino.actracker.application.tag.TagApplicationService;
+import ovh.equino.actracker.application.tag.*;
 import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.tag.MetricDto;
 import ovh.equino.actracker.domain.tag.TagDto;
@@ -10,10 +9,12 @@ import ovh.equino.actracker.rest.spring.SearchResponse;
 import ovh.equino.actracker.rest.spring.share.Share;
 import ovh.equino.actracker.rest.spring.share.ShareMapper;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static java.util.Objects.requireNonNullElse;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 
@@ -34,18 +35,28 @@ class TagController {
     @RequestMapping(method = POST)
     @ResponseStatus(OK)
     Tag createTag(@RequestBody Tag tag) {
-        TagDto tagDto = tagMapper.fromRequest(tag);
-        TagDto createdTag = tagApplicationService.createTag(tagDto);
+        List<AssignedMetric> assignedMetric = requireNonNullElse(tag.metrics(), new ArrayList<Metric>())
+                .stream()
+                .map(metric -> new AssignedMetric(metric.name(), metric.type()))
+                .toList();
+        List<String> grantedShares = requireNonNullElse(tag.shares(), new ArrayList<Share>())
+                .stream()
+                .map(Share::granteeName)
+                .toList();
+        CreateTagCommand createTagCommand = new CreateTagCommand(tag.name(), assignedMetric, grantedShares);
+        TagResult createdTag = tagApplicationService.createTag(createTagCommand);
 
-        return tagMapper.toResponse(createdTag);
+        return toResponse(createdTag);
     }
 
     @RequestMapping(method = GET)
     @ResponseStatus(OK)
     List<Tag> resolveTags(@RequestParam(name = "ids", required = false) String tagIds) {
         Set<UUID> parsedIds = tagMapper.parseIds(tagIds);
-        List<TagDto> resolvedTags = tagApplicationService.resolveTags(parsedIds);
-        return tagMapper.toResponse(resolvedTags);
+        List<TagResult> tagResults = tagApplicationService.resolveTags(parsedIds);
+        return tagResults.stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     @RequestMapping(method = GET, path = "/matching")
@@ -93,8 +104,8 @@ class TagController {
     @RequestMapping(method = PUT, path = "/{id}/name")
     @ResponseStatus(OK)
     Tag renameTag(@PathVariable("id") String tagId, @RequestBody String newName) {
-        TagDto tagDto = tagApplicationService.renameTag(newName, UUID.fromString(tagId));
-        return tagMapper.toResponse(tagDto);
+        TagResult updatedTag = tagApplicationService.renameTag(newName, UUID.fromString(tagId));
+        return toResponse(updatedTag);
     }
 
     @RequestMapping(method = PUT, path = "/{tagId}/metric/{metricId}/name")
@@ -132,4 +143,17 @@ class TagController {
         return tagMapper.toResponse(tagDto);
     }
 
+    private Tag toResponse(TagResult tagResult) {
+        List<Metric> metrics = tagResult.metrics().stream()
+                .map(this::toResponse)
+                .toList();
+        List<Share> shares = tagResult.shares().stream()
+                .map(Share::new)
+                .toList();
+        return new Tag(tagResult.id().toString(), tagResult.name(), metrics, shares);
+    }
+
+    private Metric toResponse(MetricResult metricResult) {
+        return new Metric(metricResult.id().toString(), metricResult.name(), metricResult.type());
+    }
 }
