@@ -120,7 +120,7 @@ public class TagApplicationService {
         tagRepository.update(tagId, tag.forStorage());
     }
 
-    public TagDto addMetricToTag(String metricName, MetricType metricType, UUID tagId) {
+    public TagResult addMetricToTag(String metricName, String metricType, UUID tagId) {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
@@ -128,9 +128,10 @@ public class TagApplicationService {
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
         Tag tag = Tag.fromStorage(tagDto);
 
-        tag.addMetric(metricName, metricType, updater);
+        tag.addMetric(metricName, MetricType.valueOf(metricType), updater);
         tagRepository.update(tagId, tag.forStorage());
-        return tag.forClient(updater);
+        TagDto tagResult = tag.forClient(updater);
+        return toTagResult(tagResult);
     }
 
     public TagDto deleteMetric(UUID metricId, UUID tagId) {

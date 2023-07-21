@@ -3,7 +3,6 @@ package ovh.equino.actracker.rest.spring.tag;
 import org.springframework.web.bind.annotation.*;
 import ovh.equino.actracker.application.SearchResult;
 import ovh.equino.actracker.application.tag.*;
-import ovh.equino.actracker.domain.tag.MetricDto;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.rest.spring.SearchResponse;
 import ovh.equino.actracker.rest.spring.share.Share;
@@ -128,12 +127,10 @@ class TagController {
     @RequestMapping(method = POST, path = "/{tagId}/metric")
     @ResponseStatus(OK)
     Tag addMetric(@PathVariable("tagId") String tagId, @RequestBody Metric metric) {
-        MetricDto metricDto = metricMapper.fromRequest(metric);
+        TagResult updatedTag = tagApplicationService
+                .addMetricToTag(metric.name(), metric.type(), UUID.fromString(tagId));
 
-        TagDto tagDto = tagApplicationService
-                .addMetricToTag(metricDto.name(), metricDto.type(), UUID.fromString(tagId));
-
-        return tagMapper.toResponse(tagDto);
+        return toResponse(updatedTag);
     }
 
     @RequestMapping(method = DELETE, path = "/{tagId}/metric/{metricId}")
