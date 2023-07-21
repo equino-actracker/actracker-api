@@ -42,7 +42,7 @@ public class Tag implements Entity {
         this.validator = validator;
     }
 
-    static Tag create(TagDto tag, User creator) {
+    public static Tag create(TagDto tag, User creator) {
 
         List<Metric> metrics = requireNonNullElse(tag.metrics(), new ArrayList<MetricDto>()).stream()
                 .map(metric -> Metric.create(metric, creator))

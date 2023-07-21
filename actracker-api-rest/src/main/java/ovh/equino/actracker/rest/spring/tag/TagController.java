@@ -6,7 +6,6 @@ import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.tag.MetricDto;
 import ovh.equino.actracker.domain.tag.TagDto;
-import ovh.equino.actracker.domain.tag.TagService;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.rest.spring.EntitySearchCriteriaBuilder;
 import ovh.equino.actracker.rest.spring.SearchResponse;
@@ -26,7 +25,6 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 @RequestMapping("/tag")
 class TagController {
 
-    private final TagService tagService;
     private final TagApplicationService tagApplicationService;
     private final IdentityProvider identityProvider;
 
@@ -34,11 +32,7 @@ class TagController {
     private final MetricMapper metricMapper = new MetricMapper();
     private final ShareMapper shareMapper = new ShareMapper();
 
-    TagController(TagService tagService,
-                  TagApplicationService tagApplicationService,
-                  IdentityProvider identityProvider) {
-
-        this.tagService = tagService;
+    TagController(TagApplicationService tagApplicationService, IdentityProvider identityProvider) {
         this.tagApplicationService = tagApplicationService;
         this.identityProvider = identityProvider;
     }
@@ -50,21 +44,9 @@ class TagController {
         User requester = new User(requesterIdentity.getId());
 
         TagDto tagDto = tagMapper.fromRequest(tag);
-        TagDto createdTag = tagService.createTag(tagDto, requester);
+        TagDto createdTag = tagApplicationService.createTag(tagDto, requester);
 
         return tagMapper.toResponse(createdTag);
-    }
-
-    @RequestMapping(method = PUT, path = "/{id}")
-    @ResponseStatus(OK)
-    Tag updateTag(@PathVariable("id") String id, @RequestBody Tag tag) {
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User requester = new User(requesterIdentity.getId());
-
-        TagDto tagDto = tagMapper.fromRequest(tag);
-        TagDto updatedTag = tagService.updateTag(UUID.fromString(id), tagDto, requester);
-
-        return tagMapper.toResponse(updatedTag);
     }
 
     @RequestMapping(method = GET)
@@ -75,8 +57,8 @@ class TagController {
         User requester = new User(requesterIdentity.getId());
 
         Set<UUID> parsedIds = tagMapper.parseIds(tagIds);
-        List<TagDto> foundTags = tagService.getTags(parsedIds, requester);
-        return tagMapper.toResponse(foundTags);
+        List<TagDto> resolvedTags = tagApplicationService.resolveTags(parsedIds, requester);
+        return tagMapper.toResponse(resolvedTags);
     }
 
     @RequestMapping(method = GET, path = "/matching")
@@ -98,7 +80,7 @@ class TagController {
                 .withExcludedIdsJointWithComma(excludedTags)
                 .build();
 
-        EntitySearchResult<TagDto> searchResult = tagService.searchTags(searchCriteria);
+        EntitySearchResult<TagDto> searchResult = tagApplicationService.searchTags(searchCriteria);
         return tagMapper.toResponse(searchResult);
     }
 
