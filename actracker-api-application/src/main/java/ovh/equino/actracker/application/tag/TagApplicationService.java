@@ -39,11 +39,11 @@ public class TagApplicationService {
 
         TagDto tagData = new TagDto(
                 createTagCommand.tagName(),
-                createTagCommand.assignedMetrics().stream()
-                        .map(assignedMetric ->
+                createTagCommand.metricAssignments().stream()
+                        .map(metricAssignment ->
                                 new MetricDto(
-                                        assignedMetric.name(),
-                                        MetricType.valueOf(assignedMetric.type())
+                                        metricAssignment.metricName(),
+                                        MetricType.valueOf(metricAssignment.metricType())
                                 )
                         )
                         .toList(),
@@ -105,6 +105,7 @@ public class TagApplicationService {
         tag.rename(newName, updater);
         tagRepository.update(tagId, tag.forStorage());
         TagDto tagResult = tag.forClient(updater);
+
         return toTagResult(tagResult);
     }
 
@@ -131,10 +132,11 @@ public class TagApplicationService {
         tag.addMetric(metricName, MetricType.valueOf(metricType), updater);
         tagRepository.update(tagId, tag.forStorage());
         TagDto tagResult = tag.forClient(updater);
+
         return toTagResult(tagResult);
     }
 
-    public TagDto deleteMetric(UUID metricId, UUID tagId) {
+    public TagResult deleteMetric(UUID metricId, UUID tagId) {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
@@ -144,10 +146,12 @@ public class TagApplicationService {
 
         tag.deleteMetric(new MetricId(metricId), updater);
         tagRepository.update(tagId, tag.forStorage());
-        return tag.forClient(updater);
+        TagDto tagResult = tag.forClient(updater);
+
+        return toTagResult(tagResult);
     }
 
-    public TagDto renameMetric(String newName, UUID metricId, UUID tagId) {
+    public TagResult renameMetric(String newName, UUID metricId, UUID tagId) {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
@@ -157,10 +161,12 @@ public class TagApplicationService {
 
         tag.renameMetric(newName, new MetricId(metricId), updater);
         tagRepository.update(tagId, tag.forStorage());
-        return tag.forClient(updater);
+        TagDto tagResult = tag.forClient(updater);
+
+        return toTagResult(tagResult);
     }
 
-    public TagDto shareTag(Share newShare, UUID tagId) {
+    public TagResult shareTag(String newGrantee, UUID tagId) {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User granter = new User(requesterIdentity.getId());
 
@@ -168,14 +174,16 @@ public class TagApplicationService {
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
         Tag tag = Tag.fromStorage(tagDto);
 
-        Share share = resolveShare(newShare.granteeName());
+        Share share = resolveShare(newGrantee);
 
         tag.share(share, granter);
         tagRepository.update(tagId, tag.forStorage());
-        return tag.forClient(granter);
+        TagDto tagResult = tag.forClient(granter);
+
+        return toTagResult(tagResult);
     }
 
-    public TagDto unshareTag(String granteeName, UUID tagId) {
+    public TagResult unshareTag(String granteeName, UUID tagId) {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User granter = new User(requesterIdentity.getId());
 
@@ -185,16 +193,18 @@ public class TagApplicationService {
 
         tag.unshare(granteeName, granter);
         tagRepository.update(tagId, tag.forStorage());
-        return tag.forClient(granter);
+        TagDto tagResult = tag.forClient(granter);
+
+        return toTagResult(tagResult);
     }
 
-    private Share resolveShare(String share) {
-        return tenantRepository.findByUsername(share)
+    private Share resolveShare(String grantee) {
+        return tenantRepository.findByUsername(grantee)
                 .map(tenant -> new Share(
                         new User(tenant.id()),
                         tenant.username()
                 ))
-                .orElse(new Share(share));
+                .orElse(new Share(grantee));
     }
 
     private TagResult toTagResult(TagDto tagDto) {

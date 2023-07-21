@@ -3,10 +3,8 @@ package ovh.equino.actracker.rest.spring.tag;
 import org.springframework.web.bind.annotation.*;
 import ovh.equino.actracker.application.SearchResult;
 import ovh.equino.actracker.application.tag.*;
-import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.rest.spring.SearchResponse;
 import ovh.equino.actracker.rest.spring.share.Share;
-import ovh.equino.actracker.rest.spring.share.ShareMapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,8 +22,6 @@ class TagController {
     private final TagApplicationService tagApplicationService;
 
     private final TagMapper tagMapper = new TagMapper();
-    private final MetricMapper metricMapper = new MetricMapper();
-    private final ShareMapper shareMapper = new ShareMapper();
 
     TagController(TagApplicationService tagApplicationService) {
         this.tagApplicationService = tagApplicationService;
@@ -34,9 +30,9 @@ class TagController {
     @RequestMapping(method = POST)
     @ResponseStatus(OK)
     Tag createTag(@RequestBody Tag tag) {
-        List<AssignedMetric> assignedMetric = requireNonNullElse(tag.metrics(), new ArrayList<Metric>())
+        List<MetricAssignment> assignedMetric = requireNonNullElse(tag.metrics(), new ArrayList<Metric>())
                 .stream()
-                .map(metric -> new AssignedMetric(metric.name(), metric.type()))
+                .map(metric -> new MetricAssignment(metric.name(), metric.type()))
                 .toList();
         List<String> grantedShares = requireNonNullElse(tag.shares(), new ArrayList<Share>())
                 .stream()
@@ -89,17 +85,15 @@ class TagController {
     Tag shareTag(@PathVariable("id") String id,
                  @RequestBody Share share) {
 
-        ovh.equino.actracker.domain.share.Share newShare = shareMapper.fromRequest(share);
-
-        TagDto sharedTag = tagApplicationService.shareTag(newShare, UUID.fromString(id));
-        return tagMapper.toResponse(sharedTag);
+        TagResult updatedTag = tagApplicationService.shareTag(share.granteeName(), UUID.fromString(id));
+        return toResponse(updatedTag);
     }
 
     @RequestMapping(method = DELETE, path = "/{id}/share/{granteeName}")
     @ResponseStatus(OK)
     Tag unshareTag(@PathVariable("id") String tagId, @PathVariable("granteeName") String granteeName) {
-        TagDto unsharedTag = tagApplicationService.unshareTag(granteeName, UUID.fromString(tagId));
-        return tagMapper.toResponse(unsharedTag);
+        TagResult updatedTag = tagApplicationService.unshareTag(granteeName, UUID.fromString(tagId));
+        return toResponse(updatedTag);
     }
 
     @RequestMapping(method = PUT, path = "/{id}/name")
@@ -115,13 +109,13 @@ class TagController {
                      @PathVariable("metricId") String metricId,
                      @RequestBody String newName) {
 
-        TagDto tagDto = tagApplicationService.renameMetric(
+        TagResult updatedTag = tagApplicationService.renameMetric(
                 newName,
                 UUID.fromString(metricId),
                 UUID.fromString(tagId)
         );
 
-        return tagMapper.toResponse(tagDto);
+        return toResponse(updatedTag);
     }
 
     @RequestMapping(method = POST, path = "/{tagId}/metric")
@@ -136,10 +130,10 @@ class TagController {
     @RequestMapping(method = DELETE, path = "/{tagId}/metric/{metricId}")
     @ResponseStatus(OK)
     Tag deleteMetric(@PathVariable("tagId") String tagId, @PathVariable("metricId") String metricId) {
-        TagDto tagDto = tagApplicationService
+        TagResult updatedTag = tagApplicationService
                 .deleteMetric(UUID.fromString(metricId), UUID.fromString(tagId));
 
-        return tagMapper.toResponse(tagDto);
+        return toResponse(updatedTag);
     }
 
     private Tag toResponse(TagResult tagResult) {
