@@ -7,6 +7,8 @@ import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tag.*;
 import ovh.equino.actracker.domain.tenant.TenantRepository;
 import ovh.equino.actracker.domain.user.User;
+import ovh.equino.security.identity.Identity;
+import ovh.equino.security.identity.IdentityProvider;
 
 import java.util.List;
 import java.util.Set;
@@ -16,18 +18,24 @@ public class TagApplicationService {
 
     private final TagRepository tagRepository;
     private final TagSearchEngine tagSearchEngine;
+    private final IdentityProvider identityProvider;
     private final TenantRepository tenantRepository;
 
     TagApplicationService(TagRepository tagRepository,
                           TagSearchEngine tagSearchEngine,
+                          IdentityProvider identityProvider,
                           TenantRepository tenantRepository) {
 
         this.tagRepository = tagRepository;
         this.tagSearchEngine = tagSearchEngine;
+        this.identityProvider = identityProvider;
         this.tenantRepository = tenantRepository;
     }
 
-    public TagDto createTag(TagDto newTagData, User creator) {
+    public TagDto createTag(TagDto newTagData) {
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User creator = new User(requesterIdentity.getId());
+
         TagDto tagDataWithSharesResolved = new TagDto(
                 newTagData.id(),
                 newTagData.creatorId(),
@@ -43,7 +51,10 @@ public class TagApplicationService {
         return tag.forClient(creator);
     }
 
-    public List<TagDto> resolveTags(Set<UUID> tagIds, User searcher) {
+    public List<TagDto> resolveTags(Set<UUID> tagIds) {
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User searcher = new User(requesterIdentity.getId());
+
         return tagRepository.findByIds(tagIds, searcher).stream()
                 .map(Tag::fromStorage)
                 .map(tag -> tag.forClient(searcher))
@@ -51,6 +62,9 @@ public class TagApplicationService {
     }
 
     public EntitySearchResult<TagDto> searchTags(EntitySearchCriteria searchCriteria) {
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User searcher = new User(requesterIdentity.getId());
+
         EntitySearchResult<TagDto> searchResult = tagSearchEngine.findTags(searchCriteria);
         List<TagDto> resultForClient = searchResult.results().stream()
                 .map(Tag::fromStorage)
@@ -59,7 +73,10 @@ public class TagApplicationService {
         return new EntitySearchResult<>(searchResult.nextPageId(), resultForClient);
     }
 
-    public TagDto renameTag(String newName, UUID tagId, User updater) {
+    public TagDto renameTag(String newName, UUID tagId) {
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User updater = new User(requesterIdentity.getId());
+
         TagDto tagDto = tagRepository.findById(tagId)
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
         Tag tag = Tag.fromStorage(tagDto);
@@ -69,7 +86,10 @@ public class TagApplicationService {
         return tag.forClient(updater);
     }
 
-    public void deleteTag(UUID tagId, User remover) {
+    public void deleteTag(UUID tagId) {
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User remover = new User(requesterIdentity.getId());
+
         TagDto tagDto = tagRepository.findById(tagId)
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
         Tag tag = Tag.fromStorage(tagDto);
@@ -78,7 +98,10 @@ public class TagApplicationService {
         tagRepository.update(tagId, tag.forStorage());
     }
 
-    public TagDto addMetricToTag(String metricName, MetricType metricType, UUID tagId, User updater) {
+    public TagDto addMetricToTag(String metricName, MetricType metricType, UUID tagId) {
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User updater = new User(requesterIdentity.getId());
+
         TagDto tagDto = tagRepository.findById(tagId)
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
         Tag tag = Tag.fromStorage(tagDto);
@@ -88,7 +111,10 @@ public class TagApplicationService {
         return tag.forClient(updater);
     }
 
-    public TagDto deleteMetric(UUID metricId, UUID tagId, User updater) {
+    public TagDto deleteMetric(UUID metricId, UUID tagId) {
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User updater = new User(requesterIdentity.getId());
+
         TagDto tagDto = tagRepository.findById(tagId)
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
         Tag tag = Tag.fromStorage(tagDto);
@@ -98,7 +124,10 @@ public class TagApplicationService {
         return tag.forClient(updater);
     }
 
-    public TagDto renameMetric(String newName, UUID metricId, UUID tagId, User updater) {
+    public TagDto renameMetric(String newName, UUID metricId, UUID tagId) {
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User updater = new User(requesterIdentity.getId());
+
         TagDto tagDto = tagRepository.findById(tagId)
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
         Tag tag = Tag.fromStorage(tagDto);
@@ -108,7 +137,10 @@ public class TagApplicationService {
         return tag.forClient(updater);
     }
 
-    public TagDto shareTag(Share newShare, UUID tagId, User granter) {
+    public TagDto shareTag(Share newShare, UUID tagId) {
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User granter = new User(requesterIdentity.getId());
+
         TagDto tagDto = tagRepository.findById(tagId)
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
         Tag tag = Tag.fromStorage(tagDto);
@@ -120,7 +152,10 @@ public class TagApplicationService {
         return tag.forClient(granter);
     }
 
-    public TagDto unshareTag(String granteeName, UUID tagId, User granter) {
+    public TagDto unshareTag(String granteeName, UUID tagId) {
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User granter = new User(requesterIdentity.getId());
+
         TagDto tagDto = tagRepository.findById(tagId)
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
         Tag tag = Tag.fromStorage(tagDto);

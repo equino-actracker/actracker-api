@@ -40,11 +40,8 @@ class TagController {
     @RequestMapping(method = POST)
     @ResponseStatus(OK)
     Tag createTag(@RequestBody Tag tag) {
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User requester = new User(requesterIdentity.getId());
-
         TagDto tagDto = tagMapper.fromRequest(tag);
-        TagDto createdTag = tagApplicationService.createTag(tagDto, requester);
+        TagDto createdTag = tagApplicationService.createTag(tagDto);
 
         return tagMapper.toResponse(createdTag);
     }
@@ -52,12 +49,8 @@ class TagController {
     @RequestMapping(method = GET)
     @ResponseStatus(OK)
     List<Tag> resolveTags(@RequestParam(name = "ids", required = false) String tagIds) {
-
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User requester = new User(requesterIdentity.getId());
-
         Set<UUID> parsedIds = tagMapper.parseIds(tagIds);
-        List<TagDto> resolvedTags = tagApplicationService.resolveTags(parsedIds, requester);
+        List<TagDto> resolvedTags = tagApplicationService.resolveTags(parsedIds);
         return tagMapper.toResponse(resolvedTags);
     }
 
@@ -86,10 +79,7 @@ class TagController {
 
     @RequestMapping(method = DELETE, path = "/{id}")
     void deleteTag(@PathVariable("id") String id) {
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User requester = new User(requesterIdentity.getId());
-
-        tagApplicationService.deleteTag(UUID.fromString(id), requester);
+        tagApplicationService.deleteTag(UUID.fromString(id));
     }
 
     @RequestMapping(method = POST, path = "/{id}/share")
@@ -97,34 +87,23 @@ class TagController {
     Tag shareTag(@PathVariable("id") String id,
                  @RequestBody Share share) {
 
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User requester = new User(requesterIdentity.getId());
-
         ovh.equino.actracker.domain.share.Share newShare = shareMapper.fromRequest(share);
 
-        TagDto sharedTag = tagApplicationService.shareTag(newShare, UUID.fromString(id), requester);
+        TagDto sharedTag = tagApplicationService.shareTag(newShare, UUID.fromString(id));
         return tagMapper.toResponse(sharedTag);
     }
 
     @RequestMapping(method = DELETE, path = "/{id}/share/{granteeName}")
     @ResponseStatus(OK)
     Tag unshareTag(@PathVariable("id") String tagId, @PathVariable("granteeName") String granteeName) {
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User requester = new User(requesterIdentity.getId());
-
-        TagDto unsharedTag = tagApplicationService.unshareTag(granteeName, UUID.fromString(tagId), requester);
+        TagDto unsharedTag = tagApplicationService.unshareTag(granteeName, UUID.fromString(tagId));
         return tagMapper.toResponse(unsharedTag);
     }
 
     @RequestMapping(method = PUT, path = "/{id}/name")
     @ResponseStatus(OK)
     Tag renameTag(@PathVariable("id") String tagId, @RequestBody String newName) {
-
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User requester = new User(requesterIdentity.getId());
-
-        TagDto tagDto = tagApplicationService.renameTag(newName, UUID.fromString(tagId), requester);
-
+        TagDto tagDto = tagApplicationService.renameTag(newName, UUID.fromString(tagId));
         return tagMapper.toResponse(tagDto);
     }
 
@@ -134,14 +113,10 @@ class TagController {
                      @PathVariable("metricId") String metricId,
                      @RequestBody String newName) {
 
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User requester = new User(requesterIdentity.getId());
-
         TagDto tagDto = tagApplicationService.renameMetric(
                 newName,
                 UUID.fromString(metricId),
-                UUID.fromString(tagId),
-                requester
+                UUID.fromString(tagId)
         );
 
         return tagMapper.toResponse(tagDto);
@@ -150,14 +125,10 @@ class TagController {
     @RequestMapping(method = POST, path = "/{tagId}/metric")
     @ResponseStatus(OK)
     Tag addMetric(@PathVariable("tagId") String tagId, @RequestBody Metric metric) {
-
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User requester = new User(requesterIdentity.getId());
-
         MetricDto metricDto = metricMapper.fromRequest(metric);
 
         TagDto tagDto = tagApplicationService
-                .addMetricToTag(metricDto.name(), metricDto.type(), UUID.fromString(tagId), requester);
+                .addMetricToTag(metricDto.name(), metricDto.type(), UUID.fromString(tagId));
 
         return tagMapper.toResponse(tagDto);
     }
@@ -165,12 +136,8 @@ class TagController {
     @RequestMapping(method = DELETE, path = "/{tagId}/metric/{metricId}")
     @ResponseStatus(OK)
     Tag deleteMetric(@PathVariable("tagId") String tagId, @PathVariable("metricId") String metricId) {
-
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User requester = new User(requesterIdentity.getId());
-
         TagDto tagDto = tagApplicationService
-                .deleteMetric(UUID.fromString(metricId), UUID.fromString(tagId), requester);
+                .deleteMetric(UUID.fromString(metricId), UUID.fromString(tagId));
 
         return tagMapper.toResponse(tagDto);
     }
