@@ -43,15 +43,6 @@ class ActivityServiceImpl implements ActivityService {
     }
 
     @Override
-    public ActivityDto updateActivity(UUID activityId, ActivityDto updatedActivityData, User updater) {
-        Activity activity = getActivityIfAuthorized(updater, activityId);
-        activity.updateTo(updatedActivityData);
-        activityRepository.update(activityId, activity.forStorage());
-        activityNotifier.notifyChanged(activity.forChangeNotification());
-        return activity.forClient(updater);
-    }
-
-    @Override
     public EntitySearchResult<ActivityDto> searchActivities(EntitySearchCriteria searchCriteria) {
         TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, searchCriteria.searcher());
         MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);

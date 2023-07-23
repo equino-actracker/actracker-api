@@ -51,18 +51,6 @@ class ActivityController {
         return mapper.toResponse(createdActivity);
     }
 
-    @RequestMapping(method = PUT, path = "/{id}")
-    @ResponseStatus(OK)
-    Activity updateActivity(@PathVariable("id") String id, @RequestBody Activity activity) {
-        Identity requestIdentity = identityProvider.provideIdentity();
-        User requester = new User(requestIdentity.getId());
-
-        ActivityDto activityDto = mapper.fromRequest(activity);
-        ActivityDto updatedActivity = activityService.updateActivity(UUID.fromString(id), activityDto, requester);
-
-        return mapper.toResponse(updatedActivity);
-    }
-
     @RequestMapping(method = GET, path = "/matching")
     @ResponseStatus(OK)
     SearchResponse<Activity> searchActivities(

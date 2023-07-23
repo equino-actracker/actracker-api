@@ -10,8 +10,6 @@ public interface ActivityService {
 
     ActivityDto createActivity(ActivityDto newActivityData, User creator);
 
-    ActivityDto updateActivity(UUID activityId, ActivityDto updatedActivityData, User updater);
-
     EntitySearchResult<ActivityDto> searchActivities(EntitySearchCriteria searchCriteria);
 
     void deleteActivity(UUID activityId, User remover);
