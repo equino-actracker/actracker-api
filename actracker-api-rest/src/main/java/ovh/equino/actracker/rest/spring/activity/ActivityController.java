@@ -109,9 +109,9 @@ class ActivityController {
                 mapper.stringsToUuids(activity.tags()),
                 assignedMetricValues
         );
-        ActivityDto switchedActivity = activityApplicationService.switchToNewActivity(switchActivityCommand);
+        ActivityResult switchedActivity = activityApplicationService.switchToNewActivity(switchActivityCommand);
 
-        return mapper.toResponse(switchedActivity);
+        return toResponse(switchedActivity);
     }
 
     @RequestMapping(method = PUT, path = "/{id}/title")

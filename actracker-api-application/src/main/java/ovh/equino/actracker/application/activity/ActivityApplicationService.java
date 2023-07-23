@@ -60,6 +60,7 @@ public class ActivityApplicationService {
         Activity activity = Activity.create(newActivityData, creator, tagsExistenceVerifier, metricsExistenceVerifier);
         activityRepository.add(activity.forStorage());
         ActivityDto activityResult = activity.forClient(creator);
+
         return toActivityResult(activityResult);
     }
 
@@ -92,7 +93,7 @@ public class ActivityApplicationService {
         return new SearchResult<>(searchResult.nextPageId(), resultForClient);
     }
 
-    public ActivityDto switchToNewActivity(SwitchActivityCommand switchActivityCommand) {
+    public ActivityResult switchToNewActivity(SwitchActivityCommand switchActivityCommand) {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User switcher = new User(requesterIdentity.getId());
 
@@ -127,8 +128,9 @@ public class ActivityApplicationService {
                 .forEach(activity -> activityRepository.update(activity.id(), activity));
 
         activityRepository.add(newActivity.forStorage());
+        ActivityDto activityResult = newActivity.forClient(switcher);
 
-        return newActivity.forClient(switcher);
+        return toActivityResult(activityResult);
     }
 
     public ActivityDto renameActivity(String newTitle, UUID activityId) {
