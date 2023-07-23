@@ -11,6 +11,7 @@ import ovh.equino.security.identity.IdentityProvider;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,12 +35,26 @@ public class ActivityApplicationService {
         this.identityProvider = identityProvider;
     }
 
-    public ActivityDto createActivity(ActivityDto newActivityData) {
+    public ActivityDto createActivity(CreateActivityCommand createActivityCommand) {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User creator = new User(requesterIdentity.getId());
 
         TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, creator);
         MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
+
+        ActivityDto newActivityData = new ActivityDto(
+                createActivityCommand.activityTitle(),
+                createActivityCommand.activityStartTime(),
+                createActivityCommand.activityEndTime(),
+                createActivityCommand.activityComment(),
+                new HashSet<>(createActivityCommand.assignedTags()),
+                createActivityCommand.metricValueAssignments().stream()
+                        .map(metricValueAssignment -> new MetricValue(
+                                metricValueAssignment.metricId(),
+                                metricValueAssignment.metricValue()
+                        ))
+                        .toList()
+        );
 
         Activity activity = Activity.create(newActivityData, creator, tagsExistenceVerifier, metricsExistenceVerifier);
         activityRepository.add(activity.forStorage());

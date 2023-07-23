@@ -2,6 +2,8 @@ package ovh.equino.actracker.rest.spring.activity;
 
 import org.springframework.web.bind.annotation.*;
 import ovh.equino.actracker.application.activity.ActivityApplicationService;
+import ovh.equino.actracker.application.activity.CreateActivityCommand;
+import ovh.equino.actracker.application.activity.MetricValueAssignment;
 import ovh.equino.actracker.application.activity.SearchActivitiesQuery;
 import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.activity.ActivityDto;
@@ -10,8 +12,11 @@ import ovh.equino.actracker.rest.spring.tag.Tag;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
+import static java.util.Objects.requireNonNullElse;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 
@@ -29,8 +34,24 @@ class ActivityController {
     @RequestMapping(method = POST)
     @ResponseStatus(OK)
     Activity createActivity(@RequestBody Activity activity) {
-        ActivityDto activityDto = mapper.fromRequest(activity);
-        ActivityDto createdActivity = activityApplicationService.createActivity(activityDto);
+        List<MetricValueAssignment> assignedMetricValues =
+                requireNonNullElse(activity.metricValues(), new ArrayList<MetricValue>())
+                        .stream()
+                        .map(metricValue -> new MetricValueAssignment(
+                                UUID.fromString(metricValue.metricId()),
+                                metricValue.value()
+                        ))
+                        .toList();
+
+        CreateActivityCommand createActivityCommand = new CreateActivityCommand(
+                activity.title(),
+                mapper.timestampToInstant(activity.startTimestamp()),
+                mapper.timestampToInstant(activity.endTimestamp()),
+                activity.comment(),
+                mapper.stringsToUuids(activity.tags()),
+                assignedMetricValues
+        );
+        ActivityDto createdActivity = activityApplicationService.createActivity(createActivityCommand);
         return mapper.toResponse(createdActivity);
     }
 
