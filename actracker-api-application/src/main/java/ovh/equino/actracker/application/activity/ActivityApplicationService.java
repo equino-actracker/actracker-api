@@ -35,7 +35,7 @@ public class ActivityApplicationService {
         this.identityProvider = identityProvider;
     }
 
-    public ActivityDto createActivity(CreateActivityCommand createActivityCommand) {
+    public ActivityResult createActivity(CreateActivityCommand createActivityCommand) {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User creator = new User(requesterIdentity.getId());
 
@@ -58,7 +58,8 @@ public class ActivityApplicationService {
 
         Activity activity = Activity.create(newActivityData, creator, tagsExistenceVerifier, metricsExistenceVerifier);
         activityRepository.add(activity.forStorage());
-        return activity.forClient(creator);
+        ActivityDto activityResult = activity.forClient(creator);
+        return toActivityResult(activityResult);
     }
 
     public EntitySearchResult<ActivityDto> searchActivities(SearchActivitiesQuery searchActivitiesQuery) {
@@ -264,5 +265,24 @@ public class ActivityApplicationService {
         activity.delete(remover);
 
         activityRepository.update(activityId, activity.forStorage());
+    }
+
+    private ActivityResult toActivityResult(ActivityDto activityDto) {
+        List<MetricValueResult> metricValueResults = activityDto.metricValues().stream()
+                .map(this::toMetricValueResult)
+                .toList();
+        return new ActivityResult(
+                activityDto.id(),
+                activityDto.title(),
+                activityDto.startTime(),
+                activityDto.endTime(),
+                activityDto.comment(),
+                activityDto.tags(),
+                metricValueResults
+        );
+    }
+
+    private MetricValueResult toMetricValueResult(MetricValue metricValue) {
+        return new MetricValueResult(metricValue.metricId(), metricValue.value());
     }
 }

@@ -1,10 +1,7 @@
 package ovh.equino.actracker.rest.spring.activity;
 
 import org.springframework.web.bind.annotation.*;
-import ovh.equino.actracker.application.activity.ActivityApplicationService;
-import ovh.equino.actracker.application.activity.CreateActivityCommand;
-import ovh.equino.actracker.application.activity.MetricValueAssignment;
-import ovh.equino.actracker.application.activity.SearchActivitiesQuery;
+import ovh.equino.actracker.application.activity.*;
 import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.rest.spring.SearchResponse;
@@ -51,8 +48,9 @@ class ActivityController {
                 mapper.stringsToUuids(activity.tags()),
                 assignedMetricValues
         );
-        ActivityDto createdActivity = activityApplicationService.createActivity(createActivityCommand);
-        return mapper.toResponse(createdActivity);
+        ActivityResult createdActivity = activityApplicationService.createActivity(createActivityCommand);
+
+        return toResponse(createdActivity);
     }
 
     @RequestMapping(method = GET, path = "/matching")
@@ -167,5 +165,24 @@ class ActivityController {
                 UUID.fromString(activityId)
         );
         return mapper.toResponse(updatedActivity);
+    }
+
+    private Activity toResponse(ActivityResult activityResult) {
+        List<MetricValue> metricValues = activityResult.metricValues().stream()
+                .map(this::toResponse)
+                .toList();
+        return new Activity(
+                activityResult.id().toString(),
+                activityResult.title(),
+                mapper.instantToTimestamp(activityResult.startTime()),
+                mapper.instantToTimestamp(activityResult.endTime()),
+                activityResult.comment(),
+                mapper.uuidsToStrings(activityResult.tags()),
+                metricValues
+        );
+    }
+
+    private MetricValue toResponse(MetricValueResult metricValueResult) {
+        return new MetricValue(metricValueResult.metricId().toString(), metricValueResult.value());
     }
 }
