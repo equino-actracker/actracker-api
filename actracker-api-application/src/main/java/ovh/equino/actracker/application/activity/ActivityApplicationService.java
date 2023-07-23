@@ -1,25 +1,76 @@
 package ovh.equino.actracker.application.activity;
 
-import ovh.equino.actracker.domain.activity.Activity;
-import ovh.equino.actracker.domain.activity.ActivityDto;
-import ovh.equino.actracker.domain.activity.ActivityRepository;
-import ovh.equino.actracker.domain.activity.MetricValue;
+import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchResult;
+import ovh.equino.actracker.domain.activity.*;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.tag.*;
 import ovh.equino.actracker.domain.user.User;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
+
+import static java.time.Instant.now;
 
 public class ActivityApplicationService {
 
     private final ActivityRepository activityRepository;
+    private final ActivitySearchEngine activitySearchEngine;
     private final TagRepository tagRepository;
 
-    ActivityApplicationService(ActivityRepository activityRepository, TagRepository tagRepository) {
+    public ActivityApplicationService(ActivityRepository activityRepository,
+                                      ActivitySearchEngine activitySearchEngine,
+                                      TagRepository tagRepository) {
+
         this.activityRepository = activityRepository;
+        this.activitySearchEngine = activitySearchEngine;
         this.tagRepository = tagRepository;
+    }
+
+    public ActivityDto createActivity(ActivityDto newActivityData, User creator) {
+        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, creator);
+        MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
+
+        Activity activity = Activity.create(newActivityData, creator, tagsExistenceVerifier, metricsExistenceVerifier);
+        activityRepository.add(activity.forStorage());
+        return activity.forClient(creator);
+    }
+
+    public EntitySearchResult<ActivityDto> searchActivities(EntitySearchCriteria searchCriteria) {
+        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, searchCriteria.searcher());
+        MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
+
+        EntitySearchResult<ActivityDto> searchResult = activitySearchEngine.findActivities(searchCriteria);
+        List<ActivityDto> resultForClient = searchResult.results().stream()
+                .map(activity -> Activity.fromStorage(activity, tagsExistenceVerifier, metricsExistenceVerifier))
+                .map(activity -> activity.forClient(searchCriteria.searcher()))
+                .toList();
+
+        return new EntitySearchResult<>(searchResult.nextPageId(), resultForClient);
+    }
+
+    public ActivityDto switchToNewActivity(ActivityDto activityToSwitch, User switcher) {
+        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, switcher);
+        MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
+
+        Activity newActivity = Activity.create(activityToSwitch, switcher, tagsExistenceVerifier, metricsExistenceVerifier);
+        Instant switchTime = newActivity.isStarted() ? newActivity.startTime() : now();
+        newActivity.start(switchTime, switcher);
+
+        List<Activity> activitiesToFinish = activityRepository.findUnfinishedStartedBefore(switchTime, switcher).stream()
+                .map(activity -> Activity.fromStorage(activity, tagsExistenceVerifier, metricsExistenceVerifier))
+                .toList();
+
+        activitiesToFinish.forEach(activity -> activity.finish(switchTime, switcher));
+        activitiesToFinish.stream()
+                .map(Activity::forStorage)
+                .forEach(activity -> activityRepository.update(activity.id(), activity));
+
+        activityRepository.add(newActivity.forStorage());
+
+        return newActivity.forClient(switcher);
     }
 
     public ActivityDto renameActivity(String newTitle, UUID activityId, User updater) {

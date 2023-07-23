@@ -3,7 +3,6 @@ package ovh.equino.actracker.main.springboot.configuration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
-import ovh.equino.actracker.domain.activity.ActivityService;
 import ovh.equino.actracker.domain.dashboard.DashboardService;
 
 @Configuration
@@ -12,7 +11,6 @@ import ovh.equino.actracker.domain.dashboard.DashboardService;
         includeFilters = @ComponentScan.Filter(
                 type = FilterType.ASSIGNABLE_TYPE,
                 classes = {
-                        ActivityService.class,
                         DashboardService.class
                 }
         )

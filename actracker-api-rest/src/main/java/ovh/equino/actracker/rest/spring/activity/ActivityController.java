@@ -5,7 +5,6 @@ import ovh.equino.actracker.application.activity.ActivityApplicationService;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.activity.ActivityDto;
-import ovh.equino.actracker.domain.activity.ActivityService;
 import ovh.equino.actracker.domain.activity.ActivitySortField;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.rest.spring.EntitySearchCriteriaBuilder;
@@ -25,16 +24,11 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 @RequestMapping("/activity")
 class ActivityController {
 
-    private final ActivityService activityService;
     private final ActivityApplicationService activityApplicationService;
     private final IdentityProvider identityProvider;
     private final ActivityMapper mapper = new ActivityMapper();
 
-    ActivityController(ActivityService activityService,
-                       ActivityApplicationService activityApplicationService,
-                       IdentityProvider identityProvider) {
-
-        this.activityService = activityService;
+    ActivityController(ActivityApplicationService activityApplicationService, IdentityProvider identityProvider) {
         this.activityApplicationService = activityApplicationService;
         this.identityProvider = identityProvider;
     }
@@ -46,7 +40,7 @@ class ActivityController {
         User requester = new User(requestIdentity.getId());
 
         ActivityDto activityDto = mapper.fromRequest(activity);
-        ActivityDto createdActivity = activityService.createActivity(activityDto, requester);
+        ActivityDto createdActivity = activityApplicationService.createActivity(activityDto, requester);
 
         return mapper.toResponse(createdActivity);
     }
@@ -79,7 +73,7 @@ class ActivityController {
 //                .withSortLevelsJointWithComma(orderBy)
                 .build();
 
-        EntitySearchResult<ActivityDto> searchResult = activityService.searchActivities(searchCriteria);
+        EntitySearchResult<ActivityDto> searchResult = activityApplicationService.searchActivities(searchCriteria);
         return mapper.toResponse(searchResult);
     }
 
@@ -99,7 +93,7 @@ class ActivityController {
         User requester = new User(requesterIdentity.getId());
 
         ActivityDto activityDto = mapper.fromRequest(activity);
-        ActivityDto switchedActivity = activityService.switchToNewActivity(activityDto, requester);
+        ActivityDto switchedActivity = activityApplicationService.switchToNewActivity(activityDto, requester);
         return mapper.toResponse(switchedActivity);
     }
 
