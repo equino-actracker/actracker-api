@@ -36,12 +36,8 @@ class ActivityController {
     @RequestMapping(method = POST)
     @ResponseStatus(OK)
     Activity createActivity(@RequestBody Activity activity) {
-        Identity requestIdentity = identityProvider.provideIdentity();
-        User requester = new User(requestIdentity.getId());
-
         ActivityDto activityDto = mapper.fromRequest(activity);
-        ActivityDto createdActivity = activityApplicationService.createActivity(activityDto, requester);
-
+        ActivityDto createdActivity = activityApplicationService.createActivity(activityDto);
         return mapper.toResponse(createdActivity);
     }
 
@@ -80,86 +76,61 @@ class ActivityController {
     @RequestMapping(method = DELETE, path = "/{id}")
     @ResponseStatus(OK)
     void deleteActivity(@PathVariable("id") String id) {
-        Identity requestIdentity = identityProvider.provideIdentity();
-        User requester = new User(requestIdentity.getId());
-
-        activityApplicationService.deleteActivity(UUID.fromString(id), requester);
+        activityApplicationService.deleteActivity(UUID.fromString(id));
     }
 
     @RequestMapping(method = POST, path = "/switched")
     @ResponseStatus(OK)
     Activity switchToActivity(@RequestBody Activity activity) {
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User requester = new User(requesterIdentity.getId());
-
         ActivityDto activityDto = mapper.fromRequest(activity);
-        ActivityDto switchedActivity = activityApplicationService.switchToNewActivity(activityDto, requester);
+        ActivityDto switchedActivity = activityApplicationService.switchToNewActivity(activityDto);
         return mapper.toResponse(switchedActivity);
     }
 
     @RequestMapping(method = PUT, path = "/{id}/title")
     @ResponseStatus(OK)
     Activity renameActivity(@PathVariable("id") String id, @RequestBody String newTitle) {
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User requester = new User(requesterIdentity.getId());
-
-        ActivityDto activity = activityApplicationService.renameActivity(newTitle, UUID.fromString(id), requester);
+        ActivityDto activity = activityApplicationService.renameActivity(newTitle, UUID.fromString(id));
         return mapper.toResponse(activity);
     }
 
     @RequestMapping(method = PUT, path = "/{id}/startTime")
     @ResponseStatus(OK)
     Activity startActivity(@PathVariable("id") String id, @RequestBody Long newStartTimestamp) {
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User requester = new User(requesterIdentity.getId());
-
         Instant newStartTime = Instant.ofEpochMilli(newStartTimestamp);
-        ActivityDto activity = activityApplicationService.startActivity(newStartTime, UUID.fromString(id), requester);
+        ActivityDto activity = activityApplicationService.startActivity(newStartTime, UUID.fromString(id));
         return mapper.toResponse(activity);
     }
 
     @RequestMapping(method = PUT, path = "/{id}/endTime")
     @ResponseStatus(OK)
     Activity finishActivity(@PathVariable("id") String id, @RequestBody Long newEndTimestamp) {
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User requester = new User(requesterIdentity.getId());
-
         Instant newEndTime = Instant.ofEpochMilli(newEndTimestamp);
-        ActivityDto activity = activityApplicationService.finishActivity(newEndTime, UUID.fromString(id), requester);
+        ActivityDto activity = activityApplicationService.finishActivity(newEndTime, UUID.fromString(id));
         return mapper.toResponse(activity);
     }
 
     @RequestMapping(method = PUT, path = "/{id}/comment")
     @ResponseStatus(OK)
     Activity updateActivityComment(@PathVariable("id") String id, @RequestBody String newComment) {
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User requester = new User(requesterIdentity.getId());
-
-        ActivityDto activity = activityApplicationService.updateActivityComment(newComment, UUID.fromString(id), requester);
+        ActivityDto activity = activityApplicationService.updateActivityComment(newComment, UUID.fromString(id));
         return mapper.toResponse(activity);
     }
 
     @RequestMapping(method = POST, path = "/{id}/tag")
     @ResponseStatus(OK)
     Activity addTagToActivity(@PathVariable("id") String id, @RequestBody Tag newTag) {
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User requester = new User(requesterIdentity.getId());
-
         UUID tagId = UUID.fromString(newTag.id());
-        ActivityDto activity = activityApplicationService.addTagToActivity(tagId, UUID.fromString(id), requester);
+        ActivityDto activity = activityApplicationService.addTagToActivity(tagId, UUID.fromString(id));
         return mapper.toResponse(activity);
     }
 
     @RequestMapping(method = DELETE, path = "/{activityId}/tag/{tagId}")
     @ResponseStatus(OK)
     Activity removeTagFromActivity(@PathVariable("activityId") String activityId, @PathVariable("tagId") String tagId) {
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User requester = new User(requesterIdentity.getId());
-
         ActivityDto activity = activityApplicationService.removeTagFromActivity(
                 UUID.fromString(tagId),
-                UUID.fromString(activityId),
-                requester
+                UUID.fromString(activityId)
         );
         return mapper.toResponse(activity);
     }
@@ -170,14 +141,11 @@ class ActivityController {
                                     @PathVariable("metricId") String metricId,
                                     @RequestBody BigDecimal value) {
 
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User requester = new User(requesterIdentity.getId());
-
         ActivityDto updatedActivity = activityApplicationService.setMetricValue(
                 UUID.fromString(metricId),
                 value,
-                UUID.fromString(activityId),
-                requester);
+                UUID.fromString(activityId)
+        );
         return mapper.toResponse(updatedActivity);
     }
 
@@ -186,13 +154,9 @@ class ActivityController {
     Activity unsetActivityMetricValue(@PathVariable("activityId") String activityId,
                                       @PathVariable("metricId") String metricId) {
 
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User requester = new User(requesterIdentity.getId());
-
         ActivityDto updatedActivity = activityApplicationService.unsetMetricValue(
                 UUID.fromString(metricId),
-                UUID.fromString(activityId),
-                requester
+                UUID.fromString(activityId)
         );
         return mapper.toResponse(updatedActivity);
     }

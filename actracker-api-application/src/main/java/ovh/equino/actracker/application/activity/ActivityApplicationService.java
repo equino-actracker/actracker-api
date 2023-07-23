@@ -6,6 +6,8 @@ import ovh.equino.actracker.domain.activity.*;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.tag.*;
 import ovh.equino.actracker.domain.user.User;
+import ovh.equino.security.identity.Identity;
+import ovh.equino.security.identity.IdentityProvider;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -19,17 +21,23 @@ public class ActivityApplicationService {
     private final ActivityRepository activityRepository;
     private final ActivitySearchEngine activitySearchEngine;
     private final TagRepository tagRepository;
+    private final IdentityProvider identityProvider;
 
     public ActivityApplicationService(ActivityRepository activityRepository,
                                       ActivitySearchEngine activitySearchEngine,
-                                      TagRepository tagRepository) {
+                                      TagRepository tagRepository,
+                                      IdentityProvider identityProvider) {
 
         this.activityRepository = activityRepository;
         this.activitySearchEngine = activitySearchEngine;
         this.tagRepository = tagRepository;
+        this.identityProvider = identityProvider;
     }
 
-    public ActivityDto createActivity(ActivityDto newActivityData, User creator) {
+    public ActivityDto createActivity(ActivityDto newActivityData) {
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User creator = new User(requesterIdentity.getId());
+
         TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, creator);
         MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
 
@@ -51,7 +59,10 @@ public class ActivityApplicationService {
         return new EntitySearchResult<>(searchResult.nextPageId(), resultForClient);
     }
 
-    public ActivityDto switchToNewActivity(ActivityDto activityToSwitch, User switcher) {
+    public ActivityDto switchToNewActivity(ActivityDto activityToSwitch) {
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User switcher = new User(requesterIdentity.getId());
+
         TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, switcher);
         MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
 
@@ -73,7 +84,10 @@ public class ActivityApplicationService {
         return newActivity.forClient(switcher);
     }
 
-    public ActivityDto renameActivity(String newTitle, UUID activityId, User updater) {
+    public ActivityDto renameActivity(String newTitle, UUID activityId) {
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User updater = new User(requesterIdentity.getId());
+
         TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, updater);
         MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
 
@@ -87,7 +101,10 @@ public class ActivityApplicationService {
         return activity.forClient(updater);
     }
 
-    public ActivityDto startActivity(Instant startTime, UUID activityId, User updater) {
+    public ActivityDto startActivity(Instant startTime, UUID activityId) {
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User updater = new User(requesterIdentity.getId());
+
         TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, updater);
         MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
 
@@ -101,7 +118,10 @@ public class ActivityApplicationService {
         return activity.forClient(updater);
     }
 
-    public ActivityDto finishActivity(Instant endTime, UUID activityId, User updater) {
+    public ActivityDto finishActivity(Instant endTime, UUID activityId) {
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User updater = new User(requesterIdentity.getId());
+
         TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, updater);
         MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
 
@@ -115,7 +135,10 @@ public class ActivityApplicationService {
         return activity.forClient(updater);
     }
 
-    public ActivityDto updateActivityComment(String newComment, UUID activityId, User updater) {
+    public ActivityDto updateActivityComment(String newComment, UUID activityId) {
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User updater = new User(requesterIdentity.getId());
+
         TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, updater);
         MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
 
@@ -129,7 +152,10 @@ public class ActivityApplicationService {
         return activity.forClient(updater);
     }
 
-    public ActivityDto addTagToActivity(UUID tagId, UUID activityId, User updater) {
+    public ActivityDto addTagToActivity(UUID tagId, UUID activityId) {
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User updater = new User(requesterIdentity.getId());
+
         TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, updater);
         MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
 
@@ -143,7 +169,10 @@ public class ActivityApplicationService {
         return activity.forClient(updater);
     }
 
-    public ActivityDto removeTagFromActivity(UUID tagId, UUID activityId, User updater) {
+    public ActivityDto removeTagFromActivity(UUID tagId, UUID activityId) {
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User updater = new User(requesterIdentity.getId());
+
         TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, updater);
         MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
 
@@ -157,7 +186,10 @@ public class ActivityApplicationService {
         return activity.forClient(updater);
     }
 
-    public ActivityDto setMetricValue(UUID metricId, BigDecimal value, UUID activityId, User updater) {
+    public ActivityDto setMetricValue(UUID metricId, BigDecimal value, UUID activityId) {
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User updater = new User(requesterIdentity.getId());
+
         TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, updater);
         MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
 
@@ -171,7 +203,10 @@ public class ActivityApplicationService {
         return activity.forClient(updater);
     }
 
-    public ActivityDto unsetMetricValue(UUID metricId, UUID activityId, User updater) {
+    public ActivityDto unsetMetricValue(UUID metricId, UUID activityId) {
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User updater = new User(requesterIdentity.getId());
+
         TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, updater);
         MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
 
@@ -185,7 +220,10 @@ public class ActivityApplicationService {
         return activity.forClient(updater);
     }
 
-    public void deleteActivity(UUID activityId, User remover) {
+    public void deleteActivity(UUID activityId) {
+        Identity requesterIdentity = identityProvider.provideIdentity();
+        User remover = new User(requesterIdentity.getId());
+
         TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, remover);
         MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
 
