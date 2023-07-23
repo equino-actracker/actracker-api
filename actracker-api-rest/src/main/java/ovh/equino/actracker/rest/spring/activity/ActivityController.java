@@ -2,16 +2,11 @@ package ovh.equino.actracker.rest.spring.activity;
 
 import org.springframework.web.bind.annotation.*;
 import ovh.equino.actracker.application.activity.ActivityApplicationService;
-import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.application.activity.SearchActivitiesQuery;
 import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.activity.ActivityDto;
-import ovh.equino.actracker.domain.activity.ActivitySortField;
-import ovh.equino.actracker.domain.user.User;
-import ovh.equino.actracker.rest.spring.EntitySearchCriteriaBuilder;
 import ovh.equino.actracker.rest.spring.SearchResponse;
 import ovh.equino.actracker.rest.spring.tag.Tag;
-import ovh.equino.security.identity.Identity;
-import ovh.equino.security.identity.IdentityProvider;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -25,12 +20,10 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 class ActivityController {
 
     private final ActivityApplicationService activityApplicationService;
-    private final IdentityProvider identityProvider;
     private final ActivityMapper mapper = new ActivityMapper();
 
-    ActivityController(ActivityApplicationService activityApplicationService, IdentityProvider identityProvider) {
+    ActivityController(ActivityApplicationService activityApplicationService) {
         this.activityApplicationService = activityApplicationService;
-        this.identityProvider = identityProvider;
     }
 
     @RequestMapping(method = POST)
@@ -53,23 +46,17 @@ class ActivityController {
             @RequestParam(name = "rangeEndMillis", required = false) Long rangeEndMillis,
             @RequestParam(name = "orderBy", required = false) String orderBy) {
 
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User requester = new User(requesterIdentity.getId());
+        SearchActivitiesQuery searchActivitiesQuery = new SearchActivitiesQuery(
+                pageSize,
+                pageId,
+                term,
+                mapper.timestampToInstant(rangeStartMillis),
+                mapper.timestampToInstant(rangeEndMillis),
+                mapper.parseIds(requiredTags),
+                mapper.parseIds(excludedActivities)
+        );
 
-        EntitySearchCriteria searchCriteria = new EntitySearchCriteriaBuilder()
-                .withSearcher(requester)
-                .withPageId(pageId)
-                .withPageSize(pageSize)
-                .withTerm(term)
-                .withTimeRangeStart(rangeStartMillis)
-                .withTimeRangeEnd(rangeEndMillis)
-                .withExcludedIdsJointWithComma(excludedActivities)
-                .withTagsJointWithComma(requiredTags)
-                .withPossibleSortFields(ActivitySortField.START_TIME)
-//                .withSortLevelsJointWithComma(orderBy)
-                .build();
-
-        EntitySearchResult<ActivityDto> searchResult = activityApplicationService.searchActivities(searchCriteria);
+        EntitySearchResult<ActivityDto> searchResult = activityApplicationService.searchActivities(searchActivitiesQuery);
         return mapper.toResponse(searchResult);
     }
 
