@@ -91,8 +91,26 @@ class ActivityController {
     @RequestMapping(method = POST, path = "/switched")
     @ResponseStatus(OK)
     Activity switchToActivity(@RequestBody Activity activity) {
-        ActivityDto activityDto = mapper.fromRequest(activity);
-        ActivityDto switchedActivity = activityApplicationService.switchToNewActivity(activityDto);
+
+        List<MetricValueAssignment> assignedMetricValues =
+                requireNonNullElse(activity.metricValues(), new ArrayList<MetricValue>())
+                        .stream()
+                        .map(metricValue -> new MetricValueAssignment(
+                                UUID.fromString(metricValue.metricId()),
+                                metricValue.value()
+                        ))
+                        .toList();
+
+        SwitchActivityCommand switchActivityCommand = new SwitchActivityCommand(
+                activity.title(),
+                mapper.timestampToInstant(activity.startTimestamp()),
+                mapper.timestampToInstant(activity.endTimestamp()),
+                activity.comment(),
+                mapper.stringsToUuids(activity.tags()),
+                assignedMetricValues
+        );
+        ActivityDto switchedActivity = activityApplicationService.switchToNewActivity(switchActivityCommand);
+
         return mapper.toResponse(switchedActivity);
     }
 

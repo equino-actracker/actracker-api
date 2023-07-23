@@ -92,12 +92,26 @@ public class ActivityApplicationService {
         return new SearchResult<>(searchResult.nextPageId(), resultForClient);
     }
 
-    public ActivityDto switchToNewActivity(ActivityDto activityToSwitch) {
+    public ActivityDto switchToNewActivity(SwitchActivityCommand switchActivityCommand) {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User switcher = new User(requesterIdentity.getId());
 
         TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, switcher);
         MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
+
+        ActivityDto activityToSwitch = new ActivityDto(
+                switchActivityCommand.activityTitle(),
+                switchActivityCommand.activityStartTime(),
+                switchActivityCommand.activityEndTime(),
+                switchActivityCommand.activityComment(),
+                new HashSet<>(switchActivityCommand.assignedTags()),
+                switchActivityCommand.metricValueAssignments().stream()
+                        .map(metricValueAssignment -> new MetricValue(
+                                metricValueAssignment.metricId(),
+                                metricValueAssignment.metricValue()
+                        ))
+                        .toList()
+        );
 
         Activity newActivity = Activity.create(activityToSwitch, switcher, tagsExistenceVerifier, metricsExistenceVerifier);
         Instant switchTime = newActivity.isStarted() ? newActivity.startTime() : now();
