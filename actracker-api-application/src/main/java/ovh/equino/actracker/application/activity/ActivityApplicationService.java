@@ -1,5 +1,6 @@
 package ovh.equino.actracker.application.activity;
 
+import ovh.equino.actracker.application.SearchResult;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.activity.*;
@@ -62,7 +63,7 @@ public class ActivityApplicationService {
         return toActivityResult(activityResult);
     }
 
-    public EntitySearchResult<ActivityDto> searchActivities(SearchActivitiesQuery searchActivitiesQuery) {
+    public SearchResult<ActivityResult> searchActivities(SearchActivitiesQuery searchActivitiesQuery) {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User searcher = new User(requesterIdentity.getId());
 
@@ -82,12 +83,13 @@ public class ActivityApplicationService {
         );
 
         EntitySearchResult<ActivityDto> searchResult = activitySearchEngine.findActivities(searchCriteria);
-        List<ActivityDto> resultForClient = searchResult.results().stream()
+        List<ActivityResult> resultForClient = searchResult.results().stream()
                 .map(activity -> Activity.fromStorage(activity, tagsExistenceVerifier, metricsExistenceVerifier))
                 .map(activity -> activity.forClient(searchCriteria.searcher()))
+                .map(this::toActivityResult)
                 .toList();
 
-        return new EntitySearchResult<>(searchResult.nextPageId(), resultForClient);
+        return new SearchResult<>(searchResult.nextPageId(), resultForClient);
     }
 
     public ActivityDto switchToNewActivity(ActivityDto activityToSwitch) {
