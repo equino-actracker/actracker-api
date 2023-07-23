@@ -3,7 +3,6 @@ package ovh.equino.actracker.rest.spring.activity;
 import org.springframework.web.bind.annotation.*;
 import ovh.equino.actracker.application.SearchResult;
 import ovh.equino.actracker.application.activity.*;
-import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.rest.spring.SearchResponse;
 import ovh.equino.actracker.rest.spring.tag.Tag;
 
@@ -117,49 +116,49 @@ class ActivityController {
     @RequestMapping(method = PUT, path = "/{id}/title")
     @ResponseStatus(OK)
     Activity renameActivity(@PathVariable("id") String id, @RequestBody String newTitle) {
-        ActivityDto activity = activityApplicationService.renameActivity(newTitle, UUID.fromString(id));
-        return mapper.toResponse(activity);
+        ActivityResult activity = activityApplicationService.renameActivity(newTitle, UUID.fromString(id));
+        return toResponse(activity);
     }
 
     @RequestMapping(method = PUT, path = "/{id}/startTime")
     @ResponseStatus(OK)
     Activity startActivity(@PathVariable("id") String id, @RequestBody Long newStartTimestamp) {
         Instant newStartTime = Instant.ofEpochMilli(newStartTimestamp);
-        ActivityDto activity = activityApplicationService.startActivity(newStartTime, UUID.fromString(id));
-        return mapper.toResponse(activity);
+        ActivityResult activity = activityApplicationService.startActivity(newStartTime, UUID.fromString(id));
+        return toResponse(activity);
     }
 
     @RequestMapping(method = PUT, path = "/{id}/endTime")
     @ResponseStatus(OK)
     Activity finishActivity(@PathVariable("id") String id, @RequestBody Long newEndTimestamp) {
         Instant newEndTime = Instant.ofEpochMilli(newEndTimestamp);
-        ActivityDto activity = activityApplicationService.finishActivity(newEndTime, UUID.fromString(id));
-        return mapper.toResponse(activity);
+        ActivityResult activity = activityApplicationService.finishActivity(newEndTime, UUID.fromString(id));
+        return toResponse(activity);
     }
 
     @RequestMapping(method = PUT, path = "/{id}/comment")
     @ResponseStatus(OK)
     Activity updateActivityComment(@PathVariable("id") String id, @RequestBody String newComment) {
-        ActivityDto activity = activityApplicationService.updateActivityComment(newComment, UUID.fromString(id));
-        return mapper.toResponse(activity);
+        ActivityResult activity = activityApplicationService.updateActivityComment(newComment, UUID.fromString(id));
+        return toResponse(activity);
     }
 
     @RequestMapping(method = POST, path = "/{id}/tag")
     @ResponseStatus(OK)
     Activity addTagToActivity(@PathVariable("id") String id, @RequestBody Tag newTag) {
         UUID tagId = UUID.fromString(newTag.id());
-        ActivityDto activity = activityApplicationService.addTagToActivity(tagId, UUID.fromString(id));
-        return mapper.toResponse(activity);
+        ActivityResult activity = activityApplicationService.addTagToActivity(tagId, UUID.fromString(id));
+        return toResponse(activity);
     }
 
     @RequestMapping(method = DELETE, path = "/{activityId}/tag/{tagId}")
     @ResponseStatus(OK)
     Activity removeTagFromActivity(@PathVariable("activityId") String activityId, @PathVariable("tagId") String tagId) {
-        ActivityDto activity = activityApplicationService.removeTagFromActivity(
+        ActivityResult activity = activityApplicationService.removeTagFromActivity(
                 UUID.fromString(tagId),
                 UUID.fromString(activityId)
         );
-        return mapper.toResponse(activity);
+        return toResponse(activity);
     }
 
     @RequestMapping(method = PUT, path = "/{activityId}/metric/{metricId}/value")
@@ -168,12 +167,12 @@ class ActivityController {
                                     @PathVariable("metricId") String metricId,
                                     @RequestBody BigDecimal value) {
 
-        ActivityDto updatedActivity = activityApplicationService.setMetricValue(
+        ActivityResult updatedActivity = activityApplicationService.setMetricValue(
                 UUID.fromString(metricId),
                 value,
                 UUID.fromString(activityId)
         );
-        return mapper.toResponse(updatedActivity);
+        return toResponse(updatedActivity);
     }
 
     @RequestMapping(method = DELETE, path = "/{activityId}/metric/{metricId}/value")
@@ -181,11 +180,11 @@ class ActivityController {
     Activity unsetActivityMetricValue(@PathVariable("activityId") String activityId,
                                       @PathVariable("metricId") String metricId) {
 
-        ActivityDto updatedActivity = activityApplicationService.unsetMetricValue(
+        ActivityResult updatedActivity = activityApplicationService.unsetMetricValue(
                 UUID.fromString(metricId),
                 UUID.fromString(activityId)
         );
-        return mapper.toResponse(updatedActivity);
+        return toResponse(updatedActivity);
     }
 
     private Activity toResponse(ActivityResult activityResult) {

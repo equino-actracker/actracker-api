@@ -133,7 +133,7 @@ public class ActivityApplicationService {
         return toActivityResult(activityResult);
     }
 
-    public ActivityDto renameActivity(String newTitle, UUID activityId) {
+    public ActivityResult renameActivity(String newTitle, UUID activityId) {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
@@ -147,10 +147,12 @@ public class ActivityApplicationService {
         activity.rename(newTitle, updater);
 
         activityRepository.update(activityId, activity.forStorage());
-        return activity.forClient(updater);
+        ActivityDto activityResult = activity.forClient(updater);
+
+        return toActivityResult(activityResult);
     }
 
-    public ActivityDto startActivity(Instant startTime, UUID activityId) {
+    public ActivityResult startActivity(Instant startTime, UUID activityId) {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
@@ -164,10 +166,12 @@ public class ActivityApplicationService {
         activity.start(startTime, updater);
 
         activityRepository.update(activityId, activity.forStorage());
-        return activity.forClient(updater);
+        ActivityDto activityResult = activity.forClient(updater);
+
+        return toActivityResult(activityResult);
     }
 
-    public ActivityDto finishActivity(Instant endTime, UUID activityId) {
+    public ActivityResult finishActivity(Instant endTime, UUID activityId) {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
@@ -181,10 +185,12 @@ public class ActivityApplicationService {
         activity.finish(endTime, updater);
 
         activityRepository.update(activityId, activity.forStorage());
-        return activity.forClient(updater);
+        ActivityDto activityResult = activity.forClient(updater);
+
+        return toActivityResult(activityResult);
     }
 
-    public ActivityDto updateActivityComment(String newComment, UUID activityId) {
+    public ActivityResult updateActivityComment(String newComment, UUID activityId) {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
@@ -198,10 +204,12 @@ public class ActivityApplicationService {
         activity.updateComment(newComment, updater);
 
         activityRepository.update(activityId, activity.forStorage());
-        return activity.forClient(updater);
+        ActivityDto activityResult = activity.forClient(updater);
+
+        return toActivityResult(activityResult);
     }
 
-    public ActivityDto addTagToActivity(UUID tagId, UUID activityId) {
+    public ActivityResult addTagToActivity(UUID tagId, UUID activityId) {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
@@ -215,10 +223,12 @@ public class ActivityApplicationService {
         activity.assignTag(new TagId(tagId), updater);
 
         activityRepository.update(activityId, activity.forStorage());
-        return activity.forClient(updater);
+        ActivityDto activityResult = activity.forClient(updater);
+
+        return toActivityResult(activityResult);
     }
 
-    public ActivityDto removeTagFromActivity(UUID tagId, UUID activityId) {
+    public ActivityResult removeTagFromActivity(UUID tagId, UUID activityId) {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
@@ -232,10 +242,12 @@ public class ActivityApplicationService {
         activity.removeTag(new TagId(tagId), updater);
 
         activityRepository.update(activityId, activity.forStorage());
-        return activity.forClient(updater);
+        ActivityDto activityResult = activity.forClient(updater);
+
+        return toActivityResult(activityResult);
     }
 
-    public ActivityDto setMetricValue(UUID metricId, BigDecimal value, UUID activityId) {
+    public ActivityResult setMetricValue(UUID metricId, BigDecimal value, UUID activityId) {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
@@ -249,10 +261,12 @@ public class ActivityApplicationService {
         activity.setMetricValue(new MetricValue(metricId, value), updater);
 
         activityRepository.update(activityId, activity.forStorage());
-        return activity.forClient(updater);
+        ActivityDto activityResult = activity.forClient(updater);
+
+        return toActivityResult(activityResult);
     }
 
-    public ActivityDto unsetMetricValue(UUID metricId, UUID activityId) {
+    public ActivityResult unsetMetricValue(UUID metricId, UUID activityId) {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
@@ -266,7 +280,9 @@ public class ActivityApplicationService {
         activity.unsetMetricValue(new MetricId(metricId), updater);
 
         activityRepository.update(activityId, activity.forStorage());
-        return activity.forClient(updater);
+        ActivityDto activityResult = activity.forClient(updater);
+
+        return toActivityResult(activityResult);
     }
 
     public void deleteActivity(UUID activityId) {
