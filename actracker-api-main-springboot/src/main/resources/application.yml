@@ -25,3 +25,8 @@ spring:
 server:
   servlet:
     context-path: /actracker-api
+#logging:
+#  level:
+#    org.springframework.orm.jpa: DEBUG
+#    org.springframework.transaction: DEBUG
+#    org.hibernate.engine.transaction: DEBUG

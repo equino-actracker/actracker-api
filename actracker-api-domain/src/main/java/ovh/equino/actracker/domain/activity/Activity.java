@@ -58,7 +58,7 @@ public class Activity implements Entity {
         this.validator = validator;
     }
 
-    static Activity create(ActivityDto activity, User creator, TagsExistenceVerifier tagsExistenceVerifier, MetricsExistenceVerifier metricsExistenceVerifier) {
+    public static Activity create(ActivityDto activity, User creator, TagsExistenceVerifier tagsExistenceVerifier, MetricsExistenceVerifier metricsExistenceVerifier) {
         Activity newActivity = new Activity(
                 new ActivityId(),
                 creator,
@@ -266,7 +266,7 @@ public class Activity implements Entity {
         return !isAvailableFor(user);
     }
 
-    boolean isStarted() {
+    public boolean isStarted() {
         return nonNull(this.startTime);
     }
 
@@ -275,7 +275,7 @@ public class Activity implements Entity {
         validator.validate(this);
     }
 
-    Instant startTime() {
+    public Instant startTime() {
         return startTime;
     }
 

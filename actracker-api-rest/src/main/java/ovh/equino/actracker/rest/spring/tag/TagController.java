@@ -74,32 +74,32 @@ class TagController {
         return new SearchResponse<>(searchResult.nextPageId(), foundResults);
     }
 
-    @RequestMapping(method = DELETE, path = "/{id}")
-    void deleteTag(@PathVariable("id") String id) {
-        tagApplicationService.deleteTag(UUID.fromString(id));
+    @RequestMapping(method = DELETE, path = "/{tagId}")
+    void deleteTag(@PathVariable("tagId") String tagId) {
+        tagApplicationService.deleteTag(UUID.fromString(tagId));
     }
 
-    @RequestMapping(method = POST, path = "/{id}/share")
+    @RequestMapping(method = POST, path = "/{tagId}/share")
     @ResponseStatus(OK)
-    Tag addShareToTag(@PathVariable("id") String id,
+    Tag addShareToTag(@PathVariable("tagId") String tagId,
                       @RequestBody Share share) {
 
-        TagResult updatedTag = tagApplicationService.shareTag(share.granteeName(), UUID.fromString(id));
+        TagResult updatedTag = tagApplicationService.shareTag(share.granteeName(), UUID.fromString(tagId));
         return toResponse(updatedTag);
     }
 
-    @RequestMapping(method = DELETE, path = "/{id}/share/{granteeName}")
+    @RequestMapping(method = DELETE, path = "/{tagId}/share/{granteeName}")
     @ResponseStatus(OK)
-    Tag removeShareFromTag(@PathVariable("id") String tagId,
+    Tag removeShareFromTag(@PathVariable("tagId") String tagId,
                            @PathVariable("granteeName") String granteeName) {
 
         TagResult updatedTag = tagApplicationService.unshareTag(granteeName, UUID.fromString(tagId));
         return toResponse(updatedTag);
     }
 
-    @RequestMapping(method = PUT, path = "/{id}/name")
+    @RequestMapping(method = PUT, path = "/{tagId}/name")
     @ResponseStatus(OK)
-    Tag replaceTagName(@PathVariable("id") String tagId,
+    Tag replaceTagName(@PathVariable("tagId") String tagId,
                        @RequestBody String newName) {
 
         TagResult updatedTag = tagApplicationService.renameTag(newName, UUID.fromString(tagId));
