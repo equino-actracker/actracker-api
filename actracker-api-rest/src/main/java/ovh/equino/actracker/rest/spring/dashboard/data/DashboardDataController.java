@@ -1,8 +1,8 @@
 package ovh.equino.actracker.rest.spring.dashboard.data;
 
 import org.springframework.web.bind.annotation.*;
+import ovh.equino.actracker.application.dashboard.DashboardApplicationService;
 import ovh.equino.actracker.domain.dashboard.generation.DashboardGenerationCriteria;
-import ovh.equino.actracker.domain.dashboard.DashboardService;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.security.identity.Identity;
 import ovh.equino.security.identity.IdentityProvider;
@@ -14,12 +14,14 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 @RequestMapping("/dashboard/{id}/data")
 class DashboardDataController {
 
-    private final DashboardService dashboardService;
+    private final DashboardApplicationService dashboardApplicationService;
     private final IdentityProvider identityProvider;
     private final DashboardDataMapper mapper = new DashboardDataMapper();
 
-    DashboardDataController(DashboardService dashboardService, IdentityProvider identityProvider) {
-        this.dashboardService = dashboardService;
+    DashboardDataController(DashboardApplicationService dashboardApplicationService,
+                            IdentityProvider identityProvider) {
+
+        this.dashboardApplicationService = dashboardApplicationService;
         this.identityProvider = identityProvider;
     }
 
@@ -44,7 +46,7 @@ class DashboardDataController {
                 .build();
 
         ovh.equino.actracker.domain.dashboard.generation.DashboardData dashboardData =
-                dashboardService.generateDashboard(dashboardGenerationCriteria);
+                dashboardApplicationService.generateDashboard(dashboardGenerationCriteria);
 
         return mapper.toResponse(dashboardData);
     }

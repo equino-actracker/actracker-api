@@ -45,7 +45,7 @@ public class Dashboard implements Entity {
         this.validator = validator;
     }
 
-    static Dashboard create(DashboardDto dashboard, User creator) {
+    public static Dashboard create(DashboardDto dashboard, User creator) {
         Dashboard newDashboard = new Dashboard(
                 new DashboardId(),
                 creator,

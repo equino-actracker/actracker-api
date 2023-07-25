@@ -5,7 +5,6 @@ import ovh.equino.actracker.application.dashboard.DashboardApplicationService;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
-import ovh.equino.actracker.domain.dashboard.DashboardService;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.rest.spring.EntitySearchCriteriaBuilder;
 import ovh.equino.actracker.rest.spring.SearchResponse;
@@ -23,18 +22,15 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 @RequestMapping("/dashboard")
 class DashboardController {
 
-    private final DashboardService dashboardService;
     private final DashboardApplicationService dashboardApplicationService;
     private final IdentityProvider identityProvider;
     private final DashboardMapper dashboardMapper = new DashboardMapper();
     private final ChartMapper chartMapper = new ChartMapper();
     private final ShareMapper shareMapper = new ShareMapper();
 
-    DashboardController(DashboardService dashboardService,
-                        DashboardApplicationService dashboardApplicationService,
+    DashboardController(DashboardApplicationService dashboardApplicationService,
                         IdentityProvider identityProvider) {
 
-        this.dashboardService = dashboardService;
         this.dashboardApplicationService = dashboardApplicationService;
         this.identityProvider = identityProvider;
     }
@@ -45,7 +41,7 @@ class DashboardController {
         Identity requestIdentity = identityProvider.provideIdentity();
         User requester = new User(requestIdentity.getId());
 
-        DashboardDto foundDashboard = dashboardService.getDashboard(UUID.fromString(id), requester);
+        DashboardDto foundDashboard = dashboardApplicationService.getDashboard(UUID.fromString(id), requester);
         return dashboardMapper.toResponse(foundDashboard);
     }
 
@@ -56,21 +52,9 @@ class DashboardController {
         User requester = new User(requestIdentity.getId());
 
         DashboardDto dashboardDto = dashboardMapper.fromRequest(dashboard);
-        DashboardDto createdDashboard = dashboardService.createDashboard(dashboardDto, requester);
+        DashboardDto createdDashboard = dashboardApplicationService.createDashboard(dashboardDto, requester);
 
         return dashboardMapper.toResponse(createdDashboard);
-    }
-
-    @RequestMapping(method = PUT, path = "/{id}")
-    @ResponseStatus(OK)
-    Dashboard updateDashboard(@PathVariable("id") String id, @RequestBody Dashboard dashboard) {
-        Identity requestIdentity = identityProvider.provideIdentity();
-        User requester = new User(requestIdentity.getId());
-
-        DashboardDto dashboardDto = dashboardMapper.fromRequest(dashboard);
-        DashboardDto updatedDashboard = dashboardService.updateDashboard(UUID.fromString(id), dashboardDto, requester);
-
-        return dashboardMapper.toResponse(updatedDashboard);
     }
 
     @RequestMapping(method = GET, path = "/matching")
@@ -92,7 +76,7 @@ class DashboardController {
                 .withExcludedIdsJointWithComma(excludedDashboards)
                 .build();
 
-        EntitySearchResult<DashboardDto> searchResult = dashboardService.searchDashboards(searchCriteria);
+        EntitySearchResult<DashboardDto> searchResult = dashboardApplicationService.searchDashboards(searchCriteria);
         return dashboardMapper.toResponse(searchResult);
     }
 
