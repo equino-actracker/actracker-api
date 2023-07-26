@@ -46,9 +46,9 @@ class DashboardController {
     @ResponseStatus(OK)
     Dashboard createDashboard(@RequestBody Dashboard dashboard) {
         DashboardDto dashboardDto = dashboardMapper.fromRequest(dashboard);
-        DashboardDto createdDashboard = dashboardApplicationService.createDashboard(dashboardDto);
+        DashboardResult createdDashboard = dashboardApplicationService.createDashboard(dashboardDto);
 
-        return dashboardMapper.toResponse(createdDashboard);
+        return toResponse(createdDashboard);
     }
 
     @RequestMapping(method = GET, path = "/matching")
@@ -84,23 +84,23 @@ class DashboardController {
 
         ovh.equino.actracker.domain.share.Share newShare = shareMapper.fromRequest(share);
 
-        DashboardDto sharedDashboard = dashboardApplicationService.shareDashboard(newShare, UUID.fromString(id));
-        return dashboardMapper.toResponse(sharedDashboard);
+        DashboardResult sharedDashboard = dashboardApplicationService.shareDashboard(newShare, UUID.fromString(id));
+        return toResponse(sharedDashboard);
     }
 
     @RequestMapping(method = DELETE, path = "/{id}/share/{granteeName}")
     @ResponseStatus(OK)
     Dashboard unshareDashboard(@PathVariable("id") String dashboardId, @PathVariable("granteeName") String granteeName) {
-        DashboardDto unsharedDashboard = dashboardApplicationService.unshareDashboard(granteeName, UUID.fromString(dashboardId));
-        return dashboardMapper.toResponse(unsharedDashboard);
+        DashboardResult unsharedDashboard = dashboardApplicationService.unshareDashboard(granteeName, UUID.fromString(dashboardId));
+        return toResponse(unsharedDashboard);
     }
 
     @RequestMapping(method = PUT, path = "/{id}/name")
     @ResponseStatus(OK)
     Dashboard renameDashboard(@PathVariable("id") String dashboardId, @RequestBody String newName) {
-        DashboardDto renamedDashboard = dashboardApplicationService.renameDashboard(newName, UUID.fromString(dashboardId));
+        DashboardResult renamedDashboard = dashboardApplicationService.renameDashboard(newName, UUID.fromString(dashboardId));
 
-        return dashboardMapper.toResponse(renamedDashboard);
+        return toResponse(renamedDashboard);
     }
 
     @RequestMapping(method = POST, path = "/{dashboardId}/chart")
@@ -108,19 +108,19 @@ class DashboardController {
     Dashboard addChart(@PathVariable("dashboardId") String dashboardId, @RequestBody Chart chart) {
         ovh.equino.actracker.domain.dashboard.Chart newChart = chartMapper.fromRequest(chart);
 
-        DashboardDto updatedDashboard = dashboardApplicationService
+        DashboardResult updatedDashboard = dashboardApplicationService
                 .addChart(newChart, UUID.fromString(dashboardId));
 
-        return dashboardMapper.toResponse(updatedDashboard);
+        return toResponse(updatedDashboard);
     }
 
     @RequestMapping(method = DELETE, path = "/{dashboardId}/chart/{chartId}")
     @ResponseStatus(OK)
     Dashboard deleteChart(@PathVariable("dashboardId") String dashboardId, @PathVariable("chartId") String chartId) {
-        DashboardDto updatedDashboard = dashboardApplicationService
+        DashboardResult updatedDashboard = dashboardApplicationService
                 .deleteChart(UUID.fromString(chartId), UUID.fromString(dashboardId));
 
-        return dashboardMapper.toResponse(updatedDashboard);
+        return toResponse(updatedDashboard);
     }
 
     Dashboard toResponse(DashboardResult dashboardResult) {

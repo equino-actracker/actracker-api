@@ -50,7 +50,7 @@ public class DashboardApplicationService {
         return toDashboardResult(dashboardResult);
     }
 
-    public DashboardDto createDashboard(DashboardDto newDashboardData) {
+    public DashboardResult createDashboard(DashboardDto newDashboardData) {
         Identity requestIdentity = identityProvider.provideIdentity();
         User creator = new User(requestIdentity.getId());
 
@@ -66,7 +66,9 @@ public class DashboardApplicationService {
         );
         Dashboard dashboard = Dashboard.create(dashboardDataWithSharesResolved, creator);
         dashboardRepository.add(dashboard.forStorage());
-        return dashboard.forClient(creator);
+        DashboardDto dashboardResult = dashboard.forClient(creator);
+
+        return toDashboardResult(dashboardResult);
     }
 
     public EntitySearchResult<DashboardDto> searchDashboards(SearchDashboardsQuery searchDashboardsQuery) {
@@ -94,7 +96,7 @@ public class DashboardApplicationService {
         return new EntitySearchResult<>(searchResult.nextPageId(), resultForClient);
     }
 
-    public DashboardDto renameDashboard(String newName, UUID dashboardId) {
+    public DashboardResult renameDashboard(String newName, UUID dashboardId) {
         Identity requestIdentity = identityProvider.provideIdentity();
         User updater = new User(requestIdentity.getId());
 
@@ -104,7 +106,9 @@ public class DashboardApplicationService {
 
         dashboard.rename(newName, updater);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
-        return dashboard.forClient(updater);
+        DashboardDto dashboardResult = dashboard.forClient(updater);
+
+        return toDashboardResult(dashboardResult);
     }
 
     public void deleteDashboard(UUID dashboardId) {
@@ -119,7 +123,7 @@ public class DashboardApplicationService {
         dashboardRepository.update(dashboardId, dashboard.forStorage());
     }
 
-    public DashboardDto addChart(Chart newChart, UUID dashboardId) {
+    public DashboardResult addChart(Chart newChart, UUID dashboardId) {
         Identity requestIdentity = identityProvider.provideIdentity();
         User updater = new User(requestIdentity.getId());
 
@@ -129,10 +133,11 @@ public class DashboardApplicationService {
 
         dashboard.addChart(newChart, updater);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
-        return dashboard.forClient(updater);
+        DashboardDto dashboardResult = dashboard.forClient(updater);
+        return toDashboardResult(dashboardResult);
     }
 
-    public DashboardDto deleteChart(UUID chartId, UUID dashboardId) {
+    public DashboardResult deleteChart(UUID chartId, UUID dashboardId) {
         Identity requestIdentity = identityProvider.provideIdentity();
         User updater = new User(requestIdentity.getId());
 
@@ -142,11 +147,12 @@ public class DashboardApplicationService {
 
         dashboard.deleteChart(new ChartId(chartId), updater);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
-        return dashboard.forClient(updater);
+        DashboardDto dashboardResult = dashboard.forClient(updater);
+        return toDashboardResult(dashboardResult);
 
     }
 
-    public DashboardDto shareDashboard(Share newShare, UUID dashboardId) {
+    public DashboardResult shareDashboard(Share newShare, UUID dashboardId) {
         Identity requestIdentity = identityProvider.provideIdentity();
         User granter = new User(requestIdentity.getId());
 
@@ -158,10 +164,12 @@ public class DashboardApplicationService {
 
         dashboard.share(share, granter);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
-        return dashboard.forClient(granter);
+        DashboardDto dashboardResult = dashboard.forClient(granter);
+
+        return toDashboardResult(dashboardResult);
     }
 
-    public DashboardDto unshareDashboard(String granteeName, UUID dashboardId) {
+    public DashboardResult unshareDashboard(String granteeName, UUID dashboardId) {
         Identity requestIdentity = identityProvider.provideIdentity();
         User granter = new User(requestIdentity.getId());
 
@@ -171,7 +179,9 @@ public class DashboardApplicationService {
 
         dashboard.unshare(granteeName, granter);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
-        return dashboard.forClient(granter);
+        DashboardDto dashboardResult = dashboard.forClient(granter);
+
+        return toDashboardResult(dashboardResult);
     }
 
     public DashboardData generateDashboard(GenerateDashboardQuery generateDashboardQuery) {
