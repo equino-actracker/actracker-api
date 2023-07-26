@@ -10,6 +10,8 @@ import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tenant.TenantRepository;
 import ovh.equino.actracker.domain.user.User;
+import ovh.equino.security.identity.Identity;
+import ovh.equino.security.identity.IdentityProvider;
 
 import java.util.List;
 import java.util.UUID;
@@ -20,19 +22,25 @@ public class DashboardApplicationService {
     private final DashboardSearchEngine dashboardSearchEngine;
     private final DashboardGenerationEngine dashboardGenerationEngine;
     private final TenantRepository tenantRepository;
+    private final IdentityProvider identityProvider;
 
     public DashboardApplicationService(DashboardRepository dashboardRepository,
                                        DashboardSearchEngine dashboardSearchEngine,
                                        DashboardGenerationEngine dashboardGenerationEngine,
-                                       TenantRepository tenantRepository) {
+                                       TenantRepository tenantRepository,
+                                       IdentityProvider identityProvider) {
 
         this.dashboardRepository = dashboardRepository;
         this.dashboardSearchEngine = dashboardSearchEngine;
         this.dashboardGenerationEngine = dashboardGenerationEngine;
         this.tenantRepository = tenantRepository;
+        this.identityProvider = identityProvider;
     }
 
-    public DashboardDto getDashboard(UUID dashboardId, User searcher) {
+    public DashboardDto getDashboard(UUID dashboardId) {
+        Identity requestIdentity = identityProvider.provideIdentity();
+        User searcher = new User(requestIdentity.getId());
+
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
 
@@ -40,7 +48,10 @@ public class DashboardApplicationService {
         return dashboard.forClient(searcher);
     }
 
-    public DashboardDto createDashboard(DashboardDto newDashboardData, User creator) {
+    public DashboardDto createDashboard(DashboardDto newDashboardData) {
+        Identity requestIdentity = identityProvider.provideIdentity();
+        User creator = new User(requestIdentity.getId());
+
         DashboardDto dashboardDataWithSharesResolved = new DashboardDto(
                 newDashboardData.id(),
                 newDashboardData.creatorId(),
@@ -66,7 +77,10 @@ public class DashboardApplicationService {
         return new EntitySearchResult<>(searchResult.nextPageId(), resultForClient);
     }
 
-    public DashboardDto renameDashboard(String newName, UUID dashboardId, User updater) {
+    public DashboardDto renameDashboard(String newName, UUID dashboardId) {
+        Identity requestIdentity = identityProvider.provideIdentity();
+        User updater = new User(requestIdentity.getId());
+
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
         Dashboard dashboard = Dashboard.fromStorage(dashboardDto);
@@ -76,7 +90,10 @@ public class DashboardApplicationService {
         return dashboard.forClient(updater);
     }
 
-    public void deleteDashboard(UUID dashboardId, User remover) {
+    public void deleteDashboard(UUID dashboardId) {
+        Identity requestIdentity = identityProvider.provideIdentity();
+        User remover = new User(requestIdentity.getId());
+
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
         Dashboard dashboard = Dashboard.fromStorage(dashboardDto);
@@ -85,28 +102,37 @@ public class DashboardApplicationService {
         dashboardRepository.update(dashboardId, dashboard.forStorage());
     }
 
-    public DashboardDto addChart(Chart newChart, UUID dashboardId, User editor) {
+    public DashboardDto addChart(Chart newChart, UUID dashboardId) {
+        Identity requestIdentity = identityProvider.provideIdentity();
+        User updater = new User(requestIdentity.getId());
+
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
         Dashboard dashboard = Dashboard.fromStorage(dashboardDto);
 
-        dashboard.addChart(newChart, editor);
+        dashboard.addChart(newChart, updater);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
-        return dashboard.forClient(editor);
+        return dashboard.forClient(updater);
     }
 
-    public DashboardDto deleteChart(UUID chartId, UUID dashboardId, User editor) {
+    public DashboardDto deleteChart(UUID chartId, UUID dashboardId) {
+        Identity requestIdentity = identityProvider.provideIdentity();
+        User updater = new User(requestIdentity.getId());
+
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
         Dashboard dashboard = Dashboard.fromStorage(dashboardDto);
 
-        dashboard.deleteChart(new ChartId(chartId), editor);
+        dashboard.deleteChart(new ChartId(chartId), updater);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
-        return dashboard.forClient(editor);
+        return dashboard.forClient(updater);
 
     }
 
-    public DashboardDto shareDashboard(Share newShare, UUID dashboardId, User granter) {
+    public DashboardDto shareDashboard(Share newShare, UUID dashboardId) {
+        Identity requestIdentity = identityProvider.provideIdentity();
+        User granter = new User(requestIdentity.getId());
+
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
         Dashboard dashboard = Dashboard.fromStorage(dashboardDto);
@@ -118,7 +144,10 @@ public class DashboardApplicationService {
         return dashboard.forClient(granter);
     }
 
-    public DashboardDto unshareDashboard(String granteeName, UUID dashboardId, User granter) {
+    public DashboardDto unshareDashboard(String granteeName, UUID dashboardId) {
+        Identity requestIdentity = identityProvider.provideIdentity();
+        User granter = new User(requestIdentity.getId());
+
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
         Dashboard dashboard = Dashboard.fromStorage(dashboardDto);
