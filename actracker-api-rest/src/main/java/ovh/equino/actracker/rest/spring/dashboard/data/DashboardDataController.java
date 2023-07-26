@@ -10,7 +10,7 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @RestController
-@RequestMapping("/dashboard/{id}/data")
+@RequestMapping("/dashboard/{dashboardId}/data")
 class DashboardDataController {
 
     private final DashboardApplicationService dashboardApplicationService;
@@ -23,20 +23,18 @@ class DashboardDataController {
 
     @RequestMapping(method = GET)
     @ResponseStatus(OK)
-    DashboardData getData(
-            @PathVariable("id") String id,
-            @RequestParam(name = "rangeStartMillis", required = false) Long rangeStartMillis,
-            @RequestParam(name = "rangeEndMillis", required = false) Long rangeEndMillis,
-            @RequestParam(name = "requiredTags", required = false) String requiredTags
+    DashboardData getDashboardData(@PathVariable("dashboardId") String dashboardId,
+                                   @RequestParam(name = "rangeStartMillis", required = false) Long rangeStartMillis,
+                                   @RequestParam(name = "rangeEndMillis", required = false) Long rangeEndMillis,
+                                   @RequestParam(name = "requiredTags", required = false) String requiredTags
     ) {
 
         GenerateDashboardQuery generateDashboardQuery = new GenerateDashboardQuery(
-                UUID.fromString(id),
+                UUID.fromString(dashboardId),
                 mapper.timestampToInstant(rangeStartMillis),
                 mapper.timestampToInstant(rangeEndMillis),
                 mapper.parseIds(requiredTags)
         );
-
         DashboardGenerationResult dashboardData =
                 dashboardApplicationService.generateDashboard(generateDashboardQuery);
 

@@ -20,17 +20,16 @@ class DashboardController {
 
     private final DashboardApplicationService dashboardApplicationService;
     private final DashboardMapper dashboardMapper = new DashboardMapper();
-    private final ChartMapper chartMapper = new ChartMapper();
 
     DashboardController(DashboardApplicationService dashboardApplicationService) {
 
         this.dashboardApplicationService = dashboardApplicationService;
     }
 
-    @RequestMapping(method = GET, path = "/{id}")
+    @RequestMapping(method = GET, path = "/{dashboardId}")
     @ResponseStatus(OK)
-    Dashboard getDashboard(@PathVariable("id") String id) {
-        DashboardResult foundDashboard = dashboardApplicationService.getDashboard(UUID.fromString(id));
+    Dashboard getDashboard(@PathVariable("dashboardId") String dashboardId) {
+        DashboardResult foundDashboard = dashboardApplicationService.getDashboard(UUID.fromString(dashboardId));
         return toResponse(foundDashboard);
     }
 
@@ -62,11 +61,10 @@ class DashboardController {
 
     @RequestMapping(method = GET, path = "/matching")
     @ResponseStatus(OK)
-    SearchResponse<Dashboard> searchDashboards(
-            @RequestParam(name = "pageId", required = false) String pageId,
-            @RequestParam(name = "pageSize", required = false) Integer pageSize,
-            @RequestParam(name = "term", required = false) String term,
-            @RequestParam(name = "excludedDashboards", required = false) String excludedDashboards) {
+    SearchResponse<Dashboard> searchDashboards(@RequestParam(name = "pageId", required = false) String pageId,
+                                               @RequestParam(name = "pageSize", required = false) Integer pageSize,
+                                               @RequestParam(name = "term", required = false) String term,
+                                               @RequestParam(name = "excludedDashboards", required = false) String excludedDashboards) {
 
         SearchDashboardsQuery searchDashboardsQuery = new SearchDashboardsQuery(
                 pageSize,
@@ -82,40 +80,53 @@ class DashboardController {
         return new SearchResponse<>(searchResult.nextPageId(), foundResults);
     }
 
-    @RequestMapping(method = DELETE, path = "/{id}")
+    @RequestMapping(method = DELETE, path = "/{dashboardId}")
     @ResponseStatus(OK)
-    void deleteDashboard(@PathVariable("id") String id) {
-        dashboardApplicationService.deleteDashboard(UUID.fromString(id));
+    void deleteDashboard(@PathVariable("dashboardId") String dashboardId) {
+        dashboardApplicationService.deleteDashboard(UUID.fromString(dashboardId));
     }
 
-    @RequestMapping(method = POST, path = "/{id}/share")
+    @RequestMapping(method = POST, path = "/{dashboardId}/share")
     @ResponseStatus(OK)
-    Dashboard shareDashboard(
-            @PathVariable("id") String id,
-            @RequestBody Share share) {
+    Dashboard addShareToDashboard(@PathVariable("dashboardId") String dashboardId,
+                                  @RequestBody Share share) {
 
-        DashboardResult sharedDashboard = dashboardApplicationService.shareDashboard(share.granteeName(), UUID.fromString(id));
+        DashboardResult sharedDashboard = dashboardApplicationService.shareDashboard(
+                share.granteeName(),
+                UUID.fromString(dashboardId)
+        );
         return toResponse(sharedDashboard);
     }
 
-    @RequestMapping(method = DELETE, path = "/{id}/share/{granteeName}")
+    @RequestMapping(method = DELETE, path = "/{dashboardId}/share/{granteeName}")
     @ResponseStatus(OK)
-    Dashboard unshareDashboard(@PathVariable("id") String dashboardId, @PathVariable("granteeName") String granteeName) {
-        DashboardResult unsharedDashboard = dashboardApplicationService.unshareDashboard(granteeName, UUID.fromString(dashboardId));
+    Dashboard removeShareFromDashboard(@PathVariable("dashboardId") String dashboardId,
+                                       @PathVariable("granteeName") String granteeName) {
+
+        DashboardResult unsharedDashboard = dashboardApplicationService.unshareDashboard(
+                granteeName,
+                UUID.fromString(dashboardId)
+        );
         return toResponse(unsharedDashboard);
     }
 
-    @RequestMapping(method = PUT, path = "/{id}/name")
+    @RequestMapping(method = PUT, path = "/{dashboardId}/name")
     @ResponseStatus(OK)
-    Dashboard renameDashboard(@PathVariable("id") String dashboardId, @RequestBody String newName) {
-        DashboardResult renamedDashboard = dashboardApplicationService.renameDashboard(newName, UUID.fromString(dashboardId));
+    Dashboard replaceDashboardName(@PathVariable("dashboardId") String dashboardId,
+                                   @RequestBody String newName) {
 
+        DashboardResult renamedDashboard = dashboardApplicationService.renameDashboard(
+                newName,
+                UUID.fromString(dashboardId)
+        );
         return toResponse(renamedDashboard);
     }
 
     @RequestMapping(method = POST, path = "/{dashboardId}/chart")
     @ResponseStatus(OK)
-    Dashboard addChart(@PathVariable("dashboardId") String dashboardId, @RequestBody Chart chart) {
+    Dashboard createChart(@PathVariable("dashboardId") String dashboardId,
+                          @RequestBody Chart chart) {
+
         ChartAssignment newChartAssignment = new ChartAssignment(
                 chart.name(),
                 chart.groupBy(),
@@ -130,7 +141,9 @@ class DashboardController {
 
     @RequestMapping(method = DELETE, path = "/{dashboardId}/chart/{chartId}")
     @ResponseStatus(OK)
-    Dashboard deleteChart(@PathVariable("dashboardId") String dashboardId, @PathVariable("chartId") String chartId) {
+    Dashboard deleteChart(@PathVariable("dashboardId") String dashboardId,
+                          @PathVariable("chartId") String chartId) {
+
         DashboardResult updatedDashboard = dashboardApplicationService
                 .deleteChart(UUID.fromString(chartId), UUID.fromString(dashboardId));
 
