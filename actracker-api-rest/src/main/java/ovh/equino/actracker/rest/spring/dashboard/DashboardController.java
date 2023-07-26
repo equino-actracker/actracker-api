@@ -1,19 +1,18 @@
 package ovh.equino.actracker.rest.spring.dashboard;
 
 import org.springframework.web.bind.annotation.*;
+import ovh.equino.actracker.application.dashboard.ChartResult;
 import ovh.equino.actracker.application.dashboard.DashboardApplicationService;
+import ovh.equino.actracker.application.dashboard.DashboardResult;
 import ovh.equino.actracker.application.dashboard.SearchDashboardsQuery;
-import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
-import ovh.equino.actracker.domain.user.User;
-import ovh.equino.actracker.rest.spring.EntitySearchCriteriaBuilder;
 import ovh.equino.actracker.rest.spring.SearchResponse;
 import ovh.equino.actracker.rest.spring.share.Share;
 import ovh.equino.actracker.rest.spring.share.ShareMapper;
-import ovh.equino.security.identity.Identity;
 import ovh.equino.security.identity.IdentityProvider;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.OK;
@@ -39,8 +38,8 @@ class DashboardController {
     @RequestMapping(method = GET, path = "/{id}")
     @ResponseStatus(OK)
     Dashboard getDashboard(@PathVariable("id") String id) {
-        DashboardDto foundDashboard = dashboardApplicationService.getDashboard(UUID.fromString(id));
-        return dashboardMapper.toResponse(foundDashboard);
+        DashboardResult foundDashboard = dashboardApplicationService.getDashboard(UUID.fromString(id));
+        return toResponse(foundDashboard);
     }
 
     @RequestMapping(method = POST)
@@ -122,6 +121,30 @@ class DashboardController {
                 .deleteChart(UUID.fromString(chartId), UUID.fromString(dashboardId));
 
         return dashboardMapper.toResponse(updatedDashboard);
+    }
 
+    Dashboard toResponse(DashboardResult dashboardResult) {
+        List<Share> shares = dashboardResult.shares().stream()
+                .map(Share::new)
+                .toList();
+        List<Chart> charts = dashboardResult.charts().stream()
+                .map(this::toResponse)
+                .toList();
+        return new Dashboard(
+                dashboardResult.id().toString(),
+                dashboardResult.name(),
+                charts,
+                shares
+        );
+    }
+
+    Chart toResponse(ChartResult chartResult) {
+        return new Chart(
+                chartResult.id().toString(),
+                chartResult.name(),
+                chartResult.groupBy(),
+                chartResult.analysisMetric(),
+                dashboardMapper.uuidsToStrings(chartResult.includedTags())
+        );
     }
 }

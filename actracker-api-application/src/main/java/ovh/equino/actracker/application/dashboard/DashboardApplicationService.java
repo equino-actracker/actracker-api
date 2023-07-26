@@ -37,7 +37,7 @@ public class DashboardApplicationService {
         this.identityProvider = identityProvider;
     }
 
-    public DashboardDto getDashboard(UUID dashboardId) {
+    public DashboardResult getDashboard(UUID dashboardId) {
         Identity requestIdentity = identityProvider.provideIdentity();
         User searcher = new User(requestIdentity.getId());
 
@@ -45,7 +45,9 @@ public class DashboardApplicationService {
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
 
         Dashboard dashboard = Dashboard.fromStorage(dashboardDto);
-        return dashboard.forClient(searcher);
+        DashboardDto dashboardResult = dashboard.forClient(searcher);
+
+        return toDashboardResult(dashboardResult);
     }
 
     public DashboardDto createDashboard(DashboardDto newDashboardData) {
@@ -200,5 +202,30 @@ public class DashboardApplicationService {
                         tenant.username()
                 ))
                 .orElse(new Share(share.granteeName()));
+    }
+
+    DashboardResult toDashboardResult(DashboardDto dashboardDto) {
+        List<ChartResult> chartResults = dashboardDto.charts().stream()
+                .map(this::toChartResult)
+                .toList();
+        List<String> shares = dashboardDto.shares().stream()
+                .map(Share::granteeName)
+                .toList();
+        return new DashboardResult(
+                dashboardDto.id(),
+                dashboardDto.name(),
+                chartResults,
+                shares
+        );
+    }
+
+    ChartResult toChartResult(Chart chart) {
+        return new ChartResult(
+                chart.id().id(),
+                chart.name(),
+                chart.groupBy().toString(),
+                chart.analysisMetric().toString(),
+                chart.includedTags()
+        );
     }
 }
