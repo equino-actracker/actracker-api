@@ -1,5 +1,6 @@
 package ovh.equino.actracker.application.dashboard;
 
+import ovh.equino.actracker.application.SearchResult;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.dashboard.*;
@@ -71,7 +72,7 @@ public class DashboardApplicationService {
         return toDashboardResult(dashboardResult);
     }
 
-    public EntitySearchResult<DashboardDto> searchDashboards(SearchDashboardsQuery searchDashboardsQuery) {
+    public SearchResult<DashboardResult> searchDashboards(SearchDashboardsQuery searchDashboardsQuery) {
         Identity requestIdentity = identityProvider.provideIdentity();
         User searcher = new User(requestIdentity.getId());
 
@@ -88,12 +89,13 @@ public class DashboardApplicationService {
         );
 
         EntitySearchResult<DashboardDto> searchResult = dashboardSearchEngine.findDashboards(searchCriteria);
-        List<DashboardDto> resultForClient = searchResult.results().stream()
+        List<DashboardResult> resultForClient = searchResult.results().stream()
                 .map(Dashboard::fromStorage)
                 .map(dashboard -> dashboard.forClient(searchCriteria.searcher()))
+                .map(this::toDashboardResult)
                 .toList();
 
-        return new EntitySearchResult<>(searchResult.nextPageId(), resultForClient);
+        return new SearchResult<>(searchResult.nextPageId(), resultForClient);
     }
 
     public DashboardResult renameDashboard(String newName, UUID dashboardId) {

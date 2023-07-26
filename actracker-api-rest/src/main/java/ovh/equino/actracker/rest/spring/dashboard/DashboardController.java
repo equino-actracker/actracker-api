@@ -1,11 +1,11 @@
 package ovh.equino.actracker.rest.spring.dashboard;
 
 import org.springframework.web.bind.annotation.*;
+import ovh.equino.actracker.application.SearchResult;
 import ovh.equino.actracker.application.dashboard.ChartResult;
 import ovh.equino.actracker.application.dashboard.DashboardApplicationService;
 import ovh.equino.actracker.application.dashboard.DashboardResult;
 import ovh.equino.actracker.application.dashboard.SearchDashboardsQuery;
-import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
 import ovh.equino.actracker.rest.spring.SearchResponse;
 import ovh.equino.actracker.rest.spring.share.Share;
@@ -66,8 +66,11 @@ class DashboardController {
                 dashboardMapper.parseIds(excludedDashboards)
         );
 
-        EntitySearchResult<DashboardDto> searchResult = dashboardApplicationService.searchDashboards(searchDashboardsQuery);
-        return dashboardMapper.toResponse(searchResult);
+        SearchResult<DashboardResult> searchResult = dashboardApplicationService.searchDashboards(searchDashboardsQuery);
+        List<Dashboard> foundResults = searchResult.results().stream()
+                .map(this::toResponse)
+                .toList();
+        return new SearchResponse<>(searchResult.nextPageId(), foundResults);
     }
 
     @RequestMapping(method = DELETE, path = "/{id}")
