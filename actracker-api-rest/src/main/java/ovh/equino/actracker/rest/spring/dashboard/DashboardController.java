@@ -2,6 +2,7 @@ package ovh.equino.actracker.rest.spring.dashboard;
 
 import org.springframework.web.bind.annotation.*;
 import ovh.equino.actracker.application.dashboard.DashboardApplicationService;
+import ovh.equino.actracker.application.dashboard.SearchDashboardsQuery;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
@@ -59,18 +60,14 @@ class DashboardController {
             @RequestParam(name = "term", required = false) String term,
             @RequestParam(name = "excludedDashboards", required = false) String excludedDashboards) {
 
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User requester = new User(requesterIdentity.getId());
+        SearchDashboardsQuery searchDashboardsQuery = new SearchDashboardsQuery(
+                pageSize,
+                pageId,
+                term,
+                dashboardMapper.parseIds(excludedDashboards)
+        );
 
-        EntitySearchCriteria searchCriteria = new EntitySearchCriteriaBuilder()
-                .withSearcher(requester)
-                .withPageId(pageId)
-                .withPageSize(pageSize)
-                .withTerm(term)
-                .withExcludedIdsJointWithComma(excludedDashboards)
-                .build();
-
-        EntitySearchResult<DashboardDto> searchResult = dashboardApplicationService.searchDashboards(searchCriteria);
+        EntitySearchResult<DashboardDto> searchResult = dashboardApplicationService.searchDashboards(searchDashboardsQuery);
         return dashboardMapper.toResponse(searchResult);
     }
 

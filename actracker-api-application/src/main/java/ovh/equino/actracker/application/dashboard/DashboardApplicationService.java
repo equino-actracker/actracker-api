@@ -67,7 +67,22 @@ public class DashboardApplicationService {
         return dashboard.forClient(creator);
     }
 
-    public EntitySearchResult<DashboardDto> searchDashboards(EntitySearchCriteria searchCriteria) {
+    public EntitySearchResult<DashboardDto> searchDashboards(SearchDashboardsQuery searchDashboardsQuery) {
+        Identity requestIdentity = identityProvider.provideIdentity();
+        User searcher = new User(requestIdentity.getId());
+
+        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
+                searcher,
+                searchDashboardsQuery.pageSize(),
+                searchDashboardsQuery.pageId(),
+                searchDashboardsQuery.term(),
+                null,
+                null,
+                searchDashboardsQuery.excludeFilter(),
+                null,
+                null
+        );
+
         EntitySearchResult<DashboardDto> searchResult = dashboardSearchEngine.findDashboards(searchCriteria);
         List<DashboardDto> resultForClient = searchResult.results().stream()
                 .map(Dashboard::fromStorage)
