@@ -51,19 +51,22 @@ public class DashboardApplicationService {
         return toDashboardResult(dashboardResult);
     }
 
-    public DashboardResult createDashboard(DashboardDto newDashboardData) {
+    public DashboardResult createDashboard(CreateDashboardCommand createDashboardCommand) {
         Identity requestIdentity = identityProvider.provideIdentity();
         User creator = new User(requestIdentity.getId());
 
         DashboardDto dashboardDataWithSharesResolved = new DashboardDto(
-                newDashboardData.id(),
-                newDashboardData.creatorId(),
-                newDashboardData.name(),
-                newDashboardData.charts(),
-                newDashboardData.shares().stream()
-                        .map(this::resolveShare)
+                createDashboardCommand.name(),
+                createDashboardCommand.chartAssignments().stream()
+                        .map(chartAssignment -> new Chart(
+                                chartAssignment.name(),
+                                GroupBy.valueOf(chartAssignment.groupBy()),
+                                AnalysisMetric.valueOf(chartAssignment.analysisMetric()),
+                                chartAssignment.includedTags()))
                         .toList(),
-                newDashboardData.deleted()
+                createDashboardCommand.shares().stream()
+                        .map(this::resolveShare)
+                        .toList()
         );
         Dashboard dashboard = Dashboard.create(dashboardDataWithSharesResolved, creator);
         dashboardRepository.add(dashboard.forStorage());
@@ -154,7 +157,7 @@ public class DashboardApplicationService {
 
     }
 
-    public DashboardResult shareDashboard(Share newShare, UUID dashboardId) {
+    public DashboardResult shareDashboard(String newGrantee, UUID dashboardId) {
         Identity requestIdentity = identityProvider.provideIdentity();
         User granter = new User(requestIdentity.getId());
 
@@ -162,7 +165,7 @@ public class DashboardApplicationService {
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
         Dashboard dashboard = Dashboard.fromStorage(dashboardDto);
 
-        Share share = resolveShare(newShare);
+        Share share = resolveShare(newGrantee);
 
         dashboard.share(share, granter);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
@@ -207,13 +210,13 @@ public class DashboardApplicationService {
     }
 
 
-    private Share resolveShare(Share share) {
-        return tenantRepository.findByUsername(share.granteeName())
+    private Share resolveShare(String grantee) {
+        return tenantRepository.findByUsername(grantee)
                 .map(tenant -> new Share(
                         new User(tenant.id()),
                         tenant.username()
                 ))
-                .orElse(new Share(share.granteeName()));
+                .orElse(new Share(grantee));
     }
 
     DashboardResult toDashboardResult(DashboardDto dashboardDto) {

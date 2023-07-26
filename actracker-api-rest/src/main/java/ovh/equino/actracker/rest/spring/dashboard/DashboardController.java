@@ -2,19 +2,15 @@ package ovh.equino.actracker.rest.spring.dashboard;
 
 import org.springframework.web.bind.annotation.*;
 import ovh.equino.actracker.application.SearchResult;
-import ovh.equino.actracker.application.dashboard.ChartResult;
-import ovh.equino.actracker.application.dashboard.DashboardApplicationService;
-import ovh.equino.actracker.application.dashboard.DashboardResult;
-import ovh.equino.actracker.application.dashboard.SearchDashboardsQuery;
-import ovh.equino.actracker.domain.dashboard.DashboardDto;
+import ovh.equino.actracker.application.dashboard.*;
 import ovh.equino.actracker.rest.spring.SearchResponse;
 import ovh.equino.actracker.rest.spring.share.Share;
-import ovh.equino.actracker.rest.spring.share.ShareMapper;
-import ovh.equino.security.identity.IdentityProvider;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static java.util.Objects.requireNonNullElse;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 
@@ -23,16 +19,12 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 class DashboardController {
 
     private final DashboardApplicationService dashboardApplicationService;
-    private final IdentityProvider identityProvider;
     private final DashboardMapper dashboardMapper = new DashboardMapper();
     private final ChartMapper chartMapper = new ChartMapper();
-    private final ShareMapper shareMapper = new ShareMapper();
 
-    DashboardController(DashboardApplicationService dashboardApplicationService,
-                        IdentityProvider identityProvider) {
+    DashboardController(DashboardApplicationService dashboardApplicationService) {
 
         this.dashboardApplicationService = dashboardApplicationService;
-        this.identityProvider = identityProvider;
     }
 
     @RequestMapping(method = GET, path = "/{id}")
@@ -45,8 +37,25 @@ class DashboardController {
     @RequestMapping(method = POST)
     @ResponseStatus(OK)
     Dashboard createDashboard(@RequestBody Dashboard dashboard) {
-        DashboardDto dashboardDto = dashboardMapper.fromRequest(dashboard);
-        DashboardResult createdDashboard = dashboardApplicationService.createDashboard(dashboardDto);
+        List<ChartAssignment> chartAssignments = requireNonNullElse(dashboard.charts(), new ArrayList<Chart>())
+                .stream()
+                .map(chart -> new ChartAssignment(
+                        chart.name(),
+                        chart.groupBy(),
+                        chart.metric(),
+                        dashboardMapper.stringsToUuids(chart.includedTags())
+                ))
+                .toList();
+        List<String> grantedShares = requireNonNullElse(dashboard.shares(), new ArrayList<Share>())
+                .stream()
+                .map(Share::granteeName)
+                .toList();
+        CreateDashboardCommand createDashboardCommand = new CreateDashboardCommand(
+                dashboard.name(),
+                chartAssignments,
+                grantedShares
+        );
+        DashboardResult createdDashboard = dashboardApplicationService.createDashboard(createDashboardCommand);
 
         return toResponse(createdDashboard);
     }
@@ -85,9 +94,7 @@ class DashboardController {
             @PathVariable("id") String id,
             @RequestBody Share share) {
 
-        ovh.equino.actracker.domain.share.Share newShare = shareMapper.fromRequest(share);
-
-        DashboardResult sharedDashboard = dashboardApplicationService.shareDashboard(newShare, UUID.fromString(id));
+        DashboardResult sharedDashboard = dashboardApplicationService.shareDashboard(share.granteeName(), UUID.fromString(id));
         return toResponse(sharedDashboard);
     }
 
