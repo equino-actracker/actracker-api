@@ -172,7 +172,18 @@ public class DashboardApplicationService {
         return dashboard.forClient(granter);
     }
 
-    public DashboardData generateDashboard(DashboardGenerationCriteria generationCriteria) {
+    public DashboardData generateDashboard(GenerateDashboardQuery generateDashboardQuery) {
+        Identity requestIdentity = identityProvider.provideIdentity();
+        User generator = new User(requestIdentity.getId());
+
+        DashboardGenerationCriteria generationCriteria = new DashboardGenerationCriteria(
+                generateDashboardQuery.dashboardId(),
+                generator,
+                generateDashboardQuery.timeRangeStart(),
+                generateDashboardQuery.timeRangeEnd(),
+                generateDashboardQuery.tags()
+        );
+
         UUID dashboardId = generationCriteria.dashboardId();
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));

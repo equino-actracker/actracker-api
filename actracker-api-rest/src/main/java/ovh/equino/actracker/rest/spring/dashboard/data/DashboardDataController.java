@@ -2,10 +2,9 @@ package ovh.equino.actracker.rest.spring.dashboard.data;
 
 import org.springframework.web.bind.annotation.*;
 import ovh.equino.actracker.application.dashboard.DashboardApplicationService;
-import ovh.equino.actracker.domain.dashboard.generation.DashboardGenerationCriteria;
-import ovh.equino.actracker.domain.user.User;
-import ovh.equino.security.identity.Identity;
-import ovh.equino.security.identity.IdentityProvider;
+import ovh.equino.actracker.application.dashboard.GenerateDashboardQuery;
+
+import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -15,14 +14,11 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 class DashboardDataController {
 
     private final DashboardApplicationService dashboardApplicationService;
-    private final IdentityProvider identityProvider;
     private final DashboardDataMapper mapper = new DashboardDataMapper();
 
-    DashboardDataController(DashboardApplicationService dashboardApplicationService,
-                            IdentityProvider identityProvider) {
+    DashboardDataController(DashboardApplicationService dashboardApplicationService) {
 
         this.dashboardApplicationService = dashboardApplicationService;
-        this.identityProvider = identityProvider;
     }
 
     @RequestMapping(method = GET)
@@ -34,19 +30,15 @@ class DashboardDataController {
             @RequestParam(name = "requiredTags", required = false) String requiredTags
     ) {
 
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User requester = new User(requesterIdentity.getId());
-
-        DashboardGenerationCriteria dashboardGenerationCriteria = new DashboardGenerationCriteriaBuilder()
-                .withGenerator(requester)
-                .withTimeRangeStart(rangeStartMillis)
-                .withTimeRangeEnd(rangeEndMillis)
-                .withTagsJointWithComma(requiredTags)
-                .withDashboardId(id)
-                .build();
+        GenerateDashboardQuery generateDashboardQuery = new GenerateDashboardQuery(
+                UUID.fromString(id),
+                mapper.timestampToInstant(rangeStartMillis),
+                mapper.timestampToInstant(rangeEndMillis),
+                mapper.parseIds(requiredTags)
+        );
 
         ovh.equino.actracker.domain.dashboard.generation.DashboardData dashboardData =
-                dashboardApplicationService.generateDashboard(dashboardGenerationCriteria);
+                dashboardApplicationService.generateDashboard(generateDashboardQuery);
 
         return mapper.toResponse(dashboardData);
     }
