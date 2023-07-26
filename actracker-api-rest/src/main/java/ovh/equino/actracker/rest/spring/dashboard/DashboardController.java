@@ -116,10 +116,14 @@ class DashboardController {
     @RequestMapping(method = POST, path = "/{dashboardId}/chart")
     @ResponseStatus(OK)
     Dashboard addChart(@PathVariable("dashboardId") String dashboardId, @RequestBody Chart chart) {
-        ovh.equino.actracker.domain.dashboard.Chart newChart = chartMapper.fromRequest(chart);
-
+        ChartAssignment newChartAssignment = new ChartAssignment(
+                chart.name(),
+                chart.groupBy(),
+                chart.metric(),
+                dashboardMapper.stringsToUuids(chart.includedTags())
+        );
         DashboardResult updatedDashboard = dashboardApplicationService
-                .addChart(newChart, UUID.fromString(dashboardId));
+                .addChart(newChartAssignment, UUID.fromString(dashboardId));
 
         return toResponse(updatedDashboard);
     }

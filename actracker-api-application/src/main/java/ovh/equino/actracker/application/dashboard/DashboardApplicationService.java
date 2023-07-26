@@ -130,13 +130,20 @@ public class DashboardApplicationService {
         dashboardRepository.update(dashboardId, dashboard.forStorage());
     }
 
-    public DashboardResult addChart(Chart newChart, UUID dashboardId) {
+    public DashboardResult addChart(ChartAssignment newChartAssignment, UUID dashboardId) {
         Identity requestIdentity = identityProvider.provideIdentity();
         User updater = new User(requestIdentity.getId());
 
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
         Dashboard dashboard = Dashboard.fromStorage(dashboardDto);
+
+        Chart newChart = new Chart(
+                newChartAssignment.name(),
+                GroupBy.valueOf(newChartAssignment.groupBy()),
+                AnalysisMetric.valueOf(newChartAssignment.analysisMetric()),
+                newChartAssignment.includedTags()
+        );
 
         dashboard.addChart(newChart, updater);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
