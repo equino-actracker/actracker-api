@@ -1,21 +1,16 @@
 package ovh.equino.actracker.rest.spring.dashboard;
 
 import org.springframework.web.bind.annotation.*;
-import ovh.equino.actracker.application.dashboard.DashboardApplicationService;
-import ovh.equino.actracker.domain.EntitySearchCriteria;
-import ovh.equino.actracker.domain.EntitySearchResult;
-import ovh.equino.actracker.domain.dashboard.DashboardDto;
-import ovh.equino.actracker.domain.dashboard.DashboardService;
-import ovh.equino.actracker.domain.user.User;
-import ovh.equino.actracker.rest.spring.EntitySearchCriteriaBuilder;
+import ovh.equino.actracker.application.SearchResult;
+import ovh.equino.actracker.application.dashboard.*;
 import ovh.equino.actracker.rest.spring.SearchResponse;
 import ovh.equino.actracker.rest.spring.share.Share;
-import ovh.equino.actracker.rest.spring.share.ShareMapper;
-import ovh.equino.security.identity.Identity;
-import ovh.equino.security.identity.IdentityProvider;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
+import static java.util.Objects.requireNonNullElse;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 
@@ -23,151 +18,160 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 @RequestMapping("/dashboard")
 class DashboardController {
 
-    private final DashboardService dashboardService;
     private final DashboardApplicationService dashboardApplicationService;
-    private final IdentityProvider identityProvider;
     private final DashboardMapper dashboardMapper = new DashboardMapper();
-    private final ChartMapper chartMapper = new ChartMapper();
-    private final ShareMapper shareMapper = new ShareMapper();
 
-    DashboardController(DashboardService dashboardService,
-                        DashboardApplicationService dashboardApplicationService,
-                        IdentityProvider identityProvider) {
+    DashboardController(DashboardApplicationService dashboardApplicationService) {
 
-        this.dashboardService = dashboardService;
         this.dashboardApplicationService = dashboardApplicationService;
-        this.identityProvider = identityProvider;
     }
 
-    @RequestMapping(method = GET, path = "/{id}")
+    @RequestMapping(method = GET, path = "/{dashboardId}")
     @ResponseStatus(OK)
-    Dashboard getDashboard(@PathVariable("id") String id) {
-        Identity requestIdentity = identityProvider.provideIdentity();
-        User requester = new User(requestIdentity.getId());
-
-        DashboardDto foundDashboard = dashboardService.getDashboard(UUID.fromString(id), requester);
-        return dashboardMapper.toResponse(foundDashboard);
+    Dashboard getDashboard(@PathVariable("dashboardId") String dashboardId) {
+        DashboardResult foundDashboard = dashboardApplicationService.getDashboard(UUID.fromString(dashboardId));
+        return toResponse(foundDashboard);
     }
 
     @RequestMapping(method = POST)
     @ResponseStatus(OK)
     Dashboard createDashboard(@RequestBody Dashboard dashboard) {
-        Identity requestIdentity = identityProvider.provideIdentity();
-        User requester = new User(requestIdentity.getId());
+        List<ChartAssignment> chartAssignments = requireNonNullElse(dashboard.charts(), new ArrayList<Chart>())
+                .stream()
+                .map(chart -> new ChartAssignment(
+                        chart.name(),
+                        chart.groupBy(),
+                        chart.metric(),
+                        dashboardMapper.stringsToUuids(chart.includedTags())
+                ))
+                .toList();
+        List<String> grantedShares = requireNonNullElse(dashboard.shares(), new ArrayList<Share>())
+                .stream()
+                .map(Share::granteeName)
+                .toList();
+        CreateDashboardCommand createDashboardCommand = new CreateDashboardCommand(
+                dashboard.name(),
+                chartAssignments,
+                grantedShares
+        );
+        DashboardResult createdDashboard = dashboardApplicationService.createDashboard(createDashboardCommand);
 
-        DashboardDto dashboardDto = dashboardMapper.fromRequest(dashboard);
-        DashboardDto createdDashboard = dashboardService.createDashboard(dashboardDto, requester);
-
-        return dashboardMapper.toResponse(createdDashboard);
-    }
-
-    @RequestMapping(method = PUT, path = "/{id}")
-    @ResponseStatus(OK)
-    Dashboard updateDashboard(@PathVariable("id") String id, @RequestBody Dashboard dashboard) {
-        Identity requestIdentity = identityProvider.provideIdentity();
-        User requester = new User(requestIdentity.getId());
-
-        DashboardDto dashboardDto = dashboardMapper.fromRequest(dashboard);
-        DashboardDto updatedDashboard = dashboardService.updateDashboard(UUID.fromString(id), dashboardDto, requester);
-
-        return dashboardMapper.toResponse(updatedDashboard);
+        return toResponse(createdDashboard);
     }
 
     @RequestMapping(method = GET, path = "/matching")
     @ResponseStatus(OK)
-    SearchResponse<Dashboard> searchDashboards(
-            @RequestParam(name = "pageId", required = false) String pageId,
-            @RequestParam(name = "pageSize", required = false) Integer pageSize,
-            @RequestParam(name = "term", required = false) String term,
-            @RequestParam(name = "excludedDashboards", required = false) String excludedDashboards) {
+    SearchResponse<Dashboard> searchDashboards(@RequestParam(name = "pageId", required = false) String pageId,
+                                               @RequestParam(name = "pageSize", required = false) Integer pageSize,
+                                               @RequestParam(name = "term", required = false) String term,
+                                               @RequestParam(name = "excludedDashboards", required = false) String excludedDashboards) {
 
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User requester = new User(requesterIdentity.getId());
+        SearchDashboardsQuery searchDashboardsQuery = new SearchDashboardsQuery(
+                pageSize,
+                pageId,
+                term,
+                dashboardMapper.parseIds(excludedDashboards)
+        );
 
-        EntitySearchCriteria searchCriteria = new EntitySearchCriteriaBuilder()
-                .withSearcher(requester)
-                .withPageId(pageId)
-                .withPageSize(pageSize)
-                .withTerm(term)
-                .withExcludedIdsJointWithComma(excludedDashboards)
-                .build();
-
-        EntitySearchResult<DashboardDto> searchResult = dashboardService.searchDashboards(searchCriteria);
-        return dashboardMapper.toResponse(searchResult);
+        SearchResult<DashboardResult> searchResult = dashboardApplicationService.searchDashboards(searchDashboardsQuery);
+        List<Dashboard> foundResults = searchResult.results().stream()
+                .map(this::toResponse)
+                .toList();
+        return new SearchResponse<>(searchResult.nextPageId(), foundResults);
     }
 
-    @RequestMapping(method = DELETE, path = "/{id}")
+    @RequestMapping(method = DELETE, path = "/{dashboardId}")
     @ResponseStatus(OK)
-    void deleteDashboard(@PathVariable("id") String id) {
-        Identity requestIdentity = identityProvider.provideIdentity();
-        User requester = new User(requestIdentity.getId());
-
-        dashboardApplicationService.deleteDashboard(UUID.fromString(id), requester);
+    void deleteDashboard(@PathVariable("dashboardId") String dashboardId) {
+        dashboardApplicationService.deleteDashboard(UUID.fromString(dashboardId));
     }
 
-    @RequestMapping(method = POST, path = "/{id}/share")
+    @RequestMapping(method = POST, path = "/{dashboardId}/share")
     @ResponseStatus(OK)
-    Dashboard shareDashboard(
-            @PathVariable("id") String id,
-            @RequestBody Share share) {
+    Dashboard addShareToDashboard(@PathVariable("dashboardId") String dashboardId,
+                                  @RequestBody Share share) {
 
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User requester = new User(requesterIdentity.getId());
-
-        ovh.equino.actracker.domain.share.Share newShare = shareMapper.fromRequest(share);
-
-        DashboardDto sharedDashboard = dashboardApplicationService.shareDashboard(newShare, UUID.fromString(id), requester);
-        return dashboardMapper.toResponse(sharedDashboard);
+        DashboardResult sharedDashboard = dashboardApplicationService.shareDashboard(
+                share.granteeName(),
+                UUID.fromString(dashboardId)
+        );
+        return toResponse(sharedDashboard);
     }
 
-    @RequestMapping(method = DELETE, path = "/{id}/share/{granteeName}")
+    @RequestMapping(method = DELETE, path = "/{dashboardId}/share/{granteeName}")
     @ResponseStatus(OK)
-    Dashboard unshareDashboard(@PathVariable("id") String dashboardId, @PathVariable("granteeName") String granteeName) {
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User requester = new User(requesterIdentity.getId());
+    Dashboard removeShareFromDashboard(@PathVariable("dashboardId") String dashboardId,
+                                       @PathVariable("granteeName") String granteeName) {
 
-        DashboardDto unsharedDashboard = dashboardApplicationService.unshareDashboard(granteeName, UUID.fromString(dashboardId), requester);
-        return dashboardMapper.toResponse(unsharedDashboard);
+        DashboardResult unsharedDashboard = dashboardApplicationService.unshareDashboard(
+                granteeName,
+                UUID.fromString(dashboardId)
+        );
+        return toResponse(unsharedDashboard);
     }
 
-    @RequestMapping(method = PUT, path = "/{id}/name")
+    @RequestMapping(method = PUT, path = "/{dashboardId}/name")
     @ResponseStatus(OK)
-    Dashboard renameDashboard(@PathVariable("id") String dashboardId, @RequestBody String newName) {
+    Dashboard replaceDashboardName(@PathVariable("dashboardId") String dashboardId,
+                                   @RequestBody String newName) {
 
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User requester = new User(requesterIdentity.getId());
-
-        DashboardDto renamedDashboard = dashboardApplicationService.renameDashboard(newName, UUID.fromString(dashboardId), requester);
-
-        return dashboardMapper.toResponse(renamedDashboard);
+        DashboardResult renamedDashboard = dashboardApplicationService.renameDashboard(
+                newName,
+                UUID.fromString(dashboardId)
+        );
+        return toResponse(renamedDashboard);
     }
 
     @RequestMapping(method = POST, path = "/{dashboardId}/chart")
     @ResponseStatus(OK)
-    Dashboard addChart(@PathVariable("dashboardId") String dashboardId, @RequestBody Chart chart) {
+    Dashboard createChart(@PathVariable("dashboardId") String dashboardId,
+                          @RequestBody Chart chart) {
 
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User requester = new User(requesterIdentity.getId());
+        ChartAssignment newChartAssignment = new ChartAssignment(
+                chart.name(),
+                chart.groupBy(),
+                chart.metric(),
+                dashboardMapper.stringsToUuids(chart.includedTags())
+        );
+        DashboardResult updatedDashboard = dashboardApplicationService
+                .addChart(newChartAssignment, UUID.fromString(dashboardId));
 
-        ovh.equino.actracker.domain.dashboard.Chart newChart = chartMapper.fromRequest(chart);
-
-        DashboardDto updatedDashboard = dashboardApplicationService
-                .addChart(newChart, UUID.fromString(dashboardId), requester);
-
-        return dashboardMapper.toResponse(updatedDashboard);
+        return toResponse(updatedDashboard);
     }
 
     @RequestMapping(method = DELETE, path = "/{dashboardId}/chart/{chartId}")
     @ResponseStatus(OK)
-    Dashboard deleteChart(@PathVariable("dashboardId") String dashboardId, @PathVariable("chartId") String chartId) {
+    Dashboard deleteChart(@PathVariable("dashboardId") String dashboardId,
+                          @PathVariable("chartId") String chartId) {
 
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User requester = new User(requesterIdentity.getId());
+        DashboardResult updatedDashboard = dashboardApplicationService
+                .deleteChart(UUID.fromString(chartId), UUID.fromString(dashboardId));
 
-        DashboardDto updatedDashboard = dashboardApplicationService
-                .deleteChart(UUID.fromString(chartId), UUID.fromString(dashboardId), requester);
+        return toResponse(updatedDashboard);
+    }
 
-        return dashboardMapper.toResponse(updatedDashboard);
+    Dashboard toResponse(DashboardResult dashboardResult) {
+        List<Share> shares = dashboardResult.shares().stream()
+                .map(Share::new)
+                .toList();
+        List<Chart> charts = dashboardResult.charts().stream()
+                .map(this::toResponse)
+                .toList();
+        return new Dashboard(
+                dashboardResult.id().toString(),
+                dashboardResult.name(),
+                charts,
+                shares
+        );
+    }
 
+    Chart toResponse(ChartResult chartResult) {
+        return new Chart(
+                chartResult.id().toString(),
+                chartResult.name(),
+                chartResult.groupBy(),
+                chartResult.analysisMetric(),
+                dashboardMapper.uuidsToStrings(chartResult.includedTags())
+        );
     }
 }

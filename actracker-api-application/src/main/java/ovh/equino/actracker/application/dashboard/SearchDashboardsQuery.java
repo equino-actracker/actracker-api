@@ -1,22 +1,17 @@
-package ovh.equino.actracker.application.activity;
+package ovh.equino.actracker.application.dashboard;
 
-import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
 
 import static java.util.Collections.emptySet;
 import static java.util.Objects.requireNonNullElse;
 
-public record SearchActivitiesQuery(Integer pageSize,
+public record SearchDashboardsQuery(Integer pageSize,
                                     String pageId,
                                     String term,
-                                    Instant timeRangeStart,
-                                    Instant timeRangeEnd,
-                                    Set<UUID> tags,
                                     Set<UUID> excludeFilter) {
 
-    public SearchActivitiesQuery {
-        tags = requireNonNullElse(tags, emptySet());
+    public SearchDashboardsQuery {
         excludeFilter = requireNonNullElse(excludeFilter, emptySet());
     }
 }

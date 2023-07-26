@@ -1,51 +1,71 @@
 package ovh.equino.actracker.rest.spring.dashboard.data;
 
 import org.springframework.web.bind.annotation.*;
-import ovh.equino.actracker.domain.dashboard.generation.DashboardGenerationCriteria;
-import ovh.equino.actracker.domain.dashboard.DashboardService;
-import ovh.equino.actracker.domain.user.User;
-import ovh.equino.security.identity.Identity;
-import ovh.equino.security.identity.IdentityProvider;
+import ovh.equino.actracker.application.dashboard.*;
+
+import java.util.List;
+import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @RestController
-@RequestMapping("/dashboard/{id}/data")
+@RequestMapping("/dashboard/{dashboardId}/data")
 class DashboardDataController {
 
-    private final DashboardService dashboardService;
-    private final IdentityProvider identityProvider;
+    private final DashboardApplicationService dashboardApplicationService;
     private final DashboardDataMapper mapper = new DashboardDataMapper();
 
-    DashboardDataController(DashboardService dashboardService, IdentityProvider identityProvider) {
-        this.dashboardService = dashboardService;
-        this.identityProvider = identityProvider;
+    DashboardDataController(DashboardApplicationService dashboardApplicationService) {
+
+        this.dashboardApplicationService = dashboardApplicationService;
     }
 
     @RequestMapping(method = GET)
     @ResponseStatus(OK)
-    DashboardData getData(
-            @PathVariable("id") String id,
-            @RequestParam(name = "rangeStartMillis", required = false) Long rangeStartMillis,
-            @RequestParam(name = "rangeEndMillis", required = false) Long rangeEndMillis,
-            @RequestParam(name = "requiredTags", required = false) String requiredTags
+    DashboardData getDashboardData(@PathVariable("dashboardId") String dashboardId,
+                                   @RequestParam(name = "rangeStartMillis", required = false) Long rangeStartMillis,
+                                   @RequestParam(name = "rangeEndMillis", required = false) Long rangeEndMillis,
+                                   @RequestParam(name = "requiredTags", required = false) String requiredTags
     ) {
 
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User requester = new User(requesterIdentity.getId());
+        GenerateDashboardQuery generateDashboardQuery = new GenerateDashboardQuery(
+                UUID.fromString(dashboardId),
+                mapper.timestampToInstant(rangeStartMillis),
+                mapper.timestampToInstant(rangeEndMillis),
+                mapper.parseIds(requiredTags)
+        );
+        DashboardGenerationResult dashboardData =
+                dashboardApplicationService.generateDashboard(generateDashboardQuery);
 
-        DashboardGenerationCriteria dashboardGenerationCriteria = new DashboardGenerationCriteriaBuilder()
-                .withGenerator(requester)
-                .withTimeRangeStart(rangeStartMillis)
-                .withTimeRangeEnd(rangeEndMillis)
-                .withTagsJointWithComma(requiredTags)
-                .withDashboardId(id)
-                .build();
+        return toResponse(dashboardData);
+    }
 
-        ovh.equino.actracker.domain.dashboard.generation.DashboardData dashboardData =
-                dashboardService.generateDashboard(dashboardGenerationCriteria);
+    private DashboardData toResponse(DashboardGenerationResult dashboardGenerationResult) {
+        List<DashboardDataChart> charts = dashboardGenerationResult.charts().stream()
+                .map(this::toChartData)
+                .toList();
+        return new DashboardData(dashboardGenerationResult.name(), charts);
+    }
 
-        return mapper.toResponse(dashboardData);
+    private DashboardDataChart toChartData(GeneratedChart generatedChart) {
+        List<DashboardDataBucket> buckets = generatedChart.buckets().stream()
+                .map(this::toBucketData)
+                .toList();
+        return new DashboardDataChart(generatedChart.name(), buckets);
+    }
+
+    private DashboardDataBucket toBucketData(GeneratedBucket generatedBucket) {
+        return new DashboardDataBucket(
+                generatedBucket.id(),
+                mapper.instantToTimestamp(generatedBucket.rangeStart()),
+                mapper.instantToTimestamp(generatedBucket.rangeEnd()),
+                generatedBucket.bucketType(),
+                generatedBucket.value(),
+                generatedBucket.percentage(),
+                generatedBucket.buckets().stream()
+                        .map(this::toBucketData)
+                        .toList()
+        );
     }
 }

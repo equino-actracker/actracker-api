@@ -6,8 +6,8 @@ record Chart(
 
         String id,
         String name,
-        GroupBy groupBy,
-        AnalysisMetric metric,
+        String groupBy,
+        String metric,
         Collection<String> includedTags
 
 ) {
