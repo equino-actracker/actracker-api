@@ -4,9 +4,7 @@ import ovh.equino.actracker.application.SearchResult;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.dashboard.*;
-import ovh.equino.actracker.domain.dashboard.generation.DashboardData;
-import ovh.equino.actracker.domain.dashboard.generation.DashboardGenerationCriteria;
-import ovh.equino.actracker.domain.dashboard.generation.DashboardGenerationEngine;
+import ovh.equino.actracker.domain.dashboard.generation.*;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tenant.TenantRepository;
@@ -14,8 +12,12 @@ import ovh.equino.actracker.domain.user.User;
 import ovh.equino.security.identity.Identity;
 import ovh.equino.security.identity.IdentityProvider;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+
+import static java.util.Objects.requireNonNullElse;
 
 public class DashboardApplicationService {
 
@@ -189,7 +191,7 @@ public class DashboardApplicationService {
         return toDashboardResult(dashboardResult);
     }
 
-    public DashboardData generateDashboard(GenerateDashboardQuery generateDashboardQuery) {
+    public DashboardGenerationResult generateDashboard(GenerateDashboardQuery generateDashboardQuery) {
         Identity requestIdentity = identityProvider.provideIdentity();
         User generator = new User(requestIdentity.getId());
 
@@ -206,7 +208,9 @@ public class DashboardApplicationService {
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
 
         Dashboard dashboard = Dashboard.fromStorage(dashboardDto);
-        return dashboardGenerationEngine.generateDashboard(dashboard.forStorage(), generationCriteria);
+        DashboardData dashboardData = dashboardGenerationEngine.generateDashboard(dashboard.forStorage(), generationCriteria);
+
+        return toGenerationResult(dashboardData);
     }
 
 
@@ -219,7 +223,7 @@ public class DashboardApplicationService {
                 .orElse(new Share(grantee));
     }
 
-    DashboardResult toDashboardResult(DashboardDto dashboardDto) {
+    private DashboardResult toDashboardResult(DashboardDto dashboardDto) {
         List<ChartResult> chartResults = dashboardDto.charts().stream()
                 .map(this::toChartResult)
                 .toList();
@@ -234,13 +238,46 @@ public class DashboardApplicationService {
         );
     }
 
-    ChartResult toChartResult(Chart chart) {
+    private ChartResult toChartResult(Chart chart) {
         return new ChartResult(
                 chart.id().id(),
                 chart.name(),
                 chart.groupBy().toString(),
                 chart.analysisMetric().toString(),
                 chart.includedTags()
+        );
+    }
+
+    private DashboardGenerationResult toGenerationResult(DashboardData dashboardData) {
+        List<GeneratedChart> generatedCharts = dashboardData.charts().stream()
+                .map(this::toGeneratedChart)
+                .toList();
+        return new DashboardGenerationResult(dashboardData.name(), generatedCharts);
+    }
+
+    private GeneratedChart toGeneratedChart(DashboardChartData chartData) {
+        return new GeneratedChart(
+                chartData.name(),
+                toGeneratedBuckets(chartData.buckets())
+        );
+    }
+
+    private List<GeneratedBucket> toGeneratedBuckets(Collection<ChartBucketData> bucketsData) {
+        return requireNonNullElse(bucketsData, new ArrayList<ChartBucketData>())
+                .stream()
+                .map(this::toGeneratedBucket)
+                .toList();
+    }
+
+    private GeneratedBucket toGeneratedBucket(ChartBucketData bucketData) {
+        return new GeneratedBucket(
+                bucketData.id(),
+                bucketData.rangeStart(),
+                bucketData.rangeEnd(),
+                bucketData.bucketType().toString(),
+                bucketData.value(),
+                bucketData.percentage(),
+                toGeneratedBuckets(bucketData.buckets())
         );
     }
 }
