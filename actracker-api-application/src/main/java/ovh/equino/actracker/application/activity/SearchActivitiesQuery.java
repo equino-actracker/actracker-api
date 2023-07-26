@@ -4,6 +4,9 @@ import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
 
+import static java.util.Collections.emptySet;
+import static java.util.Objects.requireNonNullElse;
+
 public record SearchActivitiesQuery(Integer pageSize,
                                     String pageId,
                                     String term,
@@ -11,4 +14,9 @@ public record SearchActivitiesQuery(Integer pageSize,
                                     Instant timeRangeEnd,
                                     Set<UUID> tags,
                                     Set<UUID> excludeFilter) {
+
+    public SearchActivitiesQuery {
+        tags = requireNonNullElse(tags, emptySet());
+        excludeFilter = requireNonNullElse(excludeFilter, emptySet());
+    }
 }
