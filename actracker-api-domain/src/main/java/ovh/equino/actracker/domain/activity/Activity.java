@@ -234,7 +234,7 @@ public class Activity implements Entity {
         );
     }
 
-    ActivityChangedNotification forChangeNotification() {
+    public ActivityChangedNotification forChangeNotification() {
         Set<UUID> tagIds = tags.stream()
                 .map(TagId::id)
                 .collect(toUnmodifiableSet());

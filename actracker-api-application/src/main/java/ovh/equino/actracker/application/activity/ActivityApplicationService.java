@@ -22,16 +22,19 @@ public class ActivityApplicationService {
 
     private final ActivityRepository activityRepository;
     private final ActivitySearchEngine activitySearchEngine;
+    private final ActivityNotifier activityNotifier;
     private final TagRepository tagRepository;
     private final IdentityProvider identityProvider;
 
     public ActivityApplicationService(ActivityRepository activityRepository,
                                       ActivitySearchEngine activitySearchEngine,
+                                      ActivityNotifier activityNotifier,
                                       TagRepository tagRepository,
                                       IdentityProvider identityProvider) {
 
         this.activityRepository = activityRepository;
         this.activitySearchEngine = activitySearchEngine;
+        this.activityNotifier = activityNotifier;
         this.tagRepository = tagRepository;
         this.identityProvider = identityProvider;
     }
@@ -60,6 +63,8 @@ public class ActivityApplicationService {
         Activity activity = Activity.create(newActivityData, creator, tagsExistenceVerifier, metricsExistenceVerifier);
         activityRepository.add(activity.forStorage());
         ActivityDto activityResult = activity.forClient(creator);
+
+        activityNotifier.notifyChanged(activity.forChangeNotification());
 
         return toActivityResult(activityResult);
     }
@@ -130,6 +135,11 @@ public class ActivityApplicationService {
         activityRepository.add(newActivity.forStorage());
         ActivityDto activityResult = newActivity.forClient(switcher);
 
+        activitiesToFinish.stream()
+                .map(Activity::forChangeNotification)
+                .forEach(activityNotifier::notifyChanged);
+        activityNotifier.notifyChanged(newActivity.forChangeNotification());
+
         return toActivityResult(activityResult);
     }
 
@@ -148,6 +158,8 @@ public class ActivityApplicationService {
 
         activityRepository.update(activityId, activity.forStorage());
         ActivityDto activityResult = activity.forClient(updater);
+
+        activityNotifier.notifyChanged(activity.forChangeNotification());
 
         return toActivityResult(activityResult);
     }
@@ -168,6 +180,8 @@ public class ActivityApplicationService {
         activityRepository.update(activityId, activity.forStorage());
         ActivityDto activityResult = activity.forClient(updater);
 
+        activityNotifier.notifyChanged(activity.forChangeNotification());
+
         return toActivityResult(activityResult);
     }
 
@@ -186,6 +200,8 @@ public class ActivityApplicationService {
 
         activityRepository.update(activityId, activity.forStorage());
         ActivityDto activityResult = activity.forClient(updater);
+
+        activityNotifier.notifyChanged(activity.forChangeNotification());
 
         return toActivityResult(activityResult);
     }
@@ -206,6 +222,8 @@ public class ActivityApplicationService {
         activityRepository.update(activityId, activity.forStorage());
         ActivityDto activityResult = activity.forClient(updater);
 
+        activityNotifier.notifyChanged(activity.forChangeNotification());
+
         return toActivityResult(activityResult);
     }
 
@@ -224,6 +242,8 @@ public class ActivityApplicationService {
 
         activityRepository.update(activityId, activity.forStorage());
         ActivityDto activityResult = activity.forClient(updater);
+
+        activityNotifier.notifyChanged(activity.forChangeNotification());
 
         return toActivityResult(activityResult);
     }
@@ -244,6 +264,8 @@ public class ActivityApplicationService {
         activityRepository.update(activityId, activity.forStorage());
         ActivityDto activityResult = activity.forClient(updater);
 
+        activityNotifier.notifyChanged(activity.forChangeNotification());
+
         return toActivityResult(activityResult);
     }
 
@@ -262,6 +284,8 @@ public class ActivityApplicationService {
 
         activityRepository.update(activityId, activity.forStorage());
         ActivityDto activityResult = activity.forClient(updater);
+
+        activityNotifier.notifyChanged(activity.forChangeNotification());
 
         return toActivityResult(activityResult);
     }
@@ -282,6 +306,8 @@ public class ActivityApplicationService {
         activityRepository.update(activityId, activity.forStorage());
         ActivityDto activityResult = activity.forClient(updater);
 
+        activityNotifier.notifyChanged(activity.forChangeNotification());
+
         return toActivityResult(activityResult);
     }
 
@@ -297,6 +323,8 @@ public class ActivityApplicationService {
 
         Activity activity = Activity.fromStorage(activityDto, tagsExistenceVerifier, metricsExistenceVerifier);
         activity.delete(remover);
+
+        activityNotifier.notifyChanged(activity.forChangeNotification());
 
         activityRepository.update(activityId, activity.forStorage());
     }

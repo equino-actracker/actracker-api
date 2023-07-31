@@ -3,6 +3,7 @@ package ovh.equino.actracker.main.springboot.configuration.application;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ovh.equino.actracker.application.activity.ActivityApplicationService;
+import ovh.equino.actracker.domain.activity.ActivityNotifier;
 import ovh.equino.actracker.domain.activity.ActivityRepository;
 import ovh.equino.actracker.domain.activity.ActivitySearchEngine;
 import ovh.equino.actracker.domain.tag.TagRepository;
@@ -14,9 +15,10 @@ class TransactionalActivityApplicationService extends ActivityApplicationService
 
     TransactionalActivityApplicationService(ActivityRepository activityRepository,
                                             ActivitySearchEngine activitySearchEngine,
+                                            ActivityNotifier activityNotifier,
                                             TagRepository tagRepository,
                                             IdentityProvider identityProvider) {
 
-        super(activityRepository, activitySearchEngine, tagRepository, identityProvider);
+        super(activityRepository, activitySearchEngine, activityNotifier, tagRepository, identityProvider);
     }
 }
