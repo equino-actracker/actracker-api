@@ -46,17 +46,17 @@ do {
             if (tagIdToName.containsKey(tag)) {
 
                 String category = tagIdToName.get(tag)
-                LocalDateTime startTime = activity.startTimestamp != null
-                        ? LocalDateTime.ofInstant(Instant.ofEpochMilli(activity.startTimestamp), zoneId)
+                String startTime = activity.startTimestamp != null
+                        ? LocalDateTime.ofInstant(Instant.ofEpochMilli(activity.startTimestamp), zoneId).format(dateTimeFormatter)
                         : null
-                LocalDateTime endTime = activity.endTimestamp != null
-                        ? LocalDateTime.ofInstant(Instant.ofEpochMilli(activity.endTimestamp), zoneId)
+                String endTime = activity.endTimestamp != null
+                        ? LocalDateTime.ofInstant(Instant.ofEpochMilli(activity.endTimestamp), zoneId).format(dateTimeFormatter)
                         : null
                 String comment = activity.title != null
                         ? activity.title
                         : ''
 
-                file.append("${category},${startTime.format(dateTimeFormatter)},${endTime.format(dateTimeFormatter)},${comment}\n")
+                file.append("${category},${startTime},${endTime},${comment}\n")
             }
         }
     }
