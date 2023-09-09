@@ -7,8 +7,8 @@ spring:
 #        - 'actracker-api-db-postgres'
 
         # MESSAGING
-        - 'actracker-api-publisher-rabbitmq'
-#        - 'actracker-api-publisher-memory'
+#        - 'actracker-api-publisher-rabbitmq'
+        - 'actracker-api-publisher-memory'
       dev:
         - 'actracker-api-db-postgres'
         - 'actracker-api-publisher-rabbitmq'
