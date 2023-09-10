@@ -175,9 +175,8 @@ public class Tag implements Entity {
         return new TagDto(id.id(), creator.id(), name, metrics, shares, deleted);
     }
 
-    TagChangedNotification forChangeNotification() {
+    public TagChangedNotification forChangeNotification() {
         List<MetricDto> metrics = this.metrics.stream()
-                .filter(Metric::isNotDeleted)
                 .map(Metric::forStorage)
                 .toList();
         TagDto dto = new TagDto(id.id(), creator.id(), name, metrics, shares, deleted);

@@ -19,16 +19,19 @@ public class TagApplicationService {
 
     private final TagRepository tagRepository;
     private final TagSearchEngine tagSearchEngine;
+    private final TagNotifier tagNotifier;
     private final IdentityProvider identityProvider;
     private final TenantRepository tenantRepository;
 
     public TagApplicationService(TagRepository tagRepository,
                                  TagSearchEngine tagSearchEngine,
+                                 TagNotifier tagNotifier,
                                  IdentityProvider identityProvider,
                                  TenantRepository tenantRepository) {
 
         this.tagRepository = tagRepository;
         this.tagSearchEngine = tagSearchEngine;
+        this.tagNotifier = tagNotifier;
         this.identityProvider = identityProvider;
         this.tenantRepository = tenantRepository;
     }
@@ -54,6 +57,8 @@ public class TagApplicationService {
         Tag tag = Tag.create(tagData, creator);
         tagRepository.add(tag.forStorage());
         TagDto tagResult = tag.forClient(creator);
+
+        tagNotifier.notifyChanged(tag.forChangeNotification());
 
         return toTagResult(tagResult);
     }
@@ -106,6 +111,8 @@ public class TagApplicationService {
         tagRepository.update(tagId, tag.forStorage());
         TagDto tagResult = tag.forClient(updater);
 
+        tagNotifier.notifyChanged(tag.forChangeNotification());
+
         return toTagResult(tagResult);
     }
 
@@ -119,6 +126,8 @@ public class TagApplicationService {
 
         tag.delete(remover);
         tagRepository.update(tagId, tag.forStorage());
+
+        tagNotifier.notifyChanged(tag.forChangeNotification());
     }
 
     public TagResult addMetricToTag(String metricName, String metricType, UUID tagId) {
@@ -132,6 +141,8 @@ public class TagApplicationService {
         tag.addMetric(metricName, MetricType.valueOf(metricType), updater);
         tagRepository.update(tagId, tag.forStorage());
         TagDto tagResult = tag.forClient(updater);
+
+        tagNotifier.notifyChanged(tag.forChangeNotification());
 
         return toTagResult(tagResult);
     }
@@ -148,6 +159,8 @@ public class TagApplicationService {
         tagRepository.update(tagId, tag.forStorage());
         TagDto tagResult = tag.forClient(updater);
 
+        tagNotifier.notifyChanged(tag.forChangeNotification());
+
         return toTagResult(tagResult);
     }
 
@@ -162,6 +175,8 @@ public class TagApplicationService {
         tag.renameMetric(newName, new MetricId(metricId), updater);
         tagRepository.update(tagId, tag.forStorage());
         TagDto tagResult = tag.forClient(updater);
+
+        tagNotifier.notifyChanged(tag.forChangeNotification());
 
         return toTagResult(tagResult);
     }
@@ -180,6 +195,8 @@ public class TagApplicationService {
         tagRepository.update(tagId, tag.forStorage());
         TagDto tagResult = tag.forClient(granter);
 
+        tagNotifier.notifyChanged(tag.forChangeNotification());
+
         return toTagResult(tagResult);
     }
 
@@ -194,6 +211,8 @@ public class TagApplicationService {
         tag.unshare(granteeName, granter);
         tagRepository.update(tagId, tag.forStorage());
         TagDto tagResult = tag.forClient(granter);
+
+        tagNotifier.notifyChanged(tag.forChangeNotification());
 
         return toTagResult(tagResult);
     }
