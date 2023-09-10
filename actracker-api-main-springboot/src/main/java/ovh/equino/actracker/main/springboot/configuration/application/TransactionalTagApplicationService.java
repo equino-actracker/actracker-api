@@ -7,6 +7,7 @@ import ovh.equino.actracker.application.tag.CreateTagCommand;
 import ovh.equino.actracker.application.tag.SearchTagsQuery;
 import ovh.equino.actracker.application.tag.TagApplicationService;
 import ovh.equino.actracker.application.tag.TagResult;
+import ovh.equino.actracker.domain.tag.TagNotifier;
 import ovh.equino.actracker.domain.tag.TagRepository;
 import ovh.equino.actracker.domain.tag.TagSearchEngine;
 import ovh.equino.actracker.domain.tenant.TenantRepository;
@@ -22,10 +23,11 @@ class TransactionalTagApplicationService extends TagApplicationService {
 
     TransactionalTagApplicationService(TagRepository tagRepository,
                                        TagSearchEngine tagSearchEngine,
+                                       TagNotifier tagNotifier,
                                        IdentityProvider identityProvider,
                                        TenantRepository tenantRepository) {
 
-        super(tagRepository, tagSearchEngine, identityProvider, tenantRepository);
+        super(tagRepository, tagSearchEngine, tagNotifier, identityProvider, tenantRepository);
     }
 
     @Override
