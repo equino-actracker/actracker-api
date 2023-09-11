@@ -166,6 +166,13 @@ public class Dashboard implements Entity {
         );
     }
 
+    public DashboardChangedNotification forChangeNotification() {
+        DashboardDto dto = new DashboardDto(
+                id.id(), creator.id(), name, unmodifiableList(charts), unmodifiableList(shares), deleted
+        );
+        return new DashboardChangedNotification(dto);
+    }
+
     boolean isAccessibleFor(User user) {
         return creator.equals(user) || isGrantee(user);
     }

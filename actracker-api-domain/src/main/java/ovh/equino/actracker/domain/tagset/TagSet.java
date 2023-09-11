@@ -2,6 +2,7 @@ package ovh.equino.actracker.domain.tagset;
 
 import ovh.equino.actracker.domain.Entity;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
+import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
 import ovh.equino.actracker.domain.user.User;
@@ -117,6 +118,14 @@ public class TagSet implements Entity {
                 .collect(toUnmodifiableSet());
 
         return new TagSetDto(id.id(), creator.id(), name, tagIds, deleted);
+    }
+
+    public TagSetChangedNotification forChangeNotification() {
+        Set<UUID> tagIds = tags.stream()
+                .map(TagId::id)
+                .collect(toUnmodifiableSet());
+        TagSetDto dto = new TagSetDto(id.id(), creator.id(), name, tagIds, deleted);
+        return new TagSetChangedNotification(dto);
     }
 
     boolean isAvailableFor(User user) {

@@ -24,18 +24,21 @@ public class DashboardApplicationService {
     private final DashboardRepository dashboardRepository;
     private final DashboardSearchEngine dashboardSearchEngine;
     private final DashboardGenerationEngine dashboardGenerationEngine;
+    private final DashboardNotifier dashboardNotifier;
     private final TenantRepository tenantRepository;
     private final IdentityProvider identityProvider;
 
     public DashboardApplicationService(DashboardRepository dashboardRepository,
                                        DashboardSearchEngine dashboardSearchEngine,
                                        DashboardGenerationEngine dashboardGenerationEngine,
+                                       DashboardNotifier dashboardNotifier,
                                        TenantRepository tenantRepository,
                                        IdentityProvider identityProvider) {
 
         this.dashboardRepository = dashboardRepository;
         this.dashboardSearchEngine = dashboardSearchEngine;
         this.dashboardGenerationEngine = dashboardGenerationEngine;
+        this.dashboardNotifier = dashboardNotifier;
         this.tenantRepository = tenantRepository;
         this.identityProvider = identityProvider;
     }
@@ -73,6 +76,8 @@ public class DashboardApplicationService {
         Dashboard dashboard = Dashboard.create(dashboardDataWithSharesResolved, creator);
         dashboardRepository.add(dashboard.forStorage());
         DashboardDto dashboardResult = dashboard.forClient(creator);
+
+        dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
 
         return toDashboardResult(dashboardResult);
     }
@@ -115,6 +120,8 @@ public class DashboardApplicationService {
         dashboardRepository.update(dashboardId, dashboard.forStorage());
         DashboardDto dashboardResult = dashboard.forClient(updater);
 
+        dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
+
         return toDashboardResult(dashboardResult);
     }
 
@@ -128,6 +135,8 @@ public class DashboardApplicationService {
 
         dashboard.delete(remover);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
+
+        dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
     }
 
     public DashboardResult addChart(ChartAssignment newChartAssignment, UUID dashboardId) {
@@ -148,6 +157,9 @@ public class DashboardApplicationService {
         dashboard.addChart(newChart, updater);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
         DashboardDto dashboardResult = dashboard.forClient(updater);
+
+        dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
+
         return toDashboardResult(dashboardResult);
     }
 
@@ -162,6 +174,9 @@ public class DashboardApplicationService {
         dashboard.deleteChart(new ChartId(chartId), updater);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
         DashboardDto dashboardResult = dashboard.forClient(updater);
+
+        dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
+
         return toDashboardResult(dashboardResult);
 
     }
@@ -180,6 +195,8 @@ public class DashboardApplicationService {
         dashboardRepository.update(dashboardId, dashboard.forStorage());
         DashboardDto dashboardResult = dashboard.forClient(granter);
 
+        dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
+
         return toDashboardResult(dashboardResult);
     }
 
@@ -194,6 +211,8 @@ public class DashboardApplicationService {
         dashboard.unshare(granteeName, granter);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
         DashboardDto dashboardResult = dashboard.forClient(granter);
+
+        dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
 
         return toDashboardResult(dashboardResult);
     }
