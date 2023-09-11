@@ -5,7 +5,9 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import ovh.equino.actracker.domain.activity.ActivityNotifier;
+import ovh.equino.actracker.domain.dashboard.DashboardNotifier;
 import ovh.equino.actracker.domain.tag.TagNotifier;
+import ovh.equino.actracker.domain.tagset.TagSetNotifier;
 import ovh.equino.actracker.notification.outbox.NotificationPublisher;
 import ovh.equino.actracker.notification.outbox.NotificationsOutboxRepository;
 import ovh.equino.actracker.notification.outbox.NotificationsOutboxService;
@@ -17,7 +19,9 @@ import ovh.equino.actracker.notification.outbox.NotificationsOutboxService;
                 type = FilterType.ASSIGNABLE_TYPE,
                 classes = {
                         ActivityNotifier.class,
-                        TagNotifier.class
+                        TagNotifier.class,
+                        DashboardNotifier.class,
+                        TagSetNotifier.class
                 }
         )
 )

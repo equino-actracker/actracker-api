@@ -7,10 +7,7 @@ import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagRepository;
 import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
-import ovh.equino.actracker.domain.tagset.TagSet;
-import ovh.equino.actracker.domain.tagset.TagSetDto;
-import ovh.equino.actracker.domain.tagset.TagSetRepository;
-import ovh.equino.actracker.domain.tagset.TagSetSearchEngine;
+import ovh.equino.actracker.domain.tagset.*;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.security.identity.Identity;
 import ovh.equino.security.identity.IdentityProvider;
@@ -22,16 +19,19 @@ public class TagSetApplicationService {
 
     private final TagSetRepository tagSetRepository;
     private final TagSetSearchEngine tagSetSearchEngine;
+    private final TagSetNotifier tagSetNotifier;
     private final TagRepository tagRepository;
     private final IdentityProvider identityProvider;
 
     public TagSetApplicationService(TagSetRepository tagSetRepository,
                                     TagSetSearchEngine tagSetSearchEngine,
+                                    TagSetNotifier tagSetNotifier,
                                     TagRepository tagRepository,
                                     IdentityProvider identityProvider) {
 
         this.tagSetRepository = tagSetRepository;
         this.tagSetSearchEngine = tagSetSearchEngine;
+        this.tagSetNotifier = tagSetNotifier;
         this.tagRepository = tagRepository;
         this.identityProvider = identityProvider;
     }
@@ -47,6 +47,8 @@ public class TagSetApplicationService {
         TagSet tagSet = TagSet.create(newTagSetData, creator, tagsExistenceVerifier);
         tagSetRepository.add(tagSet.forStorage());
         TagSetDto tagSetResult = tagSet.forClient(creator);
+
+        tagSetNotifier.notifyChanged(tagSet.forChangeNotification());
 
         return toTagSetResult(tagSetResult);
     }
@@ -92,6 +94,8 @@ public class TagSetApplicationService {
         tagSetRepository.update(tagSetId, tagSet.forStorage());
         TagSetDto tagSetResult = tagSet.forClient(updater);
 
+        tagSetNotifier.notifyChanged(tagSet.forChangeNotification());
+
         return toTagSetResult(tagSetResult);
     }
 
@@ -108,6 +112,8 @@ public class TagSetApplicationService {
         tagSet.assignTag(new TagId(tagId), updater);
         tagSetRepository.update(tagSetId, tagSet.forStorage());
         TagSetDto tagSetResult = tagSet.forClient(updater);
+
+        tagSetNotifier.notifyChanged(tagSet.forChangeNotification());
 
         return toTagSetResult(tagSetResult);
     }
@@ -126,6 +132,8 @@ public class TagSetApplicationService {
         tagSetRepository.update(tagSetId, tagSet.forStorage());
         TagSetDto tagSetResult = tagSet.forClient(updater);
 
+        tagSetNotifier.notifyChanged(tagSet.forChangeNotification());
+
         return toTagSetResult(tagSetResult);
     }
 
@@ -142,6 +150,8 @@ public class TagSetApplicationService {
 
         tagSet.delete(remover);
         tagSetRepository.update(tagSetId, tagSet.forStorage());
+
+        tagSetNotifier.notifyChanged(tagSet.forChangeNotification());
     }
 
     private TagSetResult toTagSetResult(TagSetDto tagSetResult) {
