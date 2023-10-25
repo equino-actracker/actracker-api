@@ -6,7 +6,7 @@ import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivityRepository;
 import ovh.equino.actracker.domain.user.User;
-import ovh.equino.actracker.repository.jpa.JpaRepository;
+import ovh.equino.actracker.repository.jpa.JpaDAO;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -16,7 +16,7 @@ import java.util.UUID;
 
 import static java.util.Objects.isNull;
 
-class JpaActivityRepository extends JpaRepository implements ActivityRepository {
+class JpaActivityRepository extends JpaDAO implements ActivityRepository {
 
     private final ActivityMapper mapper = new ActivityMapper();
 

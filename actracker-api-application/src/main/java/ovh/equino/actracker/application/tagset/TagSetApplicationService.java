@@ -18,18 +18,21 @@ import java.util.UUID;
 public class TagSetApplicationService {
 
     private final TagSetRepository tagSetRepository;
+    private final TagSetDataSource tagSetDataSource;
     private final TagSetSearchEngine tagSetSearchEngine;
     private final TagSetNotifier tagSetNotifier;
     private final TagRepository tagRepository;
     private final IdentityProvider identityProvider;
 
     public TagSetApplicationService(TagSetRepository tagSetRepository,
+                                    TagSetDataSource tagSetDataSource,
                                     TagSetSearchEngine tagSetSearchEngine,
                                     TagSetNotifier tagSetNotifier,
                                     TagRepository tagRepository,
                                     IdentityProvider identityProvider) {
 
         this.tagSetRepository = tagSetRepository;
+        this.tagSetDataSource = tagSetDataSource;
         this.tagSetSearchEngine = tagSetSearchEngine;
         this.tagSetNotifier = tagSetNotifier;
         this.tagRepository = tagRepository;
@@ -50,7 +53,13 @@ public class TagSetApplicationService {
 
         tagSetNotifier.notifyChanged(tagSet.forChangeNotification());
 
-        return toTagSetResult(tagSetResult);
+//        return toTagSetResult(tagSetResult);
+        return tagSetDataSource.find(tagSet.id(), creator)
+                .map(this::toTagSetResult)
+                .orElseThrow(() -> {
+                    String message = "Could not find created tag set with ID=%s".formatted(tagSet.id());
+                    return new RuntimeException(message);
+                });
     }
 
     public SearchResult<TagSetResult> searchTagSets(SearchTagSetsQuery searchTagSetsQuery) {

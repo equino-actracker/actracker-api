@@ -8,6 +8,7 @@ import ovh.equino.actracker.application.tagset.SearchTagSetsQuery;
 import ovh.equino.actracker.application.tagset.TagSetApplicationService;
 import ovh.equino.actracker.application.tagset.TagSetResult;
 import ovh.equino.actracker.domain.tag.TagRepository;
+import ovh.equino.actracker.domain.tagset.TagSetDataSource;
 import ovh.equino.actracker.domain.tagset.TagSetNotifier;
 import ovh.equino.actracker.domain.tagset.TagSetRepository;
 import ovh.equino.actracker.domain.tagset.TagSetSearchEngine;
@@ -20,12 +21,13 @@ import java.util.UUID;
 class TransactionalTagSetApplicationService extends TagSetApplicationService {
 
     TransactionalTagSetApplicationService(TagSetRepository tagSetRepository,
+                                          TagSetDataSource tagSetDataSource,
                                           TagSetSearchEngine tagSetSearchEngine,
                                           TagSetNotifier tagSetNotifier,
                                           TagRepository tagRepository,
                                           IdentityProvider identityProvider) {
 
-        super(tagSetRepository, tagSetSearchEngine, tagSetNotifier, tagRepository, identityProvider);
+        super(tagSetRepository, tagSetDataSource, tagSetSearchEngine, tagSetNotifier, tagRepository, identityProvider);
     }
 
     @Override

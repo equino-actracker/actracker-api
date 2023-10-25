@@ -6,11 +6,11 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import ovh.equino.actracker.domain.tenant.TenantDto;
 import ovh.equino.actracker.domain.tenant.TenantRepository;
-import ovh.equino.actracker.repository.jpa.JpaRepository;
+import ovh.equino.actracker.repository.jpa.JpaDAO;
 
 import java.util.Optional;
 
-class JpaTenantRepository extends JpaRepository implements TenantRepository {
+class JpaTenantRepository extends JpaDAO implements TenantRepository {
 
     private final TenantMapper tenantMapper = new TenantMapper();
 

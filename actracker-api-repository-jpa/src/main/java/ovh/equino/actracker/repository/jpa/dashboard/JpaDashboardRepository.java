@@ -5,13 +5,13 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
 import ovh.equino.actracker.domain.dashboard.DashboardRepository;
-import ovh.equino.actracker.repository.jpa.JpaRepository;
+import ovh.equino.actracker.repository.jpa.JpaDAO;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-class JpaDashboardRepository extends JpaRepository implements DashboardRepository {
+class JpaDashboardRepository extends JpaDAO implements DashboardRepository {
 
     private final DashboardMapper mapper = new DashboardMapper();
 

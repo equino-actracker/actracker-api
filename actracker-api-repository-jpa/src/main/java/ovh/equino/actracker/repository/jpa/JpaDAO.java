@@ -5,7 +5,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
 @Transactional
-public abstract class JpaRepository {
+public abstract class JpaDAO {
 
     @PersistenceContext
     protected EntityManager entityManager;

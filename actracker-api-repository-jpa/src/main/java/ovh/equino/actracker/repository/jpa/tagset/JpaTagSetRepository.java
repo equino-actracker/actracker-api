@@ -5,13 +5,13 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.tagset.TagSetDto;
 import ovh.equino.actracker.domain.tagset.TagSetRepository;
-import ovh.equino.actracker.repository.jpa.JpaRepository;
+import ovh.equino.actracker.repository.jpa.JpaDAO;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-class JpaTagSetRepository extends JpaRepository implements TagSetRepository {
+class JpaTagSetRepository extends JpaDAO implements TagSetRepository {
 
     private final TagSetMapper mapper = new TagSetMapper();
 
