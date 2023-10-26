@@ -1,7 +1,6 @@
 package ovh.equino.actracker.repository.jpa.tagset;
 
 import jakarta.persistence.Tuple;
-import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.tagset.TagSetDataSource;
@@ -26,14 +25,32 @@ class JpaTagSetDataSource extends JpaDAO implements TagSetDataSource {
         Root<TagSetEntity> root = tupleQuery.from(TagSetEntity.class);
         Join<Object, Object> tagSetTags = root.join("tags", LEFT);
 
-        // TODO replace with generated JPA Meta Model
-        tupleQuery.select(criteriaBuilder.tuple(
-                root.get("id").alias("id"),
-                root.get("creatorId").alias("creatorId"),
-                root.get("name").alias("name"),
-                root.get("deleted").alias("deleted"),
-                tagSetTags.get("id").alias("tag_id")
-        ));
+        Predicate hasIdAsRequested = criteriaBuilder.equal(root.get("id"), tagSetId.id().toString());
+        Predicate isAccessibleForSearcher = criteriaBuilder.equal(root.get("creatorId"), searcher.id().toString());
+        Predicate isTagSetNotDeleted = criteriaBuilder.isFalse(root.get("deleted"));
+        Predicate isTagNotDeleted = criteriaBuilder.or(
+                criteriaBuilder.isFalse(tagSetTags.get("deleted")),
+                criteriaBuilder.isNull(tagSetTags.get("deleted"))
+        );
+
+        // TODO replace get by string with generated JPA Meta Model
+        tupleQuery
+                .select(
+                        criteriaBuilder.tuple(
+                                root.get("id").alias("id"),
+                                root.get("creatorId").alias("creatorId"),
+                                root.get("name").alias("name"),
+                                root.get("deleted").alias("deleted"),
+                                tagSetTags.get("id").alias("tag_id")
+                        ))
+                .where(
+                        criteriaBuilder.and(
+                                hasIdAsRequested,
+                                isAccessibleForSearcher,
+                                isTagSetNotDeleted,
+                                isTagNotDeleted
+                        )
+                );
 
         List<Tuple> results = entityManager
                 .createQuery(tupleQuery)
