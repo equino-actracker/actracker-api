@@ -2,7 +2,6 @@ package ovh.equino.actracker.domain.tagset;
 
 import ovh.equino.actracker.domain.Entity;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
-import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
 import ovh.equino.actracker.domain.user.User;
@@ -109,6 +108,7 @@ public class TagSet implements Entity {
         return new TagSetDto(id.id(), creator.id(), name, tagIds, deleted);
     }
 
+    // TODO remove this and all unused methods
     public TagSetDto forClient(User client) {
         if (isNotAvailableFor(client)) {
             throw new EntityNotFoundException(TagSet.class, this.id.id());
@@ -162,5 +162,10 @@ public class TagSet implements Entity {
     @Override
     public User creator() {
         return creator;
+    }
+
+    // TODO think about extracting it to superclass
+    public TagSetId id() {
+        return this.id;
     }
 }

@@ -5,7 +5,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import ovh.equino.actracker.domain.Notification;
 import ovh.equino.actracker.notification.outbox.NotificationsOutboxRepository;
-import ovh.equino.actracker.repository.jpa.JpaRepository;
+import ovh.equino.actracker.repository.jpa.JpaDAO;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,7 +13,7 @@ import java.util.UUID;
 
 import static java.util.stream.Collectors.toList;
 
-class JpaNotificationsOutboxRepository extends JpaRepository implements NotificationsOutboxRepository {
+class JpaNotificationsOutboxRepository extends JpaDAO implements NotificationsOutboxRepository {
 
     private final NotificationMapper notificationMapper = new NotificationMapper();
 

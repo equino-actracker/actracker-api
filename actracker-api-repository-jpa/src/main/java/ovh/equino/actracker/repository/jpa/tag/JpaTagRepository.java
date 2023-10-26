@@ -6,14 +6,14 @@ import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tag.TagRepository;
 import ovh.equino.actracker.domain.user.User;
-import ovh.equino.actracker.repository.jpa.JpaRepository;
+import ovh.equino.actracker.repository.jpa.JpaDAO;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-class JpaTagRepository extends JpaRepository implements TagRepository {
+class JpaTagRepository extends JpaDAO implements TagRepository {
 
     private final TagMapper mapper = new TagMapper();
 
