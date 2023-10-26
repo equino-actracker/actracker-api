@@ -49,11 +49,9 @@ public class TagSetApplicationService {
 
         TagSet tagSet = TagSet.create(newTagSetData, creator, tagsExistenceVerifier);
         tagSetRepository.add(tagSet.forStorage());
-        TagSetDto tagSetResult = tagSet.forClient(creator);
 
         tagSetNotifier.notifyChanged(tagSet.forChangeNotification());
 
-//        return toTagSetResult(tagSetResult);
         return tagSetDataSource.find(tagSet.id(), creator)
                 .map(this::toTagSetResult)
                 .orElseThrow(() -> {
@@ -101,11 +99,15 @@ public class TagSetApplicationService {
         TagSet tagSet = TagSet.fromStorage(tagSetDto, tagsExistenceVerifier);
         tagSet.rename(newName, updater);
         tagSetRepository.update(tagSetId, tagSet.forStorage());
-        TagSetDto tagSetResult = tagSet.forClient(updater);
 
         tagSetNotifier.notifyChanged(tagSet.forChangeNotification());
 
-        return toTagSetResult(tagSetResult);
+        return tagSetDataSource.find(tagSet.id(), updater)
+                .map(this::toTagSetResult)
+                .orElseThrow(() -> {
+                    String message = "Could not find updated tag set with ID=%s".formatted(tagSet.id());
+                    return new RuntimeException(message);
+                });
     }
 
     public TagSetResult addTagToSet(UUID tagId, UUID tagSetId) {
@@ -120,11 +122,15 @@ public class TagSetApplicationService {
         TagSet tagSet = TagSet.fromStorage(tagSetDto, tagsExistenceVerifier);
         tagSet.assignTag(new TagId(tagId), updater);
         tagSetRepository.update(tagSetId, tagSet.forStorage());
-        TagSetDto tagSetResult = tagSet.forClient(updater);
 
         tagSetNotifier.notifyChanged(tagSet.forChangeNotification());
 
-        return toTagSetResult(tagSetResult);
+        return tagSetDataSource.find(tagSet.id(), updater)
+                .map(this::toTagSetResult)
+                .orElseThrow(() -> {
+                    String message = "Could not find updated tag set with ID=%s".formatted(tagSet.id());
+                    return new RuntimeException(message);
+                });
     }
 
     public TagSetResult removeTagFromSet(UUID tagId, UUID tagSetId) {
@@ -139,11 +145,15 @@ public class TagSetApplicationService {
         TagSet tagSet = TagSet.fromStorage(tagSetDto, tagsExistenceVerifier);
         tagSet.removeTag(new TagId(tagId), updater);
         tagSetRepository.update(tagSetId, tagSet.forStorage());
-        TagSetDto tagSetResult = tagSet.forClient(updater);
 
         tagSetNotifier.notifyChanged(tagSet.forChangeNotification());
 
-        return toTagSetResult(tagSetResult);
+        return tagSetDataSource.find(tagSet.id(), updater)
+                .map(this::toTagSetResult)
+                .orElseThrow(() -> {
+                    String message = "Could not find updated tag set with ID=%s".formatted(tagSet.id());
+                    return new RuntimeException(message);
+                });
     }
 
     public void deleteTagSet(UUID tagSetId) {

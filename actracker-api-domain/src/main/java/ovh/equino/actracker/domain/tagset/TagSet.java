@@ -108,6 +108,7 @@ public class TagSet implements Entity {
         return new TagSetDto(id.id(), creator.id(), name, tagIds, deleted);
     }
 
+    // TODO remove this and all unused methods
     public TagSetDto forClient(User client) {
         if (isNotAvailableFor(client)) {
             throw new EntityNotFoundException(TagSet.class, this.id.id());
