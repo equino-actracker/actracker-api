@@ -10,9 +10,12 @@ import ovh.equino.actracker.domain.tagset.TagSetId;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaDAO;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+
+import static jakarta.persistence.criteria.JoinType.LEFT;
+import static java.util.Collections.emptySet;
+import static java.util.Objects.nonNull;
+import static java.util.stream.Collectors.*;
 
 class JpaTagSetDataSource extends JpaDAO implements TagSetDataSource {
 
@@ -21,40 +24,23 @@ class JpaTagSetDataSource extends JpaDAO implements TagSetDataSource {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Tuple> tupleQuery = criteriaBuilder.createTupleQuery();
         Root<TagSetEntity> root = tupleQuery.from(TagSetEntity.class);
-        Join<Object, Object> tagSetTags = root.join("tags", JoinType.LEFT);
+        Join<Object, Object> tagSetTags = root.join("tags", LEFT);
+
+        // TODO replace with generated JPA Meta Model
         tupleQuery.select(criteriaBuilder.tuple(
                 root.get("id").alias("id"),
-                root.get("creatorId"),
-                root.get("name"),
-                tagSetTags.get("id")
+                root.get("creatorId").alias("creatorId"),
+                root.get("name").alias("name"),
+                root.get("deleted").alias("deleted"),
+                tagSetTags.get("id").alias("tag_id")
         ));
 
-        TypedQuery<Tuple> query = entityManager.createQuery(tupleQuery);
-        List<Tuple> results = query.getResultList()
-                .stream()
-                .toList();
+        List<Tuple> results = entityManager
+                .createQuery(tupleQuery)
+                .getResultList();
+        List<TagSetDto> tagSets = toTagSets(results);
 
-
-//        CriteriaQuery<TagSetDto> criteriaQuery = criteriaBuilder.createQuery(TagSetDto.class);
-//        Root<TagSetEntity> root = criteriaQuery.from(TagSetEntity.class);
-//
-//        criteriaQuery.select(criteriaBuilder.construct(
-//                        TagSetDto.class,
-//                        root.get("id"),
-//                        root.get("creatorId"),
-//                        root.get("name"),
-//                        root.get("tags"),
-//                        root.get("deleted")
-//                )
-//        );
-//
-//        TypedQuery<TagSetDto> query = entityManager.createQuery(criteriaQuery);
-
-//        return query.getResultList()
-//                .stream()
-//                .findFirst();
-
-        return Optional.empty();
+        return tagSets.stream().findFirst();
     }
 
     @Override
@@ -62,5 +48,41 @@ class JpaTagSetDataSource extends JpaDAO implements TagSetDataSource {
 
 
         return null;
+    }
+
+    private List<TagSetDto> toTagSets(List<Tuple> queryResults) {
+        Map<UUID, Set<UUID>> tagIdsByTagSetId = toTagIdsByTagSetId(queryResults);
+        return queryResults
+                .stream()
+                .map(row -> toTagSet(row, tagIdsByTagSetId))
+                .distinct()
+                .toList();
+    }
+
+    private Map<UUID, Set<UUID>> toTagIdsByTagSetId(List<Tuple> queryResults) {
+        return queryResults
+                .stream()
+                .filter(row -> nonNull(row.get("tag_id", String.class)))
+                .collect(
+                        groupingBy(
+                                row -> UUID.fromString(row.get("id", String.class)),
+                                mapping(this::toTagId, toSet())
+                        )
+                );
+    }
+
+    private UUID toTagId(Tuple queryResult) {
+        return UUID.fromString(queryResult.get("tag_id", String.class));
+    }
+
+    private TagSetDto toTagSet(Tuple queryResult, Map<UUID, Set<UUID>> tagIdsByTagSetId) {
+        UUID tagSetId = UUID.fromString(queryResult.get("id", String.class));
+        return new TagSetDto(
+                tagSetId,
+                UUID.fromString(queryResult.get("creatorId", String.class)),
+                queryResult.get("name", String.class),
+                tagIdsByTagSetId.getOrDefault(tagSetId, emptySet()),
+                queryResult.get("deleted", Boolean.class)
+        );
     }
 }
