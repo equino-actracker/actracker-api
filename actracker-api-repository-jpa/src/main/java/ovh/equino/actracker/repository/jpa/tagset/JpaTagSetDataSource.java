@@ -1,105 +1,116 @@
 package ovh.equino.actracker.repository.jpa.tagset;
 
-import jakarta.persistence.Tuple;
 import jakarta.persistence.criteria.*;
+import org.apache.commons.lang3.StringUtils;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.tagset.TagSetDataSource;
 import ovh.equino.actracker.domain.tagset.TagSetDto;
 import ovh.equino.actracker.domain.tagset.TagSetId;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaDAO;
+import ovh.equino.actracker.repository.jpa.tag.TagEntity;
 
 import java.util.*;
 
-import static jakarta.persistence.criteria.JoinType.LEFT;
-import static java.util.Collections.emptySet;
-import static java.util.Objects.nonNull;
-import static java.util.stream.Collectors.*;
+import static jakarta.persistence.criteria.JoinType.INNER;
+import static java.util.stream.Collectors.toUnmodifiableSet;
 
 class JpaTagSetDataSource extends JpaDAO implements TagSetDataSource {
 
+    private final TagSetMapper mapper = new TagSetMapper();
+
     @Override
     public Optional<TagSetDto> find(TagSetId tagSetId, User searcher) {
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Tuple> tupleQuery = criteriaBuilder.createTupleQuery();
-        Root<TagSetEntity> root = tupleQuery.from(TagSetEntity.class);
-        Join<Object, Object> tagSetTags = root.join("tags", LEFT);
 
-        Predicate hasIdAsRequested = criteriaBuilder.equal(root.get("id"), tagSetId.id().toString());
-        Predicate isAccessibleForSearcher = criteriaBuilder.equal(root.get("creatorId"), searcher.id().toString());
-        Predicate isTagSetNotDeleted = criteriaBuilder.isFalse(root.get("deleted"));
-        Predicate isTagNotDeleted = criteriaBuilder.or(
-                criteriaBuilder.isFalse(tagSetTags.get("deleted")),
-                criteriaBuilder.isNull(tagSetTags.get("deleted"))
-        );
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 
         // TODO replace get by string with generated JPA Meta Model
-        tupleQuery
+        CriteriaQuery<TagSetProjection> tagSetQuery = criteriaBuilder.createQuery(TagSetProjection.class);
+        Root<TagSetEntity> tagSet = tagSetQuery.from(TagSetEntity.class);
+        Predicate hasIdAsRequested = criteriaBuilder.equal(tagSet.get("id"), tagSetId.id().toString());
+        Predicate isAccessibleForSearcher = criteriaBuilder.equal(tagSet.get("creatorId"), searcher.id().toString());
+        Predicate isTagSetNotDeleted = criteriaBuilder.isFalse(tagSet.get("deleted"));
+
+        tagSetQuery
                 .select(
-                        criteriaBuilder.tuple(
-                                root.get("id").alias("id"),
-                                root.get("creatorId").alias("creatorId"),
-                                root.get("name").alias("name"),
-                                root.get("deleted").alias("deleted"),
-                                tagSetTags.get("id").alias("tag_id")
-                        ))
+                        criteriaBuilder.construct(
+                                TagSetProjection.class,
+                                tagSet.get("id"),
+                                tagSet.get("creatorId"),
+                                tagSet.get("name"),
+                                tagSet.get("deleted")
+                        )
+                )
                 .where(
                         criteriaBuilder.and(
                                 hasIdAsRequested,
                                 isAccessibleForSearcher,
-                                isTagSetNotDeleted,
-                                isTagNotDeleted
+                                isTagSetNotDeleted
                         )
                 );
 
-        List<Tuple> results = entityManager
-                .createQuery(tupleQuery)
-                .getResultList();
-        List<TagSetDto> tagSets = toTagSets(results);
 
-        return tagSets.stream().findFirst();
+        Optional<TagSetProjection> tagSetResult = entityManager.createQuery(tagSetQuery)
+                .setMaxResults(1)
+                .getResultStream()
+                .findFirst();
+
+        CriteriaQuery<TagProjection> tagSetTagQuery = criteriaBuilder.createQuery(TagProjection.class);
+        Root<TagSetEntity> tagSetTag = tagSetTagQuery.from(TagSetEntity.class);
+        Join<TagSetEntity, TagEntity> tag = tagSetTag.join("tags", INNER);
+        Predicate isTagNotDeleted = criteriaBuilder.isFalse(tag.get("deleted"));
+        Predicate isTagForTagSet = criteriaBuilder.equal(tagSetTag.get("id"), tagSetId.id().toString());
+
+        tagSetTagQuery
+                .select(
+                        criteriaBuilder.construct(
+                                TagProjection.class,
+                                tag.get("id"),
+                                tagSetTag.get("id")
+                        )
+                )
+                .where(
+                        criteriaBuilder.and(
+                                isTagNotDeleted,
+                                isTagForTagSet
+                        )
+                );
+
+        List<TagProjection> tagsResults = entityManager.createQuery(tagSetTagQuery)
+                .getResultList();
+
+
+        return tagSetResult
+                .map(result -> toTagSet(
+                        result,
+                        extractTagIdsFor(result, tagsResults)
+                ));
     }
 
     @Override
     public List<TagSetDto> find(EntitySearchCriteria searchCriteria) {
-
-
         return null;
     }
 
-    private List<TagSetDto> toTagSets(List<Tuple> queryResults) {
-        Map<UUID, Set<UUID>> tagIdsByTagSetId = toTagIdsByTagSetId(queryResults);
-        return queryResults
-                .stream()
-                .map(row -> toTagSet(row, tagIdsByTagSetId))
-                .distinct()
-                .toList();
-    }
-
-    private Map<UUID, Set<UUID>> toTagIdsByTagSetId(List<Tuple> queryResults) {
-        return queryResults
-                .stream()
-                .filter(row -> nonNull(row.get("tag_id", String.class)))
-                .collect(
-                        groupingBy(
-                                row -> UUID.fromString(row.get("id", String.class)),
-                                mapping(this::toTagId, toSet())
-                        )
-                );
-    }
-
-    private UUID toTagId(Tuple queryResult) {
-        return UUID.fromString(queryResult.get("tag_id", String.class));
-    }
-
-    private TagSetDto toTagSet(Tuple queryResult, Map<UUID, Set<UUID>> tagIdsByTagSetId) {
-        UUID tagSetId = UUID.fromString(queryResult.get("id", String.class));
+    private TagSetDto toTagSet(TagSetProjection tagSetProjection, Set<UUID> tagIds) {
         return new TagSetDto(
-                tagSetId,
-                UUID.fromString(queryResult.get("creatorId", String.class)),
-                queryResult.get("name", String.class),
-                tagIdsByTagSetId.getOrDefault(tagSetId, emptySet()),
-                queryResult.get("deleted", Boolean.class)
+                UUID.fromString(tagSetProjection.id()),
+                UUID.fromString(tagSetProjection.creatorId()),
+                tagSetProjection.name(),
+                tagIds,
+                tagSetProjection.deleted()
         );
     }
+
+    private Set<UUID> extractTagIdsFor(TagSetProjection tagSetProjection,
+                                       Collection<TagProjection> tagProjections) {
+
+        return tagProjections
+                .stream()
+                .filter(tagProjection -> StringUtils.equals(tagProjection.tagSetId(), tagSetProjection.id()))
+                .map(TagProjection::tagId)
+                .map(UUID::fromString)
+                .collect(toUnmodifiableSet());
+    }
+
 }
