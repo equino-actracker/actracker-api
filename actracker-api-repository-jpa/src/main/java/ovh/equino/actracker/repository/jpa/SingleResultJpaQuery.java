@@ -12,6 +12,10 @@ public abstract class SingleResultJpaQuery<E, P> extends JpaQuery<E, P, Optional
 
     @Override
     public final Optional<P> execute() {
+        initQuery();
+        if (predicate != null) {
+            query.where(predicate.toRawPredicate());
+        }
         return entityManager.createQuery(query)
                 .setMaxResults(1)
                 .getResultStream()

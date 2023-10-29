@@ -12,6 +12,8 @@ abstract class JpaQuery<E, P, R> {
     protected final Root<E> root;
     protected final CriteriaQuery<P> query;
 
+    protected JpaPredicate predicate;
+
     JpaQuery(EntityManager entityManager) {
         this.entityManager = entityManager;
         this.criteriaBuilder = entityManager.getCriteriaBuilder();
@@ -19,10 +21,12 @@ abstract class JpaQuery<E, P, R> {
         this.root = query.from(getRootEntityType());
     }
 
+    protected abstract void initQuery();
+
     public abstract JpaPredicateBuilder<E> predicateBuilder();
 
     public JpaQuery<E, P, R> where(JpaPredicate predicate) {
-        query.where(predicate.toRawPredicate());
+        this.predicate = predicate;
         return this;
     }
 

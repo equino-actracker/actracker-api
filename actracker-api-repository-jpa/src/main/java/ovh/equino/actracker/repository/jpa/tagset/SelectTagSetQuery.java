@@ -11,6 +11,11 @@ final class SelectTagSetQuery extends SingleResultJpaQuery<TagSetEntity, TagSetP
 
     SelectTagSetQuery(EntityManager entityManager) {
         super(entityManager);
+        this.predicateBuilder = new PredicateBuilder();
+    }
+
+    @Override
+    protected void initQuery() {
         query.select(
                 this.criteriaBuilder.construct(
                         TagSetProjection.class,
@@ -20,7 +25,6 @@ final class SelectTagSetQuery extends SingleResultJpaQuery<TagSetEntity, TagSetP
                         root.get("deleted")
                 )
         );
-        this.predicateBuilder = new PredicateBuilder();
     }
 
     @Override

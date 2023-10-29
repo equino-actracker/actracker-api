@@ -19,6 +19,11 @@ final class SelectTagSetJoinTagQuery extends MultiResultJpaQuery<TagSetEntity, T
     SelectTagSetJoinTagQuery(EntityManager entityManager) {
         super(entityManager);
         this.tag = root.join("tags", INNER);
+        this.predicateBuilder = new PredicateBuilder();
+    }
+
+    @Override
+    protected void initQuery() {
         query.select(
                 this.criteriaBuilder.construct(
                         TagSetJoinTagProjection.class,
@@ -26,7 +31,6 @@ final class SelectTagSetJoinTagQuery extends MultiResultJpaQuery<TagSetEntity, T
                         root.get("id")
                 )
         );
-        this.predicateBuilder = new PredicateBuilder();
     }
 
     @Override

@@ -23,6 +23,10 @@ public abstract class MultiResultJpaQuery<E, P> extends JpaQuery<E, P, List<P>> 
 
     @Override
     public final List<P> execute() {
+        initQuery();
+        if (predicate != null) {
+            query.where(predicate.toRawPredicate());
+        }
         TypedQuery<P> typedQuery = entityManager.createQuery(query);
         if (rowLimit != null) {
             typedQuery.setMaxResults(rowLimit);
