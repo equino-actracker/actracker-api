@@ -1,69 +1,46 @@
 package ovh.equino.actracker.repository.jpa.tagset;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
 import ovh.equino.actracker.domain.tagset.TagSetId;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaPredicate;
-import ovh.equino.actracker.repository.jpa.JpaQuery;
+import ovh.equino.actracker.repository.jpa.SingleResultJpaQuery;
 
-import java.util.Optional;
-
-import static java.util.Arrays.stream;
-
-class SelectTagSetQuery implements JpaQuery<TagSetEntity, Optional<TagSetProjection>> {
-
-    private final EntityManager entityManager;
-    private final CriteriaBuilder criteriaBuilder;
-    private final CriteriaQuery<TagSetProjection> query;
-    private final Root<TagSetEntity> tagSet;
+class SelectTagSetQuery extends SingleResultJpaQuery<TagSetEntity, TagSetProjection> {
 
     SelectTagSetQuery(EntityManager entityManager) {
-        this.entityManager = entityManager;
-        this.criteriaBuilder = entityManager.getCriteriaBuilder();
-        this.query = criteriaBuilder.createQuery(TagSetProjection.class);
-        this.tagSet = query.from(TagSetEntity.class);
+        super(entityManager);
 
         query.select(
                 criteriaBuilder.construct(
                         TagSetProjection.class,
-                        tagSet.get("id"),
-                        tagSet.get("creatorId"),
-                        tagSet.get("name"),
-                        tagSet.get("deleted")
+                        root.get("id"),
+                        root.get("creatorId"),
+                        root.get("name"),
+                        root.get("deleted")
                 )
         );
     }
 
     @Override
-    public JpaQuery<TagSetEntity, Optional<TagSetProjection>> where(JpaPredicate... conditions) {
-        Predicate[] predicates = stream(conditions)
-                .map(JpaPredicate::toJpa)
-                .toArray(Predicate[]::new);
-        query.where(predicates);
-        return this;
+    protected Class<TagSetEntity> getRootEntityType() {
+        return TagSetEntity.class;
     }
 
     @Override
-    public Optional<TagSetProjection> execute() {
-        return entityManager.createQuery(query)
-                .setMaxResults(1)
-                .getResultStream()
-                .findFirst();
+    protected Class<TagSetProjection> getProjectionType() {
+        return TagSetProjection.class;
     }
 
     JpaPredicate hasId(TagSetId id) {
-        return () -> criteriaBuilder.equal(tagSet.get("id"), id.id().toString());
+        return () -> criteriaBuilder.equal(root.get("id"), id.id().toString());
     }
 
     JpaPredicate isAccessibleFor(User searcher) {
-        return () -> criteriaBuilder.equal(tagSet.get("creatorId"), searcher.id().toString());
+        return () -> criteriaBuilder.equal(root.get("creatorId"), searcher.id().toString());
     }
 
     JpaPredicate isNotDeleted() {
-        return () -> criteriaBuilder.isFalse(tagSet.get("deleted"));
+        return () -> criteriaBuilder.isFalse(root.get("deleted"));
     }
 }
