@@ -13,7 +13,7 @@ public abstract class MultiResultJpaQuery<E, P> extends JpaQuery<E, P, List<P>> 
         super(entityManager);
     }
 
-    public MultiResultJpaQuery<E, P> limit(int rowNum) {
+    public final MultiResultJpaQuery<E, P> limit(int rowNum) {
         if (rowNum < 0) {
             throw new IllegalArgumentException("Number of rows cannot be less than 0");
         }
@@ -22,7 +22,7 @@ public abstract class MultiResultJpaQuery<E, P> extends JpaQuery<E, P, List<P>> 
     }
 
     @Override
-    public List<P> execute() {
+    public final List<P> execute() {
         TypedQuery<P> typedQuery = entityManager.createQuery(query);
         if (rowLimit != null) {
             typedQuery.setMaxResults(rowLimit);

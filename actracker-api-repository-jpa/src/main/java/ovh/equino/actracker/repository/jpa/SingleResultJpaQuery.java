@@ -11,7 +11,7 @@ public abstract class SingleResultJpaQuery<E, P> extends JpaQuery<E, P, Optional
     }
 
     @Override
-    public Optional<P> execute() {
+    public final Optional<P> execute() {
         return entityManager.createQuery(query)
                 .setMaxResults(1)
                 .getResultStream()

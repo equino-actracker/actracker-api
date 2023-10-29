@@ -6,11 +6,10 @@ import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaPredicate;
 import ovh.equino.actracker.repository.jpa.SingleResultJpaQuery;
 
-class SelectTagSetQuery extends SingleResultJpaQuery<TagSetEntity, TagSetProjection> {
+final class SelectTagSetQuery extends SingleResultJpaQuery<TagSetEntity, TagSetProjection> {
 
     SelectTagSetQuery(EntityManager entityManager) {
         super(entityManager);
-
         query.select(
                 criteriaBuilder.construct(
                         TagSetProjection.class,
@@ -20,6 +19,12 @@ class SelectTagSetQuery extends SingleResultJpaQuery<TagSetEntity, TagSetProject
                         root.get("deleted")
                 )
         );
+    }
+
+    @Override
+    public SelectTagSetQuery where(JpaPredicate... conditions) {
+        super.where(conditions);
+        return this;
     }
 
     @Override

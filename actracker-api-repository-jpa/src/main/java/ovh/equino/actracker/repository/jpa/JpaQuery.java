@@ -23,11 +23,12 @@ abstract class JpaQuery<E, P, R> {
         this.root = query.from(getRootEntityType());
     }
 
-    public void where(JpaPredicate... conditions) {
+    public JpaQuery<E, P, R> where(JpaPredicate... conditions) {
         Predicate[] predicates = stream(conditions)
                 .map(JpaPredicate::toJpa)
                 .toArray(Predicate[]::new);
         query.where(predicates);
+        return this;
     }
 
     public abstract R execute();

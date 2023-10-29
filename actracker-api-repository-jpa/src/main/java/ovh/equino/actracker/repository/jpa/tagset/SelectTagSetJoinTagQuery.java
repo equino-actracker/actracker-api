@@ -7,18 +7,15 @@ import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaPredicate;
 import ovh.equino.actracker.repository.jpa.MultiResultJpaQuery;
 
-import java.util.List;
-
 import static jakarta.persistence.criteria.JoinType.INNER;
 
-class SelectTagSetJoinTagQuery extends MultiResultJpaQuery<TagSetEntity, TagSetJoinTagProjection> {
+final class SelectTagSetJoinTagQuery extends MultiResultJpaQuery<TagSetEntity, TagSetJoinTagProjection> {
 
     private final Join<TagSetEntity, ?> tag;
 
     SelectTagSetJoinTagQuery(EntityManager entityManager) {
         super(entityManager);
         this.tag = root.join("tags", INNER);
-
         query.select(
                 criteriaBuilder.construct(
                         TagSetJoinTagProjection.class,
@@ -29,8 +26,9 @@ class SelectTagSetJoinTagQuery extends MultiResultJpaQuery<TagSetEntity, TagSetJ
     }
 
     @Override
-    public List<TagSetJoinTagProjection> execute() {
-        return entityManager.createQuery(query).getResultList();
+    public SelectTagSetJoinTagQuery where(JpaPredicate... conditions) {
+        super.where(conditions);
+        return this;
     }
 
     public JpaPredicate assignedForTagSet(TagSetId tagSetId) {
