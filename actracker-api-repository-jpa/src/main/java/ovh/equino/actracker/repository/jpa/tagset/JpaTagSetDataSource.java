@@ -18,22 +18,28 @@ class JpaTagSetDataSource extends JpaDAO implements TagSetDataSource {
     public Optional<TagSetDto> find(TagSetId tagSetId, User searcher) {
 
         SelectTagSetQuery selectTagSet = new SelectTagSetQuery(entityManager);
+        SelectTagSetQuery.PredicateBuilder tagSetCriteria = selectTagSet.predicateBuilder();
         Optional<TagSetProjection> tagSetResult =
                 selectTagSet
                         .where(
-                                selectTagSet.hasId(tagSetId),
-                                selectTagSet.isAccessibleFor(searcher),
-                                selectTagSet.isNotDeleted()
+                                tagSetCriteria.and(
+                                        tagSetCriteria.hasId(tagSetId.id()),
+                                        tagSetCriteria.isAccessibleFor(searcher),
+                                        tagSetCriteria.isNotDeleted()
+                                )
                         )
                         .execute();
 
         SelectTagSetJoinTagQuery selectTagSetJoinTag = new SelectTagSetJoinTagQuery(entityManager);
+        SelectTagSetJoinTagQuery.PredicateBuilder tagCriteria = selectTagSetJoinTag.predicateBuilder();
         List<TagSetJoinTagProjection> tagSetJoinTag =
                 selectTagSetJoinTag
                         .where(
-                                selectTagSetJoinTag.assignedForTagSet(tagSetId),
-                                selectTagSetJoinTag.isNotDeleted(),
-                                selectTagSetJoinTag.isAccessibleFor(searcher)
+                                tagCriteria.and(
+                                        tagCriteria.assignedForTagSet(tagSetId.id()),
+                                        tagCriteria.isNotDeleted(),
+                                        tagCriteria.isAccessibleFor(searcher)
+                                )
                         )
                         .execute();
 
