@@ -2,12 +2,17 @@ package ovh.equino.actracker.repository.jpa;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.Order;
 
 import java.util.List;
+
+import static java.util.Arrays.stream;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 public abstract class MultiResultJpaQuery<E, P> extends JpaQuery<E, P, List<P>> {
 
     private Integer rowLimit;
+    private List<JpaSortCriteria> sortCriteria;
 
     protected MultiResultJpaQuery(EntityManager entityManager) {
         super(entityManager);
@@ -21,11 +26,25 @@ public abstract class MultiResultJpaQuery<E, P> extends JpaQuery<E, P, List<P>> 
         return this;
     }
 
+    public final MultiResultJpaQuery<E, P> orderBy(JpaSortCriteria... sortCriteria) {
+        if (sortCriteria != null) {
+            this.sortCriteria = stream(sortCriteria).toList();
+        }
+        return this;
+    }
+
     @Override
     public final List<P> execute() {
         initProjection();
         if (predicate != null) {
             query.where(predicate.toRawPredicate());
+        }
+        if (isNotEmpty(sortCriteria)) {
+            List<Order> order = sortCriteria
+                    .stream()
+                    .map(JpaSortCriteria::toRawSort)
+                    .toList();
+            query.orderBy(order);
         }
         TypedQuery<P> typedQuery = entityManager.createQuery(query);
         if (rowLimit != null) {

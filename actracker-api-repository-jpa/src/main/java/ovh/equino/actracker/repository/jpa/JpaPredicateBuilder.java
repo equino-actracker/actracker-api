@@ -106,4 +106,12 @@ public abstract class JpaPredicateBuilder<E> {
     public JpaPredicate noneMatch() {
         return or();
     }
+
+    public JpaSortCriteria ascending(String fieldName) {
+        return () -> criteriaBuilder.asc(root.get(fieldName));
+    }
+
+    public JpaSortCriteria descending(String fieldName) {
+        return () -> criteriaBuilder.desc(root.get(fieldName));
+    }
 }
