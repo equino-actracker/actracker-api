@@ -18,6 +18,8 @@ public abstract class MultiResultJpaQuery<E, P> extends JpaQuery<E, P, List<P>> 
         super(entityManager);
     }
 
+    public abstract JpaSortBuilder<E> sort();
+
     public final MultiResultJpaQuery<E, P> limit(int rowNum) {
         if (rowNum < 0) {
             throw new IllegalArgumentException("Number of rows cannot be less than 0");

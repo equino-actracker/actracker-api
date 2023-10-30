@@ -5,6 +5,7 @@ import jakarta.persistence.criteria.Join;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaPredicate;
 import ovh.equino.actracker.repository.jpa.JpaPredicateBuilder;
+import ovh.equino.actracker.repository.jpa.JpaSortBuilder;
 import ovh.equino.actracker.repository.jpa.MultiResultJpaQuery;
 
 import java.util.Collection;
@@ -37,6 +38,15 @@ final class SelectTagSetJoinTagQuery extends MultiResultJpaQuery<TagSetEntity, T
     @Override
     public PredicateBuilder predicate() {
         return predicateBuilder;
+    }
+
+    /**
+     * Deprecated: Sorting this entity is not supported. An attempt will throw RuntimeException.
+     */
+    @Override
+    @Deprecated
+    public JpaSortBuilder<TagSetEntity> sort() {
+        throw new RuntimeException("Sorting tag sets joint with tags not supported");
     }
 
     @Override

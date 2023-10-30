@@ -62,13 +62,13 @@ class JpaTagSetDataSource extends JpaDAO implements TagSetDataSource {
         List<TagSetProjection> tagSetResults = selectTagSets
                 .where(
                         selectTagSets.predicate().and(
-                                selectTagSets.predicate().isAccessibleFor(searchCriteria.searcher()), // check
-                                selectTagSets.predicate().isNotDeleted(), // check
+                                selectTagSets.predicate().isAccessibleFor(searchCriteria.searcher()),
+                                selectTagSets.predicate().isNotDeleted(),
                                 selectTagSets.predicate().isInPage(searchCriteria.pageId()),
                                 selectTagSets.predicate().isNotExcluded(searchCriteria.excludeFilter())
                         )
                 )
-                .orderBy(selectTagSets.predicate().ascending("id"))
+                .orderBy(selectTagSets.sort().ascending("id"))
                 .limit(searchCriteria.pageSize())
                 .execute();
 
@@ -83,9 +83,9 @@ class JpaTagSetDataSource extends JpaDAO implements TagSetDataSource {
                 selectTagSetJoinTag
                         .where(
                                 selectTagSetJoinTag.predicate().and(
-                                        selectTagSetJoinTag.predicate().hasTagSetIdIn(foundTagSetIds),//check
-                                        selectTagSetJoinTag.predicate().isNotDeleted(),//check
-                                        selectTagSetJoinTag.predicate().isAccessibleFor(searchCriteria.searcher())//cant check
+                                        selectTagSetJoinTag.predicate().hasTagSetIdIn(foundTagSetIds),
+                                        selectTagSetJoinTag.predicate().isNotDeleted(),
+                                        selectTagSetJoinTag.predicate().isAccessibleFor(searchCriteria.searcher())
                                 )
                         )
                         .execute();
