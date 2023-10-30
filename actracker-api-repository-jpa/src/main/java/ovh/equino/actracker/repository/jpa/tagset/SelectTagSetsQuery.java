@@ -3,13 +3,13 @@ package ovh.equino.actracker.repository.jpa.tagset;
 import jakarta.persistence.EntityManager;
 import ovh.equino.actracker.repository.jpa.JpaPredicate;
 import ovh.equino.actracker.repository.jpa.JpaPredicateBuilder;
-import ovh.equino.actracker.repository.jpa.SingleResultJpaQuery;
+import ovh.equino.actracker.repository.jpa.MultiResultJpaQuery;
 
-final class SelectTagSetQuery extends SingleResultJpaQuery<TagSetEntity, TagSetProjection> {
+class SelectTagSetsQuery extends MultiResultJpaQuery<TagSetEntity, TagSetProjection> {
 
     private final PredicateBuilder predicateBuilder;
 
-    SelectTagSetQuery(EntityManager entityManager) {
+    SelectTagSetsQuery(EntityManager entityManager) {
         super(entityManager);
         this.predicateBuilder = new PredicateBuilder();
     }
@@ -33,7 +33,7 @@ final class SelectTagSetQuery extends SingleResultJpaQuery<TagSetEntity, TagSetP
     }
 
     @Override
-    public SelectTagSetQuery where(JpaPredicate predicate) {
+    public SelectTagSetsQuery where(JpaPredicate predicate) {
         super.where(predicate);
         return this;
     }

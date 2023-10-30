@@ -7,6 +7,7 @@ import ovh.equino.actracker.repository.jpa.JpaPredicate;
 import ovh.equino.actracker.repository.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.repository.jpa.MultiResultJpaQuery;
 
+import java.util.Collection;
 import java.util.UUID;
 
 import static jakarta.persistence.criteria.JoinType.INNER;
@@ -23,7 +24,7 @@ final class SelectTagSetJoinTagQuery extends MultiResultJpaQuery<TagSetEntity, T
     }
 
     @Override
-    protected void initQuery() {
+    protected void initProjection() {
         query.select(
                 this.criteriaBuilder.construct(
                         TagSetJoinTagProjection.class,
@@ -34,7 +35,7 @@ final class SelectTagSetJoinTagQuery extends MultiResultJpaQuery<TagSetEntity, T
     }
 
     @Override
-    public PredicateBuilder predicateBuilder() {
+    public PredicateBuilder predicate() {
         return predicateBuilder;
     }
 
@@ -75,8 +76,12 @@ final class SelectTagSetJoinTagQuery extends MultiResultJpaQuery<TagSetEntity, T
             );
         }
 
-        public JpaPredicate assignedForTagSet(UUID tagSetId) {
+        public JpaPredicate hasTagSetId(UUID tagSetId) {
             return super.hasId(tagSetId);
+        }
+
+        public JpaPredicate hasTagSetIdIn(Collection<UUID> tagSetIds) {
+            return super.hasIdIn(tagSetIds);
         }
     }
 }

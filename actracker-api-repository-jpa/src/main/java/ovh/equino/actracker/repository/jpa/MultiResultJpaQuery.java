@@ -23,7 +23,7 @@ public abstract class MultiResultJpaQuery<E, P> extends JpaQuery<E, P, List<P>> 
 
     @Override
     public final List<P> execute() {
-        initQuery();
+        initProjection();
         if (predicate != null) {
             query.where(predicate.toRawPredicate());
         }
