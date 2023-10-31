@@ -21,9 +21,9 @@ abstract class JpaQuery<E, P, R> {
         this.root = query.from(getRootEntityType());
     }
 
-    protected abstract void initQuery();
+    protected abstract void initProjection();
 
-    public abstract JpaPredicateBuilder<E> predicateBuilder();
+    public abstract JpaPredicateBuilder<E> predicate();
 
     public JpaQuery<E, P, R> where(JpaPredicate predicate) {
         this.predicate = predicate;

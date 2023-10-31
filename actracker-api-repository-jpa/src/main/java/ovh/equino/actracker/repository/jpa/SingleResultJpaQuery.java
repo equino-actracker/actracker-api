@@ -12,7 +12,7 @@ public abstract class SingleResultJpaQuery<E, P> extends JpaQuery<E, P, Optional
 
     @Override
     public final Optional<P> execute() {
-        initQuery();
+        initProjection();
         if (predicate != null) {
             query.where(predicate.toRawPredicate());
         }

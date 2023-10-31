@@ -6,10 +6,11 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import ovh.equino.actracker.domain.user.User;
 
-import java.util.Set;
+import java.util.Collection;
 import java.util.UUID;
 
 import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -27,7 +28,7 @@ public abstract class JpaPredicateBuilder<E> {
         return () -> criteriaBuilder.equal(root.get("id"), id.toString());
     }
 
-    public JpaPredicate hasId(Set<UUID> ids) {
+    public JpaPredicate hasIdIn(Collection<UUID> ids) {
         if (isEmpty(ids)) {
             return noneMatch();
         }
@@ -35,6 +36,7 @@ public abstract class JpaPredicateBuilder<E> {
         CriteriaBuilder.In<Object> idIn = criteriaBuilder.in(id);
         ids.stream()
                 .map(UUID::toString)
+                .collect(toUnmodifiableSet())
                 .forEach(idIn::value);
         return () -> idIn;
     }
@@ -50,7 +52,7 @@ public abstract class JpaPredicateBuilder<E> {
         return () -> criteriaBuilder.isFalse(root.get("deleted"));
     }
 
-    public JpaPredicate isNotExcluded(Set<UUID> excludedIds) {
+    public JpaPredicate isNotExcluded(Collection<UUID> excludedIds) {
         if (isEmpty(excludedIds)) {
             return allMatch();
         }
@@ -58,6 +60,7 @@ public abstract class JpaPredicateBuilder<E> {
         CriteriaBuilder.In<Object> idIn = criteriaBuilder.in(id);
         excludedIds.stream()
                 .map(UUID::toString)
+                .collect(toUnmodifiableSet())
                 .forEach(idIn::value);
         return () -> criteriaBuilder.not(idIn);
     }
