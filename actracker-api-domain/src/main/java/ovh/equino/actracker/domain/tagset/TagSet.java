@@ -1,7 +1,6 @@
 package ovh.equino.actracker.domain.tagset;
 
 import ovh.equino.actracker.domain.Entity;
-import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
 import ovh.equino.actracker.domain.user.User;
@@ -80,15 +79,6 @@ public class TagSet implements Entity {
         ).execute();
     }
 
-    void updateTo(TagSetDto tagSet) {
-        Set<TagId> deletedAssignedTags = tagsExistenceVerifier.notExisting(this.tags);
-        this.name = tagSet.name();
-        this.tags.clear();
-        this.tags.addAll(toTagIds(tagSet));
-        this.validate();
-        this.tags.addAll(deletedAssignedTags);
-    }
-
     public static TagSet fromStorage(TagSetDto tagSet, TagsExistenceVerifier tagsExistenceVerifier) {
         return new TagSet(
                 new TagSetId(tagSet.id()),
@@ -108,32 +98,12 @@ public class TagSet implements Entity {
         return new TagSetDto(id.id(), creator.id(), name, tagIds, deleted);
     }
 
-    // TODO remove this and all unused methods
-    public TagSetDto forClient(User client) {
-        if (isNotAvailableFor(client)) {
-            throw new EntityNotFoundException(TagSet.class, this.id.id());
-        }
-        Set<UUID> tagIds = tagsExistenceVerifier.existing(tags).stream()
-                .map(TagId::id)
-                .collect(toUnmodifiableSet());
-
-        return new TagSetDto(id.id(), creator.id(), name, tagIds, deleted);
-    }
-
     public TagSetChangedNotification forChangeNotification() {
         Set<UUID> tagIds = tags.stream()
                 .map(TagId::id)
                 .collect(toUnmodifiableSet());
         TagSetDto dto = new TagSetDto(id.id(), creator.id(), name, tagIds, deleted);
         return new TagSetChangedNotification(dto);
-    }
-
-    boolean isAvailableFor(User user) {
-        return creator.equals(user);
-    }
-
-    boolean isNotAvailableFor(User user) {
-        return !isAvailableFor(user);
     }
 
     @Override
@@ -154,7 +124,8 @@ public class TagSet implements Entity {
     }
 
     private static List<TagId> toTagIds(TagSetDto tagSet) {
-        return requireNonNullElse(tagSet.tags(), new HashSet<UUID>()).stream()
+        return requireNonNullElse(tagSet.tags(), new HashSet<UUID>())
+                .stream()
                 .map(TagId::new)
                 .toList();
     }
