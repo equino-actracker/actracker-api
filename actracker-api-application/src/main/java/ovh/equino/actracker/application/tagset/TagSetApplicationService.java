@@ -78,9 +78,8 @@ public class TagSetApplicationService {
                 null
         );
         EntitySearchResult<TagSetDto> searchResult = tagSetSearchEngine.findTagSets(searchCriteria);
-        List<TagSetResult> resultForClient = searchResult.results().stream()
-                .map(tagSet -> TagSet.fromStorage(tagSet, tagsExistenceVerifier))
-                .map(tagSet -> tagSet.forClient(searchCriteria.searcher()))
+        List<TagSetResult> resultForClient = searchResult.results()
+                .stream()
                 .map(this::toTagSetResult)
                 .toList();
 
