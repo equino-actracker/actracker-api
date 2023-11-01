@@ -310,4 +310,9 @@ public class Activity implements Entity {
     public User creator() {
         return creator;
     }
+
+    // TODO think about extracting it to superclass
+    public ActivityId id() {
+        return this.id;
+    }
 }

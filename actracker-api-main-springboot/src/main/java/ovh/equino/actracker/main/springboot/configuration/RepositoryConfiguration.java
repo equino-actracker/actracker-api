@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
+import ovh.equino.actracker.domain.activity.ActivityDataSource;
 import ovh.equino.actracker.domain.activity.ActivityRepository;
 import ovh.equino.actracker.domain.dashboard.DashboardRepository;
 import ovh.equino.actracker.domain.tag.TagRepository;
@@ -32,7 +33,8 @@ import java.util.Properties;
                         TagSetRepository.class,
                         DashboardRepository.class,
 
-                        TagSetDataSource.class
+                        TagSetDataSource.class,
+                        ActivityDataSource.class
                 }
         )
 )
@@ -53,7 +55,7 @@ class RepositoryConfiguration {
     Properties hibernateProperties(@Qualifier("hibernateDialect") String hibernateDialect) {
         Properties hibernateProperties = new Properties();
         hibernateProperties.setProperty("hibernate.dialect", hibernateDialect);
-        hibernateProperties.setProperty("hibernate.show_sql", "false");
+        hibernateProperties.setProperty("hibernate.show_sql", "true");
         hibernateProperties.setProperty("hibernate.format_sql", "true");
         hibernateProperties.setProperty("hibernate.use_sql_comments", "false");
         return hibernateProperties;
