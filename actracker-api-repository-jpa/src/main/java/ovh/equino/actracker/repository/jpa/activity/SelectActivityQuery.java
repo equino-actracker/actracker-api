@@ -9,11 +9,11 @@ import ovh.equino.actracker.repository.jpa.JpaPredicate;
 import ovh.equino.actracker.repository.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.repository.jpa.SingleResultJpaQuery;
 
-class SelectActivityQuery extends SingleResultJpaQuery<ActivityEntity, ActivityProjection> {
+final class SelectActivityQuery extends SingleResultJpaQuery<ActivityEntity, ActivityProjection> {
 
     private final PredicateBuilder predicateBuilder;
 
-    protected SelectActivityQuery(EntityManager entityManager) {
+    SelectActivityQuery(EntityManager entityManager) {
         super(entityManager);
         this.predicateBuilder = new PredicateBuilder();
     }
