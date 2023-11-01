@@ -32,6 +32,34 @@ allprojects {
     task tearDownInfra(type: Task)
 }
 
+subprojects {
+    apply plugin: 'java-library'
+
+    sourceSets {
+        integrationTest {
+            java {
+                compileClasspath = main.output + test.output
+                runtimeClasspath = main.output + test.output
+                srcDir file('src/integration-test/java')
+            }
+            resources.srcDir file('src/integration-test/resources')
+        }
+    }
+
+    dependencies {
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.3'
+        testImplementation 'org.mockito:mockito-core:5.2.0'
+        testImplementation 'org.mockito:mockito-junit-jupiter:5.2.0'
+        testImplementation 'org.assertj:assertj-core:3.24.2'
+
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.3'
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+}
+
 dependencies {
     runtimeOnly project(':actracker-api-main-springboot')
 }
