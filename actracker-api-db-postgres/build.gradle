@@ -1,5 +1,4 @@
 plugins {
-    id 'java'
     id 'org.flywaydb.flyway' version '9.11.0'
     id 'com.palantir.docker-compose' version '0.34.0'
 }

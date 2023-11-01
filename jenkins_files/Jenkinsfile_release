@@ -35,12 +35,6 @@ pipeline {
             }
         }
 
-//        stage('DB schema migration') {
-//            steps {
-//                sh './gradlew --no-daemon --stacktrace :actracker-api-persistence-postgres:flywayMigrate :actracker-api-persistence-postgres:flywayInfo -PequinoDocker.remote -Pdeploy.environment=PROD'
-//            }
-//        }
-
         stage('Deploy') {
             steps {
                 sh './gradlew --no-daemon --stacktrace k8sResource'

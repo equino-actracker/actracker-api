@@ -28,6 +28,12 @@ pipeline {
             }
         }
 
+        stage('Integration Test') {
+            steps {
+                sh './gradlew --no-daemon --stacktrace integrationTest'
+            }
+        }
+
         stage('Publish') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'EquinoNexus', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
@@ -35,12 +41,6 @@ pipeline {
                 }
             }
         }
-
-//        stage('DB schema migration') {
-//            steps {
-//                sh './gradlew --no-daemon --stacktrace :actracker-api-persistence-postgres:flywayMigrate :actracker-api-persistence-postgres:flywayInfo -PequinoDocker.remote -Pdeploy.environment=DEV'
-//            }
-//        }
 
         stage('Build and push Docker') {
             steps {
