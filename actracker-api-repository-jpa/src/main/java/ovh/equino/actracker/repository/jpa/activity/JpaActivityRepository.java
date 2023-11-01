@@ -1,5 +1,6 @@
 package ovh.equino.actracker.repository.jpa.activity;
 
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaQuery;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
@@ -17,6 +18,10 @@ import java.util.UUID;
 import static java.util.Objects.isNull;
 
 class JpaActivityRepository extends JpaDAO implements ActivityRepository {
+
+    JpaActivityRepository(EntityManager entityManager) {
+        super(entityManager);
+    }
 
     private final ActivityMapper mapper = new ActivityMapper();
 

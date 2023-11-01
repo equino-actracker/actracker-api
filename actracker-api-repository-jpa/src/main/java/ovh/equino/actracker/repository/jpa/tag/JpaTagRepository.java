@@ -1,5 +1,6 @@
 package ovh.equino.actracker.repository.jpa.tag;
 
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaQuery;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
@@ -14,6 +15,10 @@ import java.util.Set;
 import java.util.UUID;
 
 class JpaTagRepository extends JpaDAO implements TagRepository {
+
+    JpaTagRepository(EntityManager entityManager) {
+        super(entityManager);
+    }
 
     private final TagMapper mapper = new TagMapper();
 

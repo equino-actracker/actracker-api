@@ -1,5 +1,6 @@
 package ovh.equino.actracker.repository.jpa.tagset;
 
+import jakarta.persistence.EntityManager;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.tagset.TagSetDataSource;
 import ovh.equino.actracker.domain.tagset.TagSetDto;
@@ -13,6 +14,10 @@ import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.*;
 
 class JpaTagSetDataSource extends JpaDAO implements TagSetDataSource {
+
+    JpaTagSetDataSource(EntityManager entityManager) {
+        super(entityManager);
+    }
 
     @Override
     public Optional<TagSetDto> find(TagSetId tagSetId, User searcher) {
