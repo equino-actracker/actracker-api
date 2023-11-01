@@ -55,11 +55,6 @@ class ActivityTest {
                 .thenReturn(emptySet());
     }
 
-    @Test
-    void failingTest() {
-        fail();
-    }
-
     @Nested
     @DisplayName("rename")
     class RenameTest {
