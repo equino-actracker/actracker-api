@@ -19,17 +19,12 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Build and test') {
             steps {
                 sh './gradlew --no-daemon --stacktrace clean build test'
                 script {
                     currentBuild.displayName = readFile file: 'build/ovh.equino.version/currentVersion'
                 }
-            }
-        }
-
-        stage('Integration Test') {
-            steps {
                 sh './gradlew --no-daemon --stacktrace integrationTest'
             }
         }
