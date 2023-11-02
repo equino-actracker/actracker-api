@@ -7,6 +7,7 @@ dependencies {
     implementation 'org.apache.commons:commons-collections4:4.4'
     implementation 'org.apache.commons:commons-lang3:3.12.0'
 
+    integrationTestImplementation 'org.assertj:assertj-core:3.24.2'
     // TODO should be moved to actracker-api-db-postgres {
     integrationTestImplementation "org.testcontainers:postgresql:1.19.1"
     integrationTestImplementation 'org.postgresql:postgresql:42.5.1'
