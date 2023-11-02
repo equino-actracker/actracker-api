@@ -28,13 +28,14 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Build and test') {
             steps {
                 sh 'git branch -m master'
                 sh './gradlew --no-daemon --stacktrace clean build test'
                 script {
                     currentBuild.displayName = readFile file: 'build/ovh.equino.version/currentVersion'
                 }
+//                sh './gradlew --no-daemon --stacktrace integrationTest'
             }
         }
 
@@ -45,12 +46,6 @@ pipeline {
                 }
             }
         }
-
-//        stage('DB schema migration') {
-//            steps {
-//                sh './gradlew --no-daemon --stacktrace :actracker-api-persistence-postgres:flywayMigrate :actracker-api-persistence-postgres:flywayInfo -PequinoDocker.remote -Pdeploy.environment=INT'
-//            }
-//        }
 
         stage('Build and push Docker') {
             steps {

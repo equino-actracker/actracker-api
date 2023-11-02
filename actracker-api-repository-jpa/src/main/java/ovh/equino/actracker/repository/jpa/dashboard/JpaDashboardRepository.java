@@ -1,5 +1,6 @@
 package ovh.equino.actracker.repository.jpa.dashboard;
 
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaQuery;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
@@ -12,6 +13,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 class JpaDashboardRepository extends JpaDAO implements DashboardRepository {
+
+    JpaDashboardRepository(EntityManager entityManager) {
+        super(entityManager);
+    }
 
     private final DashboardMapper mapper = new DashboardMapper();
 

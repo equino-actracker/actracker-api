@@ -7,6 +7,9 @@ import jakarta.transaction.Transactional;
 @Transactional
 public abstract class JpaDAO {
 
-    @PersistenceContext
-    protected EntityManager entityManager;
+    protected final EntityManager entityManager;
+
+    protected JpaDAO(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
 }

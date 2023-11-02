@@ -1,5 +1,6 @@
 package ovh.equino.actracker.repository.jpa.tenant;
 
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -11,6 +12,10 @@ import ovh.equino.actracker.repository.jpa.JpaDAO;
 import java.util.Optional;
 
 class JpaTenantRepository extends JpaDAO implements TenantRepository {
+
+    JpaTenantRepository(EntityManager entityManager) {
+        super(entityManager);
+    }
 
     private final TenantMapper tenantMapper = new TenantMapper();
 

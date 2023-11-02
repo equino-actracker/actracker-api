@@ -1,5 +1,6 @@
 package ovh.equino.actracker.repository.jpa.outbox;
 
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
@@ -14,6 +15,10 @@ import java.util.UUID;
 import static java.util.stream.Collectors.toList;
 
 class JpaNotificationsOutboxRepository extends JpaDAO implements NotificationsOutboxRepository {
+
+    JpaNotificationsOutboxRepository(EntityManager entityManager) {
+        super(entityManager);
+    }
 
     private final NotificationMapper notificationMapper = new NotificationMapper();
 

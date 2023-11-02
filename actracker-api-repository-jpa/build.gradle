@@ -1,7 +1,3 @@
-plugins {
-    id 'java'
-}
-
 dependencies {
     implementation project(':actracker-api-domain')
     implementation project(':actracker-api-notification-outbox')
@@ -10,4 +6,11 @@ dependencies {
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.0'
     implementation 'org.apache.commons:commons-collections4:4.4'
     implementation 'org.apache.commons:commons-lang3:3.12.0'
+
+    integrationTestImplementation 'org.assertj:assertj-core:3.24.2'
+    // TODO should be moved to actracker-api-db-postgres {
+    integrationTestImplementation "org.testcontainers:postgresql:1.19.1"
+    integrationTestImplementation 'org.postgresql:postgresql:42.5.1'
+    integrationTestImplementation 'org.flywaydb:flyway-core:9.11.0'
+    // }
 }
