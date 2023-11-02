@@ -10,6 +10,7 @@ import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tag.MetricDto;
 import ovh.equino.actracker.domain.tag.MetricType;
 import ovh.equino.actracker.domain.tag.TagDto;
+import ovh.equino.actracker.domain.tagset.TagSetDto;
 import ovh.equino.actracker.domain.tenant.TenantDto;
 import ovh.equino.actracker.domain.user.User;
 
@@ -71,6 +72,26 @@ public abstract class IntegrationTestBase {
                 randomUUID().toString(),
                 tagIds,
                 metricValues,
+                false
+        );
+    }
+
+    protected TagSetDto newTagSet(TenantDto creator) {
+
+        Set<TagDto> tags = Set.of(
+                newTag(creator),
+                newTag(creator)
+        );
+        Set<UUID> tagIds = tags
+                .stream()
+                .map(TagDto::id)
+                .collect(toUnmodifiableSet());
+
+        return new TagSetDto(
+                randomUUID(),
+                creator.id(),
+                randomString(),
+                tagIds,
                 false
         );
     }
