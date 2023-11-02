@@ -6,6 +6,10 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.MetricValue;
+import ovh.equino.actracker.domain.dashboard.Chart;
+import ovh.equino.actracker.domain.dashboard.ChartId;
+import ovh.equino.actracker.domain.dashboard.DashboardDto;
+import ovh.equino.actracker.domain.dashboard.GroupBy;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tag.MetricDto;
 import ovh.equino.actracker.domain.tag.MetricType;
@@ -16,10 +20,14 @@ import ovh.equino.actracker.domain.user.User;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static java.util.UUID.randomUUID;
-import static java.util.stream.Collectors.toUnmodifiableSet;
+import static ovh.equino.actracker.domain.dashboard.AnalysisMetric.TAG_DURATION;
+import static ovh.equino.actracker.domain.dashboard.AnalysisMetric.TAG_PERCENTAGE;
 
 public abstract class IntegrationTestBase {
 
@@ -48,58 +56,33 @@ public abstract class IntegrationTestBase {
     }
 
     protected ActivityDto newActivity(TenantDto creator) {
-
-        Set<TagDto> tags = Set.of(
-                newTag(creator),
-                newTag(creator)
-        );
-        Set<UUID> tagIds = tags
-                .stream()
-                .map(TagDto::id)
-                .collect(toUnmodifiableSet());
-        List<MetricValue> metricValues = tags
-                .stream()
-                .map(TagDto::metrics)
-                .flatMap(Collection::stream)
-                .map(metric -> new MetricValue(metric.id(), randomBigDecimal()))
-                .toList();
-
         return new ActivityDto(randomUUID(),
                 creator.id(),
                 randomUUID().toString(),
                 Instant.ofEpochSecond(1),
                 Instant.ofEpochSecond(2),
                 randomUUID().toString(),
-                tagIds,
-                metricValues,
+                Set.of(randomUUID(), randomUUID(), randomUUID()),
+                List.of(
+                        new MetricValue(randomUUID(), randomBigDecimal()),
+                        new MetricValue(randomUUID(), randomBigDecimal()),
+                        new MetricValue(randomUUID(), randomBigDecimal())
+                ),
                 false
         );
     }
 
     protected TagSetDto newTagSet(TenantDto creator) {
-
-        Set<TagDto> tags = Set.of(
-                newTag(creator),
-                newTag(creator)
-        );
-        Set<UUID> tagIds = tags
-                .stream()
-                .map(TagDto::id)
-                .collect(toUnmodifiableSet());
-
         return new TagSetDto(
                 randomUUID(),
                 creator.id(),
                 randomString(),
-                tagIds,
+                Set.of(randomUUID(), randomUUID(), randomUUID()),
                 false
         );
     }
 
     protected TagDto newTag(TenantDto creator) {
-        TenantDto grantee1 = new TenantDto(randomUUID(), randomString(), randomString());
-        TenantDto grantee2 = new TenantDto(randomUUID(), randomString(), randomString());
-
         return new TagDto(
                 randomUUID(),
                 creator.id(),
@@ -110,13 +93,44 @@ public abstract class IntegrationTestBase {
                         new MetricDto(randomUUID(), creator.id(), randomString(), MetricType.NUMERIC, false)
                 ),
                 List.of(
-                        new Share(new User(grantee1.id()), grantee1.username()),
-                        new Share(new User(grantee2.id()), grantee2.username())
+                        new Share(new User(randomUUID()), randomString()),
+                        new Share(new User(randomUUID()), randomString())
                 ),
                 false
         );
     }
 
+    protected DashboardDto newDashboard(TenantDto creator) {
+        Chart chart1 = new Chart(
+                new ChartId(randomUUID()),
+                randomString(),
+                GroupBy.SELF,
+                TAG_PERCENTAGE,
+                Set.of(randomUUID(), randomUUID(), randomUUID()),
+                false
+        );
+        Chart chart2 = new Chart(
+                new ChartId(randomUUID()),
+                randomString(),
+                GroupBy.DAY,
+                TAG_DURATION,
+                Set.of(randomUUID(), randomUUID(), randomUUID()),
+                false
+        );
+
+        return new DashboardDto(
+                randomUUID(),
+                creator.id(),
+                randomString(),
+                List.of(chart1, chart2),
+                List.of(
+                        new Share(new User(randomUUID()), randomString()),
+                        new Share(new User(randomUUID()), randomString()),
+                        new Share(new User(randomUUID()), randomString())
+                ),
+                false
+        );
+    }
 
     private Map<String, String> persistenceProperties() {
         Map<String, String> properties = new HashMap<>();

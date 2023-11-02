@@ -41,7 +41,7 @@ class TagSetRepositoryIntegrationTest extends IntegrationTestBase {
     }
 
     @Test
-    void shouldNotFindNotExistingTag() {
+    void shouldNotFindNotExistingTagSet() {
         inTransaction(entityManager, () -> {
             Optional<TagSetDto> foundTag = repository.findById(randomUUID());
             assertThat(foundTag).isEmpty();
