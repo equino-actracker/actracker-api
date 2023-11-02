@@ -15,10 +15,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ActivityRepositoryIntegrationTest extends IntegrationTestBase {
 
     private EntityManager entityManager = entityManager();
+    private JpaActivityRepository repository;
 
     @BeforeEach
     void setup() {
         this.entityManager = entityManager();
+        this.repository = new JpaActivityRepository(entityManager);
     }
 
     @Test
@@ -26,13 +28,11 @@ class ActivityRepositoryIntegrationTest extends IntegrationTestBase {
         TenantDto user = newUser();
         ActivityDto newActivity = newActivity(user);
 
-        JpaActivityRepository repository = new JpaActivityRepository(entityManager);
         inTransaction(entityManager, () -> {
-                    repository.add(newActivity);
-                    Optional<ActivityDto> foundActivity = repository.findById(newActivity.id());
-                    assertThat(foundActivity).get().usingRecursiveComparison().isEqualTo(newActivity);
-                }
-        );
+            repository.add(newActivity);
+            Optional<ActivityDto> foundActivity = repository.findById(newActivity.id());
+            assertThat(foundActivity).get().usingRecursiveComparison().isEqualTo(newActivity);
+        });
 
         inTransaction(entityManager, () -> {
             Optional<ActivityDto> foundActivity = repository.findById(newActivity.id());
@@ -42,7 +42,6 @@ class ActivityRepositoryIntegrationTest extends IntegrationTestBase {
 
     @Test
     void shouldNotFindNotExistingActivity() {
-        JpaActivityRepository repository = new JpaActivityRepository(entityManager);
         inTransaction(entityManager, () -> {
             Optional<ActivityDto> foundActivity = repository.findById(randomUUID());
             assertThat(foundActivity).isEmpty();
