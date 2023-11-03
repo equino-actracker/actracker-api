@@ -34,6 +34,12 @@ pipeline {
                 }
                 sh './gradlew --no-daemon --stacktrace integrationTest'
             }
+            withChecks('Unit Tests') {
+                junit '**/build/test/*.xml'
+            }
+            withChecks('Integration Tests') {
+                junit '**/build/integrationTest/*.xml'
+            }
         }
 
         stage('Deploy') {
