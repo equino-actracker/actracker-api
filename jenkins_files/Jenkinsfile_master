@@ -35,7 +35,7 @@ pipeline {
                 script {
                     currentBuild.displayName = readFile file: 'build/ovh.equino.version/currentVersion'
                 }
-//                sh './gradlew --no-daemon --stacktrace integrationTest'
+                sh './gradlew --no-daemon --stacktrace integrationTest'
             }
         }
 
