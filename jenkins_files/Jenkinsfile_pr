@@ -26,12 +26,12 @@ pipeline {
                     currentBuild.displayName = readFile file: 'build/ovh.equino.version/currentVersion'
                 }
                 sh './gradlew --no-daemon --stacktrace integrationTest'
+            }
 
-                post {
-                    always {
-                        junit '**/build/test-results/test/*.xml'
-                        junit '**/build/test-results/integrationTest/*.xml'
-                    }
+            post {
+                always {
+                    junit '**/build/test-results/test/*.xml'
+                    junit '**/build/test-results/integrationTest/*.xml'
                 }
             }
         }
