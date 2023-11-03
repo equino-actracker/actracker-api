@@ -36,9 +36,9 @@ pipeline {
                     currentBuild.displayName = readFile file: 'build/ovh.equino.version/currentVersion'
                 }
                 sh './gradlew --no-daemon --stacktrace integrationTest'
+                junit '**/build/test/*.xml'
+                junit '**/build/integrationTest/*.xml'
             }
-            junit '**/build/test/*.xml'
-            junit '**/build/integrationTest/*.xml'
         }
 
         stage('Publish') {
