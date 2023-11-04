@@ -18,14 +18,13 @@ pipeline {
         }
 
         stage('Build and test') {
-                steps {
-                    container('jdk') {
-                        sh './gradlew --no-daemon --stacktrace clean build test'
-                        script {
-                            currentBuild.displayName = readFile file: 'build/ovh.equino.version/currentVersion'
-                        }
-                        sh './gradlew --no-daemon --stacktrace integrationTest'
+            steps {
+                container('jdk') {
+                    sh './gradlew --no-daemon --stacktrace clean build test'
+                    script {
+                        currentBuild.displayName = readFile file: 'build/ovh.equino.version/currentVersion'
                     }
+                    sh './gradlew --no-daemon --stacktrace integrationTest'
                 }
             }
 
