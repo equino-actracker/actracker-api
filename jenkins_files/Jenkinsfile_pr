@@ -12,6 +12,7 @@ pipeline {
 
         stage('Check release readiness') {
             steps {
+                sh 'sleep 300'
                 container('jdk') {
                     sh 'git branch -m ${CHANGE_BRANCH}'
                     sh './gradlew --no-daemon --stacktrace verifyRelease'
