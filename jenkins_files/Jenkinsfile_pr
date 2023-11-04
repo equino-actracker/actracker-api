@@ -3,6 +3,10 @@ pipeline {
         label 'jdk17 && docker'
     }
 
+    tools {
+        jdk 'jdk17'
+    }
+
     options {
         lock resource: 'actracker-api_pr'
         buildDiscarder(logRotator(numToKeepStr: '10'))
