@@ -1,8 +1,6 @@
 pipeline {
-    agent any
-
-    tools {
-        jdk 'jdk17'
+    agent {
+        label: jdk17 && docker'
     }
 
     options {
@@ -20,12 +18,14 @@ pipeline {
         }
 
         stage('Build and test') {
-            steps {
-                sh './gradlew --no-daemon --stacktrace clean build test'
-                script {
-                    currentBuild.displayName = readFile file: 'build/ovh.equino.version/currentVersion'
+            container('jdk') {
+                steps {
+                    sh './gradlew --no-daemon --stacktrace clean build test'
+                    script {
+                        currentBuild.displayName = readFile file: 'build/ovh.equino.version/currentVersion'
+                    }
+                    sh './gradlew --no-daemon --stacktrace integrationTest'
                 }
-                sh './gradlew --no-daemon --stacktrace integrationTest'
             }
 
             post {
@@ -36,25 +36,31 @@ pipeline {
         }
 
         stage('Publish') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'EquinoNexus', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    sh './gradlew --no-daemon --stacktrace publish -x build -x jar -PequinoNexus.username=${USERNAME} -PequinoNexus.password=${PASSWORD}'
+            container('jdk') {
+                steps {
+                    withCredentials([usernamePassword(credentialsId: 'EquinoNexus', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                        sh './gradlew --no-daemon --stacktrace publish -x build -x jar -PequinoNexus.username=${USERNAME} -PequinoNexus.password=${PASSWORD}'
+                    }
                 }
             }
         }
 
         stage('Build and push Docker') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'EquinoDockerRegistry', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    sh './gradlew --no-daemon --stacktrace k8sBuild k8sPush -Djkube.docker.username=${USERNAME} -Djkube.docker.password=${PASSWORD}'
+            container('jdk') {
+                steps {
+                    withCredentials([usernamePassword(credentialsId: 'EquinoDockerRegistry', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                        sh './gradlew --no-daemon --stacktrace k8sBuild k8sPush -Djkube.docker.username=${USERNAME} -Djkube.docker.password=${PASSWORD}'
+                    }
                 }
             }
         }
 
         stage('Deploy') {
-            steps {
-                withKubeConfig([credentialsId: 'MadritKubeConfig', namespace: 'equino-dev']) {
-                    sh './gradlew --no-daemon --stacktrace k8sResource k8sApply -Prelease.ignoreUncommittedChanges'
+            container('jdk') {
+                steps {
+                    withKubeConfig([credentialsId: 'MadritKubeConfig', namespace: 'equino-dev']) {
+                        sh './gradlew --no-daemon --stacktrace k8sResource k8sApply -Prelease.ignoreUncommittedChanges'
+                    }
                 }
             }
         }
