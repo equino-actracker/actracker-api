@@ -11,9 +11,11 @@ pipeline {
     stages {
 
         stage('Check release readiness') {
-            steps {
-                sh 'git branch -m ${CHANGE_BRANCH}'
-                sh './gradlew --no-daemon --stacktrace verifyRelease'
+            container('jdk') {
+                steps {
+                    sh 'git branch -m ${CHANGE_BRANCH}'
+                    sh './gradlew --no-daemon --stacktrace verifyRelease'
+                }
             }
         }
 
