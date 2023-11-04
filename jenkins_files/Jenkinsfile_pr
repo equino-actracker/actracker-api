@@ -18,13 +18,14 @@ pipeline {
         }
 
         stage('Build and test') {
-            container('jdk') {
                 steps {
-                    sh './gradlew --no-daemon --stacktrace clean build test'
-                    script {
-                        currentBuild.displayName = readFile file: 'build/ovh.equino.version/currentVersion'
+                    container('jdk') {
+                        sh './gradlew --no-daemon --stacktrace clean build test'
+                        script {
+                            currentBuild.displayName = readFile file: 'build/ovh.equino.version/currentVersion'
+                        }
+                        sh './gradlew --no-daemon --stacktrace integrationTest'
                     }
-                    sh './gradlew --no-daemon --stacktrace integrationTest'
                 }
             }
 
@@ -36,8 +37,8 @@ pipeline {
         }
 
         stage('Publish') {
-            container('jdk') {
-                steps {
+            steps {
+                container('jdk') {
                     withCredentials([usernamePassword(credentialsId: 'EquinoNexus', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                         sh './gradlew --no-daemon --stacktrace publish -x build -x jar -PequinoNexus.username=${USERNAME} -PequinoNexus.password=${PASSWORD}'
                     }
@@ -46,8 +47,8 @@ pipeline {
         }
 
         stage('Build and push Docker') {
-            container('jdk') {
-                steps {
+            steps {
+                container('jdk') {
                     withCredentials([usernamePassword(credentialsId: 'EquinoDockerRegistry', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                         sh './gradlew --no-daemon --stacktrace k8sBuild k8sPush -Djkube.docker.username=${USERNAME} -Djkube.docker.password=${PASSWORD}'
                     }
@@ -56,8 +57,8 @@ pipeline {
         }
 
         stage('Deploy') {
-            container('jdk') {
-                steps {
+            steps {
+                container('jdk') {
                     withKubeConfig([credentialsId: 'MadritKubeConfig', namespace: 'equino-dev']) {
                         sh './gradlew --no-daemon --stacktrace k8sResource k8sApply -Prelease.ignoreUncommittedChanges'
                     }
