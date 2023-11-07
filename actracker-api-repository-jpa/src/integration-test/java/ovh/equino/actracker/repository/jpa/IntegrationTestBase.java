@@ -11,10 +11,6 @@ import ovh.equino.actracker.domain.dashboard.ChartId;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
 import ovh.equino.actracker.domain.dashboard.GroupBy;
 import ovh.equino.actracker.domain.share.Share;
-import ovh.equino.actracker.domain.tag.MetricDto;
-import ovh.equino.actracker.domain.tag.MetricType;
-import ovh.equino.actracker.domain.tag.TagDto;
-import ovh.equino.actracker.domain.tagset.TagSetDto;
 import ovh.equino.actracker.domain.tenant.TenantDto;
 import ovh.equino.actracker.domain.user.User;
 
@@ -51,8 +47,8 @@ public abstract class IntegrationTestBase {
         entityManager.getTransaction().commit();
     }
 
-    protected TenantDto newUser() {
-        return new TenantDto(randomUUID(), randomString(), randomString());
+    protected static TenantBuilder newUser() {
+        return new TenantBuilder();
     }
 
     protected ActivityDto newActivity(TenantDto creator) {
@@ -72,32 +68,12 @@ public abstract class IntegrationTestBase {
         );
     }
 
-    protected TagSetDto newTagSet(TenantDto creator) {
-        return new TagSetDto(
-                randomUUID(),
-                creator.id(),
-                randomString(),
-                Set.of(randomUUID(), randomUUID(), randomUUID()),
-                false
-        );
+    protected static TagSetBuilder newTagSet(TenantDto creator) {
+        return new TagSetBuilder(creator);
     }
 
-    protected TagDto newTag(TenantDto creator) {
-        return new TagDto(
-                randomUUID(),
-                creator.id(),
-                randomString(),
-                List.of(
-                        new MetricDto(randomUUID(), creator.id(), randomString(), MetricType.NUMERIC, false),
-                        new MetricDto(randomUUID(), creator.id(), randomString(), MetricType.NUMERIC, false),
-                        new MetricDto(randomUUID(), creator.id(), randomString(), MetricType.NUMERIC, false)
-                ),
-                List.of(
-                        new Share(new User(randomUUID()), randomString()),
-                        new Share(new User(randomUUID()), randomString())
-                ),
-                false
-        );
+    protected static TagBuilder newTag(TenantDto creator) {
+        return new TagBuilder(creator);
     }
 
     protected DashboardDto newDashboard(TenantDto creator) {

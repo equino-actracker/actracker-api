@@ -25,7 +25,7 @@ class ActivityRepositoryIntegrationTest extends IntegrationTestBase {
 
     @Test
     void shouldAddAndFindActivity() {
-        TenantDto user = newUser();
+        TenantDto user = newUser().build();
         ActivityDto newActivity = newActivity(user);
 
         inTransaction(entityManager, () -> {
