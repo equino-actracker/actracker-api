@@ -2,6 +2,7 @@ package ovh.equino.actracker.repository.jpa;
 
 import org.flywaydb.core.Flyway;
 import org.testcontainers.containers.PostgreSQLContainer;
+import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tagset.TagSetDto;
 import ovh.equino.actracker.domain.tenant.TenantDto;
@@ -11,6 +12,8 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.UUID;
+
+import static java.util.UUID.randomUUID;
 
 public final class IntegrationTestPostgres implements IntegrationTestRelationalDataBase {
 
@@ -54,6 +57,21 @@ public final class IntegrationTestPostgres implements IntegrationTestRelationalD
         preparedStatement.setString(3, tag.name());
         preparedStatement.setBoolean(4, tag.deleted());
         preparedStatement.execute();
+        addAssociatedShares(tag);
+    }
+
+    private void addAssociatedShares(TagDto tag) throws SQLException {
+        Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
+        for (Share share : tag.shares()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "insert into tag_share (id, tag_id, grantee_id, grantee_name) values (?, ?, ?, ?)"
+            );
+            preparedStatement.setString(1, randomUUID().toString());
+            preparedStatement.setString(2, tag.id().toString());
+            preparedStatement.setString(3, share.grantee().id().toString());
+            preparedStatement.setString(4, share.granteeName());
+            preparedStatement.execute();
+        }
     }
 
     @Override

@@ -2,11 +2,14 @@ package ovh.equino.actracker.repository.jpa.tagset;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Subquery;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaPredicate;
 import ovh.equino.actracker.repository.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.repository.jpa.JpaSortBuilder;
 import ovh.equino.actracker.repository.jpa.MultiResultJpaQuery;
+import ovh.equino.actracker.repository.jpa.tag.TagEntity;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -82,8 +85,24 @@ final class SelectTagSetJoinTagQuery extends MultiResultJpaQuery<TagSetEntity, T
         public JpaPredicate isAccessibleFor(User user) {
             return and(
                     super.isAccessibleFor(user),
-                    () -> criteriaBuilder.equal(tag.get("creatorId"), user.id().toString())
+                    isTagAccessibleFor(user)
             );
+        }
+
+        private JpaPredicate isTagAccessibleFor(User user) {
+            return or(
+                    () -> criteriaBuilder.equal(tag.get("creatorId"), user.id().toString()),
+                    isTagSharedWith(user)
+            );
+        }
+
+        private JpaPredicate isTagSharedWith(User user) {
+            Join<?, ?> shares = tag.join("shares", JoinType.LEFT);
+            Subquery<Long> subQuery = query.subquery(Long.class);
+            subQuery.select(criteriaBuilder.literal(1L))
+                    .where(criteriaBuilder.equal(shares.get("granteeId"), user.id().toString()))
+                    .from(TagEntity.class);
+            return () -> criteriaBuilder.exists(subQuery);
         }
 
         public JpaPredicate hasTagSetId(UUID tagSetId) {
