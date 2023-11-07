@@ -31,7 +31,7 @@ public final class TagSetBuilder {
                 newTagSet.creatorId(),
                 newTagSet.name(),
                 newTagSet.tags(),
-                newTagSet.deleted()
+                true
         );
 
         return this;

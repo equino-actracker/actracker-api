@@ -14,6 +14,7 @@ import ovh.equino.actracker.domain.tenant.TenantDto;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.IntegrationTestBase;
 
+import java.sql.SQLException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -50,21 +51,31 @@ class TagSetDataSourceIntegrationTest extends IntegrationTestBase {
     }
 
     @BeforeAll
-    static void setUp() {
+    static void setUp() throws SQLException {
         TenantDto searcherTenant = newUser().build();
+        DATABASE.addUser(searcherTenant);
         TenantDto sharingUser = newUser().build();
+        DATABASE.addUser(sharingUser);
+
         accessibleOwnTag1 = newTag(searcherTenant).build();
+        DATABASE.addTag(accessibleOwnTag1);
         accessibleOwnTag2 = newTag(searcherTenant).build();
+        DATABASE.addTag(accessibleOwnTag2);
         accessibleSharedTag = newTag(sharingUser).sharedWith(searcherTenant).build();
+        DATABASE.addTag(accessibleSharedTag);
         inaccessibleOwnDeletedTag = newTag(searcherTenant).deleted().build();
+        DATABASE.addTag(inaccessibleOwnDeletedTag);
         inaccessibleSharedDeletedTag = newTag(sharingUser).sharedWith(searcherTenant).deleted().build();
+        DATABASE.addTag(inaccessibleSharedDeletedTag);
         inaccessibleNotSharedTag = newTag(sharingUser).build();
+        DATABASE.addTag(inaccessibleNotSharedTag);
 
         accessibleOwnTagSet1 = newTagSet(searcherTenant)
                 .withTags(
                         accessibleOwnTag1,
                         accessibleSharedTag
                 ).build();
+        DATABASE.addTagSet(accessibleOwnTagSet1);
         accessibleOwnTagSet2 = newTagSet(searcherTenant)
                 .withTags(
                         accessibleOwnTag1,
@@ -74,6 +85,7 @@ class TagSetDataSourceIntegrationTest extends IntegrationTestBase {
                         inaccessibleNotSharedTag
                 )
                 .build();
+        DATABASE.addTagSet(accessibleOwnTagSet2);
         accessibleOwnTagSet3 = newTagSet(searcherTenant)
                 .withTags(
                         inaccessibleOwnDeletedTag,
@@ -81,9 +93,11 @@ class TagSetDataSourceIntegrationTest extends IntegrationTestBase {
                         inaccessibleNotSharedTag
                 )
                 .build();
+        DATABASE.addTagSet(accessibleOwnTagSet3);
         accessibleOwnTagSet4 = newTagSet(searcherTenant)
                 .withTags()
                 .build();
+        DATABASE.addTagSet(accessibleOwnTagSet4);
         inaccessibleOwnDeletedTagSet = newTagSet(searcherTenant)
                 .deleted()
                 .withTags(
@@ -93,6 +107,7 @@ class TagSetDataSourceIntegrationTest extends IntegrationTestBase {
                         inaccessibleNotSharedTag
                 )
                 .build();
+        DATABASE.addTagSet(inaccessibleOwnDeletedTagSet);
         inaccessibleForeignTagSet = newTagSet(sharingUser)
                 .withTags(
                         accessibleOwnTag1,
@@ -101,6 +116,7 @@ class TagSetDataSourceIntegrationTest extends IntegrationTestBase {
                         inaccessibleNotSharedTag
                 )
                 .build();
+        DATABASE.addTagSet(inaccessibleForeignTagSet);
 
         searcher = new User(searcherTenant.id());
     }
@@ -110,7 +126,9 @@ class TagSetDataSourceIntegrationTest extends IntegrationTestBase {
     void shouldFindAccessibleTagSet(TagSetId tagSetId, TagSetDto expectedTagSet) {
         inTransaction(entityManager, () -> {
             Optional<TagSetDto> tagSetDto = dataSource.find(tagSetId, searcher);
-            assertThat(tagSetDto).usingRecursiveComparison().isEqualTo(expectedTagSet);
+            assertThat(tagSetDto).isPresent();
+            assertThat(tagSetDto.get()).usingRecursiveComparison().ignoringFields("tags").isEqualTo(expectedTagSet);
+            assertThat(tagSetDto.get().tags()).containsExactlyInAnyOrderElementsOf(expectedTagSet.tags());
         });
     }
 
@@ -150,6 +168,14 @@ class TagSetDataSourceIntegrationTest extends IntegrationTestBase {
                                 accessibleOwnTagSet3.id(),
                                 accessibleOwnTagSet3.creatorId(),
                                 accessibleOwnTagSet3.name(),
+                                emptySet(),
+                                accessibleOwnTagSet4.deleted()
+                        )
+                ),
+                Arguments.of(new TagSetId(accessibleOwnTagSet4.id()), new TagSetDto(
+                                accessibleOwnTagSet4.id(),
+                                accessibleOwnTagSet4.creatorId(),
+                                accessibleOwnTagSet4.name(),
                                 emptySet(),
                                 accessibleOwnTagSet4.deleted()
                         )

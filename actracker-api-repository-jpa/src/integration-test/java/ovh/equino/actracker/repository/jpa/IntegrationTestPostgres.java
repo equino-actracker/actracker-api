@@ -2,12 +2,15 @@ package ovh.equino.actracker.repository.jpa;
 
 import org.flywaydb.core.Flyway;
 import org.testcontainers.containers.PostgreSQLContainer;
+import ovh.equino.actracker.domain.tag.TagDto;
+import ovh.equino.actracker.domain.tagset.TagSetDto;
 import ovh.equino.actracker.domain.tenant.TenantDto;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.UUID;
 
 public final class IntegrationTestPostgres implements IntegrationTestRelationalDataBase {
 
@@ -38,6 +41,46 @@ public final class IntegrationTestPostgres implements IntegrationTestRelationalD
         preparedStatement.setString(2, user.username());
         preparedStatement.setString(3, user.password());
         preparedStatement.execute();
+    }
+
+    @Override
+    public void addTag(TagDto tag) throws SQLException {
+        Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
+        PreparedStatement preparedStatement = connection.prepareStatement(
+                "insert into tag (id, creator_id, name, deleted) values (?, ?, ?, ?);"
+        );
+        preparedStatement.setString(1, tag.id().toString());
+        preparedStatement.setString(2, tag.creatorId().toString());
+        preparedStatement.setString(3, tag.name());
+        preparedStatement.setBoolean(4, tag.deleted());
+        preparedStatement.execute();
+    }
+
+    @Override
+    public void addTagSet(TagSetDto tagSet) throws SQLException {
+        Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
+        PreparedStatement preparedStatement = connection.prepareStatement(
+                "insert into tag_set(id, creator_id, name, deleted) values (?, ?, ?, ?)"
+        );
+        preparedStatement.setString(1, tagSet.id().toString());
+        preparedStatement.setString(2, tagSet.creatorId().toString());
+        preparedStatement.setString(3, tagSet.name());
+        preparedStatement.setBoolean(4, tagSet.deleted());
+        preparedStatement.execute();
+        addAssociatedTags(tagSet);
+    }
+
+    private void addAssociatedTags(TagSetDto tagSet) throws SQLException {
+        Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
+
+        for (UUID tagId : tagSet.tags()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "insert into tag_set_tag (tag_set_id, tag_id) values (?, ?);"
+            );
+            preparedStatement.setString(1, tagSet.id().toString());
+            preparedStatement.setString(2, tagId.toString());
+            preparedStatement.execute();
+        }
     }
 
     @Override
