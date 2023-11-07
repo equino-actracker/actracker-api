@@ -47,8 +47,8 @@ public abstract class IntegrationTestBase {
         entityManager.getTransaction().commit();
     }
 
-    protected TenantDto newUser() {
-        return new TenantDto(randomUUID(), randomString(), randomString());
+    protected static TenantBuilder newUser() {
+        return new TenantBuilder();
     }
 
     protected ActivityDto newActivity(TenantDto creator) {

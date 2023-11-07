@@ -1,6 +1,5 @@
 package ovh.equino.actracker.repository.jpa;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tag.MetricDto;
 import ovh.equino.actracker.domain.tag.MetricType;
@@ -12,6 +11,7 @@ import java.util.List;
 
 import static java.util.Arrays.stream;
 import static java.util.UUID.randomUUID;
+import static ovh.equino.actracker.repository.jpa.TestUtil.randomString;
 
 public final class TagBuilder {
 
@@ -69,12 +69,5 @@ public final class TagBuilder {
 
     public TagDto build() {
         return newTag;
-    }
-
-    private static String randomString() {
-        int length = 10;
-        boolean useLetters = true;
-        boolean useNumbers = false;
-        return RandomStringUtils.random(length, useLetters, useNumbers);
     }
 }

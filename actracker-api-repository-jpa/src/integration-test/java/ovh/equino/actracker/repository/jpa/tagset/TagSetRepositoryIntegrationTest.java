@@ -25,7 +25,7 @@ class TagSetRepositoryIntegrationTest extends IntegrationTestBase {
 
     @Test
     void shouldAddAndFindTagSet() {
-        TenantDto user = newUser();
+        TenantDto user = newUser().build();
         TagSetDto newTagSet = newTagSet(user).build();
 
         inTransaction(entityManager, () -> {

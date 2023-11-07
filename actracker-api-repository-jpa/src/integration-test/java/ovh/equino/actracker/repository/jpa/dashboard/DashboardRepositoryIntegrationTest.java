@@ -25,7 +25,7 @@ class DashboardRepositoryIntegrationTest extends IntegrationTestBase {
 
     @Test
     void shouldAddAndFindDashboard() {
-        TenantDto user = newUser();
+        TenantDto user = newUser().build();
         DashboardDto newDashboard = newDashboard(user);
 
         inTransaction(entityManager, () -> {
