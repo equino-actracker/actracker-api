@@ -1,6 +1,5 @@
 package ovh.equino.actracker.repository.jpa.tagset;
 
-import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,7 +12,7 @@ import ovh.equino.actracker.domain.tagset.TagSetDto;
 import ovh.equino.actracker.domain.tagset.TagSetId;
 import ovh.equino.actracker.domain.tenant.TenantDto;
 import ovh.equino.actracker.domain.user.User;
-import ovh.equino.actracker.repository.jpa.IntegrationTestBase;
+import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -25,7 +24,7 @@ import static java.util.Collections.emptySet;
 import static java.util.Comparator.comparing;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class TagSetDataSourceIntegrationTest extends IntegrationTestBase {
+class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
 
     private static TagDto accessibleOwnTag1;
     private static TagDto accessibleOwnTag2;

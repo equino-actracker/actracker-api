@@ -4,14 +4,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ovh.equino.actracker.domain.tagset.TagSetDto;
 import ovh.equino.actracker.domain.tenant.TenantDto;
-import ovh.equino.actracker.repository.jpa.IntegrationTestBase;
+import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
 
 import java.util.Optional;
 
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class TagSetRepositoryIntegrationTest extends IntegrationTestBase {
+class JpaTagSetRepositoryIntegrationTest extends JpaIntegrationTest {
 
     private JpaTagSetRepository repository;
 

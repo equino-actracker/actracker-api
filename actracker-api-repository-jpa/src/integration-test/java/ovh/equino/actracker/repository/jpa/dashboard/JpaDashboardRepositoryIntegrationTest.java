@@ -4,14 +4,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
 import ovh.equino.actracker.domain.tenant.TenantDto;
-import ovh.equino.actracker.repository.jpa.IntegrationTestBase;
+import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
 
 import java.util.Optional;
 
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class DashboardRepositoryIntegrationTest extends IntegrationTestBase {
+class JpaDashboardRepositoryIntegrationTest extends JpaIntegrationTest {
 
     private JpaDashboardRepository repository;
 

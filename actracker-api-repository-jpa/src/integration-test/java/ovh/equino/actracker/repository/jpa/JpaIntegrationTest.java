@@ -8,7 +8,7 @@ import ovh.equino.actracker.domain.tenant.TenantDto;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class IntegrationTestBase {
+public abstract class JpaIntegrationTest {
 
     protected static final int LARGE_PAGE_SIZE = 1000;
     protected static final String FIRST_PAGE = "";
@@ -16,7 +16,7 @@ public abstract class IntegrationTestBase {
     protected static final IntegrationTestRelationalDataBase DATABASE = new IntegrationTestPostgres();
     protected final EntityManager entityManager;
 
-    protected IntegrationTestBase() {
+    protected JpaIntegrationTest() {
         EntityManagerFactory entityManagerFactory = new HibernatePersistenceProvider()
                 .createContainerEntityManagerFactory(
                         new PersistenceUnitInfo(),
