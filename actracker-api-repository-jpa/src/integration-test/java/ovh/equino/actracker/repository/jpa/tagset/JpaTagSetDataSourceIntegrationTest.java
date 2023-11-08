@@ -52,29 +52,22 @@ class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
     @BeforeAll
     static void setUp() throws SQLException {
         TenantDto searcherTenant = newUser().build();
-        DATABASE.addUser(searcherTenant);
         TenantDto sharingUser = newUser().build();
-        DATABASE.addUser(sharingUser);
+        DATABASE.addUsers(searcherTenant, sharingUser);
 
         accessibleOwnTag1 = newTag(searcherTenant).build();
-        DATABASE.addTag(accessibleOwnTag1);
         accessibleOwnTag2 = newTag(searcherTenant).build();
-        DATABASE.addTag(accessibleOwnTag2);
         accessibleSharedTag = newTag(sharingUser).sharedWith(searcherTenant).build();
-        DATABASE.addTag(accessibleSharedTag);
         inaccessibleOwnDeletedTag = newTag(searcherTenant).deleted().build();
-        DATABASE.addTag(inaccessibleOwnDeletedTag);
         inaccessibleSharedDeletedTag = newTag(sharingUser).sharedWith(searcherTenant).deleted().build();
-        DATABASE.addTag(inaccessibleSharedDeletedTag);
         inaccessibleNotSharedTag = newTag(sharingUser).build();
-        DATABASE.addTag(inaccessibleNotSharedTag);
+        DATABASE.addTags(accessibleOwnTag1, accessibleOwnTag2, accessibleSharedTag, inaccessibleOwnDeletedTag, inaccessibleSharedDeletedTag, inaccessibleNotSharedTag);
 
         accessibleOwnTagSet1 = newTagSet(searcherTenant)
                 .withTags(
                         accessibleOwnTag1,
                         accessibleSharedTag
                 ).build();
-        DATABASE.addTagSet(accessibleOwnTagSet1);
         accessibleOwnTagSet2 = newTagSet(searcherTenant)
                 .withTags(
                         accessibleOwnTag1,
@@ -84,7 +77,6 @@ class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
                         inaccessibleNotSharedTag
                 )
                 .build();
-        DATABASE.addTagSet(accessibleOwnTagSet2);
         accessibleOwnTagSet3 = newTagSet(searcherTenant)
                 .withTags(
                         inaccessibleOwnDeletedTag,
@@ -92,11 +84,9 @@ class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
                         inaccessibleNotSharedTag
                 )
                 .build();
-        DATABASE.addTagSet(accessibleOwnTagSet3);
         accessibleOwnTagSet4 = newTagSet(searcherTenant)
                 .withTags()
                 .build();
-        DATABASE.addTagSet(accessibleOwnTagSet4);
         inaccessibleOwnDeletedTagSet = newTagSet(searcherTenant)
                 .deleted()
                 .withTags(
@@ -106,7 +96,6 @@ class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
                         inaccessibleNotSharedTag
                 )
                 .build();
-        DATABASE.addTagSet(inaccessibleOwnDeletedTagSet);
         inaccessibleForeignTagSet = newTagSet(sharingUser)
                 .withTags(
                         accessibleOwnTag1,
@@ -115,7 +104,7 @@ class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
                         inaccessibleNotSharedTag
                 )
                 .build();
-        DATABASE.addTagSet(inaccessibleForeignTagSet);
+        DATABASE.addTagSets(accessibleOwnTagSet1, accessibleOwnTagSet2, accessibleOwnTagSet3, accessibleOwnTagSet4, inaccessibleOwnDeletedTagSet, inaccessibleForeignTagSet);
 
         searcher = new User(searcherTenant.id());
     }

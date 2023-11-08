@@ -35,29 +35,33 @@ public final class IntegrationTestPostgres implements IntegrationTestRelationalD
     }
 
     @Override
-    public void addUser(TenantDto user) throws SQLException {
+    public void addUsers(TenantDto... users) throws SQLException {
         Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
-        PreparedStatement preparedStatement = connection.prepareStatement(
-                "insert into tenant (id, username, password) values (?, ?, ?);"
-        );
-        preparedStatement.setString(1, user.id().toString());
-        preparedStatement.setString(2, user.username());
-        preparedStatement.setString(3, user.password());
-        preparedStatement.execute();
+        for (TenantDto user : users) {
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "insert into tenant (id, username, password) values (?, ?, ?);"
+            );
+            preparedStatement.setString(1, user.id().toString());
+            preparedStatement.setString(2, user.username());
+            preparedStatement.setString(3, user.password());
+            preparedStatement.execute();
+        }
     }
 
     @Override
-    public void addTag(TagDto tag) throws SQLException {
+    public void addTags(TagDto... tags) throws SQLException {
         Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
-        PreparedStatement preparedStatement = connection.prepareStatement(
-                "insert into tag (id, creator_id, name, deleted) values (?, ?, ?, ?);"
-        );
-        preparedStatement.setString(1, tag.id().toString());
-        preparedStatement.setString(2, tag.creatorId().toString());
-        preparedStatement.setString(3, tag.name());
-        preparedStatement.setBoolean(4, tag.deleted());
-        preparedStatement.execute();
-        addAssociatedShares(tag);
+        for (TagDto tag : tags) {
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "insert into tag (id, creator_id, name, deleted) values (?, ?, ?, ?);"
+            );
+            preparedStatement.setString(1, tag.id().toString());
+            preparedStatement.setString(2, tag.creatorId().toString());
+            preparedStatement.setString(3, tag.name());
+            preparedStatement.setBoolean(4, tag.deleted());
+            preparedStatement.execute();
+            addAssociatedShares(tag);
+        }
     }
 
     private void addAssociatedShares(TagDto tag) throws SQLException {
@@ -75,17 +79,19 @@ public final class IntegrationTestPostgres implements IntegrationTestRelationalD
     }
 
     @Override
-    public void addTagSet(TagSetDto tagSet) throws SQLException {
+    public void addTagSets(TagSetDto... tagSets) throws SQLException {
         Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
-        PreparedStatement preparedStatement = connection.prepareStatement(
-                "insert into tag_set(id, creator_id, name, deleted) values (?, ?, ?, ?)"
-        );
-        preparedStatement.setString(1, tagSet.id().toString());
-        preparedStatement.setString(2, tagSet.creatorId().toString());
-        preparedStatement.setString(3, tagSet.name());
-        preparedStatement.setBoolean(4, tagSet.deleted());
-        preparedStatement.execute();
-        addAssociatedTags(tagSet);
+        for (TagSetDto tagSet : tagSets) {
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "insert into tag_set(id, creator_id, name, deleted) values (?, ?, ?, ?)"
+            );
+            preparedStatement.setString(1, tagSet.id().toString());
+            preparedStatement.setString(2, tagSet.creatorId().toString());
+            preparedStatement.setString(3, tagSet.name());
+            preparedStatement.setBoolean(4, tagSet.deleted());
+            preparedStatement.execute();
+            addAssociatedTags(tagSet);
+        }
     }
 
     private void addAssociatedTags(TagSetDto tagSet) throws SQLException {

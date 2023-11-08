@@ -16,9 +16,9 @@ public interface IntegrationTestRelationalDataBase {
 
     String driverClassName();
 
-    void addUser(TenantDto user) throws SQLException;
+    void addUsers(TenantDto... users) throws SQLException;
 
-    void addTag(TagDto tag) throws SQLException;
+    void addTags(TagDto... tags) throws SQLException;
 
-    void addTagSet(TagSetDto tagSet) throws SQLException;
+    void addTagSets(TagSetDto... tagSets) throws SQLException;
 }
