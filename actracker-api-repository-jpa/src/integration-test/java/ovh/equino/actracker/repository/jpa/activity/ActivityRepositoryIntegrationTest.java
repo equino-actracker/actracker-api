@@ -23,7 +23,7 @@ class ActivityRepositoryIntegrationTest extends IntegrationTestBase {
     @Test
     void shouldAddAndFindActivity() {
         TenantDto user = newUser().build();
-        ActivityDto newActivity = newActivity(user);
+        ActivityDto newActivity = newActivity(user).build();
 
         inTransaction(() -> {
             repository.add(newActivity);
