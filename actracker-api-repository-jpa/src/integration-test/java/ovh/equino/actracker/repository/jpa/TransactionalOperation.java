@@ -1,7 +1,7 @@
 package ovh.equino.actracker.repository.jpa;
 
 @FunctionalInterface
-public interface Execution {
+public interface TransactionalOperation {
 
-    void call();
+    void execute();
 }

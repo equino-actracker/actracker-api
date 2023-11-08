@@ -25,9 +25,9 @@ public abstract class JpaIntegrationTest {
         this.entityManager = entityManagerFactory.createEntityManager();
     }
 
-    protected void inTransaction(Execution execution) {
+    protected void inTransaction(TransactionalOperation transactionalOperation) {
         entityManager.getTransaction().begin();
-        execution.call();
+        transactionalOperation.execute();
         entityManager.getTransaction().commit();
     }
 
