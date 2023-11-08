@@ -27,6 +27,9 @@ import static ovh.equino.actracker.domain.dashboard.AnalysisMetric.TAG_PERCENTAG
 
 public abstract class IntegrationTestBase {
 
+    protected static final int LARGE_PAGE_SIZE = 1000;
+    protected static final String FIRST_PAGE = "";
+
     protected static final IntegrationTestRelationalDataBase DATABASE = new IntegrationTestPostgres();
     private final EntityManagerFactory entityManagerFactory;
 
