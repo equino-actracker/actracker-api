@@ -1,6 +1,5 @@
 package ovh.equino.actracker.repository.jpa.dashboard;
 
-import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
@@ -14,12 +13,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class DashboardRepositoryIntegrationTest extends IntegrationTestBase {
 
-    private EntityManager entityManager = entityManager();
     private JpaDashboardRepository repository;
 
     @BeforeEach
     void setup() {
-        this.entityManager = entityManager();
         this.repository = new JpaDashboardRepository(entityManager);
     }
 
@@ -28,13 +25,13 @@ class DashboardRepositoryIntegrationTest extends IntegrationTestBase {
         TenantDto user = newUser().build();
         DashboardDto newDashboard = newDashboard(user);
 
-        inTransaction(entityManager, () -> {
+        inTransaction(() -> {
             repository.add(newDashboard);
             Optional<DashboardDto> foundDashboard = repository.findById(newDashboard.id());
             assertThat(foundDashboard).get().usingRecursiveComparison().isEqualTo(newDashboard);
         });
 
-        inTransaction(entityManager, () -> {
+        inTransaction(() -> {
             Optional<DashboardDto> foundDashboard = repository.findById(newDashboard.id());
             assertThat(foundDashboard).get().usingRecursiveComparison().isEqualTo(newDashboard);
         });
@@ -42,7 +39,7 @@ class DashboardRepositoryIntegrationTest extends IntegrationTestBase {
 
     @Test
     void shouldNotFindNotExistingDashboard() {
-        inTransaction(entityManager, () -> {
+        inTransaction(() -> {
             Optional<DashboardDto> foundDashboard = repository.findById(randomUUID());
             assertThat(foundDashboard).isEmpty();
         });

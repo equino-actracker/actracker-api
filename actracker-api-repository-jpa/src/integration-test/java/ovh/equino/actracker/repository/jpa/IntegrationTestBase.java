@@ -31,20 +31,18 @@ public abstract class IntegrationTestBase {
     protected static final String FIRST_PAGE = "";
 
     protected static final IntegrationTestRelationalDataBase DATABASE = new IntegrationTestPostgres();
-    private final EntityManagerFactory entityManagerFactory;
+    protected final EntityManager entityManager;
 
     protected IntegrationTestBase() {
-        this.entityManagerFactory = new HibernatePersistenceProvider().createContainerEntityManagerFactory(
-                new PersistenceUnitInfo(),
-                persistenceProperties()
-        );
+        EntityManagerFactory entityManagerFactory = new HibernatePersistenceProvider()
+                .createContainerEntityManagerFactory(
+                        new PersistenceUnitInfo(),
+                        persistenceProperties()
+                );
+        this.entityManager = entityManagerFactory.createEntityManager();
     }
 
-    protected EntityManager entityManager() {
-        return entityManagerFactory.createEntityManager();
-    }
-
-    protected void inTransaction(EntityManager entityManager, Execution execution) {
+    protected void inTransaction(Execution execution) {
         entityManager.getTransaction().begin();
         execution.call();
         entityManager.getTransaction().commit();

@@ -1,6 +1,5 @@
 package ovh.equino.actracker.repository.jpa.tagset;
 
-import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ovh.equino.actracker.domain.tagset.TagSetDto;
@@ -14,12 +13,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class TagSetRepositoryIntegrationTest extends IntegrationTestBase {
 
-    private EntityManager entityManager = entityManager();
     private JpaTagSetRepository repository;
 
     @BeforeEach
     void setup() {
-        this.entityManager = entityManager();
         this.repository = new JpaTagSetRepository(entityManager);
     }
 
@@ -28,13 +25,13 @@ class TagSetRepositoryIntegrationTest extends IntegrationTestBase {
         TenantDto user = newUser().build();
         TagSetDto newTagSet = newTagSet(user).build();
 
-        inTransaction(entityManager, () -> {
+        inTransaction(() -> {
             repository.add(newTagSet);
             Optional<TagSetDto> foundTagSet = repository.findById(newTagSet.id());
             assertThat(foundTagSet).get().usingRecursiveComparison().isEqualTo(newTagSet);
         });
 
-        inTransaction(entityManager, () -> {
+        inTransaction(() -> {
             Optional<TagSetDto> foundTagSet = repository.findById(newTagSet.id());
             assertThat(foundTagSet).get().usingRecursiveComparison().isEqualTo(newTagSet);
         });
@@ -42,7 +39,7 @@ class TagSetRepositoryIntegrationTest extends IntegrationTestBase {
 
     @Test
     void shouldNotFindNotExistingTagSet() {
-        inTransaction(entityManager, () -> {
+        inTransaction(() -> {
             Optional<TagSetDto> foundTag = repository.findById(randomUUID());
             assertThat(foundTag).isEmpty();
         });

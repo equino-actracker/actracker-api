@@ -1,6 +1,5 @@
 package ovh.equino.actracker.repository.jpa.activity;
 
-import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ovh.equino.actracker.domain.activity.ActivityDto;
@@ -14,12 +13,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ActivityRepositoryIntegrationTest extends IntegrationTestBase {
 
-    private EntityManager entityManager = entityManager();
     private JpaActivityRepository repository;
 
     @BeforeEach
     void setup() {
-        this.entityManager = entityManager();
         this.repository = new JpaActivityRepository(entityManager);
     }
 
@@ -28,13 +25,13 @@ class ActivityRepositoryIntegrationTest extends IntegrationTestBase {
         TenantDto user = newUser().build();
         ActivityDto newActivity = newActivity(user);
 
-        inTransaction(entityManager, () -> {
+        inTransaction(() -> {
             repository.add(newActivity);
             Optional<ActivityDto> foundActivity = repository.findById(newActivity.id());
             assertThat(foundActivity).get().usingRecursiveComparison().isEqualTo(newActivity);
         });
 
-        inTransaction(entityManager, () -> {
+        inTransaction(() -> {
             Optional<ActivityDto> foundActivity = repository.findById(newActivity.id());
             assertThat(foundActivity).get().usingRecursiveComparison().isEqualTo(newActivity);
         });
@@ -42,7 +39,7 @@ class ActivityRepositoryIntegrationTest extends IntegrationTestBase {
 
     @Test
     void shouldNotFindNotExistingActivity() {
-        inTransaction(entityManager, () -> {
+        inTransaction(() -> {
             Optional<ActivityDto> foundActivity = repository.findById(randomUUID());
             assertThat(foundActivity).isEmpty();
         });

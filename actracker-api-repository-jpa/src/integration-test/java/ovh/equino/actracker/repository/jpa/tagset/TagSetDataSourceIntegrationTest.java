@@ -43,12 +43,10 @@ class TagSetDataSourceIntegrationTest extends IntegrationTestBase {
 
     private static User searcher;
 
-    private EntityManager entityManager = entityManager();
     private JpaTagSetDataSource dataSource;
 
     @BeforeEach
     void setup() {
-        this.entityManager = entityManager();
         this.dataSource = new JpaTagSetDataSource(entityManager);
     }
 
@@ -126,7 +124,7 @@ class TagSetDataSourceIntegrationTest extends IntegrationTestBase {
     @ParameterizedTest
     @MethodSource("accessibleTagSet")
     void shouldFindAccessibleTagSet(TagSetId tagSetId, TagSetDto expectedTagSet) {
-        inTransaction(entityManager, () -> {
+        inTransaction(() -> {
             Optional<TagSetDto> tagSetDto = dataSource.find(tagSetId, searcher);
             assertThat(tagSetDto).isPresent();
             assertThat(tagSetDto.get()).usingRecursiveComparison().ignoringFields("tags").isEqualTo(expectedTagSet);
@@ -174,7 +172,7 @@ class TagSetDataSourceIntegrationTest extends IntegrationTestBase {
     @ParameterizedTest
     @MethodSource("inaccessibleTagSet")
     void shouldNotFindInaccessibleTagSet(TagSetId tagSetId) {
-        inTransaction(entityManager, () -> {
+        inTransaction(() -> {
             Optional<TagSetDto> tagSetDto = dataSource.find(tagSetId, searcher);
             assertThat(tagSetDto).isEmpty();
         });
@@ -210,7 +208,7 @@ class TagSetDataSourceIntegrationTest extends IntegrationTestBase {
                 null
         );
 
-        inTransaction(entityManager, () -> {
+        inTransaction(() -> {
             List<TagSetDto> foundTagSets = dataSource.find(searchCriteria);
             assertThat(foundTagSets)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags")
@@ -249,7 +247,7 @@ class TagSetDataSourceIntegrationTest extends IntegrationTestBase {
                 null
         );
 
-        inTransaction(entityManager, () -> {
+        inTransaction(() -> {
             List<TagSetDto> foundTagSets = dataSource.find(searchCriteria);
             assertThat(foundTagSets)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags")
@@ -276,7 +274,7 @@ class TagSetDataSourceIntegrationTest extends IntegrationTestBase {
                 null,
                 null
         );
-        inTransaction(entityManager, () -> {
+        inTransaction(() -> {
             List<TagSetDto> foundTagSets = dataSource.find(searchCriteria);
             assertThat(foundTagSets)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags")
