@@ -15,9 +15,9 @@ import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
 
-public final class IntegrationTestPostgres implements IntegrationTestRelationalDataBase {
+public final class IntegrationTestPostgresDataBase implements IntegrationTestRelationalDataBase {
 
-//    public static final IntegrationTestPostgres INSTANCE = new IntegrationTestPostgres();
+    public static final IntegrationTestPostgresDataBase INSTANCE = new IntegrationTestPostgresDataBase();
 
     private final PostgreSQLContainer<?> container;
 
@@ -26,7 +26,7 @@ public final class IntegrationTestPostgres implements IntegrationTestRelationalD
     private String password;
     private String driverClassName;
 
-    public IntegrationTestPostgres() {
+    private IntegrationTestPostgresDataBase() {
         container = new PostgreSQLContainer<>("postgres:15.1");
         container.start();
         this.jdbcUrl = container.getJdbcUrl();

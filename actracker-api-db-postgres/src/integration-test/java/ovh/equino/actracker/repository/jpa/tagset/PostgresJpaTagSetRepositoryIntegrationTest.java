@@ -1,14 +1,12 @@
 package ovh.equino.actracker.repository.jpa.tagset;
 
+import ovh.equino.actracker.repository.jpa.IntegrationTestPostgresDataBase;
 import ovh.equino.actracker.repository.jpa.IntegrationTestRelationalDataBase;
-import ovh.equino.actracker.repository.jpa.PostgresJpaIntegrationTest;
 
-class PostgresJpaTagSetRepositoryIntegrationTest
-        extends JpaTagSetRepositoryIntegrationTest
-        implements PostgresJpaIntegrationTest {
+class PostgresJpaTagSetRepositoryIntegrationTest extends JpaTagSetRepositoryIntegrationTest {
 
     @Override
     public IntegrationTestRelationalDataBase database() {
-        return PostgresJpaIntegrationTest.super.database();
+        return IntegrationTestPostgresDataBase.INSTANCE;
     }
 }
