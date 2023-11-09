@@ -11,7 +11,7 @@ import java.util.Optional;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class JpaActivityRepositoryIntegrationTest extends JpaIntegrationTest {
+abstract class JpaActivityRepositoryIntegrationTest extends JpaIntegrationTest {
 
     private JpaActivityRepository repository;
 

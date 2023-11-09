@@ -17,6 +17,8 @@ import static java.util.UUID.randomUUID;
 
 public final class IntegrationTestPostgres implements IntegrationTestRelationalDataBase {
 
+//    public static final IntegrationTestPostgres INSTANCE = new IntegrationTestPostgres();
+
     private final PostgreSQLContainer<?> container;
 
     private String jdbcUrl;
@@ -39,7 +41,7 @@ public final class IntegrationTestPostgres implements IntegrationTestRelationalD
         Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
         for (TenantDto user : users) {
             PreparedStatement preparedStatement = connection.prepareStatement(
-                    "insert into tenant (id, username, password) values (?, ?, ?);"
+                    "insert into tenant (id, username, password) values (?, ?, ?) on conflict do nothing;"
             );
             preparedStatement.setString(1, user.id().toString());
             preparedStatement.setString(2, user.username());
@@ -53,7 +55,7 @@ public final class IntegrationTestPostgres implements IntegrationTestRelationalD
         Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
         for (TagDto tag : tags) {
             PreparedStatement preparedStatement = connection.prepareStatement(
-                    "insert into tag (id, creator_id, name, deleted) values (?, ?, ?, ?);"
+                    "insert into tag (id, creator_id, name, deleted) values (?, ?, ?, ?) on conflict do nothing;"
             );
             preparedStatement.setString(1, tag.id().toString());
             preparedStatement.setString(2, tag.creatorId().toString());
@@ -68,7 +70,7 @@ public final class IntegrationTestPostgres implements IntegrationTestRelationalD
         Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
         for (Share share : tag.shares()) {
             PreparedStatement preparedStatement = connection.prepareStatement(
-                    "insert into tag_share (id, tag_id, grantee_id, grantee_name) values (?, ?, ?, ?)"
+                    "insert into tag_share (id, tag_id, grantee_id, grantee_name) values (?, ?, ?, ?) on conflict do nothing"
             );
             preparedStatement.setString(1, randomUUID().toString());
             preparedStatement.setString(2, tag.id().toString());
@@ -83,7 +85,7 @@ public final class IntegrationTestPostgres implements IntegrationTestRelationalD
         Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
         for (TagSetDto tagSet : tagSets) {
             PreparedStatement preparedStatement = connection.prepareStatement(
-                    "insert into tag_set(id, creator_id, name, deleted) values (?, ?, ?, ?)"
+                    "insert into tag_set(id, creator_id, name, deleted) values (?, ?, ?, ?) on conflict do nothing"
             );
             preparedStatement.setString(1, tagSet.id().toString());
             preparedStatement.setString(2, tagSet.creatorId().toString());
@@ -99,7 +101,7 @@ public final class IntegrationTestPostgres implements IntegrationTestRelationalD
 
         for (UUID tagId : tagSet.tags()) {
             PreparedStatement preparedStatement = connection.prepareStatement(
-                    "insert into tag_set_tag (tag_set_id, tag_id) values (?, ?);"
+                    "insert into tag_set_tag (tag_set_id, tag_id) values (?, ?) on conflict do nothing;"
             );
             preparedStatement.setString(1, tagSet.id().toString());
             preparedStatement.setString(2, tagId.toString());

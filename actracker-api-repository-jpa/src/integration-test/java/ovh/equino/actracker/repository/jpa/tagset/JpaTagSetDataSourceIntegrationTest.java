@@ -24,7 +24,7 @@ import static java.util.Collections.emptySet;
 import static java.util.Comparator.comparing;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
+abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
 
     private static TagDto accessibleOwnTag1;
     private static TagDto accessibleOwnTag2;
@@ -41,19 +41,23 @@ class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
     private static TagSetDto inaccessibleForeignTagSet;
 
     private static User searcher;
+    private static TenantDto searcherTenant;
+    private static TenantDto sharingUser;
 
     private JpaTagSetDataSource dataSource;
 
     @BeforeEach
-    void setup() {
+    void init() throws SQLException {
         this.dataSource = new JpaTagSetDataSource(entityManager);
+        database().addUsers(searcherTenant, sharingUser);
+        database().addTags(accessibleOwnTag1, accessibleOwnTag2, accessibleSharedTag, inaccessibleOwnDeletedTag, inaccessibleSharedDeletedTag, inaccessibleNotSharedTag);
+        database().addTagSets(accessibleOwnTagSet1, accessibleOwnTagSet2, accessibleOwnTagSet3, accessibleOwnTagSet4, inaccessibleOwnDeletedTagSet, inaccessibleForeignTagSet);
     }
 
     @BeforeAll
-    static void setUp() throws SQLException {
-        TenantDto searcherTenant = newUser().build();
-        TenantDto sharingUser = newUser().build();
-        DATABASE.addUsers(searcherTenant, sharingUser);
+    static void setUp() {
+        searcherTenant = newUser().build();
+        sharingUser = newUser().build();
 
         accessibleOwnTag1 = newTag(searcherTenant).build();
         accessibleOwnTag2 = newTag(searcherTenant).build();
@@ -61,7 +65,6 @@ class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
         inaccessibleOwnDeletedTag = newTag(searcherTenant).deleted().build();
         inaccessibleSharedDeletedTag = newTag(sharingUser).sharedWith(searcherTenant).deleted().build();
         inaccessibleNotSharedTag = newTag(sharingUser).build();
-        DATABASE.addTags(accessibleOwnTag1, accessibleOwnTag2, accessibleSharedTag, inaccessibleOwnDeletedTag, inaccessibleSharedDeletedTag, inaccessibleNotSharedTag);
 
         accessibleOwnTagSet1 = newTagSet(searcherTenant)
                 .withTags(
@@ -104,7 +107,6 @@ class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
                         inaccessibleNotSharedTag
                 )
                 .build();
-        DATABASE.addTagSets(accessibleOwnTagSet1, accessibleOwnTagSet2, accessibleOwnTagSet3, accessibleOwnTagSet4, inaccessibleOwnDeletedTagSet, inaccessibleForeignTagSet);
 
         searcher = new User(searcherTenant.id());
     }

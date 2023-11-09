@@ -13,7 +13,6 @@ public abstract class JpaIntegrationTest {
     protected static final int LARGE_PAGE_SIZE = 1000;
     protected static final String FIRST_PAGE = "";
 
-    protected static final IntegrationTestRelationalDataBase DATABASE = new IntegrationTestPostgres();
     protected final EntityManager entityManager;
 
     protected JpaIntegrationTest() {
@@ -24,6 +23,8 @@ public abstract class JpaIntegrationTest {
                 );
         this.entityManager = entityManagerFactory.createEntityManager();
     }
+
+    protected abstract IntegrationTestRelationalDataBase database();
 
     protected void inTransaction(TransactionalOperation transactionalOperation) {
         entityManager.getTransaction().begin();
@@ -53,10 +54,10 @@ public abstract class JpaIntegrationTest {
 
     private Map<String, String> persistenceProperties() {
         Map<String, String> properties = new HashMap<>();
-        properties.put("javax.persistence.jdbc.url", DATABASE.jdbcUrl());
-        properties.put("javax.persistence.jdbc.user", DATABASE.username());
-        properties.put("javax.persistence.jdbc.password", DATABASE.password());
-        properties.put("javax.persistence.jdbc.driver", DATABASE.driverClassName());
+        properties.put("javax.persistence.jdbc.url", database().jdbcUrl());
+        properties.put("javax.persistence.jdbc.user", database().username());
+        properties.put("javax.persistence.jdbc.password", database().password());
+        properties.put("javax.persistence.jdbc.driver", database().driverClassName());
         return properties;
     }
 }
