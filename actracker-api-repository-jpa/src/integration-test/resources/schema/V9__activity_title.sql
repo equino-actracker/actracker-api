@@ -1,1 +1,0 @@
-ALTER TABLE activity ADD COLUMN title TEXT;
