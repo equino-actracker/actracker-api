@@ -1,10 +1,12 @@
 package ovh.equino.actracker.main.springboot.configuration.db;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import ovh.equino.actracker.postgres.SchemaMigrator;
 
 import javax.sql.DataSource;
 
@@ -51,11 +53,6 @@ class PostgresConfiguration {
         return dataSource;
     }
 
-    @Bean
-    FlywayMigrator flywayMigrator() {
-        return new FlywayMigrator(ownerDataSource());
-    }
-
     private DataSource ownerDataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName("org.postgresql.Driver");
@@ -69,5 +66,11 @@ class PostgresConfiguration {
     @Bean("hibernateDialect")
     String hibernateDialect() {
         return "org.hibernate.dialect.PostgreSQLDialect";
+    }
+
+    @PostConstruct
+    void migrateSchema() {
+        SchemaMigrator migrator = new SchemaMigrator(ownerDataSource());
+        migrator.migrateSchema();
     }
 }

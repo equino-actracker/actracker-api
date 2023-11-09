@@ -1,11 +1,11 @@
 package ovh.equino.actracker.repository.jpa;
 
-import org.flywaydb.core.Flyway;
 import org.testcontainers.containers.PostgreSQLContainer;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tagset.TagSetDto;
 import ovh.equino.actracker.domain.tenant.TenantDto;
+import ovh.equino.actracker.postgres.SchemaMigrator;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -130,10 +130,11 @@ public final class IntegrationTestPostgresDataBase implements IntegrationTestRel
     }
 
     private void migrateSchema() {
-        Flyway flyway = Flyway.configure()
-                .dataSource(container.getJdbcUrl(), container.getUsername(), container.getPassword())
-                .locations("classpath:schema/")
-                .load();
-        flyway.migrate();
+        SchemaMigrator migrator = new SchemaMigrator(
+                container.getJdbcUrl(),
+                container.getUsername(),
+                container.getPassword()
+        );
+        migrator.migrateSchema();
     }
 }
