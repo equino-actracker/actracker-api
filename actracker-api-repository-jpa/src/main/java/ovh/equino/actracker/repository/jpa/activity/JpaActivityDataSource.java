@@ -1,5 +1,6 @@
 package ovh.equino.actracker.repository.jpa.activity;
 
+import jakarta.persistence.EntityManager;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.activity.ActivityDataSource;
 import ovh.equino.actracker.domain.activity.ActivityDto;
@@ -14,6 +15,10 @@ import java.util.UUID;
 import static java.util.Objects.isNull;
 
 class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
+
+    JpaActivityDataSource(EntityManager entityManager) {
+        super(entityManager);
+    }
 
     @Override
     public Optional<ActivityDto> find(ActivityId activityId, User searcher) {
