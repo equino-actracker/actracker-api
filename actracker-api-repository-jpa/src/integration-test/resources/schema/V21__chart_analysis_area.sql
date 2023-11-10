@@ -1,9 +1,0 @@
-ALTER TABLE IF EXISTS chart
-    ADD COLUMN metric VARCHAR(50);
-
-UPDATE chart SET metric='TAG_PERCENTAGE' WHERE metric IS NULL;
-
-ALTER TABLE IF EXISTS chart
-    ALTER COLUMN metric SET NOT NULL;
-
-UPDATE chart SET group_by='SELF' WHERE group_by='TAG';

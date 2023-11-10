@@ -5,6 +5,12 @@ plugins {
 
 dependencies {
     runtimeOnly 'org.postgresql:postgresql:42.5.1'
+    implementation project(':actracker-api-domain')
+    implementation 'org.flywaydb:flyway-core:9.11.0'
+
+    integrationTestImplementation project(':actracker-api-repository-jpa').sourceSets.integrationTest.compileClasspath
+    integrationTestImplementation project(':actracker-api-repository-jpa').sourceSets.integrationTest.runtimeClasspath
+    integrationTestImplementation "org.testcontainers:postgresql:1.19.1"
 }
 
 dockerCompose {
