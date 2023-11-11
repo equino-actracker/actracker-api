@@ -45,6 +45,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
     private static ActivityDto inaccessibleActivityWithDeletedSharingTag;
     private static ActivityDto inaccessibleOwnDeletedActivity;
     private static ActivityDto inaccessibleForeignActivity;
+    private static ActivityDto inaccessibleNotAddedActivity;
 
     private static User searcher;
 
@@ -77,49 +78,54 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
         );
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("accessibleActivity")
-    void shouldFindAccessibleActivity(ActivityId activityId, ActivityDto expectedActivity) {
+    void shouldFindAccessibleActivity(String testName, ActivityId activityId, ActivityDto expectedActivity) {
         fail();
     }
 
     static Stream<Arguments> accessibleActivity() {
         return Stream.of(
                 Arguments.of(
+                        "accessibleOwnActivityWithMetricsSet",
                         new ActivityId(accessibleOwnActivityWithMetricsSet.id()),
                         accessibleOwnActivityWithMetricsSet
                 ),
                 Arguments.of(
+                        "accessibleOwnActivityWithMetricsUnset",
                         new ActivityId(accessibleOwnActivityWithMetricsUnset.id()),
                         accessibleOwnActivityWithMetricsUnset
                 ),
                 Arguments.of(
+                        "accessibleOwnActivityWithDeletedTags",
                         new ActivityId(accessibleOwnActivityWithDeletedTags.id()),
                         accessibleOwnActivityWithDeletedTags
                 ),
                 Arguments.of(
+                        "accessibleOwnActivityWithoutTags",
                         new ActivityId(accessibleOwnActivityWithoutTags.id()),
                         accessibleOwnActivityWithoutTags
                 ),
                 Arguments.of(
+                        "accessibleSharedActivityWithMetricsSet",
                         new ActivityId(accessibleSharedActivityWithMetricsSet.id()),
                         accessibleSharedActivityWithMetricsSet
                 )
         );
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("inaccessibleActivity")
-    void shouldNotFindInaccessibleActivity(ActivityId activityId) {
+    void shouldNotFindInaccessibleActivity(String testName, ActivityId activityId) {
         fail();
     }
 
     static Stream<Arguments> inaccessibleActivity() {
         return Stream.of(
-                Arguments.of(new ActivityId(inaccessibleActivityWithDeletedSharingTag.id())),
-                Arguments.of(new ActivityId(inaccessibleOwnDeletedActivity.id())),
-                Arguments.of(new ActivityId(inaccessibleForeignActivity.id())),
-                Arguments.of(new ActivityId(randomUUID()))
+                Arguments.of("inaccessibleActivityWithDeletedSharingTag", new ActivityId(inaccessibleActivityWithDeletedSharingTag.id())),
+                Arguments.of("inaccessibleOwnDeletedActivity", new ActivityId(inaccessibleOwnDeletedActivity.id())),
+                Arguments.of("inaccessibleForeignActivity", new ActivityId(inaccessibleForeignActivity.id())),
+                Arguments.of("inaccessibleNotAddedActivity", new ActivityId(inaccessibleNotAddedActivity.id()))
         );
     }
 
@@ -250,6 +256,8 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                 .build();
 
         inaccessibleForeignActivity = newActivity(sharingUser).build();
+
+        inaccessibleNotAddedActivity = newActivity(searcherTenant).build();
 
         searcher = new User(searcherTenant.id());
     }

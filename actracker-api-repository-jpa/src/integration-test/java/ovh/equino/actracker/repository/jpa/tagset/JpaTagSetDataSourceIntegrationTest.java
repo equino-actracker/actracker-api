@@ -22,7 +22,6 @@ import java.util.stream.Stream;
 
 import static java.util.Collections.emptySet;
 import static java.util.Comparator.comparing;
-import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
@@ -43,6 +42,7 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
     private static TagSetDto accessibleOwnTagSet4;
     private static TagSetDto inaccessibleOwnDeletedTagSet;
     private static TagSetDto inaccessibleForeignTagSet;
+    private static TagSetDto inaccessibleNotAddedTagSet;
 
     private static User searcher;
 
@@ -56,9 +56,9 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
         database().addTagSets(accessibleOwnTagSet1, accessibleOwnTagSet2, accessibleOwnTagSet3, accessibleOwnTagSet4, inaccessibleOwnDeletedTagSet, inaccessibleForeignTagSet);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("accessibleTagSet")
-    void shouldFindAccessibleTagSet(TagSetId tagSetId, TagSetDto expectedTagSet) {
+    void shouldFindAccessibleTagSet(String testName, TagSetId tagSetId, TagSetDto expectedTagSet) {
         inTransaction(() -> {
             Optional<TagSetDto> tagSetDto = dataSource.find(tagSetId, searcher);
             assertThat(tagSetDto).isPresent();
@@ -70,6 +70,7 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
     private static Stream<Arguments> accessibleTagSet() {
         return Stream.of(
                 Arguments.of(
+                        "accessibleOwnTagSet1",
                         new TagSetId(accessibleOwnTagSet1.id()),
                         new TagSetDto(
                                 accessibleOwnTagSet1.id(),
@@ -80,6 +81,7 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
                         )
                 ),
                 Arguments.of(
+                        "accessibleOwnTagSet2",
                         new TagSetId(accessibleOwnTagSet2.id()),
                         new TagSetDto(
                                 accessibleOwnTagSet2.id(),
@@ -90,6 +92,7 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
                         )
                 ),
                 Arguments.of(
+                        "accessibleOwnTagSet3",
                         new TagSetId(accessibleOwnTagSet3.id()),
                         new TagSetDto(
                                 accessibleOwnTagSet3.id(),
@@ -100,6 +103,7 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
                         )
                 ),
                 Arguments.of(
+                        "accessibleOwnTagSet4",
                         new TagSetId(accessibleOwnTagSet4.id()),
                         new TagSetDto(
                                 accessibleOwnTagSet4.id(),
@@ -112,9 +116,9 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
         );
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("inaccessibleTagSet")
-    void shouldNotFindInaccessibleTagSet(TagSetId tagSetId) {
+    void shouldNotFindInaccessibleTagSet(String testName, TagSetId tagSetId) {
         inTransaction(() -> {
             Optional<TagSetDto> tagSetDto = dataSource.find(tagSetId, searcher);
             assertThat(tagSetDto).isEmpty();
@@ -123,9 +127,9 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
 
     private static Stream<Arguments> inaccessibleTagSet() {
         return Stream.of(
-                Arguments.of(new TagSetId(inaccessibleOwnDeletedTagSet.id())),
-                Arguments.of(new TagSetId(inaccessibleForeignTagSet.id())),
-                Arguments.of(new TagSetId(randomUUID()))
+                Arguments.of("inaccessibleOwnDeletedTagSet", new TagSetId(inaccessibleOwnDeletedTagSet.id())),
+                Arguments.of("inaccessibleForeignTagSet", new TagSetId(inaccessibleForeignTagSet.id())),
+                Arguments.of("inaccessibleNotAddedTagSet", new TagSetId(inaccessibleNotAddedTagSet.id()))
         );
     }
 
@@ -279,6 +283,7 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
                         inaccessibleForeignTag
                 )
                 .build();
+        inaccessibleNotAddedTagSet = newTagSet(searcherTenant).build();
 
         searcher = new User(searcherTenant.id());
     }
