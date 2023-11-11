@@ -168,7 +168,6 @@ public class ActivityApplicationService {
         activity.rename(newTitle, updater);
 
         activityRepository.update(activityId, activity.forStorage());
-        ActivityDto activityResult = activity.forClient(updater);
 
         activityNotifier.notifyChanged(activity.forChangeNotification());
 

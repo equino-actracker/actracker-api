@@ -210,6 +210,7 @@ public class Activity implements Entity {
         );
     }
 
+    // TODO remove this and all unnecessary methods
     public ActivityDto forClient(User client) {
         if (isNotAvailableFor(client)) {
             throw new EntityNotFoundException(Activity.class, this.id.id());
