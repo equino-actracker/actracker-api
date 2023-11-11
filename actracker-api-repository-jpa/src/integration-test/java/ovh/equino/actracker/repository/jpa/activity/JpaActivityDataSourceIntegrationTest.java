@@ -2,7 +2,11 @@ package ovh.equino.actracker.repository.jpa.activity;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import ovh.equino.actracker.domain.activity.ActivityDto;
+import ovh.equino.actracker.domain.activity.ActivityId;
 import ovh.equino.actracker.domain.activity.MetricValue;
 import ovh.equino.actracker.domain.tag.MetricDto;
 import ovh.equino.actracker.domain.tag.TagDto;
@@ -13,6 +17,7 @@ import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
 import java.sql.SQLException;
 
 import static java.util.UUID.randomUUID;
+import static org.junit.jupiter.api.Assertions.fail;
 import static ovh.equino.actracker.repository.jpa.TestUtil.randomBigDecimal;
 
 abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
@@ -46,6 +51,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
     @BeforeEach
     void init() throws SQLException {
         this.dataSource = new JpaActivityDataSource(entityManager);
+        database().addUsers(searcherTenant, sharingUser);
         database().addTags(
                 accessibleOwnTagWithMetrics,
                 accessibleOwnTagWithDeletedMetric,
@@ -57,6 +63,43 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                 inaccessibleSharedDeletedTagWithMetric,
                 inaccessibleForeignTagWithMetric
         );
+        database().addActivities(
+                accessibleOwnActivityWithMetricsSet,
+                accessibleOwnActivityWithMetricsUnset,
+                accessibleOwnActivityWithDeletedTags,
+                accessibleOwnActivityWithoutTags,
+                accessibleSharedActivityWithMetricsSet,
+                inaccessibleActivityWithDeletedSharingTag,
+                inaccessibleOwnDeletedActivity,
+                inaccessibleForeignActivity
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("accessibleActivity")
+    void shouldFindAccessibleActivity(ActivityId activityId, ActivityDto expectedActivity) {
+        fail();
+    }
+
+    @ParameterizedTest
+    @MethodSource("inaccessibleActivity")
+    void shouldNotFindInaccessibleActivity(ActivityId activityId) {
+        fail();
+    }
+
+    @Test
+    void shouldFindAllAccessibleActivities() {
+        fail();
+    }
+
+    @Test
+    void shouldFindSecondPageOfActivities() {
+        fail();
+    }
+
+    @Test
+    void shouldFindNotExcludedActivities() {
+        fail();
     }
 
     @BeforeAll

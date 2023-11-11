@@ -10,8 +10,10 @@ import ovh.equino.actracker.domain.tenant.TenantDto;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.UUID;
 
+import static java.util.Objects.isNull;
 import static java.util.UUID.randomUUID;
 
 public abstract class IntegrationTestRelationalDataBase {
@@ -41,10 +43,17 @@ public abstract class IntegrationTestRelationalDataBase {
 
     public void addActivities(ActivityDto... activities) throws SQLException {
         Connection connection = getConnection();
-        for(ActivityDto activity : activities) {
-            connection.prepareStatement(
-                    "insert into activity () values () on conflict do nothing"
+        for (ActivityDto activity : activities) {
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "insert into activity (id, creator_id, title, start_time, end_time, comment, deleted) values (?, ?, ?, ?, ?, ?, ?) on conflict do nothing"
             );
+            preparedStatement.setString(1, activity.id().toString());
+            preparedStatement.setString(2, activity.creatorId().toString());
+            preparedStatement.setString(3, activity.title());
+            preparedStatement.setTimestamp(4, isNull(activity.startTime()) ? null : Timestamp.from(activity.startTime()));
+            preparedStatement.setTimestamp(5, isNull(activity.endTime()) ? null : Timestamp.from(activity.endTime()));
+            preparedStatement.setString(6, activity.comment());
+            preparedStatement.setBoolean(7, activity.deleted());
         }
     }
 
