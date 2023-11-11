@@ -4,18 +4,18 @@ import org.apache.commons.lang3.RandomStringUtils;
 
 import java.math.BigDecimal;
 
-final class TestUtil {
+public final class TestUtil {
     private TestUtil() {
     }
 
-    static String randomString() {
+    public static String randomString() {
         int length = 10;
         boolean useLetters = true;
         boolean useNumbers = false;
         return RandomStringUtils.random(length, useLetters, useNumbers);
     }
 
-    static BigDecimal randomBigDecimal() {
+    public static BigDecimal randomBigDecimal() {
         int length = 3;
         boolean useLetters = false;
         boolean useNumbers = true;

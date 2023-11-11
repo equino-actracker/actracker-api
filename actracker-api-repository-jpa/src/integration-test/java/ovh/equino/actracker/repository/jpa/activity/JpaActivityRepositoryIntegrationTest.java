@@ -16,7 +16,7 @@ abstract class JpaActivityRepositoryIntegrationTest extends JpaIntegrationTest {
     private JpaActivityRepository repository;
 
     @BeforeEach
-    void setup() {
+    void init() {
         this.repository = new JpaActivityRepository(entityManager);
     }
 

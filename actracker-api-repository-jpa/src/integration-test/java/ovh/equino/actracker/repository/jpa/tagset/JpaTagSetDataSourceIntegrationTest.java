@@ -26,12 +26,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
 
+    private static TenantDto searcherTenant;
+    private static TenantDto sharingUser;
+
     private static TagDto accessibleOwnTag1;
     private static TagDto accessibleOwnTag2;
     private static TagDto accessibleSharedTag;
     private static TagDto inaccessibleOwnDeletedTag;
     private static TagDto inaccessibleSharedDeletedTag;
-    private static TagDto inaccessibleNotSharedTag;
+    private static TagDto inaccessibleForeignTag;
 
     private static TagSetDto accessibleOwnTagSet1;
     private static TagSetDto accessibleOwnTagSet2;
@@ -41,8 +44,6 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
     private static TagSetDto inaccessibleForeignTagSet;
 
     private static User searcher;
-    private static TenantDto searcherTenant;
-    private static TenantDto sharingUser;
 
     private JpaTagSetDataSource dataSource;
 
@@ -50,65 +51,8 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
     void init() throws SQLException {
         this.dataSource = new JpaTagSetDataSource(entityManager);
         database().addUsers(searcherTenant, sharingUser);
-        database().addTags(accessibleOwnTag1, accessibleOwnTag2, accessibleSharedTag, inaccessibleOwnDeletedTag, inaccessibleSharedDeletedTag, inaccessibleNotSharedTag);
+        database().addTags(accessibleOwnTag1, accessibleOwnTag2, accessibleSharedTag, inaccessibleOwnDeletedTag, inaccessibleSharedDeletedTag, inaccessibleForeignTag);
         database().addTagSets(accessibleOwnTagSet1, accessibleOwnTagSet2, accessibleOwnTagSet3, accessibleOwnTagSet4, inaccessibleOwnDeletedTagSet, inaccessibleForeignTagSet);
-    }
-
-    @BeforeAll
-    static void setUp() {
-        searcherTenant = newUser().build();
-        sharingUser = newUser().build();
-
-        accessibleOwnTag1 = newTag(searcherTenant).build();
-        accessibleOwnTag2 = newTag(searcherTenant).build();
-        accessibleSharedTag = newTag(sharingUser).sharedWith(searcherTenant).build();
-        inaccessibleOwnDeletedTag = newTag(searcherTenant).deleted().build();
-        inaccessibleSharedDeletedTag = newTag(sharingUser).sharedWith(searcherTenant).deleted().build();
-        inaccessibleNotSharedTag = newTag(sharingUser).build();
-
-        accessibleOwnTagSet1 = newTagSet(searcherTenant)
-                .withTags(
-                        accessibleOwnTag1,
-                        accessibleSharedTag
-                ).build();
-        accessibleOwnTagSet2 = newTagSet(searcherTenant)
-                .withTags(
-                        accessibleOwnTag1,
-                        accessibleOwnTag2,
-                        inaccessibleOwnDeletedTag,
-                        inaccessibleSharedDeletedTag,
-                        inaccessibleNotSharedTag
-                )
-                .build();
-        accessibleOwnTagSet3 = newTagSet(searcherTenant)
-                .withTags(
-                        inaccessibleOwnDeletedTag,
-                        inaccessibleSharedDeletedTag,
-                        inaccessibleNotSharedTag
-                )
-                .build();
-        accessibleOwnTagSet4 = newTagSet(searcherTenant)
-                .withTags()
-                .build();
-        inaccessibleOwnDeletedTagSet = newTagSet(searcherTenant)
-                .deleted()
-                .withTags(
-                        accessibleOwnTag1,
-                        accessibleSharedTag,
-                        inaccessibleOwnDeletedTag,
-                        inaccessibleNotSharedTag
-                )
-                .build();
-        inaccessibleForeignTagSet = newTagSet(sharingUser)
-                .withTags(
-                        accessibleOwnTag1,
-                        accessibleSharedTag,
-                        inaccessibleSharedDeletedTag,
-                        inaccessibleNotSharedTag
-                )
-                .build();
-
-        searcher = new User(searcherTenant.id());
     }
 
     @ParameterizedTest
@@ -270,5 +214,62 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags")
                     .containsExactlyElementsOf(expectedTagSets);
         });
+    }
+
+    @BeforeAll
+    static void setUp() {
+        searcherTenant = newUser().build();
+        sharingUser = newUser().build();
+
+        accessibleOwnTag1 = newTag(searcherTenant).build();
+        accessibleOwnTag2 = newTag(searcherTenant).build();
+        accessibleSharedTag = newTag(sharingUser).sharedWith(searcherTenant).build();
+        inaccessibleOwnDeletedTag = newTag(searcherTenant).deleted().build();
+        inaccessibleSharedDeletedTag = newTag(sharingUser).sharedWith(searcherTenant).deleted().build();
+        inaccessibleForeignTag = newTag(sharingUser).build();
+
+        accessibleOwnTagSet1 = newTagSet(searcherTenant)
+                .withTags(
+                        accessibleOwnTag1,
+                        accessibleSharedTag
+                ).build();
+        accessibleOwnTagSet2 = newTagSet(searcherTenant)
+                .withTags(
+                        accessibleOwnTag1,
+                        accessibleOwnTag2,
+                        inaccessibleOwnDeletedTag,
+                        inaccessibleSharedDeletedTag,
+                        inaccessibleForeignTag
+                )
+                .build();
+        accessibleOwnTagSet3 = newTagSet(searcherTenant)
+                .withTags(
+                        inaccessibleOwnDeletedTag,
+                        inaccessibleSharedDeletedTag,
+                        inaccessibleForeignTag
+                )
+                .build();
+        accessibleOwnTagSet4 = newTagSet(searcherTenant)
+                .withTags()
+                .build();
+        inaccessibleOwnDeletedTagSet = newTagSet(searcherTenant)
+                .deleted()
+                .withTags(
+                        accessibleOwnTag1,
+                        accessibleSharedTag,
+                        inaccessibleOwnDeletedTag,
+                        inaccessibleForeignTag
+                )
+                .build();
+        inaccessibleForeignTagSet = newTagSet(sharingUser)
+                .withTags(
+                        accessibleOwnTag1,
+                        accessibleSharedTag,
+                        inaccessibleSharedDeletedTag,
+                        inaccessibleForeignTag
+                )
+                .build();
+
+        searcher = new User(searcherTenant.id());
     }
 }
