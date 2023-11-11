@@ -17,9 +17,9 @@ import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
 
 import java.sql.SQLException;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static java.util.Comparator.comparing;
@@ -240,15 +240,32 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldFindNotExcludedActivities() {
-        fail();
+        List<ActivityDto> expectedActivities = Stream.of(
+                        accessibleOwnActivityWithMetricsSet,
+                        accessibleOwnActivityWithDeletedTags,
+                        accessibleSharedActivityWithMetricsSet
+                )
+                .sorted(comparing(activity -> activity.id().toString()))
+                .toList();
 
-        // TODO
-//        inTransaction(() -> {
-//            List<ActivityDto> foundActivities = dataSource.find(searchCriteria);
-//            assertThat(foundActivities)
-//                    .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags", "metricValues")
-//                    .containsExactlyElementsOf(expectedActivities);
-//        });
+        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
+                searcher,
+                LARGE_PAGE_SIZE,
+                FIRST_PAGE,
+                null,
+                null,
+                null,
+                Set.of(accessibleOwnActivityWithMetricsUnset.id(), accessibleOwnActivityWithoutTags.id()),
+                null,
+                null
+        );
+
+        inTransaction(() -> {
+            List<ActivityDto> foundActivities = dataSource.find(searchCriteria);
+            assertThat(foundActivities)
+                    .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags", "metricValues")
+                    .containsExactlyElementsOf(expectedActivities);
+        });
     }
 
     @Test
