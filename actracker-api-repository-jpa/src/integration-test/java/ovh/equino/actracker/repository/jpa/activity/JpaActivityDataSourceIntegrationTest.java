@@ -179,7 +179,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
             assertThat(foundActivities)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags", "metricValues")
                     .containsExactlyElementsOf(expectedActivities);
-            // TODO
+// TODO
 //            assertThat(foundActivities)
 //                    .flatMap(ActivityDto::tags)
 //                    .containsExactlyInAnyOrder(
@@ -193,6 +193,39 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldFindSecondPageOfActivities() {
+        List<ActivityDto> expectedActivities = Stream.of(
+                        accessibleOwnActivityWithMetricsSet,
+                        accessibleOwnActivityWithMetricsUnset,
+                        accessibleOwnActivityWithDeletedTags,
+                        accessibleOwnActivityWithoutTags,
+                        accessibleSharedActivityWithMetricsSet
+                )
+                .sorted(comparing(activity -> activity.id().toString()))
+                .skip(1)
+                .toList();
+
+        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
+                searcher,
+                3,
+                expectedActivities.get(0).id().toString(),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+
+        inTransaction(() -> {
+            List<ActivityDto> foundActivities = dataSource.find(searchCriteria);
+            assertThat(foundActivities)
+                    .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags", "metricValues")
+                    .containsExactly(expectedActivities.get(0), expectedActivities.get(1), expectedActivities.get(2));
+        });
+    }
+
+    @Test
+    void shouldFindActivitiesInTimeRange() {
         fail();
 
         // TODO
@@ -201,19 +234,25 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
 //            assertThat(foundActivities)
 //                    .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags", "metricValues")
 //                    .containsExactlyElementsOf(expectedActivities);
-////            assertThat(foundActivities)
-////                    .flatMap(ActivityDto::tags)
-////                    .containsExactlyInAnyOrder(
-////                    );
-////            assertThat(foundActivities)
-////                    .flatMap(ActivityDto::metricValues)
-////                    .containsExactlyInAnyOrder(
-////                    );
 //        });
+
     }
 
     @Test
     void shouldFindNotExcludedActivities() {
+        fail();
+
+        // TODO
+//        inTransaction(() -> {
+//            List<ActivityDto> foundActivities = dataSource.find(searchCriteria);
+//            assertThat(foundActivities)
+//                    .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags", "metricValues")
+//                    .containsExactlyElementsOf(expectedActivities);
+//        });
+    }
+
+    @Test
+    void shouldFindActivitiesWithTags() {
         fail();
 
         // TODO
