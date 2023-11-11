@@ -11,12 +11,18 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
+import static java.util.Arrays.stream;
 import static java.util.Objects.isNull;
 import static java.util.UUID.randomUUID;
 
 public abstract class IntegrationTestRelationalDataBase {
+
+    private final Set<UUID> addedEntityIds = new HashSet<>();
 
     abstract String jdbcUrl();
 
@@ -28,24 +34,31 @@ public abstract class IntegrationTestRelationalDataBase {
 
     protected abstract Connection getConnection() throws SQLException;
 
-    public void addUsers(TenantDto... users) throws SQLException {
+    public synchronized void addUsers(TenantDto... users) throws SQLException {
+        List<TenantDto> notAddedUsers = stream(users)
+                .filter(user -> !addedEntityIds.contains(user.id()))
+                .toList();
         Connection connection = getConnection();
-        for (TenantDto user : users) {
+        for (TenantDto user : notAddedUsers) {
             PreparedStatement preparedStatement = connection.prepareStatement(
-                    "insert into tenant (id, username, password) values (?, ?, ?) on conflict do nothing;"
+                    "insert into tenant (id, username, password) values (?, ?, ?);"
             );
             preparedStatement.setString(1, user.id().toString());
             preparedStatement.setString(2, user.username());
             preparedStatement.setString(3, user.password());
             preparedStatement.execute();
+            addedEntityIds.add(user.id());
         }
     }
 
-    public void addActivities(ActivityDto... activities) throws SQLException {
+    public synchronized void addActivities(ActivityDto... activities) throws SQLException {
+        List<ActivityDto> notAddedActivities = stream(activities)
+                .filter(activity -> !addedEntityIds.contains(activity.id()))
+                .toList();
         Connection connection = getConnection();
-        for (ActivityDto activity : activities) {
+        for (ActivityDto activity : notAddedActivities) {
             PreparedStatement preparedStatement = connection.prepareStatement(
-                    "insert into activity (id, creator_id, title, start_time, end_time, comment, deleted) values (?, ?, ?, ?, ?, ?, ?) on conflict do nothing"
+                    "insert into activity (id, creator_id, title, start_time, end_time, comment, deleted) values (?, ?, ?, ?, ?, ?, ?)"
             );
             preparedStatement.setString(1, activity.id().toString());
             preparedStatement.setString(2, activity.creatorId().toString());
@@ -54,14 +67,18 @@ public abstract class IntegrationTestRelationalDataBase {
             preparedStatement.setTimestamp(5, isNull(activity.endTime()) ? null : Timestamp.from(activity.endTime()));
             preparedStatement.setString(6, activity.comment());
             preparedStatement.setBoolean(7, activity.deleted());
+            addedEntityIds.add(activity.id());
         }
     }
 
-    public void addTags(TagDto... tags) throws SQLException {
+    public synchronized void addTags(TagDto... tags) throws SQLException {
+        List<TagDto> notAddedTags = stream(tags)
+                .filter(tag -> !addedEntityIds.contains(tag.id()))
+                .toList();
         Connection connection = getConnection();
-        for (TagDto tag : tags) {
+        for (TagDto tag : notAddedTags) {
             PreparedStatement preparedStatement = connection.prepareStatement(
-                    "insert into tag (id, creator_id, name, deleted) values (?, ?, ?, ?) on conflict do nothing;"
+                    "insert into tag (id, creator_id, name, deleted) values (?, ?, ?, ?);"
             );
             preparedStatement.setString(1, tag.id().toString());
             preparedStatement.setString(2, tag.creatorId().toString());
@@ -70,6 +87,7 @@ public abstract class IntegrationTestRelationalDataBase {
             preparedStatement.execute();
             addAssociatedShares(tag);
             addMetrics(tag);
+            addedEntityIds.add(tag.id());
         }
     }
 
@@ -77,7 +95,7 @@ public abstract class IntegrationTestRelationalDataBase {
         Connection connection = getConnection();
         for (Share share : tag.shares()) {
             PreparedStatement preparedStatement = connection.prepareStatement(
-                    "insert into tag_share (id, tag_id, grantee_id, grantee_name) values (?, ?, ?, ?) on conflict do nothing;"
+                    "insert into tag_share (id, tag_id, grantee_id, grantee_name) values (?, ?, ?, ?);"
             );
             preparedStatement.setString(1, randomUUID().toString());
             preparedStatement.setString(2, tag.id().toString());
@@ -91,7 +109,7 @@ public abstract class IntegrationTestRelationalDataBase {
         Connection connection = getConnection();
         for (MetricDto metric : tag.metrics()) {
             PreparedStatement preparedStatement = connection.prepareStatement(
-                    "insert into metric (id, creator_id, tag_id, name, type, deleted) values (?, ?, ?, ?, ?, ?) on conflict do nothing;"
+                    "insert into metric (id, creator_id, tag_id, name, type, deleted) values (?, ?, ?, ?, ?, ?);"
             );
             preparedStatement.setString(1, metric.id().toString());
             preparedStatement.setString(2, metric.creatorId().toString());
@@ -102,11 +120,14 @@ public abstract class IntegrationTestRelationalDataBase {
         }
     }
 
-    public void addTagSets(TagSetDto... tagSets) throws SQLException {
+    public synchronized void addTagSets(TagSetDto... tagSets) throws SQLException {
+        List<TagSetDto> notAddedTagSets = stream(tagSets)
+                .filter(tagSet -> !addedEntityIds.contains(tagSet.id()))
+                .toList();
         Connection connection = getConnection();
-        for (TagSetDto tagSet : tagSets) {
+        for (TagSetDto tagSet : notAddedTagSets) {
             PreparedStatement preparedStatement = connection.prepareStatement(
-                    "insert into tag_set(id, creator_id, name, deleted) values (?, ?, ?, ?) on conflict do nothing;"
+                    "insert into tag_set(id, creator_id, name, deleted) values (?, ?, ?, ?);"
             );
             preparedStatement.setString(1, tagSet.id().toString());
             preparedStatement.setString(2, tagSet.creatorId().toString());
@@ -114,6 +135,7 @@ public abstract class IntegrationTestRelationalDataBase {
             preparedStatement.setBoolean(4, tagSet.deleted());
             preparedStatement.execute();
             addAssociatedTags(tagSet);
+            addedEntityIds.add(tagSet.id());
         }
     }
 
@@ -121,7 +143,7 @@ public abstract class IntegrationTestRelationalDataBase {
         Connection connection = getConnection();
         for (UUID tagId : tagSet.tags()) {
             PreparedStatement preparedStatement = connection.prepareStatement(
-                    "insert into tag_set_tag (tag_set_id, tag_id) values (?, ?) on conflict do nothing;"
+                    "insert into tag_set_tag (tag_set_id, tag_id) values (?, ?);"
             );
             preparedStatement.setString(1, tagSet.id().toString());
             preparedStatement.setString(2, tagId.toString());
