@@ -11,14 +11,17 @@ import ovh.equino.actracker.domain.activity.ActivityId;
 import ovh.equino.actracker.domain.activity.MetricValue;
 import ovh.equino.actracker.domain.tag.MetricDto;
 import ovh.equino.actracker.domain.tag.TagDto;
+import ovh.equino.actracker.domain.tagset.TagSetDto;
 import ovh.equino.actracker.domain.tenant.TenantDto;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
 
 import java.sql.SQLException;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.UUID.randomUUID;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static ovh.equino.actracker.repository.jpa.TestUtil.randomBigDecimal;
 
@@ -81,7 +84,18 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("accessibleActivity")
     void shouldFindAccessibleActivity(String testName, ActivityId activityId, ActivityDto expectedActivity) {
-        fail();
+        inTransaction(() -> {
+            Optional<ActivityDto> foundActivity = dataSource.find(activityId, searcher);
+            assertThat(foundActivity).isPresent();
+            assertThat(foundActivity.get())
+                    .usingRecursiveComparison()
+                    .ignoringFields("tags", "metricValues")
+                    .isEqualTo(expectedActivity);
+//            assertThat(foundActivity.get().tags())
+//                    .containsExactlyInAnyOrderElementsOf(expectedActivity.tags());
+//            assertThat(foundActivity.get().metricValues())
+//                    .containsExactlyInAnyOrderElementsOf(expectedActivity.metricValues());
+        });
     }
 
     static Stream<Arguments> accessibleActivity() {
@@ -117,7 +131,10 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("inaccessibleActivity")
     void shouldNotFindInaccessibleActivity(String testName, ActivityId activityId) {
-        fail();
+        inTransaction(() -> {
+            Optional<ActivityDto> foundActivity = dataSource.find(activityId, searcher);
+            assertThat(foundActivity).isEmpty();
+        });
     }
 
     static Stream<Arguments> inaccessibleActivity() {
@@ -157,6 +174,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
         MetricDto sharedMetric2 = newMetric(sharingUser).build();
         MetricDto sharedMetric3 = newMetric(sharingUser).build();
         MetricDto sharedDeletedMetric = newMetric(sharingUser).deleted().build();
+        MetricDto notAddedMetric = newMetric(searcherTenant).build();
 
         accessibleOwnTagWithMetrics = newTag(searcherTenant)
                 .withMetrics(ownMetric1, ownMetric2)
@@ -185,6 +203,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
         inaccessibleSharedDeletedTagWithMetric = newTag(sharingUser)
                 .withMetrics(sharedMetric2)
                 .sharedWith(searcherTenant)
+                .deleted()
                 .build();
         inaccessibleForeignTagWithMetric = newTag(sharingUser)
                 .withMetrics(sharedMetric3)
@@ -236,14 +255,15 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                         accessibleSharedTagWithMetric,
                         accessibleSharedTagWithDeletedMetric,
                         accessibleSharedTagWithoutMetric,
-                        inaccessibleSharedDeletedTagWithMetric
+                        inaccessibleSharedDeletedTagWithMetric,
+                        inaccessibleForeignTagWithMetric
                 )
                 .withMetricValues(
                         new MetricValue(sharedMetric1.id(), randomBigDecimal()),
                         new MetricValue(sharedDeletedMetric.id(), randomBigDecimal()),
                         new MetricValue(sharedMetric2.id(), randomBigDecimal()),
-                        new MetricValue(sharedMetric3.id(), randomBigDecimal()), // not accessible, tag doesn't exist
-                        new MetricValue(randomUUID(), randomBigDecimal())   // not existing metric
+                        new MetricValue(sharedMetric3.id(), randomBigDecimal()),
+                        new MetricValue(notAddedMetric.id(), randomBigDecimal())
                 )
                 .build();
 

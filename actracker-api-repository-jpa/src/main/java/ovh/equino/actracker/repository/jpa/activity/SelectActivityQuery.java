@@ -74,7 +74,12 @@ final class SelectActivityQuery extends SingleResultJpaQuery<ActivityEntity, Act
             Join<?, ?> shares = tags.join("shares", JoinType.LEFT);
             Subquery<Long> subQuery = query.subquery(Long.class);
             subQuery.select(criteriaBuilder.literal(1L))
-                    .where(criteriaBuilder.equal(shares.get("granteeId"), user.id().toString()))
+                    .where(
+                            criteriaBuilder.and(
+                                    criteriaBuilder.equal(shares.get("granteeId"), user.id().toString()),
+                                    criteriaBuilder.isFalse(tags.get("deleted"))
+                            )
+                    )
                     .from(ActivityEntity.class);
             return () -> criteriaBuilder.exists(subQuery);
         }

@@ -60,10 +60,10 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
     @MethodSource("accessibleTagSet")
     void shouldFindAccessibleTagSet(String testName, TagSetId tagSetId, TagSetDto expectedTagSet) {
         inTransaction(() -> {
-            Optional<TagSetDto> tagSetDto = dataSource.find(tagSetId, searcher);
-            assertThat(tagSetDto).isPresent();
-            assertThat(tagSetDto.get()).usingRecursiveComparison().ignoringFields("tags").isEqualTo(expectedTagSet);
-            assertThat(tagSetDto.get().tags()).containsExactlyInAnyOrderElementsOf(expectedTagSet.tags());
+            Optional<TagSetDto> foundTagSet = dataSource.find(tagSetId, searcher);
+            assertThat(foundTagSet).isPresent();
+            assertThat(foundTagSet.get()).usingRecursiveComparison().ignoringFields("tags").isEqualTo(expectedTagSet);
+            assertThat(foundTagSet.get().tags()).containsExactlyInAnyOrderElementsOf(expectedTagSet.tags());
         });
     }
 
@@ -120,8 +120,8 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
     @MethodSource("inaccessibleTagSet")
     void shouldNotFindInaccessibleTagSet(String testName, TagSetId tagSetId) {
         inTransaction(() -> {
-            Optional<TagSetDto> tagSetDto = dataSource.find(tagSetId, searcher);
-            assertThat(tagSetDto).isEmpty();
+            Optional<TagSetDto> foundTagSet = dataSource.find(tagSetId, searcher);
+            assertThat(foundTagSet).isEmpty();
         });
     }
 

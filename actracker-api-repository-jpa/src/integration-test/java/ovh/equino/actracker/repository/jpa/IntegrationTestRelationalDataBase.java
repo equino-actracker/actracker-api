@@ -67,7 +67,21 @@ public abstract class IntegrationTestRelationalDataBase {
             preparedStatement.setTimestamp(5, isNull(activity.endTime()) ? null : Timestamp.from(activity.endTime()));
             preparedStatement.setString(6, activity.comment());
             preparedStatement.setBoolean(7, activity.deleted());
+            preparedStatement.execute();
+            addAssociatedTags(activity);
             addedEntityIds.add(activity.id());
+        }
+    }
+
+    private void addAssociatedTags(ActivityDto activity) throws SQLException {
+        Connection connection = getConnection();
+        for (UUID tagId : activity.tags()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "insert into activity_tag (activity_id, tag_id) values (?, ?);"
+            );
+            preparedStatement.setString(1, activity.id().toString());
+            preparedStatement.setString(2, tagId.toString());
+            preparedStatement.execute();
         }
     }
 
@@ -117,6 +131,7 @@ public abstract class IntegrationTestRelationalDataBase {
             preparedStatement.setString(4, metric.name());
             preparedStatement.setString(5, metric.type().toString());
             preparedStatement.setBoolean(6, metric.deleted());
+            preparedStatement.execute();
         }
     }
 
