@@ -11,6 +11,7 @@ import ovh.equino.actracker.repository.jpa.JpaSortBuilder;
 import ovh.equino.actracker.repository.jpa.MultiResultJpaQuery;
 import ovh.equino.actracker.repository.jpa.tag.TagEntity;
 
+import java.sql.Timestamp;
 import java.util.Set;
 import java.util.UUID;
 
@@ -74,6 +75,32 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
     public class PredicateBuilder extends JpaPredicateBuilder<ActivityEntity> {
         private PredicateBuilder() {
             super(criteriaBuilder, root);
+        }
+
+        public JpaPredicate isInTimeRange(Timestamp timeRangeStart, Timestamp timeRangeEnd) {
+            JpaPredicate startTimeInRange = timeRangeStart != null
+                    ? or(not(isStarted()), not(isStartedAfterOrAt(timeRangeEnd)))
+                    : allMatch();
+            JpaPredicate endTimeInRange = timeRangeEnd != null
+                    ? or(not(isFinished()), not(isFinishedBefore(timeRangeStart)))
+                    : allMatch();
+            return and(startTimeInRange, endTimeInRange);
+        }
+
+        private JpaPredicate isStartedAfterOrAt(Timestamp timeRangeEnd) {
+            return () -> criteriaBuilder.greaterThanOrEqualTo(root.get("startTime"), timeRangeEnd);
+        }
+
+        private JpaPredicate isFinishedBefore(Timestamp timeRangeStart) {
+            return () -> criteriaBuilder.lessThan(root.get("endTime"), timeRangeStart);
+        }
+
+        private JpaPredicate isFinished() {
+            return () -> criteriaBuilder.isNotNull(root.get("endTime"));
+        }
+
+        private JpaPredicate isStarted() {
+            return () -> criteriaBuilder.isNotNull(root.get("startTime"));
         }
 
         @Override

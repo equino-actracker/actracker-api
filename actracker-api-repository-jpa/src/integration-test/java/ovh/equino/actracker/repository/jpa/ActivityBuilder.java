@@ -24,8 +24,8 @@ public final class ActivityBuilder {
                 randomUUID(),
                 creator.id(),
                 randomString(),
-                Instant.ofEpochSecond(1),
-                Instant.ofEpochSecond(2),
+                null,
+                null,
                 randomString(),
                 Set.of(randomUUID(), randomUUID(), randomUUID()),
                 List.of(
@@ -35,6 +35,36 @@ public final class ActivityBuilder {
                 ),
                 false
         );
+    }
+
+    public ActivityBuilder startedAt(long epochSeconds) {
+        this.newActivity = new ActivityDto(
+                newActivity.id(),
+                newActivity.creatorId(),
+                newActivity.title(),
+                Instant.ofEpochSecond(epochSeconds),
+                newActivity.endTime(),
+                newActivity.comment(),
+                newActivity.tags(),
+                newActivity.metricValues(),
+                newActivity.deleted()
+        );
+        return this;
+    }
+
+    public ActivityBuilder finishedAt(long epochSeconds) {
+        this.newActivity = new ActivityDto(
+                newActivity.id(),
+                newActivity.creatorId(),
+                newActivity.title(),
+                newActivity.startTime(),
+                Instant.ofEpochSecond(epochSeconds),
+                newActivity.comment(),
+                newActivity.tags(),
+                newActivity.metricValues(),
+                newActivity.deleted()
+        );
+        return this;
     }
 
     public ActivityBuilder deleted() {

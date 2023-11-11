@@ -8,6 +8,7 @@ import ovh.equino.actracker.domain.activity.ActivityId;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaDAO;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -41,6 +42,13 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
     @Override
     public List<ActivityDto> find(EntitySearchCriteria searchCriteria) {
 
+        Timestamp timeRangeStart = isNull(searchCriteria.timeRangeStart())
+                ? null
+                : Timestamp.from(searchCriteria.timeRangeStart());
+        Timestamp timeRangeEnd = isNull(searchCriteria.timeRangeEnd())
+                ? null
+                : Timestamp.from(searchCriteria.timeRangeEnd());
+
         SelectActivitiesQuery selectActivities = new SelectActivitiesQuery(entityManager);
         List<ActivityProjection> activityResults = selectActivities
                 .where(
@@ -49,7 +57,8 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
                                 selectActivities.predicate().isAccessibleFor(searchCriteria.searcher()),
                                 selectActivities.predicate().isInPage(searchCriteria.pageId()),
                                 selectActivities.predicate().isNotExcluded(searchCriteria.excludeFilter()),
-                                selectActivities.predicate().hasAnyOfTag(searchCriteria.tags())
+                                selectActivities.predicate().hasAnyOfTag(searchCriteria.tags()),
+                                selectActivities.predicate().isInTimeRange(timeRangeStart, timeRangeEnd)
                         )
                 )
                 .orderBy(selectActivities.sort().ascending("id"))

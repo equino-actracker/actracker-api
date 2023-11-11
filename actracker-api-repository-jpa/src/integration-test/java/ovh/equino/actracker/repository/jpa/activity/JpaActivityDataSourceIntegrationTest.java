@@ -17,6 +17,7 @@ import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
 
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -48,6 +49,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
     private static ActivityDto accessibleOwnActivityWithDeletedTags;
     private static ActivityDto accessibleOwnActivityWithoutTags;
     private static ActivityDto accessibleSharedActivityWithMetricsSet;
+    private static ActivityDto accessibleSharedActivityWithMetricsUnset;
     private static ActivityDto inaccessibleActivityWithDeletedSharingTag;
     private static ActivityDto inaccessibleOwnDeletedActivity;
     private static ActivityDto inaccessibleForeignActivity;
@@ -78,6 +80,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                 accessibleOwnActivityWithDeletedTags,
                 accessibleOwnActivityWithoutTags,
                 accessibleSharedActivityWithMetricsSet,
+                accessibleSharedActivityWithMetricsUnset,
                 inaccessibleActivityWithDeletedSharingTag,
                 inaccessibleOwnDeletedActivity,
                 inaccessibleForeignActivity
@@ -128,6 +131,11 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                         "accessibleSharedActivityWithMetricsSet",
                         new ActivityId(accessibleSharedActivityWithMetricsSet.id()),
                         accessibleSharedActivityWithMetricsSet
+                ),
+                Arguments.of(
+                        "accessibleSharedActivityWithMetricsUnset",
+                        new ActivityId(accessibleSharedActivityWithMetricsUnset.id()),
+                        accessibleSharedActivityWithMetricsUnset
                 )
         );
     }
@@ -157,7 +165,8 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                         accessibleOwnActivityWithMetricsUnset,
                         accessibleOwnActivityWithDeletedTags,
                         accessibleOwnActivityWithoutTags,
-                        accessibleSharedActivityWithMetricsSet
+                        accessibleSharedActivityWithMetricsSet,
+                        accessibleSharedActivityWithMetricsUnset
                 )
                 .sorted(comparing(activity -> activity.id().toString()))
                 .toList();
@@ -198,7 +207,8 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                         accessibleOwnActivityWithMetricsUnset,
                         accessibleOwnActivityWithDeletedTags,
                         accessibleOwnActivityWithoutTags,
-                        accessibleSharedActivityWithMetricsSet
+                        accessibleSharedActivityWithMetricsSet,
+                        accessibleSharedActivityWithMetricsUnset
                 )
                 .sorted(comparing(activity -> activity.id().toString()))
                 .skip(1)
@@ -226,16 +236,33 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldFindActivitiesInTimeRange() {
-        fail();
+        List<ActivityDto> expectedActivities = Stream.of(
+                        accessibleOwnActivityWithMetricsSet,
+                        accessibleOwnActivityWithMetricsUnset,
+                        accessibleOwnActivityWithDeletedTags,
+                        accessibleSharedActivityWithMetricsUnset
+                )
+                .sorted(comparing(activity -> activity.id().toString()))
+                .toList();
 
-        // TODO
-//        inTransaction(() -> {
-//            List<ActivityDto> foundActivities = dataSource.find(searchCriteria);
-//            assertThat(foundActivities)
-//                    .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags", "metricValues")
-//                    .containsExactlyElementsOf(expectedActivities);
-//        });
+        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
+                searcher,
+                LARGE_PAGE_SIZE,
+                FIRST_PAGE,
+                null,
+                Instant.ofEpochSecond(40),
+                Instant.ofEpochSecond(60),
+                null,
+                null,
+                null
+        );
 
+        inTransaction(() -> {
+            List<ActivityDto> foundActivities = dataSource.find(searchCriteria);
+            assertThat(foundActivities)
+                    .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags", "metricValues")
+                    .containsExactlyElementsOf(expectedActivities);
+        });
     }
 
     @Test
@@ -243,7 +270,8 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
         List<ActivityDto> expectedActivities = Stream.of(
                         accessibleOwnActivityWithMetricsSet,
                         accessibleOwnActivityWithDeletedTags,
-                        accessibleSharedActivityWithMetricsSet
+                        accessibleSharedActivityWithMetricsSet,
+                        accessibleSharedActivityWithMetricsUnset
                 )
                 .sorted(comparing(activity -> activity.id().toString()))
                 .toList();
@@ -273,7 +301,8 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
         List<ActivityDto> expectedActivities = Stream.of(
                         accessibleOwnActivityWithMetricsSet,
                         accessibleOwnActivityWithMetricsUnset,
-                        accessibleSharedActivityWithMetricsSet
+                        accessibleSharedActivityWithMetricsSet,
+                        accessibleSharedActivityWithMetricsUnset
                 )
                 .sorted(comparing(activity -> activity.id().toString()))
                 .toList();
@@ -369,6 +398,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                 .build();
 
         accessibleOwnActivityWithMetricsUnset = newActivity(searcherTenant)
+                .startedAt(1)
                 .withTags(
                         accessibleOwnTagWithMetrics,
                         accessibleOwnTagWithDeletedMetric,
@@ -379,6 +409,8 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                 .build();
 
         accessibleOwnActivityWithDeletedTags = newActivity(searcherTenant)
+                .startedAt(39)
+                .finishedAt(61)
                 .withTags(
                         inaccessibleOwnDeletedTagWithMetric
                 )
@@ -388,11 +420,15 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                 .build();
 
         accessibleOwnActivityWithoutTags = newActivity(searcherTenant)
+                .startedAt(1)
+                .finishedAt(39)
                 .withTags()
                 .withMetricValues()
                 .build();
 
         accessibleSharedActivityWithMetricsSet = newActivity(sharingUser)
+                .startedAt(60)
+                .finishedAt(99)
                 .withTags(
                         accessibleSharedTagWithMetric,
                         accessibleSharedTagWithDeletedMetric,
@@ -406,6 +442,18 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                         new MetricValue(sharedMetric2.id(), randomBigDecimal()),
                         new MetricValue(sharedMetric3.id(), randomBigDecimal()),
                         new MetricValue(notAddedMetric.id(), randomBigDecimal())
+                )
+                .build();
+
+        accessibleSharedActivityWithMetricsUnset = newActivity(sharingUser)
+                .startedAt(41)
+                .finishedAt(59)
+                .withTags(
+                        accessibleSharedTagWithMetric,
+                        accessibleSharedTagWithDeletedMetric,
+                        accessibleSharedTagWithoutMetric,
+                        inaccessibleSharedDeletedTagWithMetric,
+                        inaccessibleForeignTagWithMetric
                 )
                 .build();
 
