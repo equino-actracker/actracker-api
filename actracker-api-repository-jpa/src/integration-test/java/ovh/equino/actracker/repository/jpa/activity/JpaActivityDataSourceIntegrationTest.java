@@ -270,23 +270,36 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldFindActivitiesWithTags() {
-        fail();
+        List<ActivityDto> expectedActivities = Stream.of(
+                        accessibleOwnActivityWithMetricsSet,
+                        accessibleOwnActivityWithMetricsUnset,
+                        accessibleSharedActivityWithMetricsSet
+                )
+                .sorted(comparing(activity -> activity.id().toString()))
+                .toList();
 
-        // TODO
-//        inTransaction(() -> {
-//            List<ActivityDto> foundActivities = dataSource.find(searchCriteria);
-//            assertThat(foundActivities)
-//                    .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags", "metricValues")
-//                    .containsExactlyElementsOf(expectedActivities);
-////            assertThat(foundActivities)
-////                    .flatMap(ActivityDto::tags)
-////                    .containsExactlyInAnyOrder(
-////                    );
-////            assertThat(foundActivities)
-////                    .flatMap(ActivityDto::metricValues)
-////                    .containsExactlyInAnyOrder(
-////                    );
-//        });
+        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
+                searcher,
+                LARGE_PAGE_SIZE,
+                FIRST_PAGE,
+                null,
+                null,
+                null,
+                null,
+                Set.of(
+                        accessibleOwnTagWithoutMetric.id(),
+                        accessibleSharedTagWithoutMetric.id(),
+                        inaccessibleOwnDeletedTagWithMetric.id()
+                ),
+                null
+        );
+
+        inTransaction(() -> {
+            List<ActivityDto> foundActivities = dataSource.find(searchCriteria);
+            assertThat(foundActivities)
+                    .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags", "metricValues")
+                    .containsExactlyElementsOf(expectedActivities);
+        });
     }
 
     @BeforeAll
@@ -326,6 +339,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                 .sharedWith(searcherTenant)
                 .build();
         inaccessibleOwnDeletedTagWithMetric = newTag(searcherTenant)
+                .deleted()
                 .withMetrics(ownMetric3)
                 .build();
         inaccessibleSharedDeletedTagWithMetric = newTag(sharingUser)

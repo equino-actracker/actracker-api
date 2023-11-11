@@ -9,6 +9,12 @@ import ovh.equino.actracker.repository.jpa.JpaPredicate;
 import ovh.equino.actracker.repository.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.repository.jpa.JpaSortBuilder;
 import ovh.equino.actracker.repository.jpa.MultiResultJpaQuery;
+import ovh.equino.actracker.repository.jpa.tag.TagEntity;
+
+import java.util.Set;
+import java.util.UUID;
+
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, ActivityProjection> {
 
@@ -86,6 +92,33 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
                     .where(
                             criteriaBuilder.and(
                                     criteriaBuilder.equal(shares.get("granteeId"), user.id().toString()),
+                                    criteriaBuilder.isFalse(tags.get("deleted"))
+                            )
+                    )
+                    .from(ActivityEntity.class);
+            return () -> criteriaBuilder.exists(subQuery);
+        }
+
+        public JpaPredicate hasAnyOfTag(Set<UUID> requiredTags) {
+            if (isEmpty(requiredTags)) {
+                return allMatch();
+            }
+
+            Join<ActivityEntity, TagEntity> tags = root.join("tags");
+
+            JpaPredicate[] predicatesForTags = requiredTags.stream()
+                    .map(tagId -> hasTag(tagId, tags))
+                    .toArray(JpaPredicate[]::new);
+
+            return or(predicatesForTags);
+        }
+
+        private JpaPredicate hasTag(UUID tagId, Join<ActivityEntity, TagEntity> tags) {
+            Subquery<Long> subQuery = query.subquery(Long.class);
+            subQuery.select(criteriaBuilder.literal(1L))
+                    .where(
+                            criteriaBuilder.and(
+                                    criteriaBuilder.equal(tags.get("id"), tagId.toString()),
                                     criteriaBuilder.isFalse(tags.get("deleted"))
                             )
                     )

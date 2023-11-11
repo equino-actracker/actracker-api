@@ -48,7 +48,8 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
                                 selectActivities.predicate().isNotDeleted(),
                                 selectActivities.predicate().isAccessibleFor(searchCriteria.searcher()),
                                 selectActivities.predicate().isInPage(searchCriteria.pageId()),
-                                selectActivities.predicate().isNotExcluded(searchCriteria.excludeFilter())
+                                selectActivities.predicate().isNotExcluded(searchCriteria.excludeFilter()),
+                                selectActivities.predicate().hasAnyOfTag(searchCriteria.tags())
                         )
                 )
                 .orderBy(selectActivities.sort().ascending("id"))
