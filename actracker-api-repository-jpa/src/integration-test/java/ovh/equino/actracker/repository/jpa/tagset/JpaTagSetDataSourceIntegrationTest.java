@@ -163,10 +163,11 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
                     .containsExactlyElementsOf(expectedTagSets);
             assertThat(foundTagSets)
                     .flatMap(TagSetDto::tags)
-                    .containsOnly(
+                    .containsExactlyInAnyOrder(
                             accessibleOwnTag1.id(),
-                            accessibleOwnTag2.id(),
-                            accessibleSharedTag.id()
+                            accessibleSharedTag.id(),
+                            accessibleOwnTag1.id(),
+                            accessibleOwnTag2.id()
                     );
         });
     }

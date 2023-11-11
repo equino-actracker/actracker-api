@@ -40,7 +40,22 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
 
     @Override
     public List<ActivityDto> find(EntitySearchCriteria searchCriteria) {
-        return null;
+
+        SelectActivitiesQuery selectActivities = new SelectActivitiesQuery(entityManager);
+        List<ActivityProjection> activityResults = selectActivities
+                .where(
+                        selectActivities.predicate().and(
+                                selectActivities.predicate().isNotDeleted(),
+                                selectActivities.predicate().isAccessibleFor(searchCriteria.searcher())
+                        )
+                )
+                .orderBy(selectActivities.sort().ascending("id"))
+                .execute();
+
+        return activityResults
+                .stream()
+                .map(this::toActivity)
+                .toList();
     }
 
     private ActivityDto toActivity(ActivityProjection activityProjection) {

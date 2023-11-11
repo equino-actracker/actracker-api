@@ -6,20 +6,23 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivityId;
 import ovh.equino.actracker.domain.activity.MetricValue;
 import ovh.equino.actracker.domain.tag.MetricDto;
 import ovh.equino.actracker.domain.tag.TagDto;
-import ovh.equino.actracker.domain.tagset.TagSetDto;
 import ovh.equino.actracker.domain.tenant.TenantDto;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
 
 import java.sql.SQLException;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static java.util.Comparator.comparing;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -91,6 +94,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                     .usingRecursiveComparison()
                     .ignoringFields("tags", "metricValues")
                     .isEqualTo(expectedActivity);
+            // TODO
 //            assertThat(foundActivity.get().tags())
 //                    .containsExactlyInAnyOrderElementsOf(expectedActivity.tags());
 //            assertThat(foundActivity.get().metricValues())
@@ -148,17 +152,85 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldFindAllAccessibleActivities() {
-        fail();
+        List<ActivityDto> expectedActivities = Stream.of(
+                        accessibleOwnActivityWithMetricsSet,
+                        accessibleOwnActivityWithMetricsUnset,
+                        accessibleOwnActivityWithDeletedTags,
+                        accessibleOwnActivityWithoutTags,
+                        accessibleSharedActivityWithMetricsSet
+                )
+                .sorted(comparing(activity -> activity.id().toString()))
+                .toList();
+
+        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
+                searcher,
+                LARGE_PAGE_SIZE,
+                FIRST_PAGE,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+
+        inTransaction(() -> {
+            List<ActivityDto> foundActivities = dataSource.find(searchCriteria);
+            assertThat(foundActivities)
+                    .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags", "metricValues")
+                    .containsExactlyElementsOf(expectedActivities);
+            // TODO
+//            assertThat(foundActivities)
+//                    .flatMap(ActivityDto::tags)
+//                    .containsExactlyInAnyOrder(
+//                    );
+//            assertThat(foundActivities)
+//                    .flatMap(ActivityDto::metricValues)
+//                    .containsExactlyInAnyOrder(
+//                    );
+        });
     }
 
     @Test
     void shouldFindSecondPageOfActivities() {
         fail();
+
+        // TODO
+//        inTransaction(() -> {
+//            List<ActivityDto> foundActivities = dataSource.find(searchCriteria);
+//            assertThat(foundActivities)
+//                    .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags", "metricValues")
+//                    .containsExactlyElementsOf(expectedActivities);
+////            assertThat(foundActivities)
+////                    .flatMap(ActivityDto::tags)
+////                    .containsExactlyInAnyOrder(
+////                    );
+////            assertThat(foundActivities)
+////                    .flatMap(ActivityDto::metricValues)
+////                    .containsExactlyInAnyOrder(
+////                    );
+//        });
     }
 
     @Test
     void shouldFindNotExcludedActivities() {
         fail();
+
+        // TODO
+//        inTransaction(() -> {
+//            List<ActivityDto> foundActivities = dataSource.find(searchCriteria);
+//            assertThat(foundActivities)
+//                    .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags", "metricValues")
+//                    .containsExactlyElementsOf(expectedActivities);
+////            assertThat(foundActivities)
+////                    .flatMap(ActivityDto::tags)
+////                    .containsExactlyInAnyOrder(
+////                    );
+////            assertThat(foundActivities)
+////                    .flatMap(ActivityDto::metricValues)
+////                    .containsExactlyInAnyOrder(
+////                    );
+//        });
     }
 
     @BeforeAll

@@ -13,6 +13,7 @@ import static java.util.Arrays.stream;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static ovh.equino.actracker.repository.jpa.TestUtil.randomBigDecimal;
+import static ovh.equino.actracker.repository.jpa.TestUtil.randomString;
 
 public final class ActivityBuilder {
 
@@ -22,10 +23,10 @@ public final class ActivityBuilder {
         this.newActivity = new ActivityDto(
                 randomUUID(),
                 creator.id(),
-                randomUUID().toString(),
+                randomString(),
                 Instant.ofEpochSecond(1),
                 Instant.ofEpochSecond(2),
-                randomUUID().toString(),
+                randomString(),
                 Set.of(randomUUID(), randomUUID(), randomUUID()),
                 List.of(
                         new MetricValue(randomUUID(), randomBigDecimal()),
