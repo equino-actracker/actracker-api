@@ -22,6 +22,7 @@ import java.util.stream.Stream;
 
 import static java.util.Collections.emptySet;
 import static java.util.Comparator.comparing;
+import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
@@ -68,7 +69,9 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
 
     private static Stream<Arguments> accessibleTagSet() {
         return Stream.of(
-                Arguments.of(new TagSetId(accessibleOwnTagSet1.id()), new TagSetDto(
+                Arguments.of(
+                        new TagSetId(accessibleOwnTagSet1.id()),
+                        new TagSetDto(
                                 accessibleOwnTagSet1.id(),
                                 accessibleOwnTagSet1.creatorId(),
                                 accessibleOwnTagSet1.name(),
@@ -76,7 +79,9 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
                                 accessibleOwnTagSet1.deleted()
                         )
                 ),
-                Arguments.of(new TagSetId(accessibleOwnTagSet2.id()), new TagSetDto(
+                Arguments.of(
+                        new TagSetId(accessibleOwnTagSet2.id()),
+                        new TagSetDto(
                                 accessibleOwnTagSet2.id(),
                                 accessibleOwnTagSet2.creatorId(),
                                 accessibleOwnTagSet2.name(),
@@ -84,7 +89,9 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
                                 accessibleOwnTagSet2.deleted()
                         )
                 ),
-                Arguments.of(new TagSetId(accessibleOwnTagSet3.id()), new TagSetDto(
+                Arguments.of(
+                        new TagSetId(accessibleOwnTagSet3.id()),
+                        new TagSetDto(
                                 accessibleOwnTagSet3.id(),
                                 accessibleOwnTagSet3.creatorId(),
                                 accessibleOwnTagSet3.name(),
@@ -92,7 +99,9 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
                                 accessibleOwnTagSet4.deleted()
                         )
                 ),
-                Arguments.of(new TagSetId(accessibleOwnTagSet4.id()), new TagSetDto(
+                Arguments.of(
+                        new TagSetId(accessibleOwnTagSet4.id()),
+                        new TagSetDto(
                                 accessibleOwnTagSet4.id(),
                                 accessibleOwnTagSet4.creatorId(),
                                 accessibleOwnTagSet4.name(),
@@ -115,7 +124,8 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
     private static Stream<Arguments> inaccessibleTagSet() {
         return Stream.of(
                 Arguments.of(new TagSetId(inaccessibleOwnDeletedTagSet.id())),
-                Arguments.of(new TagSetId(inaccessibleForeignTagSet.id()))
+                Arguments.of(new TagSetId(inaccessibleForeignTagSet.id())),
+                Arguments.of(new TagSetId(randomUUID()))
         );
     }
 

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivityId;
@@ -15,6 +16,7 @@ import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
 
 import java.sql.SQLException;
+import java.util.stream.Stream;
 
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -81,10 +83,44 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
         fail();
     }
 
+    static Stream<Arguments> accessibleActivity() {
+        return Stream.of(
+                Arguments.of(
+                        new ActivityId(accessibleOwnActivityWithMetricsSet.id()),
+                        accessibleOwnActivityWithMetricsSet
+                ),
+                Arguments.of(
+                        new ActivityId(accessibleOwnActivityWithMetricsUnset.id()),
+                        accessibleOwnActivityWithMetricsUnset
+                ),
+                Arguments.of(
+                        new ActivityId(accessibleOwnActivityWithDeletedTags.id()),
+                        accessibleOwnActivityWithDeletedTags
+                ),
+                Arguments.of(
+                        new ActivityId(accessibleOwnActivityWithoutTags.id()),
+                        accessibleOwnActivityWithoutTags
+                ),
+                Arguments.of(
+                        new ActivityId(accessibleSharedActivityWithMetricsSet.id()),
+                        accessibleSharedActivityWithMetricsSet
+                )
+        );
+    }
+
     @ParameterizedTest
     @MethodSource("inaccessibleActivity")
     void shouldNotFindInaccessibleActivity(ActivityId activityId) {
         fail();
+    }
+
+    static Stream<Arguments> inaccessibleActivity() {
+        return Stream.of(
+                Arguments.of(new ActivityId(inaccessibleActivityWithDeletedSharingTag.id())),
+                Arguments.of(new ActivityId(inaccessibleOwnDeletedActivity.id())),
+                Arguments.of(new ActivityId(inaccessibleForeignActivity.id())),
+                Arguments.of(new ActivityId(randomUUID()))
+        );
     }
 
     @Test
@@ -214,5 +250,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                 .build();
 
         inaccessibleForeignActivity = newActivity(sharingUser).build();
+
+        searcher = new User(searcherTenant.id());
     }
 }
