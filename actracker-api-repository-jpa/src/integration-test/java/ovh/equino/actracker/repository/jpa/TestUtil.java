@@ -4,24 +4,22 @@ import org.apache.commons.lang3.RandomStringUtils;
 
 import java.math.BigDecimal;
 
-public final class TestUtil {
+final class TestUtil {
     private TestUtil() {
     }
 
-    public static String randomString() {
+    static String randomString() {
         int length = 10;
         boolean useLetters = true;
         boolean useNumbers = false;
         return RandomStringUtils.random(length, useLetters, useNumbers);
     }
 
-    public static BigDecimal randomBigDecimal() {
-        int length = 2;
+    static BigDecimal randomBigDecimal() {
+        int length = 3;
         boolean useLetters = false;
         boolean useNumbers = true;
-        String randomInteger = RandomStringUtils.random(length, useLetters, useNumbers);
-        String randomDecimal = RandomStringUtils.random(length, useLetters, useNumbers);
-        return new BigDecimal("%s.%s5".formatted(randomInteger, randomDecimal));
+        return new BigDecimal(RandomStringUtils.random(length, useLetters, useNumbers));
     }
 
 }

@@ -1,6 +1,5 @@
 package ovh.equino.actracker.repository.jpa.activity;
 
-import jakarta.persistence.EntityManager;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.repository.jpa.tag.TagEntity;
 
@@ -15,11 +14,7 @@ import static java.util.stream.Collectors.toUnmodifiableSet;
 
 class ActivityMapper {
 
-    private final MetricValueMapper metricValueMapper;
-
-    public ActivityMapper(EntityManager entityManager) {
-        this.metricValueMapper = new MetricValueMapper(entityManager);
-    }
+    private final MetricValueMapper metricValueMapper = new MetricValueMapper();
 
     ActivityDto toDto(ActivityEntity entity) {
 

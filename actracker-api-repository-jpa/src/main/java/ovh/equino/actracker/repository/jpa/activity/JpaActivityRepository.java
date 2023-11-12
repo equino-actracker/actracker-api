@@ -6,10 +6,8 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivityRepository;
-import ovh.equino.actracker.domain.activity.MetricValue;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaDAO;
-import ovh.equino.actracker.repository.jpa.tag.MetricEntity;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -25,7 +23,7 @@ class JpaActivityRepository extends JpaDAO implements ActivityRepository {
         super(entityManager);
     }
 
-    private final ActivityMapper mapper = new ActivityMapper(entityManager);
+    private final ActivityMapper mapper = new ActivityMapper();
 
     @Override
     public void add(ActivityDto activity) {

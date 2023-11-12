@@ -1,8 +1,6 @@
 package ovh.equino.actracker.repository.jpa.activity;
 
-import jakarta.persistence.EntityManager;
 import ovh.equino.actracker.domain.activity.MetricValue;
-import ovh.equino.actracker.repository.jpa.tag.MetricEntity;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,12 +12,6 @@ import static java.util.UUID.randomUUID;
 
 class MetricValueMapper {
 
-    private final EntityManager entityManager;
-
-    MetricValueMapper(EntityManager entityManager) {
-        this.entityManager = entityManager;
-    }
-
     List<MetricValue> toValueObjects(Collection<MetricValueEntity> entities) {
         return requireNonNullElse(entities, new ArrayList<MetricValueEntity>())
                 .stream()
@@ -29,7 +21,7 @@ class MetricValueMapper {
 
     MetricValue toValueObject(MetricValueEntity entity) {
         return new MetricValue(
-                UUID.fromString(entity.metric.id),
+                UUID.fromString(entity.metricId),
                 entity.value
         );
     }
@@ -45,12 +37,8 @@ class MetricValueMapper {
         MetricValueEntity entity = new MetricValueEntity();
         entity.id = randomUUID().toString();
         entity.activity = activity;
-        entity.metric = findMetric(metricValue.metricId());
+        entity.metricId = metricValue.metricId().toString();
         entity.value = metricValue.value();
         return entity;
-    }
-
-    private MetricEntity findMetric(UUID metricId) {
-        return entityManager.find(MetricEntity.class, metricId.toString());
     }
 }
