@@ -55,7 +55,7 @@ class RepositoryConfiguration {
     Properties hibernateProperties(@Qualifier("hibernateDialect") String hibernateDialect) {
         Properties hibernateProperties = new Properties();
         hibernateProperties.setProperty("hibernate.dialect", hibernateDialect);
-        hibernateProperties.setProperty("hibernate.show_sql", "true");
+        hibernateProperties.setProperty("hibernate.show_sql", "false");
         hibernateProperties.setProperty("hibernate.format_sql", "true");
         hibernateProperties.setProperty("hibernate.use_sql_comments", "false");
         return hibernateProperties;

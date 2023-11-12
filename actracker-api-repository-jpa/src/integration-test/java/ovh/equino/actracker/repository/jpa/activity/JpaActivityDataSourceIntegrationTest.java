@@ -33,6 +33,8 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
 
     private static TenantDto searcherTenant;
     private static TenantDto sharingUser;
+    private static TenantDto grantee1;
+    private static TenantDto grantee2;
 
     private static TagDto accessibleOwnTagWithMetrics;
     private static TagDto accessibleOwnTagWithDeletedMetric;
@@ -72,7 +74,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
     @BeforeEach
     void init() throws SQLException {
         this.dataSource = new JpaActivityDataSource(entityManager);
-        database().addUsers(searcherTenant, sharingUser);
+        database().addUsers(searcherTenant, sharingUser, grantee1, grantee2);
         database().addTags(
                 accessibleOwnTagWithMetrics,
                 accessibleOwnTagWithDeletedMetric,
@@ -442,6 +444,8 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
     static void setUp() {
         searcherTenant = newUser().build();
         sharingUser = newUser().build();
+        grantee1 = newUser().build();
+        grantee2 = newUser().build();
 
         MetricDto ownMetric1 = newMetric(searcherTenant).build();
         MetricDto ownMetric2 = newMetric(searcherTenant).build();
@@ -465,12 +469,15 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
 
         accessibleOwnTagWithMetrics = newTag(searcherTenant)
                 .withMetrics(ownMetric1, ownMetric2)
+                .sharedWith(grantee1, grantee2)
                 .build();
         accessibleOwnTagWithDeletedMetric = newTag(searcherTenant)
                 .withMetrics(ownDeletedMetric)
+                .sharedWith(grantee1, grantee2)
                 .build();
         accessibleOwnTagWithoutMetric = newTag(searcherTenant)
                 .withMetrics()
+                .sharedWith(grantee1, grantee2)
                 .build();
         accessibleSharedTagWithMetric = newTag(sharingUser)
                 .withMetrics(sharedMetric1)
@@ -478,11 +485,11 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                 .build();
         accessibleSharedTagWithDeletedMetric = newTag(sharingUser)
                 .withMetrics(sharedDeletedMetric)
-                .sharedWith(searcherTenant)
+                .sharedWith(searcherTenant, grantee1, grantee2)
                 .build();
         accessibleSharedTagWithoutMetric = newTag(sharingUser)
                 .withMetrics()
-                .sharedWith(searcherTenant)
+                .sharedWith(searcherTenant, grantee1, grantee2)
                 .build();
         inaccessibleOwnDeletedTagWithMetric = newTag(searcherTenant)
                 .deleted()
@@ -509,7 +516,6 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                         ownMetric2Value,
                         ownDeletedMetricValue,
                         ownMetric3Value,
-                        sharedMetric1Value, // not accessible, tag doesn't exist
                         notAddedMetricValue
                 )
                 .build();

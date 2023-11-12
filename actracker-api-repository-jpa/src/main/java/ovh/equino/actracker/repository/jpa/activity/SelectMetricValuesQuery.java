@@ -1,13 +1,13 @@
 package ovh.equino.actracker.repository.jpa.activity;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.*;
+import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaPredicate;
 import ovh.equino.actracker.repository.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.repository.jpa.JpaSortBuilder;
 import ovh.equino.actracker.repository.jpa.MultiResultJpaQuery;
+import ovh.equino.actracker.repository.jpa.tag.TagEntity;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -34,14 +34,15 @@ final class SelectMetricValuesQuery extends MultiResultJpaQuery<MetricValueEntit
     @Override
     protected void initProjection() {
         query.select(
-                criteriaBuilder.construct(
-                        MetricValueProjection.class,
-                        root.get("id"),
-                        activity.get("id"),
-                        metric.get("id"),
-                        root.get("value")
+                        criteriaBuilder.construct(
+                                MetricValueProjection.class,
+                                root.get("id"),
+                                activity.get("id"),
+                                metric.get("id"),
+                                root.get("value")
+                        )
                 )
-        );
+                .distinct(true);
     }
 
     @Override
@@ -96,17 +97,25 @@ final class SelectMetricValuesQuery extends MultiResultJpaQuery<MetricValueEntit
             return () -> activityIdIn;
         }
 
-        public JpaPredicate hasTagIdIn(Collection<UUID> tagIds) {
-            if (isEmpty(tagIds)) {
-                return noneMatch();
-            }
-            Path<Object> tagId = tag.get("id");
-            CriteriaBuilder.In<Object> tagIdIn = criteriaBuilder.in(tagId);
-            tagIds.stream()
-                    .map(UUID::toString)
-                    .collect(toUnmodifiableSet())
-                    .forEach(tagIdIn::value);
-            return () -> tagIdIn;
+        @Override
+        public JpaPredicate isAccessibleFor(User user) {
+            return isTagAccessibleFor(user);
+        }
+
+        private JpaPredicate isTagAccessibleFor(User user) {
+            return or(
+                    () -> criteriaBuilder.equal(tag.get("creatorId"), user.id().toString()),
+                    isTagSharedWith(user)
+            );
+        }
+
+        private JpaPredicate isTagSharedWith(User user) {
+            Join<?, ?> shares = tag.join("shares", JoinType.LEFT);
+            Subquery<Long> subQuery = query.subquery(Long.class);
+            subQuery.select(criteriaBuilder.literal(1L))
+                    .where(criteriaBuilder.equal(shares.get("granteeId"), user.id().toString()))
+                    .from(TagEntity.class);
+            return () -> criteriaBuilder.exists(subQuery);
         }
 
         @Override

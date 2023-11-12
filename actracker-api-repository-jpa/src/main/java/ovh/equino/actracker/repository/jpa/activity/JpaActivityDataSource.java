@@ -60,8 +60,8 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
                 .where(
                         selectMetricValues.predicate().and(
                                 selectMetricValues.predicate().hasActivityId(activityId.id()),
-                                selectMetricValues.predicate().hasTagIdIn(tagIdsForActivity),
-                                selectMetricValues.predicate().isNotDeleted()
+                                selectMetricValues.predicate().isNotDeleted(),
+                                selectMetricValues.predicate().isAccessibleFor(searcher)
                         )
                 )
                 .execute();
@@ -113,19 +113,13 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
                 )
                 .execute();
 
-        Set<UUID> foundTagIds = activityJoinTag
-                .stream()
-                .map(ActivityJoinTagProjection::tagId)
-                .map(UUID::fromString)
-                .collect(toUnmodifiableSet());
-
         SelectMetricValuesQuery selectMetricValue = new SelectMetricValuesQuery(entityManager);
         List<MetricValueProjection> metricValues = selectMetricValue
                 .where(
                         selectMetricValue.predicate().and(
                                 selectMetricValue.predicate().hasActivityIdIn(foundActivityIds),
-                                selectMetricValue.predicate().hasTagIdIn(foundTagIds),
-                                selectMetricValue.predicate().isNotDeleted()
+                                selectMetricValue.predicate().isNotDeleted(),
+                                selectMetricValue.predicate().isAccessibleFor(searchCriteria.searcher())
                         )
                 )
                 .execute();
