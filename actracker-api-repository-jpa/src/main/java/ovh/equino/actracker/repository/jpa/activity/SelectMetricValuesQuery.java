@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.UUID;
 
 import static jakarta.persistence.criteria.JoinType.INNER;
+import static jakarta.persistence.criteria.JoinType.LEFT;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
@@ -20,10 +21,12 @@ final class SelectMetricValuesQuery extends MultiResultJpaQuery<MetricValueEntit
 
     private final PredicateBuilder predicate;
     private final Join<MetricValueEntity, ActivityEntity> activity;
+    private final Join<MetricValueEntity, ?> metric;
 
     SelectMetricValuesQuery(EntityManager entityManager) {
         super(entityManager);
         this.activity = root.join("activity", INNER);
+        metric = root.join("metric", LEFT);
         this.predicate = new PredicateBuilder();
     }
 
@@ -34,7 +37,7 @@ final class SelectMetricValuesQuery extends MultiResultJpaQuery<MetricValueEntit
                         MetricValueProjection.class,
                         root.get("id"),
                         activity.get("id"),
-                        root.get("metricId"),
+                        metric.get("id"),
                         root.get("value")
                 )
         );

@@ -1,6 +1,7 @@
 package ovh.equino.actracker.repository.jpa.activity;
 
 import jakarta.persistence.*;
+import ovh.equino.actracker.repository.jpa.tag.MetricEntity;
 
 import java.math.BigDecimal;
 
@@ -16,8 +17,9 @@ class MetricValueEntity {
     @JoinColumn(name = "activity_id")
     ActivityEntity activity;
 
-    @Column(name = "metric_id")
-    String metricId;
+    @ManyToOne
+    @JoinColumn(name = "metric_id")
+    MetricEntity metric;
 
     @Column(name = "metric_value")
     BigDecimal value;
