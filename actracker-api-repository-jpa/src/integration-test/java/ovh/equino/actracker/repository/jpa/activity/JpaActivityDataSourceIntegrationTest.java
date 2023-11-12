@@ -135,8 +135,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                                         ownMetric2Value,
                                         ownDeletedMetricValue,
                                         ownMetric3Value,
-                                        sharedMetric1Value, // TODO remove
-                                        notAddedMetricValue // TODO remove
+                                        sharedMetric1Value // TODO remove
                                 ),
                                 accessibleOwnActivityWithMetricsSet.deleted()
                         )
@@ -210,8 +209,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                                         sharedMetric1Value,
                                         sharedDeletedMetricValue,
                                         sharedMetric2Value,
-                                        inaccessibleForeignMetricValue, // TODO remove
-                                        notAddedMetricValue // TODO remove
+                                        inaccessibleForeignMetricValue // TODO remove
                                 ),
                                 accessibleSharedActivityWithMetricsSet.deleted()
                         )
