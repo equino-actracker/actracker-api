@@ -58,7 +58,11 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
         SelectMetricValuesQuery selectMetricValues = new SelectMetricValuesQuery(entityManager);
         List<MetricValueProjection> metricValues = selectMetricValues
                 .where(
-                        selectMetricValues.predicate().hasActivityId(activityId.id())
+                        selectMetricValues.predicate().and(
+                                selectMetricValues.predicate().hasActivityId(activityId.id()),
+                                selectMetricValues.predicate().isNotDeleted(),
+                                selectMetricValues.predicate().isAccessibleFor(searcher)
+                        )
                 )
                 .execute();
 

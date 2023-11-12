@@ -1,13 +1,13 @@
 package ovh.equino.actracker.repository.jpa.activity;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.*;
+import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaPredicate;
 import ovh.equino.actracker.repository.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.repository.jpa.JpaSortBuilder;
 import ovh.equino.actracker.repository.jpa.MultiResultJpaQuery;
+import ovh.equino.actracker.repository.jpa.tag.TagEntity;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -21,25 +21,28 @@ final class SelectMetricValuesQuery extends MultiResultJpaQuery<MetricValueEntit
     private final PredicateBuilder predicate;
     private final Join<MetricValueEntity, ActivityEntity> activity;
     private final Join<MetricValueEntity, ?> metric;
+    private final Join<?, ?> tag;
 
     SelectMetricValuesQuery(EntityManager entityManager) {
         super(entityManager);
         this.activity = root.join("activity", INNER);
-        metric = root.join("metric", INNER);
+        this.metric = root.join("metric", INNER);
+        this.tag = metric.join("tag", INNER);
         this.predicate = new PredicateBuilder();
     }
 
     @Override
     protected void initProjection() {
         query.select(
-                criteriaBuilder.construct(
-                        MetricValueProjection.class,
-                        root.get("id"),
-                        activity.get("id"),
-                        metric.get("id"),
-                        root.get("value")
+                        criteriaBuilder.construct(
+                                MetricValueProjection.class,
+                                root.get("id"),
+                                activity.get("id"),
+                                metric.get("id"),
+                                root.get("value")
+                        )
                 )
-        );
+                .distinct(true);
     }
 
     @Override
@@ -92,6 +95,31 @@ final class SelectMetricValuesQuery extends MultiResultJpaQuery<MetricValueEntit
                     .collect(toUnmodifiableSet())
                     .forEach(activityIdIn::value);
             return () -> activityIdIn;
+        }
+
+        @Override
+        public JpaPredicate isNotDeleted() {
+            return and(
+                    () -> criteriaBuilder.isFalse(tag.get("deleted")),
+                    () -> criteriaBuilder.isFalse(metric.get("deleted"))
+            );
+        }
+
+        @Override
+        public JpaPredicate isAccessibleFor(User user) {
+            return or(
+                    () -> criteriaBuilder.equal(tag.get("creatorId"), user.id().toString()),
+                    isTagSharedWith(user)
+            );
+        }
+
+        private JpaPredicate isTagSharedWith(User user) {
+            Join<?, ?> shares = tag.join("shares", JoinType.LEFT);
+            Subquery<Long> subQuery = query.subquery(Long.class);
+            subQuery.select(criteriaBuilder.literal(1L))
+                    .where(criteriaBuilder.equal(shares.get("granteeId"), user.id().toString()))
+                    .from(TagEntity.class);
+            return () -> criteriaBuilder.exists(subQuery);
         }
     }
 }

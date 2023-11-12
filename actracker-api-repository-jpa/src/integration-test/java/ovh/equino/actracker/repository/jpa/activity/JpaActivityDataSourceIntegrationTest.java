@@ -133,8 +133,6 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                                 List.of(
                                         ownMetric1Value,
                                         ownMetric2Value,
-                                        ownDeletedMetricValue,
-                                        ownMetric3Value,
                                         sharedMetric1Value // TODO remove
                                 ),
                                 accessibleOwnActivityWithMetricsSet.deleted()
@@ -170,7 +168,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                                 accessibleOwnActivityWithDeletedTags.endTime(),
                                 accessibleOwnActivityWithDeletedTags.comment(),
                                 emptySet(),
-                                singletonList(ownMetric3Value), // TODO remove
+                                emptyList(),
                                 accessibleOwnActivityWithDeletedTags.deleted()
                         )
                 ),
@@ -206,10 +204,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                                         accessibleSharedTagWithoutMetric.id()
                                 ),
                                 List.of(
-                                        sharedMetric1Value,
-                                        sharedDeletedMetricValue,
-                                        sharedMetric2Value,
-                                        inaccessibleForeignMetricValue // TODO remove
+                                        sharedMetric1Value
                                 ),
                                 accessibleSharedActivityWithMetricsSet.deleted()
                         )
