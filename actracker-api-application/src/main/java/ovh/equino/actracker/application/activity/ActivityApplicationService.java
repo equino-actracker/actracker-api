@@ -97,8 +97,6 @@ public class ActivityApplicationService {
 
         EntitySearchResult<ActivityDto> searchResult = activitySearchEngine.findActivities(searchCriteria);
         List<ActivityResult> resultForClient = searchResult.results().stream()
-                .map(activity -> Activity.fromStorage(activity, tagsExistenceVerifier, metricsExistenceVerifier))
-                .map(activity -> activity.forClient(searchCriteria.searcher()))
                 .map(this::toActivityResult)
                 .toList();
 

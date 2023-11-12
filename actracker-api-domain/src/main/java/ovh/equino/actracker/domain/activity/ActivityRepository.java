@@ -14,10 +14,13 @@ public interface ActivityRepository {
 
     void update(UUID activityId, ActivityDto activity);
 
+    // TODO delete when data sources proven
     Optional<ActivityDto> findById(UUID activityId);
 
+    // TODO delete when data sources proven
     List<ActivityDto> find(EntitySearchCriteria searchCriteria);
 
+    // TODO delete when data sources proven
     List<ActivityDto> findUnfinishedStartedBefore(Instant startTime, User user);
 
 }
