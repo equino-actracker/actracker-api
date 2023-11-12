@@ -11,9 +11,12 @@ import ovh.equino.actracker.repository.jpa.JpaDAO;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
+import static java.util.Collections.emptySet;
 import static java.util.Objects.isNull;
+import static java.util.stream.Collectors.toUnmodifiableSet;
 
 class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
 
@@ -35,8 +38,25 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
                 )
                 .execute();
 
+        SelectActivityJoinTagQuery selectActivityJoinTag = new SelectActivityJoinTagQuery(entityManager);
+        List<ActivityJoinTagProjection> activityJoinTag = selectActivityJoinTag
+                .where(
+                        selectActivityJoinTag.predicate().and(
+                                selectActivityJoinTag.predicate().hasActivityId(activityId.id()),
+                                selectActivityJoinTag.predicate().isNotDeleted(),
+                                selectActivityJoinTag.predicate().isAccessibleFor(searcher)
+                        )
+                )
+                .execute();
+
+        Set<UUID> tagIdsForActivity = activityJoinTag
+                .stream()
+                .map(ActivityJoinTagProjection::tagId)
+                .map(UUID::fromString)
+                .collect(toUnmodifiableSet());
+
         return activityResult
-                .map(this::toActivity);
+                .map(result -> toActivity(result, tagIdsForActivity));
     }
 
     @Override
@@ -67,11 +87,11 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
 
         return activityResults
                 .stream()
-                .map(this::toActivity)
+                .map(activityProjection -> toActivity(activityProjection, emptySet()))
                 .toList();
     }
 
-    private ActivityDto toActivity(ActivityProjection activityProjection) {
+    private ActivityDto toActivity(ActivityProjection activityProjection, Set<UUID> tagIds) {
         return new ActivityDto(
                 UUID.fromString(activityProjection.id()),
                 UUID.fromString(activityProjection.creatorId()),
@@ -79,7 +99,7 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
                 isNull(activityProjection.startTime()) ? null : activityProjection.startTime().toInstant(),
                 isNull(activityProjection.endTime()) ? null : activityProjection.endTime().toInstant(),
                 activityProjection.comment(),
-                null,
+                tagIds,
                 null,
                 activityProjection.deleted()
         );

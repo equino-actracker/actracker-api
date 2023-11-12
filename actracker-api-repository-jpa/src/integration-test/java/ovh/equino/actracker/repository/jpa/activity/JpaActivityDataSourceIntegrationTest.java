@@ -23,10 +23,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static java.util.Collections.emptySet;
 import static java.util.Comparator.comparing;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static ovh.equino.actracker.repository.jpa.TestUtil.randomBigDecimal;
 
 abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
@@ -97,9 +97,9 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                     .usingRecursiveComparison()
                     .ignoringFields("tags", "metricValues")
                     .isEqualTo(expectedActivity);
+            assertThat(foundActivity.get().tags())
+                    .containsExactlyInAnyOrderElementsOf(expectedActivity.tags());
             // TODO
-//            assertThat(foundActivity.get().tags())
-//                    .containsExactlyInAnyOrderElementsOf(expectedActivity.tags());
 //            assertThat(foundActivity.get().metricValues())
 //                    .containsExactlyInAnyOrderElementsOf(expectedActivity.metricValues());
         });
@@ -110,32 +110,111 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                 Arguments.of(
                         "accessibleOwnActivityWithMetricsSet",
                         new ActivityId(accessibleOwnActivityWithMetricsSet.id()),
-                        accessibleOwnActivityWithMetricsSet
+                        new ActivityDto(
+                                accessibleOwnActivityWithMetricsSet.id(),
+                                accessibleOwnActivityWithMetricsSet.creatorId(),
+                                accessibleOwnActivityWithMetricsSet.title(),
+                                accessibleOwnActivityWithMetricsSet.startTime(),
+                                accessibleOwnActivityWithMetricsSet.endTime(),
+                                accessibleOwnActivityWithMetricsSet.comment(),
+                                Set.of(
+                                        accessibleOwnTagWithMetrics.id(),
+                                        accessibleOwnTagWithDeletedMetric.id(),
+                                        accessibleOwnTagWithoutMetric.id()
+                                ),
+                                accessibleOwnActivityWithMetricsSet.metricValues(), // TODO replace
+                                accessibleOwnActivityWithMetricsSet.deleted()
+                        )
                 ),
                 Arguments.of(
                         "accessibleOwnActivityWithMetricsUnset",
                         new ActivityId(accessibleOwnActivityWithMetricsUnset.id()),
-                        accessibleOwnActivityWithMetricsUnset
+                        new ActivityDto(
+                                accessibleOwnActivityWithMetricsUnset.id(),
+                                accessibleOwnActivityWithMetricsUnset.creatorId(),
+                                accessibleOwnActivityWithMetricsUnset.title(),
+                                accessibleOwnActivityWithMetricsUnset.startTime(),
+                                accessibleOwnActivityWithMetricsUnset.endTime(),
+                                accessibleOwnActivityWithMetricsUnset.comment(),
+                                Set.of(
+                                        accessibleOwnTagWithMetrics.id(),
+                                        accessibleOwnTagWithDeletedMetric.id(),
+                                        accessibleOwnTagWithoutMetric.id()
+                                ),
+                                accessibleOwnActivityWithMetricsUnset.metricValues(), // TODO replace
+                                accessibleOwnActivityWithMetricsUnset.deleted()
+                        )
                 ),
                 Arguments.of(
                         "accessibleOwnActivityWithDeletedTags",
                         new ActivityId(accessibleOwnActivityWithDeletedTags.id()),
-                        accessibleOwnActivityWithDeletedTags
+                        new ActivityDto(
+                                accessibleOwnActivityWithDeletedTags.id(),
+                                accessibleOwnActivityWithDeletedTags.creatorId(),
+                                accessibleOwnActivityWithDeletedTags.title(),
+                                accessibleOwnActivityWithDeletedTags.startTime(),
+                                accessibleOwnActivityWithDeletedTags.endTime(),
+                                accessibleOwnActivityWithDeletedTags.comment(),
+                                emptySet(),
+                                accessibleOwnActivityWithDeletedTags.metricValues(), // TODO replace
+                                accessibleOwnActivityWithDeletedTags.deleted()
+                        )
                 ),
                 Arguments.of(
                         "accessibleOwnActivityWithoutTags",
                         new ActivityId(accessibleOwnActivityWithoutTags.id()),
-                        accessibleOwnActivityWithoutTags
+                        new ActivityDto(
+                                accessibleOwnActivityWithoutTags.id(),
+                                accessibleOwnActivityWithoutTags.creatorId(),
+                                accessibleOwnActivityWithoutTags.title(),
+                                accessibleOwnActivityWithoutTags.startTime(),
+                                accessibleOwnActivityWithoutTags.endTime(),
+                                accessibleOwnActivityWithoutTags.comment(),
+                                emptySet(),
+                                accessibleOwnActivityWithoutTags.metricValues(), // TODO replace
+                                accessibleOwnActivityWithoutTags.deleted()
+                        )
+
                 ),
                 Arguments.of(
                         "accessibleSharedActivityWithMetricsSet",
                         new ActivityId(accessibleSharedActivityWithMetricsSet.id()),
-                        accessibleSharedActivityWithMetricsSet
+                        new ActivityDto(
+                                accessibleSharedActivityWithMetricsSet.id(),
+                                accessibleSharedActivityWithMetricsSet.creatorId(),
+                                accessibleSharedActivityWithMetricsSet.title(),
+                                accessibleSharedActivityWithMetricsSet.startTime(),
+                                accessibleSharedActivityWithMetricsSet.endTime(),
+                                accessibleSharedActivityWithMetricsSet.comment(),
+                                Set.of(
+                                        accessibleSharedTagWithMetric.id(),
+                                        accessibleSharedTagWithDeletedMetric.id(),
+                                        accessibleSharedTagWithoutMetric.id()
+                                ),
+                                accessibleSharedActivityWithMetricsSet.metricValues(), // TODO replace
+                                accessibleSharedActivityWithMetricsSet.deleted()
+                        )
+
                 ),
                 Arguments.of(
                         "accessibleSharedActivityWithMetricsUnset",
                         new ActivityId(accessibleSharedActivityWithMetricsUnset.id()),
-                        accessibleSharedActivityWithMetricsUnset
+                        new ActivityDto(
+                                accessibleSharedActivityWithMetricsUnset.id(),
+                                accessibleSharedActivityWithMetricsUnset.creatorId(),
+                                accessibleSharedActivityWithMetricsUnset.title(),
+                                accessibleSharedActivityWithMetricsUnset.startTime(),
+                                accessibleSharedActivityWithMetricsUnset.endTime(),
+                                accessibleSharedActivityWithMetricsUnset.comment(),
+                                Set.of(
+                                        accessibleSharedTagWithMetric.id(),
+                                        accessibleSharedTagWithDeletedMetric.id(),
+                                        accessibleSharedTagWithoutMetric.id()
+                                ),
+                                accessibleSharedActivityWithMetricsUnset.metricValues(), // TODO replace
+                                accessibleSharedActivityWithMetricsUnset.deleted()
+                        )
+
                 )
         );
     }

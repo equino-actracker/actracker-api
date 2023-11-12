@@ -39,7 +39,7 @@ final class SelectActivityJoinTagQuery extends MultiResultJpaQuery<ActivityEntit
     }
 
     @Override
-    public JpaPredicateBuilder<ActivityEntity> predicate() {
+    public PredicateBuilder predicate() {
         return predicate;
     }
 
@@ -73,14 +73,11 @@ final class SelectActivityJoinTagQuery extends MultiResultJpaQuery<ActivityEntit
             super(criteriaBuilder, root);
         }
 
-        public JpaPredicate isTagNotDeleted() {
-            return () -> criteriaBuilder.isFalse(tag.get("deleted"));
-        }
-
-        public JpaPredicate isTagAccessibleFor(User user) {
-            return or(
-                    () -> criteriaBuilder.equal(tag.get("creatorId"), user.id().toString()),
-                    isTagSharedWith(user)
+        @Override
+        public JpaPredicate isNotDeleted() {
+            return and(
+                    super.isNotDeleted(),
+                    () -> criteriaBuilder.isFalse(tag.get("deleted"))
             );
         }
 
@@ -90,6 +87,21 @@ final class SelectActivityJoinTagQuery extends MultiResultJpaQuery<ActivityEntit
 
         public JpaPredicate hasActivityIdIn(Collection<UUID> activityIds) {
             return super.hasIdIn(activityIds);
+        }
+
+        @Override
+        public JpaPredicate isAccessibleFor(User user) {
+            return or(
+                    super.isAccessibleFor(user),
+                    isTagAccessibleFor(user)
+            );
+        }
+
+        private JpaPredicate isTagAccessibleFor(User user) {
+            return or(
+                    () -> criteriaBuilder.equal(tag.get("creatorId"), user.id().toString()),
+                    isTagSharedWith(user)
+            );
         }
 
         private JpaPredicate isTagSharedWith(User user) {
