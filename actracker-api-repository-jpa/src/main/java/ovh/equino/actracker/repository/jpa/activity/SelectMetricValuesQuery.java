@@ -41,8 +41,7 @@ final class SelectMetricValuesQuery extends MultiResultJpaQuery<MetricValueEntit
                                 metric.get("id"),
                                 root.get("value")
                         )
-                )
-                .distinct(true);
+                );
     }
 
     @Override
