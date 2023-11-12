@@ -21,21 +21,18 @@ import static java.time.Instant.now;
 public class ActivityApplicationService {
 
     private final ActivityRepository activityRepository;
-    private final ActivityDataSource activityDataSource;
     private final ActivitySearchEngine activitySearchEngine;
     private final ActivityNotifier activityNotifier;
     private final TagRepository tagRepository;
     private final IdentityProvider identityProvider;
 
     public ActivityApplicationService(ActivityRepository activityRepository,
-                                      ActivityDataSource activityDataSource,
                                       ActivitySearchEngine activitySearchEngine,
                                       ActivityNotifier activityNotifier,
                                       TagRepository tagRepository,
                                       IdentityProvider identityProvider) {
 
         this.activityRepository = activityRepository;
-        this.activityDataSource = activityDataSource;
         this.activitySearchEngine = activitySearchEngine;
         this.activityNotifier = activityNotifier;
         this.tagRepository = tagRepository;
@@ -65,15 +62,11 @@ public class ActivityApplicationService {
 
         Activity activity = Activity.create(newActivityData, creator, tagsExistenceVerifier, metricsExistenceVerifier);
         activityRepository.add(activity.forStorage());
+        ActivityDto activityResult = activity.forClient(creator);
 
         activityNotifier.notifyChanged(activity.forChangeNotification());
 
-        return activityDataSource.find(activity.id(), creator)
-                .map(this::toActivityResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find created activity with ID=%s".formatted(activity.id());
-                    return new RuntimeException(message);
-                });
+        return toActivityResult(activityResult);
     }
 
     public SearchResult<ActivityResult> searchActivities(SearchActivitiesQuery searchActivitiesQuery) {
@@ -97,6 +90,8 @@ public class ActivityApplicationService {
 
         EntitySearchResult<ActivityDto> searchResult = activitySearchEngine.findActivities(searchCriteria);
         List<ActivityResult> resultForClient = searchResult.results().stream()
+                .map(activity -> Activity.fromStorage(activity, tagsExistenceVerifier, metricsExistenceVerifier))
+                .map(activity -> activity.forClient(searchCriteria.searcher()))
                 .map(this::toActivityResult)
                 .toList();
 
@@ -138,18 +133,14 @@ public class ActivityApplicationService {
                 .forEach(activity -> activityRepository.update(activity.id(), activity));
 
         activityRepository.add(newActivity.forStorage());
+        ActivityDto activityResult = newActivity.forClient(switcher);
 
         activitiesToFinish.stream()
                 .map(Activity::forChangeNotification)
                 .forEach(activityNotifier::notifyChanged);
         activityNotifier.notifyChanged(newActivity.forChangeNotification());
 
-        return activityDataSource.find(newActivity.id(), switcher)
-                .map(this::toActivityResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find created activity with ID=%s".formatted(newActivity.id());
-                    return new RuntimeException(message);
-                });
+        return toActivityResult(activityResult);
     }
 
     public ActivityResult renameActivity(String newTitle, UUID activityId) {
@@ -166,15 +157,11 @@ public class ActivityApplicationService {
         activity.rename(newTitle, updater);
 
         activityRepository.update(activityId, activity.forStorage());
+        ActivityDto activityResult = activity.forClient(updater);
 
         activityNotifier.notifyChanged(activity.forChangeNotification());
 
-        return activityDataSource.find(activity.id(), updater)
-                .map(this::toActivityResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find updated activity with ID=%s".formatted(activity.id());
-                    return new RuntimeException(message);
-                });
+        return toActivityResult(activityResult);
     }
 
     public ActivityResult startActivity(Instant startTime, UUID activityId) {
@@ -191,15 +178,11 @@ public class ActivityApplicationService {
         activity.start(startTime, updater);
 
         activityRepository.update(activityId, activity.forStorage());
+        ActivityDto activityResult = activity.forClient(updater);
 
         activityNotifier.notifyChanged(activity.forChangeNotification());
 
-        return activityDataSource.find(activity.id(), updater)
-                .map(this::toActivityResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find updated activity with ID=%s".formatted(activity.id());
-                    return new RuntimeException(message);
-                });
+        return toActivityResult(activityResult);
     }
 
     public ActivityResult finishActivity(Instant endTime, UUID activityId) {
@@ -216,15 +199,11 @@ public class ActivityApplicationService {
         activity.finish(endTime, updater);
 
         activityRepository.update(activityId, activity.forStorage());
+        ActivityDto activityResult = activity.forClient(updater);
 
         activityNotifier.notifyChanged(activity.forChangeNotification());
 
-        return activityDataSource.find(activity.id(), updater)
-                .map(this::toActivityResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find updated activity with ID=%s".formatted(activity.id());
-                    return new RuntimeException(message);
-                });
+        return toActivityResult(activityResult);
     }
 
     public ActivityResult updateActivityComment(String newComment, UUID activityId) {
@@ -241,15 +220,11 @@ public class ActivityApplicationService {
         activity.updateComment(newComment, updater);
 
         activityRepository.update(activityId, activity.forStorage());
+        ActivityDto activityResult = activity.forClient(updater);
 
         activityNotifier.notifyChanged(activity.forChangeNotification());
 
-        return activityDataSource.find(activity.id(), updater)
-                .map(this::toActivityResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find updated activity with ID=%s".formatted(activity.id());
-                    return new RuntimeException(message);
-                });
+        return toActivityResult(activityResult);
     }
 
     public ActivityResult addTagToActivity(UUID tagId, UUID activityId) {
@@ -266,15 +241,11 @@ public class ActivityApplicationService {
         activity.assignTag(new TagId(tagId), updater);
 
         activityRepository.update(activityId, activity.forStorage());
+        ActivityDto activityResult = activity.forClient(updater);
 
         activityNotifier.notifyChanged(activity.forChangeNotification());
 
-        return activityDataSource.find(activity.id(), updater)
-                .map(this::toActivityResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find updated activity with ID=%s".formatted(activity.id());
-                    return new RuntimeException(message);
-                });
+        return toActivityResult(activityResult);
     }
 
     public ActivityResult removeTagFromActivity(UUID tagId, UUID activityId) {
@@ -291,15 +262,11 @@ public class ActivityApplicationService {
         activity.removeTag(new TagId(tagId), updater);
 
         activityRepository.update(activityId, activity.forStorage());
+        ActivityDto activityResult = activity.forClient(updater);
 
         activityNotifier.notifyChanged(activity.forChangeNotification());
 
-        return activityDataSource.find(activity.id(), updater)
-                .map(this::toActivityResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find updated activity with ID=%s".formatted(activity.id());
-                    return new RuntimeException(message);
-                });
+        return toActivityResult(activityResult);
     }
 
     public ActivityResult setMetricValue(UUID metricId, BigDecimal value, UUID activityId) {
@@ -316,15 +283,11 @@ public class ActivityApplicationService {
         activity.setMetricValue(new MetricValue(metricId, value), updater);
 
         activityRepository.update(activityId, activity.forStorage());
+        ActivityDto activityResult = activity.forClient(updater);
 
         activityNotifier.notifyChanged(activity.forChangeNotification());
 
-        return activityDataSource.find(activity.id(), updater)
-                .map(this::toActivityResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find updated activity with ID=%s".formatted(activity.id());
-                    return new RuntimeException(message);
-                });
+        return toActivityResult(activityResult);
     }
 
     public ActivityResult unsetMetricValue(UUID metricId, UUID activityId) {
@@ -341,15 +304,11 @@ public class ActivityApplicationService {
         activity.unsetMetricValue(new MetricId(metricId), updater);
 
         activityRepository.update(activityId, activity.forStorage());
+        ActivityDto activityResult = activity.forClient(updater);
 
         activityNotifier.notifyChanged(activity.forChangeNotification());
 
-        return activityDataSource.find(activity.id(), updater)
-                .map(this::toActivityResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find updated activity with ID=%s".formatted(activity.id());
-                    return new RuntimeException(message);
-                });
+        return toActivityResult(activityResult);
     }
 
     public void deleteActivity(UUID activityId) {

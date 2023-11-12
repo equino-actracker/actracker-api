@@ -4,11 +4,11 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "metric")
-public class MetricEntity {
+class MetricEntity {
 
     @Id
     @Column(name = "id")
-    public String id;
+    String id;
 
     @Column(name = "creator_id", insertable = false, updatable = false)
     String creatorId;

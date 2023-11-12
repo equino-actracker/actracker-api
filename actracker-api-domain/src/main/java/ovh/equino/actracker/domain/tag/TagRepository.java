@@ -14,12 +14,9 @@ public interface TagRepository {
 
     void update(UUID tagId, TagDto tag);
 
-    // TODO delete when data sources proven
     Optional<TagDto> findById(UUID tagId);
 
-    // TODO delete when data sources proven
     List<TagDto> findByIds(Set<UUID> tagIds, User searcher);
 
-    // TODO delete when data sources proven
     List<TagDto> find(EntitySearchCriteria searchCriteria);
 }
