@@ -64,6 +64,8 @@ public abstract class JpaIntegrationTest {
         properties.put("javax.persistence.jdbc.user", database().username());
         properties.put("javax.persistence.jdbc.password", database().password());
         properties.put("javax.persistence.jdbc.driver", database().driverClassName());
+        properties.put("hibernate.show_sql", "true");
+        properties.put("hibernate.format_sql", "true");
         return properties;
     }
 }

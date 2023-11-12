@@ -297,11 +297,13 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                             accessibleSharedTagWithDeletedMetric.id(),
                             accessibleSharedTagWithoutMetric.id()
                     );
-// TODO
-//            assertThat(foundActivities)
-//                    .flatMap(ActivityDto::metricValues)
-//                    .containsExactlyInAnyOrder(
-//                    );
+            assertThat(foundActivities)
+                    .flatMap(ActivityDto::metricValues)
+                    .containsExactlyInAnyOrder(
+                            ownMetric1Value,
+                            ownMetric2Value,
+                            sharedMetric1Value
+                    );
         });
     }
 

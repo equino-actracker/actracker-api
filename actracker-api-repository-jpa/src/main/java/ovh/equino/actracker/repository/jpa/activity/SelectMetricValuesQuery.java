@@ -111,7 +111,10 @@ final class SelectMetricValuesQuery extends MultiResultJpaQuery<MetricValueEntit
 
         @Override
         public JpaPredicate isNotDeleted() {
-            return () -> criteriaBuilder.isFalse(metric.get("deleted"));
+            return and(
+                    () -> criteriaBuilder.isFalse(metric.get("deleted")),
+                    () -> criteriaBuilder.isFalse(tag.get("deleted"))
+            );
         }
     }
 }
