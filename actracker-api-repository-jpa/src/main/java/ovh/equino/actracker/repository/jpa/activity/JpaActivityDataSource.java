@@ -15,7 +15,6 @@ import java.util.*;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Objects.isNull;
-import static java.util.Objects.requireNonNullElse;
 import static java.util.stream.Collectors.*;
 
 class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
@@ -66,8 +65,13 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
                 )
                 .execute();
 
+        List<MetricValue> metricValuesForActivity = metricValues
+                .stream()
+                .map(this::toMetricValue)
+                .toList();
+
         return activityResult
-                .map(result -> toActivity(result, tagIdsForActivity, metricValues));
+                .map(result -> toActivity(result, tagIdsForActivity, metricValuesForActivity));
     }
 
     @Override
@@ -131,9 +135,12 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
                         mapping(projection -> UUID.fromString(projection.tagId()), toUnmodifiableSet())
                 ));
 
-        Map<String, List<MetricValueProjection>> metricValuesByActivityId = metricValues
+        Map<String, List<MetricValue>> metricValuesByActivityId = metricValues
                 .stream()
-                .collect(groupingBy(MetricValueProjection::activityId));
+                .collect(groupingBy(
+                        MetricValueProjection::activityId,
+                        mapping(this::toMetricValue, toList())
+                ));
 
         return activityResults
                 .stream()
@@ -147,7 +154,7 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
 
     private ActivityDto toActivity(ActivityProjection activityProjection,
                                    Set<UUID> tagIds,
-                                   List<MetricValueProjection> metricValues) {
+                                   List<MetricValue> metricValues) {
 
         return new ActivityDto(
                 UUID.fromString(activityProjection.id()),
@@ -157,16 +164,9 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
                 isNull(activityProjection.endTime()) ? null : activityProjection.endTime().toInstant(),
                 activityProjection.comment(),
                 tagIds,
-                toMetricValues(metricValues),
+                metricValues,
                 activityProjection.deleted()
         );
-    }
-
-    private List<MetricValue> toMetricValues(Collection<MetricValueProjection> projections) {
-        return requireNonNullElse(projections, new ArrayList<MetricValueProjection>())
-                .stream()
-                .map(this::toMetricValue)
-                .toList();
     }
 
     private MetricValue toMetricValue(MetricValueProjection projection) {

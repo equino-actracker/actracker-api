@@ -45,12 +45,12 @@ class MetricValueMapper {
         MetricValueEntity entity = new MetricValueEntity();
         entity.id = randomUUID().toString();
         entity.activity = activity;
-        entity.metric = toMetricEntity(metricValue.metricId().toString());
+        entity.metric = findMetric(metricValue.metricId());
         entity.value = metricValue.value();
         return entity;
     }
 
-    private MetricEntity toMetricEntity(String metricId) {
-        return entityManager.find(MetricEntity.class, metricId);
+    private MetricEntity findMetric(UUID metricId) {
+        return entityManager.find(MetricEntity.class, metricId.toString());
     }
 }
