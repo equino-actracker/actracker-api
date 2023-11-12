@@ -23,9 +23,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static java.util.Collections.emptySet;
+import static java.util.Collections.*;
 import static java.util.Comparator.comparing;
-import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static ovh.equino.actracker.repository.jpa.TestUtil.randomBigDecimal;
 
@@ -54,6 +53,16 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
     private static ActivityDto inaccessibleOwnDeletedActivity;
     private static ActivityDto inaccessibleForeignActivity;
     private static ActivityDto inaccessibleNotAddedActivity;
+
+    private static MetricValue ownMetric1Value;
+    private static MetricValue ownMetric2Value;
+    private static MetricValue ownMetric3Value;
+    private static MetricValue ownDeletedMetricValue;
+    private static MetricValue sharedMetric1Value;
+    private static MetricValue sharedMetric2Value;
+    private static MetricValue inaccessibleForeignMetricValue;
+    private static MetricValue sharedDeletedMetricValue;
+    private static MetricValue notAddedMetricValue;
 
     private static User searcher;
 
@@ -99,9 +108,8 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                     .isEqualTo(expectedActivity);
             assertThat(foundActivity.get().tags())
                     .containsExactlyInAnyOrderElementsOf(expectedActivity.tags());
-            // TODO
-//            assertThat(foundActivity.get().metricValues())
-//                    .containsExactlyInAnyOrderElementsOf(expectedActivity.metricValues());
+            assertThat(foundActivity.get().metricValues())
+                    .containsExactlyInAnyOrderElementsOf(expectedActivity.metricValues());
         });
     }
 
@@ -122,7 +130,14 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                                         accessibleOwnTagWithDeletedMetric.id(),
                                         accessibleOwnTagWithoutMetric.id()
                                 ),
-                                accessibleOwnActivityWithMetricsSet.metricValues(), // TODO replace
+                                List.of(
+                                        ownMetric1Value,
+                                        ownMetric2Value,
+                                        ownDeletedMetricValue,
+                                        ownMetric3Value,
+                                        sharedMetric1Value, // TODO remove
+                                        notAddedMetricValue // TODO remove
+                                ),
                                 accessibleOwnActivityWithMetricsSet.deleted()
                         )
                 ),
@@ -141,7 +156,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                                         accessibleOwnTagWithDeletedMetric.id(),
                                         accessibleOwnTagWithoutMetric.id()
                                 ),
-                                accessibleOwnActivityWithMetricsUnset.metricValues(), // TODO replace
+                                emptyList(),
                                 accessibleOwnActivityWithMetricsUnset.deleted()
                         )
                 ),
@@ -156,7 +171,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                                 accessibleOwnActivityWithDeletedTags.endTime(),
                                 accessibleOwnActivityWithDeletedTags.comment(),
                                 emptySet(),
-                                accessibleOwnActivityWithDeletedTags.metricValues(), // TODO replace
+                                singletonList(ownMetric3Value), // TODO remove
                                 accessibleOwnActivityWithDeletedTags.deleted()
                         )
                 ),
@@ -171,7 +186,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                                 accessibleOwnActivityWithoutTags.endTime(),
                                 accessibleOwnActivityWithoutTags.comment(),
                                 emptySet(),
-                                accessibleOwnActivityWithoutTags.metricValues(), // TODO replace
+                                emptyList(),
                                 accessibleOwnActivityWithoutTags.deleted()
                         )
 
@@ -191,7 +206,13 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                                         accessibleSharedTagWithDeletedMetric.id(),
                                         accessibleSharedTagWithoutMetric.id()
                                 ),
-                                accessibleSharedActivityWithMetricsSet.metricValues(), // TODO replace
+                                List.of(
+                                        sharedMetric1Value,
+                                        sharedDeletedMetricValue,
+                                        sharedMetric2Value,
+                                        inaccessibleForeignMetricValue, // TODO remove
+                                        notAddedMetricValue // TODO remove
+                                ),
                                 accessibleSharedActivityWithMetricsSet.deleted()
                         )
 
@@ -211,7 +232,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                                         accessibleSharedTagWithDeletedMetric.id(),
                                         accessibleSharedTagWithoutMetric.id()
                                 ),
-                                accessibleSharedActivityWithMetricsUnset.metricValues(), // TODO replace
+                                emptyList(),
                                 accessibleSharedActivityWithMetricsUnset.deleted()
                         )
 
@@ -421,9 +442,19 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
         MetricDto ownDeletedMetric = newMetric(searcherTenant).deleted().build();
         MetricDto sharedMetric1 = newMetric(sharingUser).build();
         MetricDto sharedMetric2 = newMetric(sharingUser).build();
-        MetricDto sharedMetric3 = newMetric(sharingUser).build();
+        MetricDto inaccessibleForeignMetric = newMetric(sharingUser).build();
         MetricDto sharedDeletedMetric = newMetric(sharingUser).deleted().build();
         MetricDto notAddedMetric = newMetric(searcherTenant).build();
+
+        ownMetric1Value = new MetricValue(ownMetric1.id(), randomBigDecimal());
+        ownMetric2Value = new MetricValue(ownMetric2.id(), randomBigDecimal());
+        ownMetric3Value = new MetricValue(ownMetric3.id(), randomBigDecimal());
+        ownDeletedMetricValue = new MetricValue(ownDeletedMetric.id(), randomBigDecimal());
+        sharedMetric1Value = new MetricValue(sharedMetric1.id(), randomBigDecimal());
+        sharedMetric2Value = new MetricValue(sharedMetric2.id(), randomBigDecimal());
+        inaccessibleForeignMetricValue = new MetricValue(inaccessibleForeignMetric.id(), randomBigDecimal());
+        sharedDeletedMetricValue = new MetricValue(sharedDeletedMetric.id(), randomBigDecimal());
+        notAddedMetricValue = new MetricValue(notAddedMetric.id(), randomBigDecimal());
 
         accessibleOwnTagWithMetrics = newTag(searcherTenant)
                 .withMetrics(ownMetric1, ownMetric2)
@@ -456,7 +487,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                 .deleted()
                 .build();
         inaccessibleForeignTagWithMetric = newTag(sharingUser)
-                .withMetrics(sharedMetric3)
+                .withMetrics(inaccessibleForeignMetric)
                 .build();
 
         accessibleOwnActivityWithMetricsSet = newActivity(searcherTenant)
@@ -467,12 +498,12 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                         inaccessibleOwnDeletedTagWithMetric
                 )
                 .withMetricValues(
-                        new MetricValue(ownMetric1.id(), randomBigDecimal()),
-                        new MetricValue(ownMetric2.id(), randomBigDecimal()),
-                        new MetricValue(ownDeletedMetric.id(), randomBigDecimal()),
-                        new MetricValue(ownMetric3.id(), randomBigDecimal()),
-                        new MetricValue(sharedMetric1.id(), randomBigDecimal()), // not accessible, tag doesn't exist
-                        new MetricValue(randomUUID(), randomBigDecimal())   // not existing metric
+                        ownMetric1Value,
+                        ownMetric2Value,
+                        ownDeletedMetricValue,
+                        ownMetric3Value,
+                        sharedMetric1Value, // not accessible, tag doesn't exist
+                        notAddedMetricValue
                 )
                 .build();
 
@@ -490,12 +521,8 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
         accessibleOwnActivityWithDeletedTags = newActivity(searcherTenant)
                 .startedAt(39)
                 .finishedAt(61)
-                .withTags(
-                        inaccessibleOwnDeletedTagWithMetric
-                )
-                .withMetricValues(
-                        new MetricValue(ownMetric3.id(), randomBigDecimal())
-                )
+                .withTags(inaccessibleOwnDeletedTagWithMetric)
+                .withMetricValues(ownMetric3Value)
                 .build();
 
         accessibleOwnActivityWithoutTags = newActivity(searcherTenant)
@@ -516,11 +543,11 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                         inaccessibleForeignTagWithMetric
                 )
                 .withMetricValues(
-                        new MetricValue(sharedMetric1.id(), randomBigDecimal()),
-                        new MetricValue(sharedDeletedMetric.id(), randomBigDecimal()),
-                        new MetricValue(sharedMetric2.id(), randomBigDecimal()),
-                        new MetricValue(sharedMetric3.id(), randomBigDecimal()),
-                        new MetricValue(notAddedMetric.id(), randomBigDecimal())
+                        sharedMetric1Value,
+                        sharedDeletedMetricValue,
+                        sharedMetric2Value,
+                        inaccessibleForeignMetricValue,
+                        notAddedMetricValue
                 )
                 .build();
 
@@ -534,6 +561,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                         inaccessibleSharedDeletedTagWithMetric,
                         inaccessibleForeignTagWithMetric
                 )
+                .withMetricValues()
                 .build();
 
         inaccessibleActivityWithDeletedSharingTag = newActivity(sharingUser)

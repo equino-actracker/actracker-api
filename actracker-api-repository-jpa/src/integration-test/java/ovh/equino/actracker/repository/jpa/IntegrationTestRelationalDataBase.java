@@ -1,6 +1,7 @@
 package ovh.equino.actracker.repository.jpa;
 
 import ovh.equino.actracker.domain.activity.ActivityDto;
+import ovh.equino.actracker.domain.activity.MetricValue;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tag.MetricDto;
 import ovh.equino.actracker.domain.tag.TagDto;
@@ -69,6 +70,7 @@ public abstract class IntegrationTestRelationalDataBase {
             preparedStatement.setBoolean(7, activity.deleted());
             preparedStatement.execute();
             addAssociatedTags(activity);
+            addMetricValues(activity);
             addedEntityIds.add(activity.id());
         }
     }
@@ -81,6 +83,20 @@ public abstract class IntegrationTestRelationalDataBase {
             );
             preparedStatement.setString(1, activity.id().toString());
             preparedStatement.setString(2, tagId.toString());
+            preparedStatement.execute();
+        }
+    }
+
+    private void addMetricValues(ActivityDto activity) throws SQLException {
+        Connection connection = getConnection();
+        for (MetricValue metricValue : activity.metricValues()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "insert into metric_value (id, activity_id, metric_id, metric_value) values (?, ?, ?, ?);"
+            );
+            preparedStatement.setString(1, randomUUID().toString());
+            preparedStatement.setString(2, activity.id().toString());
+            preparedStatement.setString(3, metricValue.metricId().toString());
+            preparedStatement.setBigDecimal(4, metricValue.value());
             preparedStatement.execute();
         }
     }

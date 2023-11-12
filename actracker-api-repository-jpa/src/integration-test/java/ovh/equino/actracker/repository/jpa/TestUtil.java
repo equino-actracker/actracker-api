@@ -16,10 +16,12 @@ public final class TestUtil {
     }
 
     public static BigDecimal randomBigDecimal() {
-        int length = 3;
+        int length = 2;
         boolean useLetters = false;
         boolean useNumbers = true;
-        return new BigDecimal(RandomStringUtils.random(length, useLetters, useNumbers));
+        String randomInteger = RandomStringUtils.random(length, useLetters, useNumbers);
+        String randomDecimal = RandomStringUtils.random(length, useLetters, useNumbers);
+        return new BigDecimal("%s.%s5".formatted(randomInteger, randomDecimal));
     }
 
 }

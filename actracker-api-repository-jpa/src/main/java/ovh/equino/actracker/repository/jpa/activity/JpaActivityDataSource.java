@@ -5,17 +5,17 @@ import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.activity.ActivityDataSource;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivityId;
+import ovh.equino.actracker.domain.activity.MetricValue;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaDAO;
 
 import java.sql.Timestamp;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Objects.isNull;
+import static java.util.Objects.requireNonNullElse;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 
 class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
@@ -55,8 +55,15 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
                 .map(UUID::fromString)
                 .collect(toUnmodifiableSet());
 
+        SelectMetricValuesQuery selectMetricValues = new SelectMetricValuesQuery(entityManager);
+        List<MetricValueProjection> metricValues = selectMetricValues
+                .where(
+                        selectMetricValues.predicate().hasActivityId(activityId.id())
+                )
+                .execute();
+
         return activityResult
-                .map(result -> toActivity(result, tagIdsForActivity));
+                .map(result -> toActivity(result, tagIdsForActivity, metricValues));
     }
 
     @Override
@@ -87,11 +94,14 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
 
         return activityResults
                 .stream()
-                .map(activityProjection -> toActivity(activityProjection, emptySet()))
+                .map(activityProjection -> toActivity(activityProjection, emptySet(), emptyList()))
                 .toList();
     }
 
-    private ActivityDto toActivity(ActivityProjection activityProjection, Set<UUID> tagIds) {
+    private ActivityDto toActivity(ActivityProjection activityProjection,
+                                   Set<UUID> tagIds,
+                                   List<MetricValueProjection> metricValues) {
+
         return new ActivityDto(
                 UUID.fromString(activityProjection.id()),
                 UUID.fromString(activityProjection.creatorId()),
@@ -100,8 +110,22 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
                 isNull(activityProjection.endTime()) ? null : activityProjection.endTime().toInstant(),
                 activityProjection.comment(),
                 tagIds,
-                null,
+                toMetricValues(metricValues),
                 activityProjection.deleted()
+        );
+    }
+
+    private List<MetricValue> toMetricValues(Collection<MetricValueProjection> projections) {
+        return requireNonNullElse(projections, new ArrayList<MetricValueProjection>())
+                .stream()
+                .map(this::toMetricValue)
+                .toList();
+    }
+
+    private MetricValue toMetricValue(MetricValueProjection projection) {
+        return new MetricValue(
+                UUID.fromString(projection.metricId()),
+                projection.value()
         );
     }
 }
