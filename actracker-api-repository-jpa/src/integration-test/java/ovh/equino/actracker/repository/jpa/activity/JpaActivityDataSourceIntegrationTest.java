@@ -132,8 +132,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                                 ),
                                 List.of(
                                         ownMetric1Value,
-                                        ownMetric2Value,
-                                        sharedMetric1Value // TODO remove
+                                        ownMetric2Value
                                 ),
                                 accessibleOwnActivityWithMetricsSet.deleted()
                         )

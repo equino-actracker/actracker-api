@@ -60,8 +60,8 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
                 .where(
                         selectMetricValues.predicate().and(
                                 selectMetricValues.predicate().hasActivityId(activityId.id()),
-                                selectMetricValues.predicate().isNotDeleted(),
-                                selectMetricValues.predicate().isAccessibleFor(searcher)
+                                selectMetricValues.predicate().hasTagIdIn(tagIdsForActivity),
+                                selectMetricValues.predicate().isNotDeleted()
                         )
                 )
                 .execute();

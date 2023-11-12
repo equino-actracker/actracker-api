@@ -97,29 +97,22 @@ final class SelectMetricValuesQuery extends MultiResultJpaQuery<MetricValueEntit
             return () -> activityIdIn;
         }
 
+        public JpaPredicate hasTagIdIn(Collection<UUID> tagIds) {
+            if(isEmpty(tagIds)) {
+                return noneMatch();
+            }
+            Path<Object> tagId = tag.get("id");
+            CriteriaBuilder.In<Object> tagIdIn = criteriaBuilder.in(tagId);
+            tagIds.stream()
+                    .map(UUID::toString)
+                    .collect(toUnmodifiableSet())
+                    .forEach(tagIdIn::value);
+            return () -> tagIdIn;
+        }
+
         @Override
         public JpaPredicate isNotDeleted() {
-            return and(
-                    () -> criteriaBuilder.isFalse(tag.get("deleted")),
-                    () -> criteriaBuilder.isFalse(metric.get("deleted"))
-            );
-        }
-
-        @Override
-        public JpaPredicate isAccessibleFor(User user) {
-            return or(
-                    () -> criteriaBuilder.equal(tag.get("creatorId"), user.id().toString()),
-                    isTagSharedWith(user)
-            );
-        }
-
-        private JpaPredicate isTagSharedWith(User user) {
-            Join<?, ?> shares = tag.join("shares", JoinType.LEFT);
-            Subquery<Long> subQuery = query.subquery(Long.class);
-            subQuery.select(criteriaBuilder.literal(1L))
-                    .where(criteriaBuilder.equal(shares.get("granteeId"), user.id().toString()))
-                    .from(TagEntity.class);
-            return () -> criteriaBuilder.exists(subQuery);
+            return () -> criteriaBuilder.isFalse(metric.get("deleted"));
         }
     }
 }
