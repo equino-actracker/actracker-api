@@ -14,7 +14,7 @@ import ovh.equino.actracker.domain.tag.TagSearchEngine;
                 type = FilterType.ASSIGNABLE_TYPE,
                 classes = {
                         TagSearchEngine.class,
-                        ActivitySearchEngine.class,
+//                        ActivitySearchEngine.class,
 //                        TagSetSearchEngine.class,
                         DashboardSearchEngine.class
                 }

@@ -17,3 +17,13 @@ INSERT INTO tenant(
     'user2',
     '$2y$10$Fv5oOn/AfiPhwAavq9w5WOZ/jtVG580gIfruyRS2xG2KkUx8CfiVq'
 );
+
+INSERT INTO tenant(
+    id,
+    username,
+    password
+) VALUES (
+    '7aa2963d-563f-4ed6-82ae-c4be22e64658',
+    'user3',
+    '$2a$10$EwNatP2esYJXPxIfPT3x3Oqf1plFKvXkAzd/AnAu.glg5TbJhbefe'
+);

@@ -46,18 +46,14 @@ class JpaTagSetDataSource extends JpaDAO implements TagSetDataSource {
                         )
                         .execute();
 
-        Map<String, Set<UUID>> tagIdsByTagSetId = tagSetJoinTag
+        Set<UUID> tagIdsForActivity = tagSetJoinTag
                 .stream()
-                .collect(groupingBy(
-                        TagSetJoinTagProjection::tagSetId,
-                        mapping(projection -> UUID.fromString(projection.tagId()), toUnmodifiableSet())
-                ));
+                .map(TagSetJoinTagProjection::tagId)
+                .map(UUID::fromString)
+                .collect(toUnmodifiableSet());
 
         return tagSetResult
-                .map(result -> toTagSet(
-                        result,
-                        tagIdsByTagSetId.getOrDefault(result.id(), emptySet())
-                ));
+                .map(result -> toTagSet(result, tagIdsForActivity));
     }
 
     @Override

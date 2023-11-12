@@ -1,7 +1,6 @@
 package ovh.equino.actracker.domain.activity;
 
 import ovh.equino.actracker.domain.Entity;
-import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.tag.*;
 import ovh.equino.actracker.domain.user.User;
 
@@ -150,32 +149,6 @@ public class Activity implements Entity {
         ).execute();
     }
 
-    void updateTo(ActivityDto activity) {
-        Set<TagId> deletedAssignedTags = tagsExistenceVerifier.notExisting(this.tags);
-        Set<MetricId> deletedAssignedMetrics = metricsExistenceVerifier.notExisting(this.tags, this.selectedMetrics());
-        List<MetricValue> deletedAssignedValues = valuesForMetricIds(deletedAssignedMetrics);
-        this.title = activity.title();
-        this.startTime = activity.startTime();
-        this.endTime = activity.endTime();
-        this.comment = activity.comment();
-        this.tags.clear();
-        this.tags.addAll(toTagIds(activity));
-        this.metricValues.clear();
-        this.metricValues.addAll(activity.metricValues());
-        validate();
-        this.tags.addAll(deletedAssignedTags);
-        this.metricValues.addAll(deletedAssignedValues);
-    }
-
-    private List<MetricValue> valuesForMetricIds(Collection<MetricId> metricIds) {
-        List<UUID> metricUUIDs = metricIds.stream()
-                .map(MetricId::id)
-                .toList();
-        return this.metricValues.stream()
-                .filter(metricValue -> metricUUIDs.contains(metricValue.metricId()))
-                .toList();
-    }
-
     public static Activity fromStorage(ActivityDto activity, TagsExistenceVerifier tagsExistenceVerifier, MetricsExistenceVerifier metricsExistenceVerifier) {
         return new Activity(
                 new ActivityId(activity.id()),
@@ -210,30 +183,6 @@ public class Activity implements Entity {
         );
     }
 
-    public ActivityDto forClient(User client) {
-        if (isNotAvailableFor(client)) {
-            throw new EntityNotFoundException(Activity.class, this.id.id());
-        }
-        Set<UUID> tagIds = tagsExistenceVerifier.existing(tags).stream()
-                .map(TagId::id)
-                .collect(toUnmodifiableSet());
-        List<MetricValue> metricValues = valuesForMetricIds(
-                metricsExistenceVerifier.existing(this.tags, this.selectedMetrics())
-        );
-
-        return new ActivityDto(
-                id.id(),
-                creator.id(),
-                title,
-                startTime,
-                endTime,
-                comment,
-                tagIds,
-                unmodifiableList(metricValues),
-                deleted
-        );
-    }
-
     public ActivityChangedNotification forChangeNotification() {
         Set<UUID> tagIds = tags.stream()
                 .map(TagId::id)
@@ -250,20 +199,6 @@ public class Activity implements Entity {
                 deleted
         );
         return new ActivityChangedNotification(dto);
-    }
-
-    boolean isAvailableFor(User user) {
-        return creator.equals(user) || isSharedWith(user);
-    }
-
-    boolean isSharedWith(User user) {
-        SharedTagsExistenceVerifier sharedTagsExistenceVerifier =
-                new SharedTagsExistenceVerifier(tagsExistenceVerifier, user);
-        return sharedTagsExistenceVerifier.containsSharedTags(this.tags);
-    }
-
-    boolean isNotAvailableFor(User user) {
-        return !isAvailableFor(user);
     }
 
     public boolean isStarted() {
@@ -309,5 +244,10 @@ public class Activity implements Entity {
     @Override
     public User creator() {
         return creator;
+    }
+
+    // TODO think about extracting it to superclass
+    public ActivityId id() {
+        return this.id;
     }
 }
