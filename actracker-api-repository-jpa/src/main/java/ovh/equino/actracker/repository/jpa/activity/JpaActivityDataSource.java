@@ -16,7 +16,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNullElse;
-import static java.util.stream.Collectors.toUnmodifiableSet;
+import static java.util.stream.Collectors.*;
 
 class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
 
@@ -96,9 +96,37 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
                 .limit(searchCriteria.pageSize())
                 .execute();
 
+        Set<UUID> foundActivityIds = activityResults
+                .stream()
+                .map(ActivityProjection::id)
+                .map(UUID::fromString)
+                .collect(toUnmodifiableSet());
+
+        SelectActivityJoinTagQuery selectActivityJoinTag = new SelectActivityJoinTagQuery(entityManager);
+        List<ActivityJoinTagProjection> activityJoinTag = selectActivityJoinTag
+                .where(
+                        selectActivityJoinTag.predicate().and(
+                                selectActivityJoinTag.predicate().hasActivityIdIn(foundActivityIds),
+                                selectActivityJoinTag.predicate().isNotDeleted(),
+                                selectActivityJoinTag.predicate().isAccessibleFor(searchCriteria.searcher())
+                        )
+                )
+                .execute();
+
+        Map<String, Set<UUID>> tagIdsByActivityId = activityJoinTag
+                .stream()
+                .collect(groupingBy(
+                        ActivityJoinTagProjection::activityId,
+                        mapping(projection -> UUID.fromString(projection.tagId()), toUnmodifiableSet())
+                ));
+
         return activityResults
                 .stream()
-                .map(activityProjection -> toActivity(activityProjection, emptySet(), emptyList()))
+                .map(activityProjection -> toActivity(
+                        activityProjection,
+                        tagIdsByActivityId.getOrDefault(activityProjection.id(), emptySet()),
+                        emptyList()
+                ))
                 .toList();
     }
 

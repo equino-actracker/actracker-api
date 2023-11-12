@@ -23,7 +23,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static java.util.Collections.*;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
 import static java.util.Comparator.comparing;
 import static org.assertj.core.api.Assertions.assertThat;
 import static ovh.equino.actracker.repository.jpa.TestUtil.randomBigDecimal;
@@ -280,11 +281,23 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
             assertThat(foundActivities)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags", "metricValues")
                     .containsExactlyElementsOf(expectedActivities);
+            assertThat(foundActivities)
+                    .flatMap(ActivityDto::tags)
+                    .containsExactlyInAnyOrder(
+                            accessibleOwnTagWithMetrics.id(),
+                            accessibleOwnTagWithDeletedMetric.id(),
+                            accessibleOwnTagWithoutMetric.id(),
+                            accessibleOwnTagWithMetrics.id(),
+                            accessibleOwnTagWithDeletedMetric.id(),
+                            accessibleOwnTagWithoutMetric.id(),
+                            accessibleSharedTagWithMetric.id(),
+                            accessibleSharedTagWithDeletedMetric.id(),
+                            accessibleSharedTagWithoutMetric.id(),
+                            accessibleSharedTagWithMetric.id(),
+                            accessibleSharedTagWithDeletedMetric.id(),
+                            accessibleSharedTagWithoutMetric.id()
+                    );
 // TODO
-//            assertThat(foundActivities)
-//                    .flatMap(ActivityDto::tags)
-//                    .containsExactlyInAnyOrder(
-//                    );
 //            assertThat(foundActivities)
 //                    .flatMap(ActivityDto::metricValues)
 //                    .containsExactlyInAnyOrder(

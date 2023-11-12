@@ -1,13 +1,13 @@
 package ovh.equino.actracker.repository.jpa.activity;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.*;
-import ovh.equino.actracker.domain.user.User;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Path;
 import ovh.equino.actracker.repository.jpa.JpaPredicate;
 import ovh.equino.actracker.repository.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.repository.jpa.JpaSortBuilder;
 import ovh.equino.actracker.repository.jpa.MultiResultJpaQuery;
-import ovh.equino.actracker.repository.jpa.tag.TagEntity;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -34,14 +34,14 @@ final class SelectMetricValuesQuery extends MultiResultJpaQuery<MetricValueEntit
     @Override
     protected void initProjection() {
         query.select(
-                        criteriaBuilder.construct(
-                                MetricValueProjection.class,
-                                root.get("id"),
-                                activity.get("id"),
-                                metric.get("id"),
-                                root.get("value")
-                        )
-                );
+                criteriaBuilder.construct(
+                        MetricValueProjection.class,
+                        root.get("id"),
+                        activity.get("id"),
+                        metric.get("id"),
+                        root.get("value")
+                )
+        );
     }
 
     @Override
@@ -97,7 +97,7 @@ final class SelectMetricValuesQuery extends MultiResultJpaQuery<MetricValueEntit
         }
 
         public JpaPredicate hasTagIdIn(Collection<UUID> tagIds) {
-            if(isEmpty(tagIds)) {
+            if (isEmpty(tagIds)) {
                 return noneMatch();
             }
             Path<Object> tagId = tag.get("id");
