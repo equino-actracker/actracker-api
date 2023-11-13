@@ -85,6 +85,10 @@ public abstract class JpaPredicateBuilder<E> {
         );
     }
 
+    public JpaPredicate not(JpaPredicate predicate) {
+        return () -> criteriaBuilder.not(predicate.toRawPredicate());
+    }
+
     public JpaPredicate and(JpaPredicate... predicates) {
         Predicate[] mappedPredicates = stream(predicates)
                 .map(JpaPredicate::toRawPredicate)

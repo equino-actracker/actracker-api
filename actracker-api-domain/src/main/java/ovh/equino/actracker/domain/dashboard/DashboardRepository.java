@@ -12,7 +12,9 @@ public interface DashboardRepository {
 
     void update(UUID dashboardId, DashboardDto dashboard);
 
+    // TODO delete when data sources proven
     Optional<DashboardDto> findById(UUID dashboardId);
 
+    // TODO delete when data sources proven
     List<DashboardDto> find(EntitySearchCriteria searchCriteria);
 }

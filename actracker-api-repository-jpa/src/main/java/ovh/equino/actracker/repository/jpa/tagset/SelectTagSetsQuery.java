@@ -6,7 +6,7 @@ import ovh.equino.actracker.repository.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.repository.jpa.JpaSortBuilder;
 import ovh.equino.actracker.repository.jpa.MultiResultJpaQuery;
 
-class SelectTagSetsQuery extends MultiResultJpaQuery<TagSetEntity, TagSetProjection> {
+final class SelectTagSetsQuery extends MultiResultJpaQuery<TagSetEntity, TagSetProjection> {
 
     private final PredicateBuilder predicateBuilder;
     private final SortBuilder sortBuilder;
