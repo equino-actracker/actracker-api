@@ -3,9 +3,11 @@ package ovh.equino.actracker.repository.jpa;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.hibernate.jpa.HibernatePersistenceProvider;
+import ovh.equino.actracker.domain.activity.MetricValue;
 import ovh.equino.actracker.domain.tenant.TenantDto;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public abstract class JpaIntegrationTest {
@@ -48,6 +50,10 @@ public abstract class JpaIntegrationTest {
         return new TagBuilder(creator);
     }
 
+    protected static MetricBuilder newMetric(TenantDto creator) {
+        return new MetricBuilder(creator);
+    }
+
     protected static DashboardBuilder newDashboard(TenantDto creator) {
         return new DashboardBuilder(creator);
     }
@@ -58,6 +64,8 @@ public abstract class JpaIntegrationTest {
         properties.put("javax.persistence.jdbc.user", database().username());
         properties.put("javax.persistence.jdbc.password", database().password());
         properties.put("javax.persistence.jdbc.driver", database().driverClassName());
+        properties.put("hibernate.show_sql", "true");
+        properties.put("hibernate.format_sql", "true");
         return properties;
     }
 }
