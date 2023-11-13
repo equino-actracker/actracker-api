@@ -78,17 +78,17 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
         }
 
         public JpaPredicate isInTimeRange(Timestamp timeRangeStart, Timestamp timeRangeEnd) {
-            JpaPredicate startTimeInRange = timeRangeStart != null
-                    ? or(not(isStarted()), not(isStartedAfterOrAt(timeRangeEnd)))
-                    : allMatch();
-            JpaPredicate endTimeInRange = timeRangeEnd != null
+            JpaPredicate endTimeInRange = timeRangeStart != null
                     ? or(not(isFinished()), not(isFinishedBefore(timeRangeStart)))
+                    : allMatch();
+            JpaPredicate startTimeInRange = timeRangeEnd != null
+                    ? or(not(isStarted()), not(isStartedAfter(timeRangeEnd)))
                     : allMatch();
             return and(startTimeInRange, endTimeInRange);
         }
 
-        private JpaPredicate isStartedAfterOrAt(Timestamp timeRangeEnd) {
-            return () -> criteriaBuilder.greaterThanOrEqualTo(root.get("startTime"), timeRangeEnd);
+        private JpaPredicate isStartedAfter(Timestamp timeRangeEnd) {
+            return () -> criteriaBuilder.greaterThan(root.get("startTime"), timeRangeEnd);
         }
 
         private JpaPredicate isFinishedBefore(Timestamp timeRangeStart) {

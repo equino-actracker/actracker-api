@@ -532,8 +532,8 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                 .build();
 
         accessibleOwnActivityWithDeletedTags = newActivity(searcherTenant)
-                .startedAt(39)
-                .finishedAt(61)
+                .startedAt(40)
+                .finishedAt(60)
                 .withTags(inaccessibleOwnDeletedTagWithMetric)
                 .withMetricValues(ownMetric3Value)
                 .build();
@@ -546,7 +546,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                 .build();
 
         accessibleSharedActivityWithMetricsSet = newActivity(sharingUser)
-                .startedAt(60)
+                .startedAt(61)
                 .finishedAt(99)
                 .withTags(
                         accessibleSharedTagWithMetric,
@@ -565,8 +565,8 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                 .build();
 
         accessibleSharedActivityWithMetricsUnset = newActivity(sharingUser)
-                .startedAt(41)
-                .finishedAt(59)
+                .startedAt(40)
+                .finishedAt(60)
                 .withTags(
                         accessibleSharedTagWithMetric,
                         accessibleSharedTagWithDeletedMetric,
