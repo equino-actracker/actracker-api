@@ -11,6 +11,7 @@ import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import ovh.equino.actracker.domain.activity.ActivityDataSource;
 import ovh.equino.actracker.domain.activity.ActivityRepository;
 import ovh.equino.actracker.domain.dashboard.DashboardRepository;
+import ovh.equino.actracker.domain.tag.TagDataSource;
 import ovh.equino.actracker.domain.tag.TagRepository;
 import ovh.equino.actracker.domain.tagset.TagSetDataSource;
 import ovh.equino.actracker.domain.tagset.TagSetRepository;
@@ -33,8 +34,9 @@ import java.util.Properties;
                         TagSetRepository.class,
                         DashboardRepository.class,
 
+                        ActivityDataSource.class,
+                        TagDataSource.class,
                         TagSetDataSource.class,
-                        ActivityDataSource.class
                 }
         )
 )

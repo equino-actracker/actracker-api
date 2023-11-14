@@ -18,18 +18,21 @@ import java.util.UUID;
 public class TagApplicationService {
 
     private final TagRepository tagRepository;
+    private final TagDataSource tagDataSource;
     private final TagSearchEngine tagSearchEngine;
     private final TagNotifier tagNotifier;
     private final IdentityProvider identityProvider;
     private final TenantRepository tenantRepository;
 
     public TagApplicationService(TagRepository tagRepository,
+                                 TagDataSource tagDataSource,
                                  TagSearchEngine tagSearchEngine,
                                  TagNotifier tagNotifier,
                                  IdentityProvider identityProvider,
                                  TenantRepository tenantRepository) {
 
         this.tagRepository = tagRepository;
+        this.tagDataSource = tagDataSource;
         this.tagSearchEngine = tagSearchEngine;
         this.tagNotifier = tagNotifier;
         this.identityProvider = identityProvider;
@@ -56,11 +59,15 @@ public class TagApplicationService {
         );
         Tag tag = Tag.create(tagData, creator);
         tagRepository.add(tag.forStorage());
-        TagDto tagResult = tag.forClient(creator);
 
         tagNotifier.notifyChanged(tag.forChangeNotification());
 
-        return toTagResult(tagResult);
+        return tagDataSource.find(tag.id(), creator)
+                .map(this::toTagResult)
+                .orElseThrow(() -> {
+                    String message = "Could not find created tag with ID=%s".formatted(tag.id());
+                    return new RuntimeException(message);
+                });
     }
 
     public List<TagResult> resolveTags(Set<UUID> tagIds) {
@@ -91,8 +98,6 @@ public class TagApplicationService {
         );
         EntitySearchResult<TagDto> searchResult = tagSearchEngine.findTags(searchCriteria);
         List<TagResult> resultForClient = searchResult.results().stream()
-                .map(Tag::fromStorage)
-                .map(tag -> tag.forClient(searchCriteria.searcher()))
                 .map(this::toTagResult)
                 .toList();
 
@@ -109,11 +114,15 @@ public class TagApplicationService {
 
         tag.rename(newName, updater);
         tagRepository.update(tagId, tag.forStorage());
-        TagDto tagResult = tag.forClient(updater);
 
         tagNotifier.notifyChanged(tag.forChangeNotification());
 
-        return toTagResult(tagResult);
+        return tagDataSource.find(tag.id(), updater)
+                .map(this::toTagResult)
+                .orElseThrow(() -> {
+                    String message = "Could not find updated tag with ID=%s".formatted(tag.id());
+                    return new RuntimeException(message);
+                });
     }
 
     public void deleteTag(UUID tagId) {
@@ -140,11 +149,16 @@ public class TagApplicationService {
 
         tag.addMetric(metricName, MetricType.valueOf(metricType), updater);
         tagRepository.update(tagId, tag.forStorage());
-        TagDto tagResult = tag.forClient(updater);
 
         tagNotifier.notifyChanged(tag.forChangeNotification());
 
-        return toTagResult(tagResult);
+        return tagDataSource.find(tag.id(), updater)
+                .map(this::toTagResult)
+                .orElseThrow(() -> {
+                    String message = "Could not find updated tag with ID=%s".formatted(tag.id());
+                    return new RuntimeException(message);
+                });
+
     }
 
     public TagResult deleteMetric(UUID metricId, UUID tagId) {
@@ -157,11 +171,16 @@ public class TagApplicationService {
 
         tag.deleteMetric(new MetricId(metricId), updater);
         tagRepository.update(tagId, tag.forStorage());
-        TagDto tagResult = tag.forClient(updater);
 
         tagNotifier.notifyChanged(tag.forChangeNotification());
 
-        return toTagResult(tagResult);
+        return tagDataSource.find(tag.id(), updater)
+                .map(this::toTagResult)
+                .orElseThrow(() -> {
+                    String message = "Could not find updated tag with ID=%s".formatted(tag.id());
+                    return new RuntimeException(message);
+                });
+
     }
 
     public TagResult renameMetric(String newName, UUID metricId, UUID tagId) {
@@ -174,11 +193,16 @@ public class TagApplicationService {
 
         tag.renameMetric(newName, new MetricId(metricId), updater);
         tagRepository.update(tagId, tag.forStorage());
-        TagDto tagResult = tag.forClient(updater);
 
         tagNotifier.notifyChanged(tag.forChangeNotification());
 
-        return toTagResult(tagResult);
+        return tagDataSource.find(tag.id(), updater)
+                .map(this::toTagResult)
+                .orElseThrow(() -> {
+                    String message = "Could not find updated tag with ID=%s".formatted(tag.id());
+                    return new RuntimeException(message);
+                });
+
     }
 
     public TagResult shareTag(String newGrantee, UUID tagId) {
@@ -193,11 +217,16 @@ public class TagApplicationService {
 
         tag.share(share, granter);
         tagRepository.update(tagId, tag.forStorage());
-        TagDto tagResult = tag.forClient(granter);
 
         tagNotifier.notifyChanged(tag.forChangeNotification());
 
-        return toTagResult(tagResult);
+        return tagDataSource.find(tag.id(), granter)
+                .map(this::toTagResult)
+                .orElseThrow(() -> {
+                    String message = "Could not find updated tag with ID=%s".formatted(tag.id());
+                    return new RuntimeException(message);
+                });
+
     }
 
     public TagResult unshareTag(String granteeName, UUID tagId) {
@@ -210,11 +239,16 @@ public class TagApplicationService {
 
         tag.unshare(granteeName, granter);
         tagRepository.update(tagId, tag.forStorage());
-        TagDto tagResult = tag.forClient(granter);
 
         tagNotifier.notifyChanged(tag.forChangeNotification());
 
-        return toTagResult(tagResult);
+        return tagDataSource.find(tag.id(), granter)
+                .map(this::toTagResult)
+                .orElseThrow(() -> {
+                    String message = "Could not find updated tag with ID=%s".formatted(tag.id());
+                    return new RuntimeException(message);
+                });
+
     }
 
     private Share resolveShare(String grantee) {

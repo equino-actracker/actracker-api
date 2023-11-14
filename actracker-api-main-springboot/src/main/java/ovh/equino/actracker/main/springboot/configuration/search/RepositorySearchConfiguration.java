@@ -13,7 +13,7 @@ import ovh.equino.actracker.domain.tag.TagSearchEngine;
         includeFilters = @ComponentScan.Filter(
                 type = FilterType.ASSIGNABLE_TYPE,
                 classes = {
-                        TagSearchEngine.class,
+//                        TagSearchEngine.class,
 //                        ActivitySearchEngine.class,
 //                        TagSetSearchEngine.class,
                         DashboardSearchEngine.class
