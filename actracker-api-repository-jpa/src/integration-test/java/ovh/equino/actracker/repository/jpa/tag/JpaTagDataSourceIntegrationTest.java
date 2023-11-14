@@ -41,8 +41,8 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
                     .ignoringFields("metrics", "shares")
                     .isEqualTo(expectedTag);
             // TODO
-//            assertThat(foundTag.get().metrics()).containsExactlyInAnyOrderElementsOf(expectedTag.metrics());
-//            assertThat(foundTag.get().shares()).containsExactlyInAnyOrderElementsOf(expectedTag.shares());
+            assertThat(foundTag.get().metrics()).containsExactlyInAnyOrderElementsOf(expectedTag.metrics());
+            assertThat(foundTag.get().shares()).containsExactlyInAnyOrderElementsOf(expectedTag.shares());
         });
     }
 
@@ -112,6 +112,7 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
         testConfiguration.tags.add(newTag(sharingTenant)
                 .named("Inaccessible shared deleted tag")
                 .sharedWith(searcherTenant)
+                .deleted()
                 .build()
         );
 
