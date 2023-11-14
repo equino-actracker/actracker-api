@@ -1,7 +1,7 @@
 package ovh.equino.actracker.repository.jpa;
 
 import ovh.equino.actracker.domain.tag.TagDto;
-import ovh.equino.actracker.domain.tenant.TenantDto;
+import ovh.equino.actracker.domain.user.User;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -28,11 +28,11 @@ public class IntegrationTestTagsConfiguration {
         transientTags.add(tag);
     }
 
-    public Collection<TagDto> accessibleFor(TenantDto user) {
+    public Collection<TagDto> accessibleFor(User user) {
         return addedTags;
     }
 
-    public Collection<TagDto> inaccessibleFor(TenantDto user) {
+    public Collection<TagDto> inaccessibleFor(User user) {
         Collection<TagDto> accessibleTags = accessibleFor(user);
         return concat(addedTags.stream(), transientTags.stream())
                 .filter(not(accessibleTags::contains))

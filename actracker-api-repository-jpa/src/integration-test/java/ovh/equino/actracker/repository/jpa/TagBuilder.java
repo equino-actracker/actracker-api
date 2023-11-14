@@ -35,6 +35,18 @@ public final class TagBuilder {
         );
     }
 
+    public TagBuilder named(String name) {
+        this.newTag = new TagDto(
+                newTag.id(),
+                newTag.creatorId(),
+                name,
+                newTag.metrics(),
+                newTag.shares(),
+                newTag.deleted()
+        );
+        return this;
+    }
+
     public TagBuilder withMetrics(MetricDto... metrics) {
         this.newTag = new TagDto(
                 newTag.id(),
