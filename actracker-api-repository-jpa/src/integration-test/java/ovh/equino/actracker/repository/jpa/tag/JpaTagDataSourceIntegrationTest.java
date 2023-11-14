@@ -13,9 +13,10 @@ import ovh.equino.actracker.repository.jpa.IntegrationTestConfiguration;
 import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
 
 import java.sql.SQLException;
+import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
 
 abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
 
@@ -32,7 +33,17 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("accessibleTag")
     void shouldFindAccessibleTag(String testName, TagId tagId, TagDto expectedTag) {
-        fail();
+        inTransaction(() -> {
+            Optional<TagDto> foundTag = dataSource.find(tagId, searcher);
+            assertThat(foundTag).isPresent();
+            assertThat(foundTag.get())
+                    .usingRecursiveComparison()
+                    .ignoringFields("metrics", "shares")
+                    .isEqualTo(expectedTag);
+            // TODO
+//            assertThat(foundTag.get().metrics()).containsExactlyInAnyOrderElementsOf(expectedTag.metrics());
+//            assertThat(foundTag.get().shares()).containsExactlyInAnyOrderElementsOf(expectedTag.shares());
+        });
     }
 
     private static Stream<Arguments> accessibleTag() {
@@ -46,7 +57,10 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("inaccessibleTag")
     void shouldNotFindInaccessibleTag(String testName, TagId tagId) {
-        fail();
+        inTransaction(() -> {
+            Optional<TagDto> foundTag = dataSource.find(tagId, searcher);
+            assertThat(foundTag).isEmpty();
+        });
     }
 
     private static Stream<Arguments> inaccessibleTag() {
@@ -71,9 +85,40 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
         testConfiguration.tags.add(newTag(searcherTenant)
                 .named("Accessible own tag without metrics")
                 .withMetrics()
+                .sharedWith()
                 .build()
         );
 
+        testConfiguration.tags.add(newTag(searcherTenant)
+                .named("Accessible own tag with metrics")
+                .withMetrics(newMetric(searcherTenant).build(), newMetric(searcherTenant).build())
+                .sharedWith(grantee1, grantee2)
+                .build()
+        );
+
+        testConfiguration.tags.add(newTag(searcherTenant)
+                .named("Inaccessible own deleted tag")
+                .deleted()
+                .build()
+        );
+
+        testConfiguration.tags.add(newTag(sharingTenant)
+                .named("Accessible shared tag with metrics")
+                .withMetrics(newMetric(sharingTenant).build(), newMetric(sharingTenant).build())
+                .sharedWith(searcherTenant, grantee1, grantee2)
+                .build()
+        );
+
+        testConfiguration.tags.add(newTag(sharingTenant)
+                .named("Inaccessible shared deleted tag")
+                .sharedWith(searcherTenant)
+                .build()
+        );
+
+        testConfiguration.tags.add(newTag(sharingTenant)
+                .named("Inaccessible foreign tag")
+                .build()
+        );
 
         testConfiguration.tags.addTransient(newTag(searcherTenant)
                 .named("Inaccessible not persisted tag")
