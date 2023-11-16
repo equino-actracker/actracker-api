@@ -38,7 +38,7 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
                 .execute();
 
         SelectActivityJoinTagQuery selectActivityJoinTag = new SelectActivityJoinTagQuery(entityManager);
-        List<ActivityJoinTagProjection> activityJoinTag = selectActivityJoinTag
+        Set<UUID> tagIds = selectActivityJoinTag
                 .where(
                         selectActivityJoinTag.predicate().and(
                                 selectActivityJoinTag.predicate().hasActivityId(activityId.id()),
@@ -46,16 +46,14 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
                                 selectActivityJoinTag.predicate().isAccessibleFor(searcher)
                         )
                 )
-                .execute();
-
-        Set<UUID> tagIdsForActivity = activityJoinTag
+                .execute()
                 .stream()
                 .map(ActivityJoinTagProjection::tagId)
                 .map(UUID::fromString)
                 .collect(toUnmodifiableSet());
 
         SelectMetricValuesQuery selectMetricValues = new SelectMetricValuesQuery(entityManager);
-        List<MetricValueProjection> metricValues = selectMetricValues
+        List<MetricValue> metricValues = selectMetricValues
                 .where(
                         selectMetricValues.predicate().and(
                                 selectMetricValues.predicate().hasActivityId(activityId.id()),
@@ -63,15 +61,12 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
                                 selectMetricValues.predicate().isAccessibleFor(searcher)
                         )
                 )
-                .execute();
-
-        List<MetricValue> metricValuesForActivity = metricValues
+                .execute()
                 .stream()
-                .map(this::toMetricValue)
+                .map(MetricValueProjection::toMetricValue)
                 .toList();
 
-        return activityResult
-                .map(result -> toActivity(result, tagIdsForActivity, metricValuesForActivity));
+        return activityResult.map(result -> result.toActivity(tagIds, metricValues));
     }
 
     @Override
@@ -107,7 +102,7 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
                 .collect(toUnmodifiableSet());
 
         SelectActivityJoinTagQuery selectActivityJoinTag = new SelectActivityJoinTagQuery(entityManager);
-        List<ActivityJoinTagProjection> activityJoinTag = selectActivityJoinTag
+        Map<String, Set<UUID>> tagsByActivityId = selectActivityJoinTag
                 .where(
                         selectActivityJoinTag.predicate().and(
                                 selectActivityJoinTag.predicate().hasActivityIdIn(foundActivityIds),
@@ -115,10 +110,15 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
                                 selectActivityJoinTag.predicate().isAccessibleFor(searchCriteria.searcher())
                         )
                 )
-                .execute();
+                .execute()
+                .stream()
+                .collect(groupingBy(
+                        ActivityJoinTagProjection::activityId,
+                        mapping(projection -> UUID.fromString(projection.tagId()), toUnmodifiableSet())
+                ));
 
         SelectMetricValuesQuery selectMetricValue = new SelectMetricValuesQuery(entityManager);
-        List<MetricValueProjection> metricValues = selectMetricValue
+        Map<String, List<MetricValue>> metricValues = selectMetricValue
                 .where(
                         selectMetricValue.predicate().and(
                                 selectMetricValue.predicate().hasActivityIdIn(foundActivityIds),
@@ -126,53 +126,19 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
                                 selectMetricValue.predicate().isAccessibleFor(searchCriteria.searcher())
                         )
                 )
-                .execute();
-
-        Map<String, Set<UUID>> tagIdsByActivityId = activityJoinTag
-                .stream()
-                .collect(groupingBy(
-                        ActivityJoinTagProjection::activityId,
-                        mapping(projection -> UUID.fromString(projection.tagId()), toUnmodifiableSet())
-                ));
-
-        Map<String, List<MetricValue>> metricValuesByActivityId = metricValues
+                .execute()
                 .stream()
                 .collect(groupingBy(
                         MetricValueProjection::activityId,
-                        mapping(this::toMetricValue, toList())
+                        mapping(MetricValueProjection::toMetricValue, toList())
                 ));
 
         return activityResults
                 .stream()
-                .map(activityProjection -> toActivity(
-                        activityProjection,
-                        tagIdsByActivityId.getOrDefault(activityProjection.id(), emptySet()),
-                        metricValuesByActivityId.getOrDefault(activityProjection.id(), emptyList())
+                .map(result -> result.toActivity(
+                        tagsByActivityId.getOrDefault(result.id(), emptySet()),
+                        metricValues.getOrDefault(result.id(), emptyList())
                 ))
                 .toList();
-    }
-
-    private ActivityDto toActivity(ActivityProjection activityProjection,
-                                   Set<UUID> tagIds,
-                                   List<MetricValue> metricValues) {
-
-        return new ActivityDto(
-                UUID.fromString(activityProjection.id()),
-                UUID.fromString(activityProjection.creatorId()),
-                activityProjection.title(),
-                isNull(activityProjection.startTime()) ? null : activityProjection.startTime().toInstant(),
-                isNull(activityProjection.endTime()) ? null : activityProjection.endTime().toInstant(),
-                activityProjection.comment(),
-                tagIds,
-                metricValues,
-                activityProjection.deleted()
-        );
-    }
-
-    private MetricValue toMetricValue(MetricValueProjection projection) {
-        return new MetricValue(
-                UUID.fromString(projection.metricId()),
-                projection.value()
-        );
     }
 }
