@@ -35,6 +35,18 @@ public final class TagBuilder {
         );
     }
 
+    public TagBuilder named(String name) {
+        this.newTag = new TagDto(
+                newTag.id(),
+                newTag.creatorId(),
+                name,
+                newTag.metrics(),
+                newTag.shares(),
+                newTag.deleted()
+        );
+        return this;
+    }
+
     public TagBuilder withMetrics(MetricDto... metrics) {
         this.newTag = new TagDto(
                 newTag.id(),
@@ -63,6 +75,21 @@ public final class TagBuilder {
                 newTag.deleted()
         );
         return this;
+    }
+
+    public TagBuilder sharedWithNonExisting(String... granteeNames) {
+        this.newTag = new TagDto(
+                newTag.id(),
+                newTag.creatorId(),
+                newTag.name(),
+                newTag.metrics(),
+                stream(granteeNames)
+                        .map(Share::new)
+                        .toList(),
+                newTag.deleted()
+        );
+        return this;
+
     }
 
     public TagBuilder deleted() {

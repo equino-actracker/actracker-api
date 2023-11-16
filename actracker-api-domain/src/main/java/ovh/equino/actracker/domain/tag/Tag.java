@@ -183,10 +183,6 @@ public class Tag implements Entity {
         return new TagChangedNotification(dto);
     }
 
-    TagId id() {
-        return id;
-    }
-
     boolean isDeleted() {
         return deleted;
     }
@@ -272,4 +268,10 @@ public class Tag implements Entity {
     public User creator() {
         return creator;
     }
+
+    // TODO think about extracting it to superclass
+    public TagId id() {
+        return this.id;
+    }
+
 }
