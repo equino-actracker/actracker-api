@@ -77,6 +77,21 @@ public final class TagBuilder {
         return this;
     }
 
+    public TagBuilder sharedWithNonExisting(String... granteeNames) {
+        this.newTag = new TagDto(
+                newTag.id(),
+                newTag.creatorId(),
+                newTag.name(),
+                newTag.metrics(),
+                stream(granteeNames)
+                        .map(Share::new)
+                        .toList(),
+                newTag.deleted()
+        );
+        return this;
+
+    }
+
     public TagBuilder deleted() {
         this.newTag = new TagDto(
                 newTag.id(),

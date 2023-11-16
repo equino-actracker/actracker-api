@@ -96,8 +96,9 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
         );
 
         testConfiguration.tags.add(newTag(searcherTenant)
-                .named("Accessible own tag with deleted metric")
+                .named("Accessible own tag with deleted metric shared with non existing users")
                 .withMetrics(newMetric(searcherTenant).deleted().build())
+                .sharedWithNonExisting("nonExistingGrantee1", "nonExistingGrantee2")
                 .build()
         );
 

@@ -19,6 +19,7 @@ import java.util.UUID;
 
 import static java.util.Arrays.stream;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static java.util.UUID.randomUUID;
 
 public abstract class IntegrationTestRelationalDataBase {
@@ -129,7 +130,7 @@ public abstract class IntegrationTestRelationalDataBase {
             );
             preparedStatement.setString(1, randomUUID().toString());
             preparedStatement.setString(2, tag.id().toString());
-            preparedStatement.setString(3, share.grantee().id().toString());
+            preparedStatement.setString(3, nonNull(share.grantee()) ? share.grantee().id().toString() : null);
             preparedStatement.setString(4, share.granteeName());
             preparedStatement.execute();
         }
