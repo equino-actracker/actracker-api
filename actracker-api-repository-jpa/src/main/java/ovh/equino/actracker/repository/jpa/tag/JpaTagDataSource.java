@@ -60,8 +60,7 @@ class JpaTagDataSource extends JpaDAO implements TagDataSource {
                 .map(MetricJoinTagProjection::toMetric)
                 .toList();
 
-        return tagResult
-                .map(result -> result.toTag(shares, metrics));
+        return tagResult.map(result -> result.toTag(shares, metrics));
     }
 
     @Override
