@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Collections.emptyList;
+import static java.util.Objects.nonNull;
 
 class JpaTagDataSource extends JpaDAO implements TagDataSource {
 
@@ -85,10 +86,10 @@ class JpaTagDataSource extends JpaDAO implements TagDataSource {
     }
 
     private Share toShare(ShareJoinTagProjection tagShare) {
-        return new Share(
-                new User(UUID.fromString(tagShare.granteeId())),
-                tagShare.granteeName()
-        );
+        User granteeId = nonNull(tagShare.granteeId())
+                ? new User(UUID.fromString(tagShare.granteeId()))
+                : null;
+        return new Share(granteeId, tagShare.granteeName());
     }
 
     private MetricDto toMetric(MetricJoinTagProjection metric) {
