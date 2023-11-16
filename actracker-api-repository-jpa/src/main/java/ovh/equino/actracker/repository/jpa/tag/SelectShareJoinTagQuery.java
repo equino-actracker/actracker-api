@@ -2,6 +2,7 @@ package ovh.equino.actracker.repository.jpa.tag;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
+import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaPredicate;
 import ovh.equino.actracker.repository.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.repository.jpa.JpaSortBuilder;
@@ -76,6 +77,11 @@ final class SelectShareJoinTagQuery extends MultiResultJpaQuery<TagShareEntity, 
 
         public JpaPredicate hasTagId(UUID tagId) {
             return () -> criteriaBuilder.equal(tag.get("id"), tagId.toString());
+        }
+
+        @Override
+        public JpaPredicate isAccessibleFor(User searcher) {
+            return () -> criteriaBuilder.equal(tag.get("creatorId"), searcher.id().toString());
         }
     }
 }

@@ -40,7 +40,8 @@ class JpaTagDataSource extends JpaDAO implements TagDataSource {
                 .where(
                         selectShareJoinTag.predicate().and(
                                 selectShareJoinTag.predicate().isNotDeleted(),
-                                selectShareJoinTag.predicate().hasTagId(tagId.id())
+                                selectShareJoinTag.predicate().hasTagId(tagId.id()),
+                                selectShareJoinTag.predicate().isAccessibleFor(searcher)
                         )
                 )
                 .execute();

@@ -8,7 +8,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
+import static java.util.Collections.emptyList;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Stream.concat;
 
@@ -34,13 +36,17 @@ public class IntegrationTestTagsConfiguration {
                 .stream()
                 .filter(not(TagDto::deleted))
                 .filter(tag -> isOwnerOrGrantee(user, tag))
+                .map(tag -> toAccessibleFormFor(user, tag))
                 .toList();
     }
 
     public Collection<TagDto> inaccessibleFor(User user) {
-        Collection<TagDto> accessibleTags = accessibleFor(user);
+        List<UUID> accessibleTags = accessibleFor(user)
+                .stream()
+                .map(TagDto::id)
+                .toList();
         return concat(addedTags.stream(), transientTags.stream())
-                .filter(not(accessibleTags::contains))
+                .filter(tag -> !accessibleTags.contains(tag.id()))
                 .toList();
     }
 
@@ -48,7 +54,7 @@ public class IntegrationTestTagsConfiguration {
         return isOwner(user, tag) || isGrantee(user, tag);
     }
 
-    private static boolean isGrantee(User user, TagDto tag) {
+    private boolean isGrantee(User user, TagDto tag) {
         List<User> grantees = tag.shares()
                 .stream()
                 .map(Share::grantee)
@@ -56,7 +62,21 @@ public class IntegrationTestTagsConfiguration {
         return grantees.contains(user);
     }
 
-    private static boolean isOwner(User user, TagDto tag) {
+    private boolean isOwner(User user, TagDto tag) {
         return user.id().equals(tag.creatorId());
+    }
+
+    private TagDto toAccessibleFormFor(User user, TagDto tag) {
+        List<Share> shares = isOwner(user, tag)
+                ? tag.shares()
+                : emptyList();
+        return new TagDto(
+                tag.id(),
+                tag.creatorId(),
+                tag.name(),
+                tag.metrics(),
+                shares,
+                tag.deleted()
+        );
     }
 }
