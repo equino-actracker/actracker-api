@@ -2,6 +2,7 @@ package ovh.equino.actracker.repository.jpa.tag;
 
 import jakarta.persistence.EntityManager;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tag.TagDataSource;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tag.TagId;
@@ -34,7 +35,23 @@ class JpaTagDataSource extends JpaDAO implements TagDataSource {
                 )
                 .execute();
 
-        return tagResult.map(this::toTag);
+        SelectShareJoinTagQuery selectShareJoinTag = new SelectShareJoinTagQuery(entityManager);
+        List<ShareJoinTagProjection> shareJoinTagResults = selectShareJoinTag
+                .where(
+                        selectShareJoinTag.predicate().and(
+                                selectShareJoinTag.predicate().isNotDeleted(),
+                                selectShareJoinTag.predicate().hasTagId(tagId.id())
+                        )
+                )
+                .execute();
+
+        List<Share> shares = shareJoinTagResults
+                .stream()
+                .map(this::toShare)
+                .toList();
+
+        return tagResult
+                .map(result -> toTag(result, shares));
     }
 
     @Override
@@ -42,14 +59,21 @@ class JpaTagDataSource extends JpaDAO implements TagDataSource {
         return emptyList();
     }
 
-    private TagDto toTag(TagProjection projection) {
+    private TagDto toTag(TagProjection projection, List<Share> shares) {
         return new TagDto(
                 UUID.fromString(projection.id()),
                 UUID.fromString(projection.creatorId()),
                 projection.name(),
                 emptyList(),
-                emptyList(),
+                shares,
                 projection.deleted()
+        );
+    }
+
+    private Share toShare(ShareJoinTagProjection tagShare) {
+        return new Share(
+                new User(UUID.fromString(tagShare.granteeId())),
+                tagShare.granteeName()
         );
     }
 }
