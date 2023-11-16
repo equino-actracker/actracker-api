@@ -71,7 +71,7 @@ class JpaTagDataSource extends JpaDAO implements TagDataSource {
 
     @Override
     public List<TagDto> find(EntitySearchCriteria searchCriteria) {
-        return emptyList();
+        throw new RuntimeException("Operation not supported");
     }
 
     private TagDto toTag(TagProjection projection, List<Share> shares, List<MetricDto> metrics) {
