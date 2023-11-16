@@ -40,7 +40,6 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
                     .usingRecursiveComparison()
                     .ignoringFields("metrics", "shares")
                     .isEqualTo(expectedTag);
-            // TODO
             assertThat(foundTag.get().metrics()).containsExactlyInAnyOrderElementsOf(expectedTag.metrics());
             assertThat(foundTag.get().shares()).containsExactlyInAnyOrderElementsOf(expectedTag.shares());
         });
@@ -93,6 +92,12 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
                 .named("Accessible own tag with metrics")
                 .withMetrics(newMetric(searcherTenant).build(), newMetric(searcherTenant).build())
                 .sharedWith(grantee1, grantee2)
+                .build()
+        );
+
+        testConfiguration.tags.add(newTag(searcherTenant)
+                .named("Accessible own tag with deleted metric")
+                .withMetrics(newMetric(searcherTenant).deleted().build())
                 .build()
         );
 

@@ -1,6 +1,7 @@
 package ovh.equino.actracker.repository.jpa;
 
 import ovh.equino.actracker.domain.share.Share;
+import ovh.equino.actracker.domain.tag.MetricDto;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.user.User;
 
@@ -70,11 +71,15 @@ public class IntegrationTestTagsConfiguration {
         List<Share> shares = isOwner(user, tag)
                 ? tag.shares()
                 : emptyList();
+        List<MetricDto> metrics = tag.metrics()
+                .stream()
+                .filter(not(MetricDto::deleted))
+                .toList();
         return new TagDto(
                 tag.id(),
                 tag.creatorId(),
                 tag.name(),
-                tag.metrics(),
+                metrics,
                 shares,
                 tag.deleted()
         );

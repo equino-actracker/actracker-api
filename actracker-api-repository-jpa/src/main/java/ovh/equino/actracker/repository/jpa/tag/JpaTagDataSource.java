@@ -3,9 +3,7 @@ package ovh.equino.actracker.repository.jpa.tag;
 import jakarta.persistence.EntityManager;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.share.Share;
-import ovh.equino.actracker.domain.tag.TagDataSource;
-import ovh.equino.actracker.domain.tag.TagDto;
-import ovh.equino.actracker.domain.tag.TagId;
+import ovh.equino.actracker.domain.tag.*;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaDAO;
 
@@ -51,8 +49,23 @@ class JpaTagDataSource extends JpaDAO implements TagDataSource {
                 .map(this::toShare)
                 .toList();
 
+        SelectMetricJoinTagQuery selectMetricJoinTag = new SelectMetricJoinTagQuery(entityManager);
+        List<MetricJoinTagProjection> metricJoinTagResults = selectMetricJoinTag
+                .where(
+                        selectMetricJoinTag.predicate().and(
+                                selectMetricJoinTag.predicate().hasTagId(tagId.id()),
+                                selectMetricJoinTag.predicate().isNotDeleted()
+                        )
+                )
+                .execute();
+
+        List<MetricDto> metrics = metricJoinTagResults
+                .stream()
+                .map(this::toMetric)
+                .toList();
+
         return tagResult
-                .map(result -> toTag(result, shares));
+                .map(result -> toTag(result, shares, metrics));
     }
 
     @Override
@@ -60,12 +73,12 @@ class JpaTagDataSource extends JpaDAO implements TagDataSource {
         return emptyList();
     }
 
-    private TagDto toTag(TagProjection projection, List<Share> shares) {
+    private TagDto toTag(TagProjection projection, List<Share> shares, List<MetricDto> metrics) {
         return new TagDto(
                 UUID.fromString(projection.id()),
                 UUID.fromString(projection.creatorId()),
                 projection.name(),
-                emptyList(),
+                metrics,
                 shares,
                 projection.deleted()
         );
@@ -75,6 +88,16 @@ class JpaTagDataSource extends JpaDAO implements TagDataSource {
         return new Share(
                 new User(UUID.fromString(tagShare.granteeId())),
                 tagShare.granteeName()
+        );
+    }
+
+    private MetricDto toMetric(MetricJoinTagProjection metric) {
+        return new MetricDto(
+                UUID.fromString(metric.id()),
+                UUID.fromString(metric.creatorId()),
+                metric.name(),
+                MetricType.valueOf(metric.type()),
+                metric.deleted()
         );
     }
 }
