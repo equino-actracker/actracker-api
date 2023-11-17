@@ -98,8 +98,6 @@ public class TagApplicationService {
         );
         EntitySearchResult<TagDto> searchResult = tagSearchEngine.findTags(searchCriteria);
         List<TagResult> resultForClient = searchResult.results().stream()
-                .map(Tag::fromStorage)
-                .map(tag -> tag.forClient(searchCriteria.searcher()))
                 .map(this::toTagResult)
                 .toList();
 
