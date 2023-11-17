@@ -10,6 +10,7 @@ import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaDAO;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -65,6 +66,21 @@ class JpaTagDataSource extends JpaDAO implements TagDataSource {
 
     @Override
     public List<TagDto> find(EntitySearchCriteria searchCriteria) {
-        throw new RuntimeException("Operation not supported");
+
+        SelectTagsQuery selectTags = new SelectTagsQuery(entityManager);
+        List<TagProjection> tagResults = selectTags
+                .where(
+                        selectTags.predicate().and(
+                                selectTags.predicate().isNotDeleted(),
+                                selectTags.predicate().isAccessibleFor(searchCriteria.searcher())
+                        )
+                )
+                .orderBy(selectTags.sort().ascending("id"))
+                .execute();
+
+        return tagResults
+                .stream()
+                .map(tagResult -> tagResult.toTag(Collections.emptyList(), Collections.emptyList()))
+                .toList();
     }
 }

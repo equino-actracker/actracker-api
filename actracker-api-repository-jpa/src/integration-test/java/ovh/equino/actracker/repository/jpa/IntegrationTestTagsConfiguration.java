@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static java.util.Collections.emptyList;
+import static java.util.Comparator.comparing;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Stream.concat;
 
@@ -38,6 +39,7 @@ public class IntegrationTestTagsConfiguration {
                 .filter(not(TagDto::deleted))
                 .filter(tag -> isOwnerOrGrantee(user, tag))
                 .map(tag -> toAccessibleFormFor(user, tag))
+                .sorted(comparing(tag -> tag.id().toString()))
                 .toList();
     }
 
