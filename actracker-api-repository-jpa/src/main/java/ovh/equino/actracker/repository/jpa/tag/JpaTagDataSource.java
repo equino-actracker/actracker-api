@@ -85,6 +85,21 @@ class JpaTagDataSource extends JpaDAO implements TagDataSource {
                 .map(UUID::fromString)
                 .collect(toUnmodifiableSet());
 
+        SelectShareJoinTagQuery selectShareJoinTag = new SelectShareJoinTagQuery(entityManager);
+        Map<String, List<Share>> sharesByTagId = selectShareJoinTag
+                .where(
+                        selectShareJoinTag.predicate().and(
+                                selectShareJoinTag.predicate().hasTagIdIn(foundTagIds),
+                                selectShareJoinTag.predicate().isAccessibleFor(searchCriteria.searcher())
+                        )
+                )
+                .execute()
+                .stream()
+                .collect(groupingBy(
+                        ShareJoinTagProjection::tagId,
+                        mapping(ShareJoinTagProjection::toShare, toList())
+                ));
+
         SelectMetricJoinTagQuery selectMetricJoinTag = new SelectMetricJoinTagQuery(entityManager);
         Map<String, List<MetricDto>> metricsByTagId = selectMetricJoinTag
                 .where(
@@ -103,7 +118,7 @@ class JpaTagDataSource extends JpaDAO implements TagDataSource {
         return tagResults
                 .stream()
                 .map(tagResult -> tagResult.toTag(
-                        emptyList(),
+                        sharesByTagId.getOrDefault(tagResult.id(), emptyList()),
                         metricsByTagId.getOrDefault(tagResult.id(), emptyList())
                 ))
                 .toList();

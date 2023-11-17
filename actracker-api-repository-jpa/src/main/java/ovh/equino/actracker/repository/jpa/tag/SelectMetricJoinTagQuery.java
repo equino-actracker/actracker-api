@@ -73,7 +73,7 @@ final class SelectMetricJoinTagQuery extends MultiResultJpaQuery<MetricEntity, M
         throw new RuntimeException("Sorting metrics joint with tags not supported");
     }
 
-    public final class PredicateBuilder extends JpaPredicateBuilder<MetricEntity> {
+    final class PredicateBuilder extends JpaPredicateBuilder<MetricEntity> {
         private PredicateBuilder() {
             super(criteriaBuilder, root);
         }
@@ -88,7 +88,6 @@ final class SelectMetricJoinTagQuery extends MultiResultJpaQuery<MetricEntity, M
                     .map(UUID::toString)
                     .collect(toUnmodifiableSet());
             return in(tagIdsAsStrings, tag.get("id"));
-
         }
     }
 }

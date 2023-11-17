@@ -60,6 +60,13 @@ public class IntegrationTestTagsConfiguration {
                 .toList();
     }
 
+    public Collection<Share> flatSharesAccessibleFor(User user) {
+        return accessibleFor(user)
+                .stream()
+                .flatMap(tag -> tag.shares().stream())
+                .toList();
+    }
+
     private boolean isOwnerOrGrantee(User user, TagDto tag) {
         return isOwner(user, tag) || isGrantee(user, tag);
     }
