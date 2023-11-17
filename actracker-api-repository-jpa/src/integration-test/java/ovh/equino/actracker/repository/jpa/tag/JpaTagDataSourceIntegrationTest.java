@@ -93,10 +93,10 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
             assertThat(foundTags)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("shares", "metrics")
                     .containsExactlyElementsOf(testConfiguration.tags.accessibleFor(searcher));
+            assertThat(foundTags)
+                    .flatMap(TagDto::metrics)
+                    .containsExactlyInAnyOrderElementsOf(testConfiguration.tags.flatMetricsAccessibleFor(searcher));
             // TODO
-//            assertThat(foundTags)
-//                    .flatMap(TagDto::metrics)
-//                    .containsExactlyInAnyOrderElementsOf(testConfiguration.tags.flatMetricsAccessibleFor(searcher));
 //            assertThat(foundTags)
 //                    .flatMap(TagDto::shares)
 //                    .containsExactlyInAnyOrderElementsOf(testConfiguration.tags.flatSharesAccessibleFor(searcher));

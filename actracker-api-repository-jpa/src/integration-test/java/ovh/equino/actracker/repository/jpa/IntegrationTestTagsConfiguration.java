@@ -53,6 +53,13 @@ public class IntegrationTestTagsConfiguration {
                 .toList();
     }
 
+    public Collection<MetricDto> flatMetricsAccessibleFor(User user) {
+        return accessibleFor(user)
+                .stream()
+                .flatMap(tag -> tag.metrics().stream())
+                .toList();
+    }
+
     private boolean isOwnerOrGrantee(User user, TagDto tag) {
         return isOwner(user, tag) || isGrantee(user, tag);
     }

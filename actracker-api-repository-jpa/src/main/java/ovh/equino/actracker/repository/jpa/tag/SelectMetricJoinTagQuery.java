@@ -1,15 +1,21 @@
 package ovh.equino.actracker.repository.jpa.tag;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Path;
 import ovh.equino.actracker.repository.jpa.JpaPredicate;
 import ovh.equino.actracker.repository.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.repository.jpa.JpaSortBuilder;
 import ovh.equino.actracker.repository.jpa.MultiResultJpaQuery;
 
+import java.util.Collection;
+import java.util.Set;
 import java.util.UUID;
 
 import static jakarta.persistence.criteria.JoinType.INNER;
+import static java.util.stream.Collectors.toUnmodifiableSet;
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 final class SelectMetricJoinTagQuery extends MultiResultJpaQuery<MetricEntity, MetricJoinTagProjection> {
 
@@ -74,6 +80,15 @@ final class SelectMetricJoinTagQuery extends MultiResultJpaQuery<MetricEntity, M
 
         public JpaPredicate hasTagId(UUID tagId) {
             return () -> criteriaBuilder.equal(tag.get("id"), tagId.toString());
+        }
+
+        public JpaPredicate hasTagIdIn(Collection<UUID> tagIds) {
+            Set<String> tagIdsAsStrings = tagIds
+                    .stream()
+                    .map(UUID::toString)
+                    .collect(toUnmodifiableSet());
+            return in(tagIdsAsStrings, tag.get("id"));
+
         }
     }
 }

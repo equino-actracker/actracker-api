@@ -10,9 +10,10 @@ import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaDAO;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.*;
 
 class JpaTagDataSource extends JpaDAO implements TagDataSource {
 
@@ -78,9 +79,33 @@ class JpaTagDataSource extends JpaDAO implements TagDataSource {
                 .orderBy(selectTags.sort().ascending("id"))
                 .execute();
 
+        Set<UUID> foundTagIds = tagResults
+                .stream()
+                .map(TagProjection::id)
+                .map(UUID::fromString)
+                .collect(toUnmodifiableSet());
+
+        SelectMetricJoinTagQuery selectMetricJoinTag = new SelectMetricJoinTagQuery(entityManager);
+        Map<String, List<MetricDto>> metricsByTagId = selectMetricJoinTag
+                .where(
+                        selectMetricJoinTag.predicate().and(
+                                selectMetricJoinTag.predicate().hasTagIdIn(foundTagIds),
+                                selectMetricJoinTag.predicate().isNotDeleted()
+                        )
+                )
+                .execute()
+                .stream()
+                .collect(groupingBy(
+                        MetricJoinTagProjection::tagId,
+                        mapping(MetricJoinTagProjection::toMetric, toList())
+                ));
+
         return tagResults
                 .stream()
-                .map(tagResult -> tagResult.toTag(Collections.emptyList(), Collections.emptyList()))
+                .map(tagResult -> tagResult.toTag(
+                        emptyList(),
+                        metricsByTagId.getOrDefault(tagResult.id(), emptyList())
+                ))
                 .toList();
     }
 }
