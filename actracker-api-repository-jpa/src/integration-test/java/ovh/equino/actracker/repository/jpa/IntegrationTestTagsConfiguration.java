@@ -6,14 +6,12 @@ import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.user.User;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparing;
 import static java.util.function.Predicate.not;
+import static java.util.stream.Collectors.toUnmodifiableSet;
 import static java.util.stream.Stream.concat;
 
 public class IntegrationTestTagsConfiguration {
@@ -33,7 +31,7 @@ public class IntegrationTestTagsConfiguration {
         transientTags.add(tag);
     }
 
-    public Collection<TagDto> accessibleFor(User user) {
+    public List<TagDto> accessibleFor(User user) {
         return addedTags
                 .stream()
                 .filter(not(TagDto::deleted))
@@ -43,11 +41,18 @@ public class IntegrationTestTagsConfiguration {
                 .toList();
     }
 
-    public Collection<TagDto> accessibleForWithLimitOffset(User user, int limit, int offset) {
+    public List<TagDto> accessibleForWithLimitOffset(User user, int limit, int offset) {
         return accessibleFor(user)
                 .stream()
                 .skip(offset)
                 .limit(limit)
+                .toList();
+    }
+
+    public List<TagDto> accessibleForExcluding(User user, Set<UUID> excludedIds) {
+        return accessibleFor(user)
+                .stream()
+                .filter(tag -> !excludedIds.contains(tag.id()))
                 .toList();
     }
 

@@ -66,6 +66,10 @@ final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection
             super(criteriaBuilder, root);
         }
 
+        JpaPredicate matchesTerm(String term) {
+            return super.matchesTerm(term, "name");
+        }
+
         @Override
         public JpaPredicate isAccessibleFor(User searcher) {
             return or(

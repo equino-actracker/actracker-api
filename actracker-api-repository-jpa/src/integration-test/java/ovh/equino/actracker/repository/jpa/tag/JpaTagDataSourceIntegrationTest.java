@@ -15,9 +15,10 @@ import ovh.equino.actracker.repository.jpa.IntegrationTestConfiguration;
 import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
 
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -107,8 +108,8 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
     void shouldFindSecondPageOfTags() {
         int pageSize = 2;
         int offset = 1;
-        Collection<TagDto> expectedTags = testConfiguration.tags.accessibleForWithLimitOffset(searcher, pageSize, offset);
-        String pageId = expectedTags.stream().findFirst().get().id().toString();
+        List<TagDto> expectedTags = testConfiguration.tags.accessibleForWithLimitOffset(searcher, pageSize, offset);
+        String pageId = expectedTags.get(0).id().toString();
         EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
                 searcher,
                 pageSize,
@@ -130,7 +131,26 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldFindNotExcludedTags() {
-        fail();
+        List<TagDto> allAccessibleTags = testConfiguration.tags.accessibleFor(searcher);
+        Set<UUID> excludedTags = Set.of(allAccessibleTags.get(1).id(), allAccessibleTags.get(2).id());
+        List<TagDto> expectedTags = testConfiguration.tags.accessibleForExcluding(searcher, excludedTags);
+        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
+                searcher,
+                LARGE_PAGE_SIZE,
+                FIRST_PAGE,
+                null,
+                null,
+                null,
+                excludedTags,
+                null,
+                null
+        );
+        inTransaction(() -> {
+            List<TagDto> foundTags = dataSource.find(searchCriteria);
+            assertThat(foundTags)
+                    .usingRecursiveFieldByFieldElementComparatorIgnoringFields("shares", "metrics")
+                    .containsExactlyElementsOf(expectedTags);
+        });
     }
 
     @Test
