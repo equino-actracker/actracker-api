@@ -35,7 +35,7 @@ class JpaTagSetDataSource extends JpaDAO implements TagSetDataSource {
                         .execute();
 
         SelectTagSetJoinTagQuery selectTagSetJoinTag = new SelectTagSetJoinTagQuery(entityManager);
-        List<TagSetJoinTagProjection> tagSetJoinTag =
+        Set<UUID> tagSetJoinTag =
                 selectTagSetJoinTag
                         .where(
                                 selectTagSetJoinTag.predicate().and(
@@ -44,16 +44,13 @@ class JpaTagSetDataSource extends JpaDAO implements TagSetDataSource {
                                         selectTagSetJoinTag.predicate().isAccessibleFor(searcher)
                                 )
                         )
-                        .execute();
+                        .execute()
+                        .stream()
+                        .map(TagSetJoinTagProjection::tagId)
+                        .map(UUID::fromString)
+                        .collect(toUnmodifiableSet());
 
-        Set<UUID> tagIdsForActivity = tagSetJoinTag
-                .stream()
-                .map(TagSetJoinTagProjection::tagId)
-                .map(UUID::fromString)
-                .collect(toUnmodifiableSet());
-
-        return tagSetResult
-                .map(result -> toTagSet(result, tagIdsForActivity));
+        return tagSetResult.map(result -> result.toTagSet(tagSetJoinTag));
     }
 
     @Override
@@ -80,7 +77,7 @@ class JpaTagSetDataSource extends JpaDAO implements TagSetDataSource {
                 .collect(toUnmodifiableSet());
 
         SelectTagSetJoinTagQuery selectTagSetJoinTag = new SelectTagSetJoinTagQuery(entityManager);
-        List<TagSetJoinTagProjection> tagSetJoinTag =
+        Map<String, Set<UUID>> tagIdsByTagSetId =
                 selectTagSetJoinTag
                         .where(
                                 selectTagSetJoinTag.predicate().and(
@@ -89,32 +86,16 @@ class JpaTagSetDataSource extends JpaDAO implements TagSetDataSource {
                                         selectTagSetJoinTag.predicate().isAccessibleFor(searchCriteria.searcher())
                                 )
                         )
-                        .execute();
-
-        Map<String, Set<UUID>> tagIdsByTagSetId = tagSetJoinTag
-                .stream()
-                .collect(groupingBy(
-                        TagSetJoinTagProjection::tagSetId,
-                        mapping(projection -> UUID.fromString(projection.tagId()), toUnmodifiableSet())
-                ));
+                        .execute()
+                        .stream()
+                        .collect(groupingBy(
+                                TagSetJoinTagProjection::tagSetId,
+                                mapping(projection -> UUID.fromString(projection.tagId()), toUnmodifiableSet())
+                        ));
 
         return tagSetResults
                 .stream()
-                .map(result -> toTagSet(
-                        result,
-                        tagIdsByTagSetId.getOrDefault(result.id(), emptySet())
-                ))
+                .map(result -> result.toTagSet(tagIdsByTagSetId.getOrDefault(result.id(), emptySet())))
                 .toList();
     }
-
-    private TagSetDto toTagSet(TagSetProjection tagSetProjection, Set<UUID> tagIds) {
-        return new TagSetDto(
-                UUID.fromString(tagSetProjection.id()),
-                UUID.fromString(tagSetProjection.creatorId()),
-                tagSetProjection.name(),
-                tagIds,
-                tagSetProjection.deleted()
-        );
-    }
-
 }
