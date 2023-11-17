@@ -22,7 +22,6 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 
 abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
 
@@ -155,7 +154,25 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldFindTagsMatchingTerm() {
-        fail();
+        String term = "Accessible shared";
+        List<TagDto> expectedTags = testConfiguration.tags.accessibleForMatchingTerm(searcher, term);
+        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
+                searcher,
+                LARGE_PAGE_SIZE,
+                FIRST_PAGE,
+                term,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+        inTransaction(() -> {
+            List<TagDto> foundTags = dataSource.find(searchCriteria);
+            assertThat(foundTags)
+                    .usingRecursiveFieldByFieldElementComparatorIgnoringFields("shares", "metrics")
+                    .containsExactlyElementsOf(expectedTags);
+        });
     }
 
     @BeforeAll

@@ -56,6 +56,13 @@ public class IntegrationTestTagsConfiguration {
                 .toList();
     }
 
+    public List<TagDto> accessibleForMatchingTerm(User user, String term) {
+        return accessibleFor(user)
+                .stream()
+                .filter(tag -> tag.name().startsWith(term))
+                .toList();
+    }
+
     public Collection<TagDto> inaccessibleFor(User user) {
         List<UUID> accessibleTags = accessibleFor(user)
                 .stream()
