@@ -15,6 +15,7 @@ import ovh.equino.actracker.repository.jpa.IntegrationTestConfiguration;
 import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
 
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -104,7 +105,27 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldFindSecondPageOfTags() {
-        fail();
+        int pageSize = 2;
+        int offset = 1;
+        Collection<TagDto> expectedTags = testConfiguration.tags.accessibleForWithLimitOffset(searcher, pageSize, offset);
+        String pageId = expectedTags.stream().findFirst().get().id().toString();
+        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
+                searcher,
+                pageSize,
+                pageId,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+        inTransaction(() -> {
+            List<TagDto> foundTags = dataSource.find(searchCriteria);
+            assertThat(foundTags)
+                    .usingRecursiveFieldByFieldElementComparatorIgnoringFields("shares", "metrics")
+                    .containsExactlyElementsOf(expectedTags);
+        });
     }
 
     @Test

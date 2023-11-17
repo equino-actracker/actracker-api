@@ -43,6 +43,14 @@ public class IntegrationTestTagsConfiguration {
                 .toList();
     }
 
+    public Collection<TagDto> accessibleForWithLimitOffset(User user, int limit, int offset) {
+        return accessibleFor(user)
+                .stream()
+                .skip(offset)
+                .limit(limit)
+                .toList();
+    }
+
     public Collection<TagDto> inaccessibleFor(User user) {
         List<UUID> accessibleTags = accessibleFor(user)
                 .stream()

@@ -73,10 +73,12 @@ class JpaTagDataSource extends JpaDAO implements TagDataSource {
                 .where(
                         selectTags.predicate().and(
                                 selectTags.predicate().isNotDeleted(),
-                                selectTags.predicate().isAccessibleFor(searchCriteria.searcher())
+                                selectTags.predicate().isAccessibleFor(searchCriteria.searcher()),
+                                selectTags.predicate().isInPage(searchCriteria.pageId())
                         )
                 )
                 .orderBy(selectTags.sort().ascending("id"))
+                .limit(searchCriteria.pageSize())
                 .execute();
 
         Set<UUID> foundTagIds = tagResults
