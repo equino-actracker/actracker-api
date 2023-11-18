@@ -6,6 +6,7 @@ import ovh.equino.actracker.domain.dashboard.Chart;
 import ovh.equino.actracker.domain.dashboard.DashboardDataSource;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
 import ovh.equino.actracker.domain.dashboard.DashboardId;
+import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaDAO;
 
@@ -72,7 +73,20 @@ class JpaDashboardDataSource extends JpaDAO implements DashboardDataSource {
                 .map(chart -> chart.toChart(tagIdsByChartId.getOrDefault(chart.id(), emptySet())))
                 .toList();
 
-        return dashboardResult.map(result -> result.toDashboard(charts, Collections.emptyList()));
+        SelectShareJoinDashboardQuery selectShareJoinDashboard = new SelectShareJoinDashboardQuery(entityManager);
+        List<Share> shares = selectShareJoinDashboard
+                .where(
+                        selectShareJoinDashboard.predicate().and(
+                                selectShareJoinDashboard.predicate().isAccessibleFor(searcher),
+                                selectShareJoinDashboard.predicate().hasDashboardId(dashboardId.id())
+                        )
+                )
+                .execute()
+                .stream()
+                .map(ShareJoinDashboardProjection::toShare)
+                .toList();
+
+        return dashboardResult.map(result -> result.toDashboard(charts, shares));
     }
 
     @Override

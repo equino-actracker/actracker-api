@@ -137,7 +137,8 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
                 .withCharts(newChart(searcherTenant)
                         .withTags(accessibleOwnTag1, inaccessibleOwnDeletedTag)
                         .deleted()
-                        .build())
+                        .build()
+                )
                 .sharedWithNonExisting("nonExistingGrantee1", "nonExistingGrantee2")
                 .build()
         );
