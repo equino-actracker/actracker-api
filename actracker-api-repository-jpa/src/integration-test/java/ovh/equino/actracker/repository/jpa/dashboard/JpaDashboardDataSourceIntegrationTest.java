@@ -13,9 +13,10 @@ import ovh.equino.actracker.repository.jpa.IntegrationTestConfiguration;
 import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
 
 import java.sql.SQLException;
+import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
 
 abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest {
 
@@ -32,7 +33,16 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
     @ParameterizedTest(name = "{0}")
     @MethodSource("accessibleDashboards")
     void shouldFindAccessibleDashboard(String testName, DashboardId dashboardId, DashboardDto expectedDashboard) {
-        fail();
+        inTransaction(() -> {
+            Optional<DashboardDto> foundDashboard = dataSource.find(dashboardId, searcher);
+            assertThat(foundDashboard).isPresent();
+            assertThat(foundDashboard.get())
+                    .usingRecursiveComparison()
+                    .ignoringFields("charts", "shares")
+                    .isEqualTo(expectedDashboard);
+            assertThat(foundDashboard.get().charts()).containsExactlyInAnyOrderElementsOf(expectedDashboard.charts());
+            assertThat(foundDashboard.get().shares()).containsExactlyElementsOf(expectedDashboard.shares());
+        });
     }
 
     private static Stream<Arguments> accessibleDashboards() {
@@ -46,7 +56,10 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
     @ParameterizedTest(name = "{0}")
     @MethodSource("inaccessibleDashboards")
     void shouldNotFindInaccessibleDashboard(String testName, DashboardId dashboardId) {
-        fail();
+        inTransaction(() -> {
+            Optional<DashboardDto> foundDashboard = dataSource.find(dashboardId, searcher);
+            assertThat(foundDashboard).isNotPresent();
+        });
     }
 
     private static Stream<Arguments> inaccessibleDashboards() {
@@ -70,13 +83,53 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
 
         testConfiguration.dashboards.add(newDashboard(searcherTenant)
                 .named("Accessible own dashboard not shared without charts")
-                .withCharts()
                 .sharedWith()
+                .withCharts()
+                .build()
+        );
+
+        testConfiguration.dashboards.add(newDashboard(searcherTenant)
+                .named("Accessible own dashboard shared with charts")
+                .sharedWith(grantee1, grantee2)
+                //.withCharts()
+                .build()
+        );
+
+        testConfiguration.dashboards.add(newDashboard(searcherTenant)
+                .named("Accessible own dashboard with deleted chart shared with non existing users")
+                //.withCharts()
+                .sharedWithNonExisting("nonExistingGrantee1", "nonExistingGrantee2")
+                .build()
+        );
+
+        testConfiguration.dashboards.add(newDashboard(sharingTenant)
+                        .named("Accessible shared dashboard with charts")
+//.withCharts()
+                        .sharedWith(searcherTenant, grantee1, grantee2)
+                        .build()
+        );
+
+        testConfiguration.dashboards.add(newDashboard(searcherTenant)
+                .named("Inaccessible own deleted dashboard")
+                .deleted()
+                .build()
+        );
+
+        testConfiguration.dashboards.add(newDashboard(sharingTenant)
+                .named("Inaccessible shared deleted dashboard")
+                .sharedWith(searcherTenant)
+                .deleted()
+                .build()
+        );
+
+        testConfiguration.dashboards.add(newDashboard(sharingTenant)
+                .named("Inaccessible foreign dashboard")
                 .build()
         );
 
         testConfiguration.dashboards.addTransient(newDashboard(searcherTenant)
                 .named("Inaccessible not persisted dashboard")
-                .build());
+                .build()
+        );
     }
 }

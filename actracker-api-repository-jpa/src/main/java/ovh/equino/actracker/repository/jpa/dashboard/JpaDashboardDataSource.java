@@ -4,11 +4,12 @@ import jakarta.persistence.EntityManager;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.dashboard.DashboardDataSource;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
+import ovh.equino.actracker.domain.dashboard.DashboardId;
+import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaDAO;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 class JpaDashboardDataSource extends JpaDAO implements DashboardDataSource {
 
@@ -17,8 +18,8 @@ class JpaDashboardDataSource extends JpaDAO implements DashboardDataSource {
     }
 
     @Override
-    public Optional<DashboardDto> find(UUID dashboardId) {
-        throw new RuntimeException("Not implemented yet");
+    public Optional<DashboardDto> find(DashboardId dashboardId, User user) {
+        return Optional.empty();
     }
 
     @Override

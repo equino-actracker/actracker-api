@@ -78,13 +78,33 @@ public final class DashboardBuilder {
         return this;
     }
 
-    public DashboardBuilder sharedWith(Share... grantees) {
+    public DashboardBuilder sharedWith(TenantDto... grantees) {
         newDashboard = new DashboardDto(
                 newDashboard.id(),
                 newDashboard.creatorId(),
                 newDashboard.name(),
                 newDashboard.charts(),
-                stream(grantees).toList(),
+                stream(grantees)
+                        .map(grantee -> new Share(
+                                        new User(grantee.id()),
+                                        grantee.username()
+                                )
+                        )
+                        .toList(),
+                newDashboard.deleted()
+        );
+        return this;
+    }
+
+    public DashboardBuilder sharedWithNonExisting(String... granteeNames) {
+        newDashboard = new DashboardDto(
+                newDashboard.id(),
+                newDashboard.creatorId(),
+                newDashboard.name(),
+                newDashboard.charts(),
+                stream(granteeNames)
+                        .map(Share::new)
+                        .toList(),
                 newDashboard.deleted()
         );
         return this;

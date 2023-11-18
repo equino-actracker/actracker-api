@@ -1,6 +1,7 @@
 package ovh.equino.actracker.repository.jpa;
 
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
+import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.user.User;
 
 import java.sql.SQLException;
@@ -8,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static java.util.function.Predicate.not;
 import static java.util.stream.Stream.concat;
 
 public class IntegrationTestDashboardsConfiguration {
@@ -28,7 +30,27 @@ public class IntegrationTestDashboardsConfiguration {
     }
 
     public List<DashboardDto> accessibleFor(User user) {
-        return addedDashboards;
+        return addedDashboards
+                .stream()
+                .filter(not(DashboardDto::deleted))
+                .filter(dashboard -> isOwnerOrGrantee(user, dashboard))
+                .toList();
+    }
+
+    private boolean isOwnerOrGrantee(User user, DashboardDto dashboard) {
+        return isOwner(user, dashboard) || isGrantee(user, dashboard);
+    }
+
+    private boolean isGrantee(User user, DashboardDto dashboard) {
+        List<User> grantees = dashboard.shares()
+                .stream()
+                .map(Share::grantee)
+                .toList();
+        return grantees.contains(user);
+    }
+
+    private boolean isOwner(User user, DashboardDto dashboard) {
+        return user.id().equals(dashboard.creatorId());
     }
 
     public List<DashboardDto> inaccessibleFor(User user) {
