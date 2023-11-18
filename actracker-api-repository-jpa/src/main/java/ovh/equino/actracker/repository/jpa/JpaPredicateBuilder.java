@@ -7,6 +7,7 @@ import jakarta.persistence.criteria.Root;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.Collection;
+import java.util.Set;
 import java.util.UUID;
 
 import static java.util.Arrays.stream;
@@ -29,16 +30,22 @@ public abstract class JpaPredicateBuilder<E> {
     }
 
     public JpaPredicate hasIdIn(Collection<UUID> ids) {
-        if (isEmpty(ids)) {
+        Set<String> idsAsStrings = ids
+                .stream()
+                .map(UUID::toString)
+                .collect(toUnmodifiableSet());
+        return in(idsAsStrings, root.get("id"));
+    }
+
+    protected <T> JpaPredicate in(Collection<T> values, Path<T> field) {
+        if (isEmpty(values)) {
             return noneMatch();
         }
-        Path<Object> id = root.get("id");
-        CriteriaBuilder.In<Object> idIn = criteriaBuilder.in(id);
-        ids.stream()
-                .map(UUID::toString)
+        CriteriaBuilder.In<Object> in = criteriaBuilder.in(field);
+        values.stream()
                 .collect(toUnmodifiableSet())
-                .forEach(idIn::value);
-        return () -> idIn;
+                .forEach(in::value);
+        return () -> in;
     }
 
     public JpaPredicate isAccessibleFor(User searcher) {

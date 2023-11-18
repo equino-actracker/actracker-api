@@ -2,9 +2,11 @@ package ovh.equino.actracker.repository.jpa.tag;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tenant.TenantDto;
@@ -13,7 +15,10 @@ import ovh.equino.actracker.repository.jpa.IntegrationTestConfiguration;
 import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -68,6 +73,106 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
                 .map(tag -> Arguments.of(
                         tag.name(), new TagId(tag.id())
                 ));
+    }
+
+    @Test
+    void shouldFindAllAccessibleTags() {
+        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
+                searcher,
+                LARGE_PAGE_SIZE,
+                FIRST_PAGE,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+
+        inTransaction(() -> {
+            List<TagDto> foundTags = dataSource.find(searchCriteria);
+            assertThat(foundTags)
+                    .usingRecursiveFieldByFieldElementComparatorIgnoringFields("shares", "metrics")
+                    .containsExactlyElementsOf(testConfiguration.tags.accessibleFor(searcher));
+            assertThat(foundTags)
+                    .flatMap(TagDto::metrics)
+                    .containsExactlyInAnyOrderElementsOf(testConfiguration.tags.flatMetricsAccessibleFor(searcher));
+            assertThat(foundTags)
+                    .flatMap(TagDto::shares)
+                    .containsExactlyInAnyOrderElementsOf(testConfiguration.tags.flatSharesAccessibleFor(searcher));
+        });
+    }
+
+    @Test
+    void shouldFindSecondPageOfTags() {
+        int pageSize = 2;
+        int offset = 1;
+        List<TagDto> expectedTags = testConfiguration.tags.accessibleForWithLimitOffset(searcher, pageSize, offset);
+        String pageId = expectedTags.get(0).id().toString();
+        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
+                searcher,
+                pageSize,
+                pageId,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+        inTransaction(() -> {
+            List<TagDto> foundTags = dataSource.find(searchCriteria);
+            assertThat(foundTags)
+                    .usingRecursiveFieldByFieldElementComparatorIgnoringFields("shares", "metrics")
+                    .containsExactlyElementsOf(expectedTags);
+        });
+    }
+
+    @Test
+    void shouldFindNotExcludedTags() {
+        List<TagDto> allAccessibleTags = testConfiguration.tags.accessibleFor(searcher);
+        Set<UUID> excludedTags = Set.of(allAccessibleTags.get(1).id(), allAccessibleTags.get(2).id());
+        List<TagDto> expectedTags = testConfiguration.tags.accessibleForExcluding(searcher, excludedTags);
+        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
+                searcher,
+                LARGE_PAGE_SIZE,
+                FIRST_PAGE,
+                null,
+                null,
+                null,
+                excludedTags,
+                null,
+                null
+        );
+        inTransaction(() -> {
+            List<TagDto> foundTags = dataSource.find(searchCriteria);
+            assertThat(foundTags)
+                    .usingRecursiveFieldByFieldElementComparatorIgnoringFields("shares", "metrics")
+                    .containsExactlyElementsOf(expectedTags);
+        });
+    }
+
+    @Test
+    void shouldFindTagsMatchingTerm() {
+        String term = "Accessible shared";
+        List<TagDto> expectedTags = testConfiguration.tags.accessibleForMatchingTerm(searcher, term);
+        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
+                searcher,
+                LARGE_PAGE_SIZE,
+                FIRST_PAGE,
+                term,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+        inTransaction(() -> {
+            List<TagDto> foundTags = dataSource.find(searchCriteria);
+            assertThat(foundTags)
+                    .usingRecursiveFieldByFieldElementComparatorIgnoringFields("shares", "metrics")
+                    .containsExactlyElementsOf(expectedTags);
+        });
     }
 
     @BeforeAll

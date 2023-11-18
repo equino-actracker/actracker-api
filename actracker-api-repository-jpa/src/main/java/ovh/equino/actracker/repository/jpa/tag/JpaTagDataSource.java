@@ -10,8 +10,10 @@ import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaDAO;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.*;
 
 class JpaTagDataSource extends JpaDAO implements TagDataSource {
 
@@ -65,6 +67,64 @@ class JpaTagDataSource extends JpaDAO implements TagDataSource {
 
     @Override
     public List<TagDto> find(EntitySearchCriteria searchCriteria) {
-        throw new RuntimeException("Operation not supported");
+
+        SelectTagsQuery selectTags = new SelectTagsQuery(entityManager);
+        List<TagProjection> tagResults = selectTags
+                .where(
+                        selectTags.predicate().and(
+                                selectTags.predicate().isNotDeleted(),
+                                selectTags.predicate().isAccessibleFor(searchCriteria.searcher()),
+                                selectTags.predicate().isInPage(searchCriteria.pageId()),
+                                selectTags.predicate().isNotExcluded(searchCriteria.excludeFilter()),
+                                selectTags.predicate().matchesTerm(searchCriteria.term())
+                        )
+                )
+                .orderBy(selectTags.sort().ascending("id"))
+                .limit(searchCriteria.pageSize())
+                .execute();
+
+        Set<UUID> foundTagIds = tagResults
+                .stream()
+                .map(TagProjection::id)
+                .map(UUID::fromString)
+                .collect(toUnmodifiableSet());
+
+        SelectShareJoinTagQuery selectShareJoinTag = new SelectShareJoinTagQuery(entityManager);
+        Map<String, List<Share>> sharesByTagId = selectShareJoinTag
+                .where(
+                        selectShareJoinTag.predicate().and(
+                                selectShareJoinTag.predicate().hasTagIdIn(foundTagIds),
+                                selectShareJoinTag.predicate().isAccessibleFor(searchCriteria.searcher())
+                        )
+                )
+                .execute()
+                .stream()
+                .collect(groupingBy(
+                        ShareJoinTagProjection::tagId,
+                        mapping(ShareJoinTagProjection::toShare, toList())
+                ));
+
+        SelectMetricJoinTagQuery selectMetricJoinTag = new SelectMetricJoinTagQuery(entityManager);
+        Map<String, List<MetricDto>> metricsByTagId = selectMetricJoinTag
+                .where(
+                        selectMetricJoinTag.predicate().and(
+                                selectMetricJoinTag.predicate().hasTagIdIn(foundTagIds),
+                                selectMetricJoinTag.predicate().isNotDeleted()
+                        )
+                )
+                .execute()
+                .stream()
+                .collect(groupingBy(
+                        MetricJoinTagProjection::tagId,
+                        mapping(MetricJoinTagProjection::toMetric, toList())
+                ));
+
+        return tagResults
+                .stream()
+                .map(tagResult -> tagResult.toTag(
+                        sharesByTagId.getOrDefault(tagResult.id(), emptyList()),
+                        metricsByTagId.getOrDefault(tagResult.id(), emptyList())
+                ))
+                .toList();
     }
 }

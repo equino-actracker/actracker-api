@@ -8,9 +8,12 @@ import ovh.equino.actracker.repository.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.repository.jpa.JpaSortBuilder;
 import ovh.equino.actracker.repository.jpa.MultiResultJpaQuery;
 
+import java.util.Collection;
+import java.util.Set;
 import java.util.UUID;
 
 import static jakarta.persistence.criteria.JoinType.INNER;
+import static java.util.stream.Collectors.toUnmodifiableSet;
 
 final class SelectShareJoinTagQuery extends MultiResultJpaQuery<TagShareEntity, ShareJoinTagProjection> {
 
@@ -65,7 +68,7 @@ final class SelectShareJoinTagQuery extends MultiResultJpaQuery<TagShareEntity, 
         return ShareJoinTagProjection.class;
     }
 
-    class PredicateBuilder extends JpaPredicateBuilder<TagShareEntity> {
+    final class PredicateBuilder extends JpaPredicateBuilder<TagShareEntity> {
         private PredicateBuilder() {
             super(criteriaBuilder, root);
         }
@@ -77,6 +80,14 @@ final class SelectShareJoinTagQuery extends MultiResultJpaQuery<TagShareEntity, 
 
         public JpaPredicate hasTagId(UUID tagId) {
             return () -> criteriaBuilder.equal(tag.get("id"), tagId.toString());
+        }
+
+        public JpaPredicate hasTagIdIn(Collection<UUID> tagIds) {
+            Set<String> tagIdsAsStrings = tagIds
+                    .stream()
+                    .map(UUID::toString)
+                    .collect(toUnmodifiableSet());
+            return in(tagIdsAsStrings, tag.get("id"));
         }
 
         @Override
