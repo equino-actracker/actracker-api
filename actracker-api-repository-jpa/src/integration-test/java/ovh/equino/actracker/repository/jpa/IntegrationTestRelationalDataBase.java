@@ -2,6 +2,7 @@ package ovh.equino.actracker.repository.jpa;
 
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.MetricValue;
+import ovh.equino.actracker.domain.dashboard.DashboardDto;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tag.MetricDto;
 import ovh.equino.actracker.domain.tag.TagDto;
@@ -180,6 +181,24 @@ public abstract class IntegrationTestRelationalDataBase {
             preparedStatement.setString(1, tagSet.id().toString());
             preparedStatement.setString(2, tagId.toString());
             preparedStatement.execute();
+        }
+    }
+
+    public synchronized void addDashboards(DashboardDto... dashboards) throws SQLException {
+        List<DashboardDto> notAddedDashboards = stream(dashboards)
+                .filter(dashboard -> !addedEntityIds.contains(dashboard.id()))
+                .toList();
+        Connection connection = getConnection();
+        for (DashboardDto dashboard : notAddedDashboards) {
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "insert into dashboard (id, creator_id, name, deleted) values (?, ?, ?, ?);"
+            );
+            preparedStatement.setString(1, dashboard.id().toString());
+            preparedStatement.setString(2, dashboard.creatorId().toString());
+            preparedStatement.setString(3, dashboard.name());
+            preparedStatement.setBoolean(4, dashboard.deleted());
+            preparedStatement.execute();
+            addedEntityIds.add(dashboard.id());
         }
     }
 }

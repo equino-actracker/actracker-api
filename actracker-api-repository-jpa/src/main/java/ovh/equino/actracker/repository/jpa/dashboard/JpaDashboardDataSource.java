@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-class JpaDashboardDataSet extends JpaDAO implements DashboardDataSource {
+class JpaDashboardDataSource extends JpaDAO implements DashboardDataSource {
 
-    JpaDashboardDataSet(EntityManager entityManager) {
+    JpaDashboardDataSource(EntityManager entityManager) {
         super(entityManager);
     }
 
