@@ -3,23 +3,33 @@ package ovh.equino.actracker.repository.jpa;
 import ovh.equino.actracker.domain.dashboard.Chart;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
 import ovh.equino.actracker.domain.share.Share;
+import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.user.User;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Comparator.comparing;
 import static java.util.function.Predicate.not;
+import static java.util.stream.Collectors.toUnmodifiableSet;
 import static java.util.stream.Stream.concat;
 
 public class IntegrationTestDashboardsConfiguration {
 
+    private final IntegrationTestTagsConfiguration tags;
+
     private final List<DashboardDto> addedDashboards = new ArrayList<>();
     private final List<DashboardDto> transientDashboards = new ArrayList<>();
+
+    IntegrationTestDashboardsConfiguration(IntegrationTestTagsConfiguration tags) {
+        this.tags = tags;
+    }
 
     void persistIn(IntegrationTestRelationalDataBase database) throws SQLException {
         database.addDashboards(addedDashboards.toArray(new DashboardDto[0]));
@@ -89,12 +99,20 @@ public class IntegrationTestDashboardsConfiguration {
     }
 
     private Chart toAccessibleFormFor(User user, Chart chart) {
+        List<UUID> accessibleTagIds = tags.accessibleFor(user)
+                .stream()
+                .map(TagDto::id)
+                .toList();
+        Set<UUID> includedAccessibleTags = chart.includedTags()
+                .stream()
+                .filter(accessibleTagIds::contains)
+                .collect(toUnmodifiableSet());
         return new Chart(
                 chart.id(),
                 chart.name(),
                 chart.groupBy(),
                 chart.analysisMetric(),
-                emptySet(), // TODO
+                includedAccessibleTags,
                 chart.isDeleted()
         );
     }

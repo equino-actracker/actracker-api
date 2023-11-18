@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import ovh.equino.actracker.domain.dashboard.Chart;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
 import ovh.equino.actracker.domain.dashboard.DashboardId;
 import ovh.equino.actracker.domain.tag.TagDto;
@@ -14,7 +15,9 @@ import ovh.equino.actracker.repository.jpa.IntegrationTestConfiguration;
 import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,6 +37,11 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
     @ParameterizedTest(name = "{0}")
     @MethodSource("accessibleDashboards")
     void shouldFindAccessibleDashboard(String testName, DashboardId dashboardId, DashboardDto expectedDashboard) {
+        List<UUID> expectedFlattenIncludedTags = expectedDashboard.charts()
+                .stream()
+                .flatMap(chart -> chart.includedTags().stream())
+                .toList();
+
         inTransaction(() -> {
             Optional<DashboardDto> foundDashboard = dataSource.find(dashboardId, searcher);
             assertThat(foundDashboard).isPresent();
@@ -41,11 +49,13 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
                     .usingRecursiveComparison()
                     .ignoringFields("charts", "shares")
                     .isEqualTo(expectedDashboard);
-            // TODO compare tags and shares
             assertThat(foundDashboard.get().charts())
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("includedTags")
                     .containsExactlyInAnyOrderElementsOf(expectedDashboard.charts());
-//            assertThat(foundDashboard.get().shares()).containsExactlyElementsOf(expectedDashboard.shares());
+            assertThat(foundDashboard.get().charts())
+                    .flatMap(Chart::includedTags)
+                    .containsExactlyInAnyOrderElementsOf(expectedFlattenIncludedTags);
+            assertThat(foundDashboard.get().shares()).containsExactlyElementsOf(expectedDashboard.shares());
         });
     }
 

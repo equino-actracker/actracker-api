@@ -9,9 +9,12 @@ import ovh.equino.actracker.domain.dashboard.DashboardId;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaDAO;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.Collections.emptySet;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toUnmodifiableSet;
 
 class JpaDashboardDataSource extends JpaDAO implements DashboardDataSource {
 
@@ -43,9 +46,30 @@ class JpaDashboardDataSource extends JpaDAO implements DashboardDataSource {
                 )
                 .execute();
 
+        Set<UUID> chartIds = chartResults
+                .stream()
+                .map(ChartJoinDashboardProjection::id)
+                .map(UUID::fromString)
+                .collect(toUnmodifiableSet());
+
+        SelectChartJoinTagQuery selectChartJoinTag = new SelectChartJoinTagQuery(entityManager);
+        Map<String, Set<UUID>> tagIdsByChartId = selectChartJoinTag
+                .where(selectChartJoinTag.predicate().and(
+                                selectChartJoinTag.predicate().isNotDeleted(),
+                                selectChartJoinTag.predicate().isAccessibleFor(searcher),
+                                selectChartJoinTag.predicate().hasChartIdIn(chartIds)
+                        )
+                )
+                .execute()
+                .stream()
+                .collect(Collectors.groupingBy(
+                        ChartJoinTagProjection::chartId,
+                        mapping(ChartJoinTagProjection::toTagId, toUnmodifiableSet())
+                ));
+
         List<Chart> charts = chartResults
                 .stream()
-                .map(chart -> chart.toChart(Collections.emptySet()))
+                .map(chart -> chart.toChart(tagIdsByChartId.getOrDefault(chart.id(), emptySet())))
                 .toList();
 
         return dashboardResult.map(result -> result.toDashboard(charts, Collections.emptyList()));
