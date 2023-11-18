@@ -40,6 +40,7 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
                     .usingRecursiveComparison()
                     .ignoringFields("charts", "shares")
                     .isEqualTo(expectedDashboard);
+            // TODO
             assertThat(foundDashboard.get().charts()).containsExactlyInAnyOrderElementsOf(expectedDashboard.charts());
             assertThat(foundDashboard.get().shares()).containsExactlyElementsOf(expectedDashboard.shares());
         });

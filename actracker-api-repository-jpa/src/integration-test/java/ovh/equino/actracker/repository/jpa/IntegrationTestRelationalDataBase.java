@@ -198,7 +198,22 @@ public abstract class IntegrationTestRelationalDataBase {
             preparedStatement.setString(3, dashboard.name());
             preparedStatement.setBoolean(4, dashboard.deleted());
             preparedStatement.execute();
+            addAssociatedShares(dashboard);
             addedEntityIds.add(dashboard.id());
+        }
+    }
+
+    private void addAssociatedShares(DashboardDto dashboard) throws SQLException {
+        Connection connection = getConnection();
+        for (Share share : dashboard.shares()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "insert into dashboard_share (id, dashboard_id, grantee_id, grantee_name) values (?, ?, ?, ?);"
+            );
+            preparedStatement.setString(1, randomUUID().toString());
+            preparedStatement.setString(2, dashboard.id().toString());
+            preparedStatement.setString(3, nonNull(share.grantee()) ? share.grantee().id().toString() : null);
+            preparedStatement.setString(4, share.granteeName());
+            preparedStatement.execute();
         }
     }
 }
