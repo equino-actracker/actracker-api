@@ -37,7 +37,8 @@ class JpaDashboardDataSource extends JpaDAO implements DashboardDataSource {
         List<ChartJoinDashboardProjection> chartResults = selectChartJoinDashboard
                 .where(
                         selectChartJoinDashboard.predicate().and(
-                            selectChartJoinDashboard.predicate().hasDashboardId(dashboardId.id())
+                                selectChartJoinDashboard.predicate().hasDashboardId(dashboardId.id()),
+                                selectChartJoinDashboard.predicate().isNotDeleted()
                         )
                 )
                 .execute();
