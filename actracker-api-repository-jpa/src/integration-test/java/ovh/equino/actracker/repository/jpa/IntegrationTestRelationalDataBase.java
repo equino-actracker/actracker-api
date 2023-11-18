@@ -2,6 +2,7 @@ package ovh.equino.actracker.repository.jpa;
 
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.MetricValue;
+import ovh.equino.actracker.domain.dashboard.Chart;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tag.MetricDto;
@@ -199,6 +200,7 @@ public abstract class IntegrationTestRelationalDataBase {
             preparedStatement.setBoolean(4, dashboard.deleted());
             preparedStatement.execute();
             addAssociatedShares(dashboard);
+            addCharts(dashboard);
             addedEntityIds.add(dashboard.id());
         }
     }
@@ -213,6 +215,35 @@ public abstract class IntegrationTestRelationalDataBase {
             preparedStatement.setString(2, dashboard.id().toString());
             preparedStatement.setString(3, nonNull(share.grantee()) ? share.grantee().id().toString() : null);
             preparedStatement.setString(4, share.granteeName());
+            preparedStatement.execute();
+        }
+    }
+
+    private void addCharts(DashboardDto dashboard) throws SQLException {
+        Connection connection = getConnection();
+        for (Chart chart : dashboard.charts()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "insert into chart (id, dashboard_id, group_by, metric, name, deleted) values (?, ?, ?, ?, ?, ?);"
+            );
+            preparedStatement.setString(1, chart.id().id().toString());
+            preparedStatement.setString(2, dashboard.id().toString());
+            preparedStatement.setString(3, chart.groupBy().toString());
+            preparedStatement.setString(4, chart.analysisMetric().toString());
+            preparedStatement.setString(5, chart.name());
+            preparedStatement.setBoolean(6, chart.isDeleted());
+            preparedStatement.execute();
+            addAssociatedTags(chart);
+        }
+    }
+
+    private void addAssociatedTags(Chart chart) throws SQLException {
+        Connection connection = getConnection();
+        for (UUID tagId : chart.includedTags()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "insert into chart_tag (chart_id, tag_id) values (?, ?);"
+            );
+            preparedStatement.setString(1, chart.id().toString());
+            preparedStatement.setString(2, tagId.toString());
             preparedStatement.execute();
         }
     }

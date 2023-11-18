@@ -2,6 +2,7 @@ package ovh.equino.actracker.repository.jpa.dashboard;
 
 import jakarta.persistence.EntityManager;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.dashboard.Chart;
 import ovh.equino.actracker.domain.dashboard.DashboardDataSource;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
 import ovh.equino.actracker.domain.dashboard.DashboardId;
@@ -32,7 +33,21 @@ class JpaDashboardDataSource extends JpaDAO implements DashboardDataSource {
                 )
                 .execute();
 
-        return dashboardResult.map(result -> result.toDashboard(Collections.emptyList(), Collections.emptyList()));
+        SelectChartJoinDashboardQuery selectChartJoinDashboard = new SelectChartJoinDashboardQuery(entityManager);
+        List<ChartJoinDashboardProjection> chartResults = selectChartJoinDashboard
+                .where(
+                        selectChartJoinDashboard.predicate().and(
+                            selectChartJoinDashboard.predicate().hasDashboardId(dashboardId.id())
+                        )
+                )
+                .execute();
+
+        List<Chart> charts = chartResults
+                .stream()
+                .map(chart -> chart.toChart(Collections.emptySet()))
+                .toList();
+
+        return dashboardResult.map(result -> result.toDashboard(charts, Collections.emptyList()));
     }
 
     @Override

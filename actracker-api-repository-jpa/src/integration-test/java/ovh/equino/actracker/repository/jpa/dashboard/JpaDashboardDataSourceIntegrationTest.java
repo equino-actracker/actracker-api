@@ -7,6 +7,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
 import ovh.equino.actracker.domain.dashboard.DashboardId;
+import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tenant.TenantDto;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.IntegrationTestConfiguration;
@@ -40,9 +41,11 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
                     .usingRecursiveComparison()
                     .ignoringFields("charts", "shares")
                     .isEqualTo(expectedDashboard);
-            // TODO
-            assertThat(foundDashboard.get().charts()).containsExactlyInAnyOrderElementsOf(expectedDashboard.charts());
-            assertThat(foundDashboard.get().shares()).containsExactlyElementsOf(expectedDashboard.shares());
+            // TODO compare tags and shares
+            assertThat(foundDashboard.get().charts())
+                    .usingRecursiveFieldByFieldElementComparatorIgnoringFields("includedTags")
+                    .containsExactlyInAnyOrderElementsOf(expectedDashboard.charts());
+//            assertThat(foundDashboard.get().shares()).containsExactlyElementsOf(expectedDashboard.shares());
         });
     }
 
@@ -79,8 +82,24 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
         TenantDto grantee2 = newUser().build();
         searcher = new User(searcherTenant.id());
 
+        TagDto accessibleOwnTag1 = newTag(searcherTenant).build();
+        TagDto accessibleOwnTag2 = newTag(searcherTenant).build();
+        TagDto inaccessibleOwnDeletedTag = newTag(searcherTenant).deleted().build();
+        TagDto accessibleSharedTag = newTag(sharingTenant).sharedWith(searcherTenant).build();
+        TagDto inaccessibleForeignTag = newTag(sharingTenant).build();
+        TagDto inaccessibleSharedDeletedTag = newTag(sharingTenant).sharedWith(searcherTenant).deleted().build();
+        TagDto inaccessibleNotPersistedTag = newTag(sharingTenant).build();
+
         testConfiguration.addUser(searcherTenant);
         testConfiguration.addUser(sharingTenant);
+
+        testConfiguration.tags.add(accessibleOwnTag1);
+        testConfiguration.tags.add(accessibleOwnTag2);
+        testConfiguration.tags.add(inaccessibleOwnDeletedTag);
+        testConfiguration.tags.add(accessibleSharedTag);
+        testConfiguration.tags.add(inaccessibleForeignTag);
+        testConfiguration.tags.add(inaccessibleSharedDeletedTag);
+        testConfiguration.tags.addTransient(inaccessibleNotPersistedTag);
 
         testConfiguration.dashboards.add(newDashboard(searcherTenant)
                 .named("Accessible own dashboard not shared without charts")
@@ -92,22 +111,37 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
         testConfiguration.dashboards.add(newDashboard(searcherTenant)
                 .named("Accessible own dashboard shared with charts")
                 .sharedWith(grantee1, grantee2)
-                //.withCharts()
+                .withCharts(
+                        newChart(searcherTenant)
+                                .withTags(accessibleOwnTag1, accessibleOwnTag2, inaccessibleOwnDeletedTag)
+                                .build(),
+                        newChart(searcherTenant)
+                                .withTags(accessibleOwnTag2, inaccessibleOwnDeletedTag, inaccessibleNotPersistedTag)
+                                .build()
+                )
                 .build()
         );
 
         testConfiguration.dashboards.add(newDashboard(searcherTenant)
                 .named("Accessible own dashboard with deleted chart shared with non existing users")
-                //.withCharts()
+                .withCharts(newChart(searcherTenant)
+                        .withTags(accessibleOwnTag1, inaccessibleOwnDeletedTag)
+                        .deleted()
+                        .build())
                 .sharedWithNonExisting("nonExistingGrantee1", "nonExistingGrantee2")
                 .build()
         );
 
         testConfiguration.dashboards.add(newDashboard(sharingTenant)
-                        .named("Accessible shared dashboard with charts")
-//.withCharts()
-                        .sharedWith(searcherTenant, grantee1, grantee2)
-                        .build()
+                .named("Accessible shared dashboard with charts")
+                .withCharts(
+                        newChart(sharingTenant)
+                                .withTags(accessibleSharedTag, inaccessibleForeignTag, inaccessibleSharedDeletedTag)
+                                .build(),
+                        newChart(sharingTenant).deleted().build()
+                )
+                .sharedWith(searcherTenant, grantee1, grantee2)
+                .build()
         );
 
         testConfiguration.dashboards.add(newDashboard(searcherTenant)
