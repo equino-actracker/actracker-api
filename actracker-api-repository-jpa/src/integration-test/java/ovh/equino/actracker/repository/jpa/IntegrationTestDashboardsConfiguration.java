@@ -58,7 +58,7 @@ public class IntegrationTestDashboardsConfiguration {
                 .toList();
     }
 
-    public List<Chart> flatChartsAccessibleFor(User user) {
+    public Collection<Chart> flatChartsAccessibleFor(User user) {
         return accessibleFor(user)
                 .stream()
                 .flatMap(dashboard -> dashboard.charts().stream())

@@ -10,6 +10,7 @@ import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.dashboard.Chart;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
 import ovh.equino.actracker.domain.dashboard.DashboardId;
+import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tenant.TenantDto;
 import ovh.equino.actracker.domain.user.User;
@@ -17,6 +18,7 @@ import ovh.equino.actracker.repository.jpa.IntegrationTestConfiguration;
 import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
 
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -99,7 +101,9 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
                 null,
                 null
         );
-        List<Chart> expectedFlattenCharts = testConfiguration.dashboards.flatChartsAccessibleFor(searcher);
+
+        Collection<Share> expectedFlattenShares = testConfiguration.dashboards.flatSharesAccessibleFor(searcher);
+        Collection<Chart> expectedFlattenCharts = testConfiguration.dashboards.flatChartsAccessibleFor(searcher);
         List<UUID> expectedFlattenIncludedTags = expectedFlattenCharts
                 .stream()
                 .flatMap(chart -> chart.includedTags().stream())
@@ -118,7 +122,9 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
                     .flatMap(DashboardDto::charts)
                     .flatMap(Chart::includedTags)
                     .containsExactlyInAnyOrderElementsOf(expectedFlattenIncludedTags);
-            // TODO check shares
+            assertThat(foundDashboards)
+                    .flatMap(DashboardDto::shares)
+                    .containsExactlyInAnyOrderElementsOf(expectedFlattenShares);
         });
     }
 

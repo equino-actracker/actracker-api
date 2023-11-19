@@ -119,17 +119,35 @@ class JpaDashboardDataSource extends JpaDAO implements DashboardDataSource {
                 )
                 .execute();
 
-//        Set<UUID> chartIds = chartsResults
-//                .stream()
-//                .map(ChartJoinDashboardProjection::id)
-//                .map(UUID::fromString)
-//                .collect(toUnmodifiableSet());
+        Set<UUID> chartIds = chartsResults
+                .stream()
+                .map(ChartJoinDashboardProjection::id)
+                .map(UUID::fromString)
+                .collect(toUnmodifiableSet());
+
+        SelectChartJoinTagQuery selectChartJoinTag = new SelectChartJoinTagQuery(entityManager);
+        Map<String, Set<UUID>> tagsByChartId = selectChartJoinTag
+                .where(
+                        selectChartJoinTag.predicate().and(
+                                selectChartJoinTag.predicate().hasChartIdIn(chartIds),
+                                selectChartJoinTag.predicate().isAccessibleFor(searchCriteria.searcher()),
+                                selectChartJoinTag.predicate().isNotDeleted()
+                        )
+                )
+                .execute()
+                .stream()
+                .collect(groupingBy(
+                        ChartJoinTagProjection::chartId,
+                        mapping(ChartJoinTagProjection::toTagId, toUnmodifiableSet())
+                ));
 
         Map<String, List<Chart>> charts = chartsResults
                 .stream()
                 .collect(groupingBy(
                         ChartJoinDashboardProjection::dashboardId,
-                        mapping(result -> result.toChart(emptySet()), toList())
+                        mapping(result -> result.toChart(
+                                tagsByChartId.getOrDefault(result.id(), emptySet())), toList()
+                        )
                 ));
 
         return dashboardResults
