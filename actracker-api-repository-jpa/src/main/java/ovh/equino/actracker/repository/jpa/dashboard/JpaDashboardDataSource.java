@@ -13,6 +13,7 @@ import ovh.equino.actracker.repository.jpa.JpaDAO;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toUnmodifiableSet;
@@ -91,6 +92,16 @@ class JpaDashboardDataSource extends JpaDAO implements DashboardDataSource {
 
     @Override
     public List<DashboardDto> find(EntitySearchCriteria searchCriteria) {
-        throw new RuntimeException("Not implemented yet");
+
+        SelectDashboardsQuery selectDashboards = new SelectDashboardsQuery(entityManager);
+        List<DashboardProjection> dashboardResults = selectDashboards
+                .where(
+                        selectDashboards.predicate().and(
+
+                        )
+                )
+                .execute();
+
+        return dashboardResults.stream().map(result -> result.toDashboard(emptyList(), emptyList())).toList();
     }
 }

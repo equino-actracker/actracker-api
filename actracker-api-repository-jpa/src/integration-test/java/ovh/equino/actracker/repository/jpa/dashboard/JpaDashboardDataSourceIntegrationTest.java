@@ -2,9 +2,11 @@ package ovh.equino.actracker.repository.jpa.dashboard;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.dashboard.Chart;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
 import ovh.equino.actracker.domain.dashboard.DashboardId;
@@ -82,6 +84,28 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
                 .map(dashboard -> Arguments.of(
                         dashboard.name(), new DashboardId(dashboard.id())
                 ));
+    }
+
+    @Test
+    void shouldFindAllAccessibleDashboards() {
+        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
+                searcher,
+                LARGE_PAGE_SIZE,
+                FIRST_PAGE,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+        inTransaction(() -> {
+            List<DashboardDto> foundDashboards = dataSource.find(searchCriteria);
+            assertThat(foundDashboards)
+                    .usingRecursiveFieldByFieldElementComparatorIgnoringFields("charts", "shares")
+                    .containsExactlyElementsOf(testConfiguration.dashboards.accessibleFor(searcher));
+            // TODO check charts, shares
+        });
     }
 
     @BeforeAll
