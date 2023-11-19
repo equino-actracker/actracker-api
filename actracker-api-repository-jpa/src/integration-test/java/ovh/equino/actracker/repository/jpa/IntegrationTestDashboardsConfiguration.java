@@ -7,14 +7,9 @@ import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.user.User;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.*;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptySet;
 import static java.util.Comparator.comparing;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toUnmodifiableSet;
@@ -53,6 +48,30 @@ public class IntegrationTestDashboardsConfiguration {
                 .toList();
     }
 
+    public List<DashboardDto> inaccessibleFor(User user) {
+        List<UUID> accessibleDashboards = accessibleFor(user)
+                .stream()
+                .map(DashboardDto::id)
+                .toList();
+        return concat(addedDashboards.stream(), transientDashboards.stream())
+                .filter(dashboard -> !accessibleDashboards.contains(dashboard.id()))
+                .toList();
+    }
+
+    public List<Chart> flatChartsAccessibleFor(User user) {
+        return accessibleFor(user)
+                .stream()
+                .flatMap(dashboard -> dashboard.charts().stream())
+                .toList();
+    }
+
+    public Collection<Share> flatSharesAccessibleFor(User user) {
+        return accessibleFor(user)
+                .stream()
+                .flatMap(dashboard -> dashboard.shares().stream())
+                .toList();
+    }
+
     private boolean isOwnerOrGrantee(User user, DashboardDto dashboard) {
         return isOwner(user, dashboard) || isGrantee(user, dashboard);
     }
@@ -67,16 +86,6 @@ public class IntegrationTestDashboardsConfiguration {
 
     private boolean isOwner(User user, DashboardDto dashboard) {
         return user.id().equals(dashboard.creatorId());
-    }
-
-    public List<DashboardDto> inaccessibleFor(User user) {
-        List<UUID> accessibleDashboards = accessibleFor(user)
-                .stream()
-                .map(DashboardDto::id)
-                .toList();
-        return concat(addedDashboards.stream(), transientDashboards.stream())
-                .filter(dashboard -> !accessibleDashboards.contains(dashboard.id()))
-                .toList();
     }
 
     private DashboardDto toAccessibleFormFor(User user, DashboardDto dashboard) {

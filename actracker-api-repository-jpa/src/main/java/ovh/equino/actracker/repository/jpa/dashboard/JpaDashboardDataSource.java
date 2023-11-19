@@ -97,9 +97,11 @@ class JpaDashboardDataSource extends JpaDAO implements DashboardDataSource {
         List<DashboardProjection> dashboardResults = selectDashboards
                 .where(
                         selectDashboards.predicate().and(
-
+                                selectDashboards.predicate().isNotDeleted(),
+                                selectDashboards.predicate().isAccessibleFor(searchCriteria.searcher())
                         )
                 )
+//                .orderBy(selectDashboards.sort().ascending("id")) But tests don't fail! :(
                 .execute();
 
         return dashboardResults.stream().map(result -> result.toDashboard(emptyList(), emptyList())).toList();
