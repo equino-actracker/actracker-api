@@ -97,10 +97,12 @@ class JpaDashboardDataSource extends JpaDAO implements DashboardDataSource {
                 .where(
                         selectDashboards.predicate().and(
                                 selectDashboards.predicate().isNotDeleted(),
-                                selectDashboards.predicate().isAccessibleFor(searchCriteria.searcher())
+                                selectDashboards.predicate().isAccessibleFor(searchCriteria.searcher()),
+                                selectDashboards.predicate().isInPage(searchCriteria.pageId())
                         )
                 )
                 .orderBy(selectDashboards.sort().ascending("id"))
+                .limit(searchCriteria.pageSize())
                 .execute();
 
         Set<UUID> dashboardIds = dashboardResults

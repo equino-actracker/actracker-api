@@ -48,6 +48,21 @@ public class IntegrationTestDashboardsConfiguration {
                 .toList();
     }
 
+    public List<DashboardDto> accessibleForWithLimitOffset(User user, int limit, int offset) {
+        return accessibleFor(user)
+                .stream()
+                .skip(offset)
+                .limit(limit)
+                .toList();
+    }
+
+    public List<DashboardDto> accessibleForExcluding(User user, Set<UUID> excludedIds) {
+        return accessibleFor(user)
+                .stream()
+                .filter(dashboard -> !excludedIds.contains(dashboard.id()))
+                .toList();
+    }
+
     public List<DashboardDto> inaccessibleFor(User user) {
         List<UUID> accessibleDashboards = accessibleFor(user)
                 .stream()

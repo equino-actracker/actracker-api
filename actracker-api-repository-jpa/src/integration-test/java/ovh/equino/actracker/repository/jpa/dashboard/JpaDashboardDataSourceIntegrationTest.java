@@ -25,6 +25,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 
 abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest {
 
@@ -126,6 +127,40 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
                     .flatMap(DashboardDto::shares)
                     .containsExactlyInAnyOrderElementsOf(expectedFlattenShares);
         });
+    }
+
+    @Test
+    void shouldFindSecondPageOfDashboards() {
+        int pageSize = 2;
+        int offset = 1;
+        List<DashboardDto> expectedDashboards = testConfiguration.dashboards.accessibleForWithLimitOffset(
+                searcher,
+                pageSize,
+                offset
+        );
+        String pageId = expectedDashboards.get(0).id().toString();
+        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
+                searcher,
+                pageSize,
+                pageId,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+        inTransaction(() -> {
+            List<DashboardDto> foundDashboards = dataSource.find(searchCriteria);
+            assertThat(foundDashboards)
+                    .usingRecursiveFieldByFieldElementComparatorIgnoringFields("charts", "shares")
+                    .containsExactlyElementsOf(expectedDashboards);
+        });
+    }
+
+    @Test
+    void shouldFindNonExcludedDashboards() {
+        fail();
     }
 
     @BeforeAll
