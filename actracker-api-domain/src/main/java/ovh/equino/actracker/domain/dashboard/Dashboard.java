@@ -1,7 +1,6 @@
 package ovh.equino.actracker.domain.dashboard;
 
 import ovh.equino.actracker.domain.Entity;
-import ovh.equino.actracker.domain.exception.EntityEditForbidden;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tag.Tag;
@@ -126,16 +125,6 @@ public class Dashboard implements Entity {
         }).execute();
     }
 
-    void updateTo(DashboardDto dashboard, User updater) {
-        if (isEditForbiddenFor(updater)) {
-            throw new EntityEditForbidden(Dashboard.class);
-        }
-        this.name = dashboard.name();
-        this.charts.clear();
-        this.charts.addAll(dashboard.charts());
-        this.validate();
-    }
-
     public static Dashboard fromStorage(DashboardDto dashboard) {
         return new Dashboard(
                 new DashboardId(dashboard.id()),
@@ -181,10 +170,6 @@ public class Dashboard implements Entity {
         return !isAccessibleFor(user);
     }
 
-    private boolean isEditForbiddenFor(User user) {
-        return !creator.equals(user);
-    }
-
     private boolean isGrantee(User user) {
         return shares.stream()
                 .map(Share::grantee)
@@ -208,5 +193,10 @@ public class Dashboard implements Entity {
 
     public boolean isDeleted() {
         return deleted;
+    }
+
+    // TODO think about extracting it to superclass
+    public DashboardId id() {
+        return this.id;
     }
 }
