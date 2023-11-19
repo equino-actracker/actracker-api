@@ -58,6 +58,10 @@ public abstract class JpaIntegrationTest {
         return new DashboardBuilder(creator);
     }
 
+    protected static ChartBuilder newChart(TenantDto creator) {
+        return new ChartBuilder(creator);
+    }
+
     private Map<String, String> persistenceProperties() {
         Map<String, String> properties = new HashMap<>();
         properties.put("javax.persistence.jdbc.url", database().jdbcUrl());

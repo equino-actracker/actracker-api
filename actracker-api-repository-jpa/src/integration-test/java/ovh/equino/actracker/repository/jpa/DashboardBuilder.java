@@ -11,6 +11,7 @@ import ovh.equino.actracker.domain.user.User;
 import java.util.List;
 import java.util.Set;
 
+import static java.util.Arrays.stream;
 import static java.util.UUID.randomUUID;
 import static ovh.equino.actracker.domain.dashboard.AnalysisMetric.TAG_DURATION;
 import static ovh.equino.actracker.domain.dashboard.AnalysisMetric.TAG_PERCENTAGE;
@@ -50,6 +51,75 @@ public final class DashboardBuilder {
                 ),
                 false
         );
+
+    }
+
+    public DashboardBuilder named(String name) {
+        newDashboard = new DashboardDto(
+                newDashboard.id(),
+                newDashboard.creatorId(),
+                name,
+                newDashboard.charts(),
+                newDashboard.shares(),
+                newDashboard.deleted()
+        );
+        return this;
+    }
+
+    public DashboardBuilder withCharts(Chart... charts) {
+        newDashboard = new DashboardDto(
+                newDashboard.id(),
+                newDashboard.creatorId(),
+                newDashboard.name(),
+                stream(charts).toList(),
+                newDashboard.shares(),
+                newDashboard.deleted()
+        );
+        return this;
+    }
+
+    public DashboardBuilder sharedWith(TenantDto... grantees) {
+        newDashboard = new DashboardDto(
+                newDashboard.id(),
+                newDashboard.creatorId(),
+                newDashboard.name(),
+                newDashboard.charts(),
+                stream(grantees)
+                        .map(grantee -> new Share(
+                                        new User(grantee.id()),
+                                        grantee.username()
+                                )
+                        )
+                        .toList(),
+                newDashboard.deleted()
+        );
+        return this;
+    }
+
+    public DashboardBuilder sharedWithNonExisting(String... granteeNames) {
+        newDashboard = new DashboardDto(
+                newDashboard.id(),
+                newDashboard.creatorId(),
+                newDashboard.name(),
+                newDashboard.charts(),
+                stream(granteeNames)
+                        .map(Share::new)
+                        .toList(),
+                newDashboard.deleted()
+        );
+        return this;
+    }
+
+    public DashboardBuilder deleted() {
+        newDashboard = new DashboardDto(
+                newDashboard.id(),
+                newDashboard.creatorId(),
+                newDashboard.name(),
+                newDashboard.charts(),
+                newDashboard.shares(),
+                true
+        );
+        return this;
 
     }
 
