@@ -150,11 +150,26 @@ class JpaDashboardDataSource extends JpaDAO implements DashboardDataSource {
                         )
                 ));
 
+        SelectShareJoinDashboardQuery selectShareJoinDashboard = new SelectShareJoinDashboardQuery(entityManager);
+        Map<String, List<Share>> shareByDashboardId = selectShareJoinDashboard
+                .where(
+                        selectShareJoinDashboard.predicate().and(
+                                selectShareJoinDashboard.predicate().hasDashboardIdIn(dashboardIds),
+                                selectShareJoinDashboard.predicate().isAccessibleFor(searchCriteria.searcher())
+                        )
+                )
+                .execute()
+                .stream()
+                .collect(groupingBy(
+                        ShareJoinDashboardProjection::dashboardId,
+                        mapping(ShareJoinDashboardProjection::toShare, toList())
+                ));
+
         return dashboardResults
                 .stream()
                 .map(result -> result.toDashboard(
                         charts.getOrDefault(result.id(), emptyList()),
-                        emptyList()
+                        shareByDashboardId.getOrDefault(result.id(), emptyList())
                 ))
                 .toList();
     }
