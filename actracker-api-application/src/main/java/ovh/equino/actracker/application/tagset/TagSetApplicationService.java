@@ -64,8 +64,6 @@ public class TagSetApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User searcher = new User(requesterIdentity.getId());
 
-        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, searcher);
-
         EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
                 searcher,
                 searchTagSetsQuery.pageSize(),

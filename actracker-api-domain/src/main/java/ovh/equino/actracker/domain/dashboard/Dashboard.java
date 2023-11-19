@@ -1,18 +1,13 @@
 package ovh.equino.actracker.domain.dashboard;
 
 import ovh.equino.actracker.domain.Entity;
-import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.share.Share;
-import ovh.equino.actracker.domain.tag.Tag;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import static java.util.Collections.unmodifiableList;
-import static java.util.function.Predicate.isEqual;
-import static java.util.function.Predicate.not;
 
 
 public class Dashboard implements Entity {
@@ -143,38 +138,11 @@ public class Dashboard implements Entity {
         );
     }
 
-    public DashboardDto forClient(User client) {
-        if (isNotAccessibleFor(client)) {
-            throw new EntityNotFoundException(Tag.class, this.id.id());
-        }
-        List<Chart> nonDeletedCharts = charts.stream()
-                .filter(not(Chart::isDeleted))
-                .toList();
-        return new DashboardDto(
-                id.id(), creator.id(), name, nonDeletedCharts, unmodifiableList(shares), deleted
-        );
-    }
-
     public DashboardChangedNotification forChangeNotification() {
         DashboardDto dto = new DashboardDto(
                 id.id(), creator.id(), name, unmodifiableList(charts), unmodifiableList(shares), deleted
         );
         return new DashboardChangedNotification(dto);
-    }
-
-    boolean isAccessibleFor(User user) {
-        return creator.equals(user) || isGrantee(user);
-    }
-
-    boolean isNotAccessibleFor(User user) {
-        return !isAccessibleFor(user);
-    }
-
-    private boolean isGrantee(User user) {
-        return shares.stream()
-                .map(Share::grantee)
-                .filter(Objects::nonNull)
-                .anyMatch(isEqual(user));
     }
 
     @Override

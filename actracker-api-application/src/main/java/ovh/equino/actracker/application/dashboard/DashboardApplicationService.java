@@ -101,9 +101,8 @@ public class DashboardApplicationService {
         );
 
         EntitySearchResult<DashboardDto> searchResult = dashboardSearchEngine.findDashboards(searchCriteria);
-        List<DashboardResult> resultForClient = searchResult.results().stream()
-                .map(Dashboard::fromStorage)
-                .map(dashboard -> dashboard.forClient(searchCriteria.searcher()))
+        List<DashboardResult> resultForClient = searchResult.results()
+                .stream()
                 .map(this::toDashboardResult)
                 .toList();
 

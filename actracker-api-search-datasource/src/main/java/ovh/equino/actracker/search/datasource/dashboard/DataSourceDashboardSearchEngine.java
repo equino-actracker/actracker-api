@@ -1,20 +1,20 @@
-package ovh.equino.actracker.search.repository.dashboard;
+package ovh.equino.actracker.search.datasource.dashboard;
 
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
+import ovh.equino.actracker.domain.dashboard.DashboardDataSource;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
-import ovh.equino.actracker.domain.dashboard.DashboardRepository;
 import ovh.equino.actracker.domain.dashboard.DashboardSearchEngine;
 
 import java.util.LinkedList;
 import java.util.List;
 
-class RepositoryDashboardSearchEngine implements DashboardSearchEngine {
+class DataSourceDashboardSearchEngine implements DashboardSearchEngine {
 
-    private final DashboardRepository dashboardRepository;
+    private final DashboardDataSource dashboardDataSource;
 
-    RepositoryDashboardSearchEngine(DashboardRepository dashboardRepository) {
-        this.dashboardRepository = dashboardRepository;
+    DataSourceDashboardSearchEngine(DashboardDataSource dashboardDataSource) {
+        this.dashboardDataSource = dashboardDataSource;
     }
 
     @Override
@@ -31,7 +31,7 @@ class RepositoryDashboardSearchEngine implements DashboardSearchEngine {
                 searchCriteria.sortCriteria()
         );
 
-        List<DashboardDto> foundDashboards = dashboardRepository.find(forNextPageIdSearchCriteria);
+        List<DashboardDto> foundDashboards = dashboardDataSource.find(forNextPageIdSearchCriteria);
         String nextPageId = getNextPageId(foundDashboards, searchCriteria.pageSize());
         List<DashboardDto> results = foundDashboards.stream()
                 .limit(searchCriteria.pageSize())
