@@ -80,9 +80,6 @@ public class ActivityApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User searcher = new User(requesterIdentity.getId());
 
-        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, searcher);
-        MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
-
         EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
                 searcher,
                 searchActivitiesQuery.pageSize(),
@@ -96,7 +93,8 @@ public class ActivityApplicationService {
         );
 
         EntitySearchResult<ActivityDto> searchResult = activitySearchEngine.findActivities(searchCriteria);
-        List<ActivityResult> resultForClient = searchResult.results().stream()
+        List<ActivityResult> resultForClient = searchResult.results()
+                .stream()
                 .map(this::toActivityResult)
                 .toList();
 
