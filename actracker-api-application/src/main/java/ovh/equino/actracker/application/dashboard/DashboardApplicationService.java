@@ -22,6 +22,7 @@ import static java.util.Objects.requireNonNullElse;
 public class DashboardApplicationService {
 
     private final DashboardRepository dashboardRepository;
+    private final DashboardDataSource dashboardDataSource;
     private final DashboardSearchEngine dashboardSearchEngine;
     private final DashboardGenerationEngine dashboardGenerationEngine;
     private final DashboardNotifier dashboardNotifier;
@@ -29,6 +30,7 @@ public class DashboardApplicationService {
     private final IdentityProvider identityProvider;
 
     public DashboardApplicationService(DashboardRepository dashboardRepository,
+                                       DashboardDataSource dashboardDataSource,
                                        DashboardSearchEngine dashboardSearchEngine,
                                        DashboardGenerationEngine dashboardGenerationEngine,
                                        DashboardNotifier dashboardNotifier,
@@ -36,6 +38,7 @@ public class DashboardApplicationService {
                                        IdentityProvider identityProvider) {
 
         this.dashboardRepository = dashboardRepository;
+        this.dashboardDataSource = dashboardDataSource;
         this.dashboardSearchEngine = dashboardSearchEngine;
         this.dashboardGenerationEngine = dashboardGenerationEngine;
         this.dashboardNotifier = dashboardNotifier;
@@ -47,13 +50,9 @@ public class DashboardApplicationService {
         Identity requestIdentity = identityProvider.provideIdentity();
         User searcher = new User(requestIdentity.getId());
 
-        DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
+        return dashboardDataSource.find(new DashboardId(dashboardId), searcher)
+                .map(this::toDashboardResult)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
-
-        Dashboard dashboard = Dashboard.fromStorage(dashboardDto);
-        DashboardDto dashboardResult = dashboard.forClient(searcher);
-
-        return toDashboardResult(dashboardResult);
     }
 
     public DashboardResult createDashboard(CreateDashboardCommand createDashboardCommand) {
@@ -75,11 +74,14 @@ public class DashboardApplicationService {
         );
         Dashboard dashboard = Dashboard.create(dashboardDataWithSharesResolved, creator);
         dashboardRepository.add(dashboard.forStorage());
-        DashboardDto dashboardResult = dashboard.forClient(creator);
-
         dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
 
-        return toDashboardResult(dashboardResult);
+        return dashboardDataSource.find(dashboard.id(), creator)
+                .map(this::toDashboardResult)
+                .orElseThrow(() -> {
+                    String message = "Could not find created dashboard with ID=%s".formatted(dashboard.id());
+                    return new RuntimeException(message);
+                });
     }
 
     public SearchResult<DashboardResult> searchDashboards(SearchDashboardsQuery searchDashboardsQuery) {
@@ -118,11 +120,14 @@ public class DashboardApplicationService {
 
         dashboard.rename(newName, updater);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
-        DashboardDto dashboardResult = dashboard.forClient(updater);
-
         dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
 
-        return toDashboardResult(dashboardResult);
+        return dashboardDataSource.find(dashboard.id(), updater)
+                .map(this::toDashboardResult)
+                .orElseThrow(() -> {
+                    String message = "Could not find updated dashboard with ID=%s".formatted(dashboard.id());
+                    return new RuntimeException(message);
+                });
     }
 
     public void deleteDashboard(UUID dashboardId) {
@@ -135,7 +140,6 @@ public class DashboardApplicationService {
 
         dashboard.delete(remover);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
-
         dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
     }
 
@@ -156,12 +160,14 @@ public class DashboardApplicationService {
 
         dashboard.addChart(newChart, updater);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
-        DashboardDto dashboardResult = dashboard.forClient(updater);
-
         dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
 
-        return toDashboardResult(dashboardResult);
-    }
+        return dashboardDataSource.find(dashboard.id(), updater)
+                .map(this::toDashboardResult)
+                .orElseThrow(() -> {
+                    String message = "Could not find updated dashboard with ID=%s".formatted(dashboard.id());
+                    return new RuntimeException(message);
+                });    }
 
     public DashboardResult deleteChart(UUID chartId, UUID dashboardId) {
         Identity requestIdentity = identityProvider.provideIdentity();
@@ -173,12 +179,14 @@ public class DashboardApplicationService {
 
         dashboard.deleteChart(new ChartId(chartId), updater);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
-        DashboardDto dashboardResult = dashboard.forClient(updater);
-
         dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
 
-        return toDashboardResult(dashboardResult);
-
+        return dashboardDataSource.find(dashboard.id(), updater)
+                .map(this::toDashboardResult)
+                .orElseThrow(() -> {
+                    String message = "Could not find updated dashboard with ID=%s".formatted(dashboard.id());
+                    return new RuntimeException(message);
+                });
     }
 
     public DashboardResult shareDashboard(String newGrantee, UUID dashboardId) {
@@ -193,11 +201,14 @@ public class DashboardApplicationService {
 
         dashboard.share(share, granter);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
-        DashboardDto dashboardResult = dashboard.forClient(granter);
-
         dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
 
-        return toDashboardResult(dashboardResult);
+        return dashboardDataSource.find(dashboard.id(), granter)
+                .map(this::toDashboardResult)
+                .orElseThrow(() -> {
+                    String message = "Could not find updated dashboard with ID=%s".formatted(dashboard.id());
+                    return new RuntimeException(message);
+                });
     }
 
     public DashboardResult unshareDashboard(String granteeName, UUID dashboardId) {
@@ -210,11 +221,14 @@ public class DashboardApplicationService {
 
         dashboard.unshare(granteeName, granter);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
-        DashboardDto dashboardResult = dashboard.forClient(granter);
-
         dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
 
-        return toDashboardResult(dashboardResult);
+        return dashboardDataSource.find(dashboard.id(), granter)
+                .map(this::toDashboardResult)
+                .orElseThrow(() -> {
+                    String message = "Could not find updated dashboard with ID=%s".formatted(dashboard.id());
+                    return new RuntimeException(message);
+                });
     }
 
     public DashboardGenerationResult generateDashboard(GenerateDashboardQuery generateDashboardQuery) {
