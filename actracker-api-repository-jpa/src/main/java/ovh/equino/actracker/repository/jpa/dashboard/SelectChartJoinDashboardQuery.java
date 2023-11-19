@@ -7,9 +7,12 @@ import ovh.equino.actracker.repository.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.repository.jpa.JpaSortBuilder;
 import ovh.equino.actracker.repository.jpa.MultiResultJpaQuery;
 
+import java.util.Collection;
+import java.util.Set;
 import java.util.UUID;
 
 import static jakarta.persistence.criteria.JoinType.INNER;
+import static java.util.stream.Collectors.toUnmodifiableSet;
 
 final class SelectChartJoinDashboardQuery extends MultiResultJpaQuery<ChartEntity, ChartJoinDashboardProjection> {
 
@@ -74,6 +77,14 @@ final class SelectChartJoinDashboardQuery extends MultiResultJpaQuery<ChartEntit
 
         public JpaPredicate hasDashboardId(UUID dashboardId) {
             return () -> criteriaBuilder.equal(dashboard.get("id"), dashboardId.toString());
+        }
+
+        public JpaPredicate hasDashboardIdIn(Collection<UUID> dashboardIds) {
+            Set<String> dashboardIdsAsString = dashboardIds
+                    .stream()
+                    .map(UUID::toString)
+                    .collect(toUnmodifiableSet());
+            return in(dashboardIdsAsString, dashboard.get("id"));
         }
     }
 }

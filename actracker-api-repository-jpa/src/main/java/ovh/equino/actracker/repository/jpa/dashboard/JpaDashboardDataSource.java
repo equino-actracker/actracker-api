@@ -13,9 +13,9 @@ import ovh.equino.actracker.repository.jpa.JpaDAO;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
-import static java.util.stream.Collectors.mapping;
-import static java.util.stream.Collectors.toUnmodifiableSet;
+import static java.util.stream.Collectors.*;
 
 class JpaDashboardDataSource extends JpaDAO implements DashboardDataSource {
 
@@ -91,6 +91,89 @@ class JpaDashboardDataSource extends JpaDAO implements DashboardDataSource {
 
     @Override
     public List<DashboardDto> find(EntitySearchCriteria searchCriteria) {
-        throw new RuntimeException("Not implemented yet");
+
+        SelectDashboardsQuery selectDashboards = new SelectDashboardsQuery(entityManager);
+        List<DashboardProjection> dashboardResults = selectDashboards
+                .where(
+                        selectDashboards.predicate().and(
+                                selectDashboards.predicate().isNotDeleted(),
+                                selectDashboards.predicate().isAccessibleFor(searchCriteria.searcher()),
+                                selectDashboards.predicate().isInPage(searchCriteria.pageId()),
+                                selectDashboards.predicate().isNotExcluded(searchCriteria.excludeFilter())
+                        )
+                )
+                .orderBy(selectDashboards.sort().ascending("id"))
+                .limit(searchCriteria.pageSize())
+                .execute();
+
+        Set<UUID> dashboardIds = dashboardResults
+                .stream()
+                .map(DashboardProjection::id)
+                .map(UUID::fromString)
+                .collect(toUnmodifiableSet());
+
+        SelectChartJoinDashboardQuery selectChartJoinDashboard = new SelectChartJoinDashboardQuery(entityManager);
+        List<ChartJoinDashboardProjection> chartsResults = selectChartJoinDashboard
+                .where(
+                        selectChartJoinDashboard.predicate().and(
+                                selectChartJoinDashboard.predicate().hasDashboardIdIn(dashboardIds),
+                                selectChartJoinDashboard.predicate().isNotDeleted()
+                        )
+                )
+                .execute();
+
+        Set<UUID> chartIds = chartsResults
+                .stream()
+                .map(ChartJoinDashboardProjection::id)
+                .map(UUID::fromString)
+                .collect(toUnmodifiableSet());
+
+        SelectChartJoinTagQuery selectChartJoinTag = new SelectChartJoinTagQuery(entityManager);
+        Map<String, Set<UUID>> tagsByChartId = selectChartJoinTag
+                .where(
+                        selectChartJoinTag.predicate().and(
+                                selectChartJoinTag.predicate().hasChartIdIn(chartIds),
+                                selectChartJoinTag.predicate().isAccessibleFor(searchCriteria.searcher()),
+                                selectChartJoinTag.predicate().isNotDeleted()
+                        )
+                )
+                .execute()
+                .stream()
+                .collect(groupingBy(
+                        ChartJoinTagProjection::chartId,
+                        mapping(ChartJoinTagProjection::toTagId, toUnmodifiableSet())
+                ));
+
+        Map<String, List<Chart>> charts = chartsResults
+                .stream()
+                .collect(groupingBy(
+                        ChartJoinDashboardProjection::dashboardId,
+                        mapping(result -> result.toChart(
+                                tagsByChartId.getOrDefault(result.id(), emptySet())), toList()
+                        )
+                ));
+
+        SelectShareJoinDashboardQuery selectShareJoinDashboard = new SelectShareJoinDashboardQuery(entityManager);
+        Map<String, List<Share>> shareByDashboardId = selectShareJoinDashboard
+                .where(
+                        selectShareJoinDashboard.predicate().and(
+                                selectShareJoinDashboard.predicate().hasDashboardIdIn(dashboardIds),
+                                selectShareJoinDashboard.predicate().isAccessibleFor(searchCriteria.searcher())
+                        )
+                )
+                .execute()
+                .stream()
+                .collect(groupingBy(
+                        ShareJoinDashboardProjection::dashboardId,
+                        mapping(ShareJoinDashboardProjection::toShare, toList())
+                ));
+
+        return dashboardResults
+                .stream()
+                .map(result -> result.toDashboard(
+                        charts.getOrDefault(result.id(), emptyList()),
+                        shareByDashboardId.getOrDefault(result.id(), emptyList())
+                ))
+                .toList();
     }
 }

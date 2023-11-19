@@ -28,12 +28,12 @@ final class SelectShareJoinDashboardQuery extends MultiResultJpaQuery<DashboardS
     @Override
     protected void initProjection() {
         query.select(
-            criteriaBuilder.construct(
-                    ShareJoinDashboardProjection.class,
-                    root.get("granteeId"),
-                    dashboard.get("id"),
-                    root.get("granteeName")
-            )
+                criteriaBuilder.construct(
+                        ShareJoinDashboardProjection.class,
+                        root.get("granteeId"),
+                        dashboard.get("id"),
+                        root.get("granteeName")
+                )
         );
     }
 
@@ -83,12 +83,12 @@ final class SelectShareJoinDashboardQuery extends MultiResultJpaQuery<DashboardS
             return () -> criteriaBuilder.equal(dashboard.get("id"), dashboardId.toString());
         }
 
-        public JpaPredicate hasTagIdIn(Collection<UUID> dashboardIds) {
-            Set<String> tagIdsAsStrings = dashboardIds
+        public JpaPredicate hasDashboardIdIn(Collection<UUID> dashboardIds) {
+            Set<String> dashboardIdsAsStrings = dashboardIds
                     .stream()
                     .map(UUID::toString)
                     .collect(toUnmodifiableSet());
-            return in(tagIdsAsStrings, dashboard.get("id"));
+            return in(dashboardIdsAsStrings, dashboard.get("id"));
         }
 
         @Override
