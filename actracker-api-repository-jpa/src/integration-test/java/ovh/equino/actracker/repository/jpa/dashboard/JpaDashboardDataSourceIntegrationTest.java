@@ -99,12 +99,26 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
                 null,
                 null
         );
+        List<Chart> expectedFlattenCharts = testConfiguration.dashboards.flatChartsAccessibleFor(searcher);
+        List<UUID> expectedFlattenIncludedTags = expectedFlattenCharts
+                .stream()
+                .flatMap(chart -> chart.includedTags().stream())
+                .toList();
+
         inTransaction(() -> {
             List<DashboardDto> foundDashboards = dataSource.find(searchCriteria);
             assertThat(foundDashboards)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("charts", "shares")
                     .containsExactlyElementsOf(testConfiguration.dashboards.accessibleFor(searcher));
-            // TODO check charts, shares
+            assertThat(foundDashboards)
+                    .flatMap(DashboardDto::charts)
+                    .usingRecursiveFieldByFieldElementComparatorIgnoringFields("includedTags")
+                    .containsExactlyInAnyOrderElementsOf(expectedFlattenCharts);
+            assertThat(foundDashboards)
+                    .flatMap(DashboardDto::charts)
+                    .flatMap(Chart::includedTags)
+                    .containsExactlyInAnyOrderElementsOf(expectedFlattenIncludedTags);
+            // TODO check shares
         });
     }
 

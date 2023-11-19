@@ -15,8 +15,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
-import static java.util.stream.Collectors.mapping;
-import static java.util.stream.Collectors.toUnmodifiableSet;
+import static java.util.stream.Collectors.*;
 
 class JpaDashboardDataSource extends JpaDAO implements DashboardDataSource {
 
@@ -101,9 +100,44 @@ class JpaDashboardDataSource extends JpaDAO implements DashboardDataSource {
                                 selectDashboards.predicate().isAccessibleFor(searchCriteria.searcher())
                         )
                 )
-//                .orderBy(selectDashboards.sort().ascending("id")) But tests don't fail! :(
+                .orderBy(selectDashboards.sort().ascending("id"))
                 .execute();
 
-        return dashboardResults.stream().map(result -> result.toDashboard(emptyList(), emptyList())).toList();
+        Set<UUID> dashboardIds = dashboardResults
+                .stream()
+                .map(DashboardProjection::id)
+                .map(UUID::fromString)
+                .collect(toUnmodifiableSet());
+
+        SelectChartJoinDashboardQuery selectChartJoinDashboard = new SelectChartJoinDashboardQuery(entityManager);
+        List<ChartJoinDashboardProjection> chartsResults = selectChartJoinDashboard
+                .where(
+                        selectChartJoinDashboard.predicate().and(
+                                selectChartJoinDashboard.predicate().hasDashboardIdIn(dashboardIds),
+                                selectChartJoinDashboard.predicate().isNotDeleted()
+                        )
+                )
+                .execute();
+
+//        Set<UUID> chartIds = chartsResults
+//                .stream()
+//                .map(ChartJoinDashboardProjection::id)
+//                .map(UUID::fromString)
+//                .collect(toUnmodifiableSet());
+
+        Map<String, List<Chart>> charts = chartsResults
+                .stream()
+                .collect(groupingBy(
+                        ChartJoinDashboardProjection::dashboardId,
+                        mapping(result -> result.toChart(emptySet()), toList())
+                ));
+
+        return dashboardResults
+                .stream()
+                .map(result -> result.toDashboard(
+                        charts.getOrDefault(result.id(), emptyList()),
+                        emptyList()
+                ))
+                .toList();
     }
 }
