@@ -24,8 +24,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptySet;
 import static java.util.Comparator.comparing;
 import static org.assertj.core.api.Assertions.assertThat;
 import static ovh.equino.actracker.repository.jpa.TestUtil.randomBigDecimal;
@@ -231,12 +229,18 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
     }
 
     static Stream<Arguments> inaccessibleActivity() {
-        return Stream.of(
-                Arguments.of("inaccessibleActivityWithDeletedSharingTag", new ActivityId(inaccessibleActivityWithDeletedSharingTag.id())),
-                Arguments.of("inaccessibleOwnDeletedActivity", new ActivityId(inaccessibleOwnDeletedActivity.id())),
-                Arguments.of("inaccessibleForeignActivity", new ActivityId(inaccessibleForeignActivity.id())),
-                Arguments.of("inaccessibleNotAddedActivity", new ActivityId(inaccessibleNotAddedActivity.id()))
-        );
+        return testConfiguration.activities.inaccessibleFor(searcher)
+                .stream()
+                .map(activity -> Arguments.of(
+                        activity.title(),
+                        new ActivityId(activity.id())
+                ));
+//        return Stream.of(
+//                Arguments.of("inaccessibleActivityWithDeletedSharingTag", new ActivityId(inaccessibleActivityWithDeletedSharingTag.id())),
+//                Arguments.of("inaccessibleOwnDeletedActivity", new ActivityId(inaccessibleOwnDeletedActivity.id())),
+//                Arguments.of("inaccessibleForeignActivity", new ActivityId(inaccessibleForeignActivity.id())),
+//                Arguments.of("inaccessibleNotAddedActivity", new ActivityId(inaccessibleNotAddedActivity.id()))
+//        );
     }
 
     @Test

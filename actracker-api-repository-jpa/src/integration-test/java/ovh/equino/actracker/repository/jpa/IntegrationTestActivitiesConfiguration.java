@@ -61,20 +61,22 @@ public final class IntegrationTestActivitiesConfiguration {
     }
 
     private boolean isOwnerOrGrantee(User user, ActivityDto activity) {
-        return isOwner(user, activity);// || isGrantee(user, activity);
+        return isOwner(user, activity) || containsAnyTagAccessibleFor(user, activity);
     }
 
     private boolean isOwner(User user, ActivityDto activity) {
         return user.id().equals(activity.creatorId());
     }
 
-//    private boolean isGrantee(User user, ActivityDto activity) {
-//        List<User> grantees = activity.shares()
-//                .stream()
-//                .map(Share::grantee)
-//                .toList();
-//        return grantees.contains(user);
-//    }
+    private boolean containsAnyTagAccessibleFor(User user, ActivityDto activity) {
+        Set<UUID> accessibleTagIds = tags.accessibleFor(user)
+                .stream()
+                .map(TagDto::id)
+                .collect(toUnmodifiableSet());
+        return activity.tags()
+                .stream()
+                .anyMatch(accessibleTagIds::contains);
+    }
 
     private ActivityDto toAccessibleFormFor(User user, ActivityDto activity) {
         List<UUID> accessibleTagIds = tags.accessibleFor(user)
