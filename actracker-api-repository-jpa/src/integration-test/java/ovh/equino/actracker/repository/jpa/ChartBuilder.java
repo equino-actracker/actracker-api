@@ -10,8 +10,8 @@ import ovh.equino.actracker.domain.tenant.TenantDto;
 import java.util.Set;
 
 import static java.util.Arrays.stream;
-import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toUnmodifiableSet;
+import static ovh.equino.actracker.repository.jpa.TestUtil.nextUUID;
 import static ovh.equino.actracker.repository.jpa.TestUtil.randomString;
 
 public final class ChartBuilder {
@@ -24,7 +24,7 @@ public final class ChartBuilder {
                 randomString(),
                 GroupBy.SELF,
                 AnalysisMetric.TAG_PERCENTAGE,
-                Set.of(randomUUID(), randomUUID(), randomUUID()),
+                Set.of(nextUUID(), nextUUID(), nextUUID()),
                 false
         );
     }

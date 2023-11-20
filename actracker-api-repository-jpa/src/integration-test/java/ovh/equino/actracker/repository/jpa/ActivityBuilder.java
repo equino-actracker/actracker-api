@@ -10,10 +10,8 @@ import java.util.List;
 import java.util.Set;
 
 import static java.util.Arrays.stream;
-import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toUnmodifiableSet;
-import static ovh.equino.actracker.repository.jpa.TestUtil.randomBigDecimal;
-import static ovh.equino.actracker.repository.jpa.TestUtil.randomString;
+import static ovh.equino.actracker.repository.jpa.TestUtil.*;
 
 public final class ActivityBuilder {
 
@@ -21,17 +19,17 @@ public final class ActivityBuilder {
 
     ActivityBuilder(TenantDto creator) {
         this.newActivity = new ActivityDto(
-                randomUUID(),
+                nextUUID(),
                 creator.id(),
                 randomString(),
                 null,
                 null,
                 randomString(),
-                Set.of(randomUUID(), randomUUID(), randomUUID()),
+                Set.of(nextUUID(), nextUUID(), nextUUID()),
                 List.of(
-                        new MetricValue(randomUUID(), randomBigDecimal()),
-                        new MetricValue(randomUUID(), randomBigDecimal()),
-                        new MetricValue(randomUUID(), randomBigDecimal())
+                        new MetricValue(nextUUID(), randomBigDecimal()),
+                        new MetricValue(nextUUID(), randomBigDecimal()),
+                        new MetricValue(nextUUID(), randomBigDecimal())
                 ),
                 false
         );

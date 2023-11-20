@@ -3,8 +3,13 @@ package ovh.equino.actracker.repository.jpa;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import java.math.BigDecimal;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 
 public final class TestUtil {
+
+    private static AtomicLong uuidLeastSignificantByte = new AtomicLong(0L);
+
     private TestUtil() {
     }
 
@@ -22,6 +27,10 @@ public final class TestUtil {
         String randomInteger = RandomStringUtils.random(length, useLetters, useNumbers);
         String randomDecimal = RandomStringUtils.random(length, useLetters, useNumbers);
         return new BigDecimal("%s.%s5".formatted(randomInteger, randomDecimal));
+    }
+
+    public static UUID nextUUID() {
+        return new UUID(0, uuidLeastSignificantByte.getAndIncrement());
     }
 
 }

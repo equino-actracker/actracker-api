@@ -5,6 +5,7 @@ import ovh.equino.actracker.domain.tag.MetricType;
 import ovh.equino.actracker.domain.tenant.TenantDto;
 
 import static java.util.UUID.randomUUID;
+import static ovh.equino.actracker.repository.jpa.TestUtil.nextUUID;
 import static ovh.equino.actracker.repository.jpa.TestUtil.randomString;
 
 public final class MetricBuilder {
@@ -13,7 +14,7 @@ public final class MetricBuilder {
 
     MetricBuilder(TenantDto creator) {
         this.newMetric = new MetricDto(
-                randomUUID(),
+                nextUUID(),
                 creator.id(),
                 randomString(),
                 MetricType.NUMERIC,
