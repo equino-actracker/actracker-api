@@ -336,14 +336,10 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldFindNotExcludedActivities() {
-        List<ActivityDto> expectedActivities = Stream.of(
-                        accessibleOwnActivityWithMetricsSet,
-                        accessibleOwnActivityWithDeletedTags,
-                        accessibleSharedActivityWithMetricsSet,
-                        accessibleSharedActivityWithMetricsUnset
-                )
-                .sorted(comparing(activity -> activity.id().toString()))
-                .toList();
+        List<ActivityDto> allAccessibleActivities = testConfiguration.activities.accessibleFor(searcher);
+        Set<UUID> excludedActivities = Set.of(allAccessibleActivities.get(1).id(), allAccessibleActivities.get(3).id());
+        List<ActivityDto> expectedActivities = testConfiguration.activities
+                .accessibleForExcluding(searcher, excludedActivities);
 
         EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
                 searcher,
@@ -352,7 +348,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                 null,
                 null,
                 null,
-                Set.of(accessibleOwnActivityWithMetricsUnset.id(), accessibleOwnActivityWithoutTags.id()),
+                excludedActivities,
                 null,
                 null
         );

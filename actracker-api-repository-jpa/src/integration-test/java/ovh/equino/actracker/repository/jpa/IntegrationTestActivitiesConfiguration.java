@@ -2,6 +2,7 @@ package ovh.equino.actracker.repository.jpa;
 
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.MetricValue;
+import ovh.equino.actracker.domain.dashboard.DashboardDto;
 import ovh.equino.actracker.domain.tag.MetricDto;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.user.User;
@@ -52,6 +53,13 @@ public final class IntegrationTestActivitiesConfiguration {
                 .stream()
                 .skip(offset)
                 .limit(limit)
+                .toList();
+    }
+
+    public List<ActivityDto> accessibleForExcluding(User user, Set<UUID> excludedIds) {
+        return accessibleFor(user)
+                .stream()
+                .filter(activity -> !excludedIds.contains(activity.id()))
                 .toList();
     }
 
