@@ -90,9 +90,8 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                     .isEqualTo(expectedActivity);
             assertThat(foundActivity.get().tags())
                     .containsExactlyInAnyOrderElementsOf(expectedActivity.tags());
-            // TODO
-//            assertThat(foundActivity.get().metricValues())
-//                    .containsExactlyInAnyOrderElementsOf(expectedActivity.metricValues());
+            assertThat(foundActivity.get().metricValues())
+                    .containsExactlyInAnyOrderElementsOf(expectedActivity.metricValues());
         });
     }
 

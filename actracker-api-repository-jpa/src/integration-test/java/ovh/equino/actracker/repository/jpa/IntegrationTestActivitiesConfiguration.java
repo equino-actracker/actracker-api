@@ -1,6 +1,8 @@
 package ovh.equino.actracker.repository.jpa;
 
 import ovh.equino.actracker.domain.activity.ActivityDto;
+import ovh.equino.actracker.domain.activity.MetricValue;
+import ovh.equino.actracker.domain.tag.MetricDto;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.user.User;
 
@@ -10,7 +12,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparing;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toUnmodifiableSet;
@@ -84,6 +85,15 @@ public final class IntegrationTestActivitiesConfiguration {
                 .stream()
                 .filter(accessibleTagIds::contains)
                 .collect(toUnmodifiableSet());
+        Set<UUID> accessibleMetricIds = tags.accessibleFor(user)
+                .stream()
+                .flatMap(tag -> tag.metrics().stream())
+                .map(MetricDto::id)
+                .collect(toUnmodifiableSet());
+        List<MetricValue> includedAccessibleMetricValues = activity.metricValues()
+                .stream()
+                .filter(metricValue -> accessibleMetricIds.contains(metricValue.metricId()))
+                .toList();
         return new ActivityDto(
                 activity.id(),
                 activity.creatorId(),
@@ -92,7 +102,7 @@ public final class IntegrationTestActivitiesConfiguration {
                 activity.endTime(),
                 activity.comment(),
                 includedAccessibleTags,
-                emptyList(),
+                includedAccessibleMetricValues,
                 activity.deleted()
         );
     }
