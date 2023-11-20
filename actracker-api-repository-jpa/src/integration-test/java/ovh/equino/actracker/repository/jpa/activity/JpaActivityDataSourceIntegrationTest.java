@@ -277,22 +277,16 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldFindSecondPageOfActivities() {
-        List<ActivityDto> expectedActivities = Stream.of(
-                        accessibleOwnActivityWithMetricsSet,
-                        accessibleOwnActivityWithMetricsUnset,
-                        accessibleOwnActivityWithDeletedTags,
-                        accessibleOwnActivityWithoutTags,
-                        accessibleSharedActivityWithMetricsSet,
-                        accessibleSharedActivityWithMetricsUnset
-                )
-                .sorted(comparing(activity -> activity.id().toString()))
-                .skip(1)
-                .toList();
+        int pageSize = 3;
+        int offset = 1;
+        List<ActivityDto> expectedActivities = testConfiguration.activities
+                .accessibleForWithLimitOffset(searcher, pageSize, offset);
+        String pageId = expectedActivities.get(0).id().toString();
 
         EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
                 searcher,
-                3,
-                expectedActivities.get(0).id().toString(),
+                pageSize,
+                pageId,
                 null,
                 null,
                 null,

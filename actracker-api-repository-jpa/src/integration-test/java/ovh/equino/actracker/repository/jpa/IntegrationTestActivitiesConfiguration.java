@@ -47,6 +47,14 @@ public final class IntegrationTestActivitiesConfiguration {
                 .toList();
     }
 
+    public List<ActivityDto> accessibleForWithLimitOffset(User user, int limit, int offset) {
+        return accessibleFor(user)
+                .stream()
+                .skip(offset)
+                .limit(limit)
+                .toList();
+    }
+
     public List<ActivityDto> inaccessibleFor(User user) {
         List<UUID> accessibleActivities = accessibleFor(user)
                 .stream()

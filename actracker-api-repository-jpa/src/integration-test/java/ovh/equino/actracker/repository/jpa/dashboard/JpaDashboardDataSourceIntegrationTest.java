@@ -129,9 +129,8 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
     void shouldFindSecondPageOfDashboards() {
         int pageSize = 2;
         int offset = 1;
-        List<DashboardDto> expectedDashboards = testConfiguration.dashboards.accessibleForWithLimitOffset(
-                searcher, pageSize, offset
-        );
+        List<DashboardDto> expectedDashboards = testConfiguration.dashboards
+                .accessibleForWithLimitOffset(searcher, pageSize, offset);
         String pageId = expectedDashboards.get(0).id().toString();
         EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
                 searcher,
