@@ -19,9 +19,7 @@ import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
 
 import java.sql.SQLException;
 import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static java.util.Comparator.comparing;
@@ -245,16 +243,11 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldFindAllAccessibleActivities() {
-        List<ActivityDto> expectedActivities = Stream.of(
-                        accessibleOwnActivityWithMetricsSet,
-                        accessibleOwnActivityWithMetricsUnset,
-                        accessibleOwnActivityWithDeletedTags,
-                        accessibleOwnActivityWithoutTags,
-                        accessibleSharedActivityWithMetricsSet,
-                        accessibleSharedActivityWithMetricsUnset
-                )
-                .sorted(comparing(activity -> activity.id().toString()))
-                .toList();
+        List<ActivityDto> expectedActivities = testConfiguration.activities.accessibleFor(searcher);
+        Collection<UUID> expectedFlattenCharts = testConfiguration.activities
+                .flatTagIdsAccessibleFor(searcher);
+        Collection<MetricValue> expectedFlattenMetricValues = testConfiguration.activities
+                .flatMetricValuesAccessibleFor(searcher);
 
         EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
                 searcher,
@@ -275,27 +268,10 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                     .containsExactlyElementsOf(expectedActivities);
             assertThat(foundActivities)
                     .flatMap(ActivityDto::tags)
-                    .containsExactlyInAnyOrder(
-                            accessibleOwnTagWithMetrics.id(),
-                            accessibleOwnTagWithDeletedMetric.id(),
-                            accessibleOwnTagWithoutMetric.id(),
-                            accessibleOwnTagWithMetrics.id(),
-                            accessibleOwnTagWithDeletedMetric.id(),
-                            accessibleOwnTagWithoutMetric.id(),
-                            accessibleSharedTagWithMetric.id(),
-                            accessibleSharedTagWithDeletedMetric.id(),
-                            accessibleSharedTagWithoutMetric.id(),
-                            accessibleSharedTagWithMetric.id(),
-                            accessibleSharedTagWithDeletedMetric.id(),
-                            accessibleSharedTagWithoutMetric.id()
-                    );
+                    .containsExactlyInAnyOrderElementsOf(expectedFlattenCharts);
             assertThat(foundActivities)
                     .flatMap(ActivityDto::metricValues)
-                    .containsExactlyInAnyOrder(
-                            ownMetric1Value,
-                            ownMetric2Value,
-                            sharedMetric1Value
-                    );
+                    .containsExactlyInAnyOrderElementsOf(expectedFlattenMetricValues);
         });
     }
 

@@ -7,10 +7,7 @@ import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.user.User;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static java.util.Comparator.comparing;
 import static java.util.function.Predicate.not;
@@ -60,6 +57,20 @@ public final class IntegrationTestActivitiesConfiguration {
                 .toList();
     }
 
+    public Collection<UUID> flatTagIdsAccessibleFor(User user) {
+        return accessibleFor(user)
+                .stream()
+                .flatMap(activity -> activity.tags().stream())
+                .toList();
+    }
+
+    public Collection<MetricValue> flatMetricValuesAccessibleFor(User user) {
+        return accessibleFor(user)
+                .stream()
+                .flatMap(activity -> activity.metricValues().stream())
+                .toList();
+    }
+
     private boolean isOwnerOrGrantee(User user, ActivityDto activity) {
         return isOwner(user, activity) || containsAnyTagAccessibleFor(user, activity);
     }
@@ -79,10 +90,10 @@ public final class IntegrationTestActivitiesConfiguration {
     }
 
     private ActivityDto toAccessibleFormFor(User user, ActivityDto activity) {
-        List<UUID> accessibleTagIds = tags.accessibleFor(user)
+        Set<UUID> accessibleTagIds = tags.accessibleFor(user)
                 .stream()
                 .map(TagDto::id)
-                .toList();
+                .collect(toUnmodifiableSet());
         Set<UUID> includedAccessibleTags = activity.tags()
                 .stream()
                 .filter(accessibleTagIds::contains)
@@ -108,4 +119,5 @@ public final class IntegrationTestActivitiesConfiguration {
                 activity.deleted()
         );
     }
+
 }
