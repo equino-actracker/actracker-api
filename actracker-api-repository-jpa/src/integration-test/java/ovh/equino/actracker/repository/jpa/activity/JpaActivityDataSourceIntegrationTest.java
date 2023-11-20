@@ -28,42 +28,6 @@ import static ovh.equino.actracker.repository.jpa.TestUtil.randomBigDecimal;
 
 abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
 
-    private static TenantDto searcherTenant;
-    private static TenantDto sharingUser;
-    private static TenantDto grantee1;
-    private static TenantDto grantee2;
-
-    private static TagDto accessibleOwnTagWithMetrics;
-    private static TagDto accessibleOwnTagWithDeletedMetric;
-    private static TagDto accessibleOwnTagWithoutMetric;
-    private static TagDto accessibleSharedTagWithMetric;
-    private static TagDto accessibleSharedTagWithDeletedMetric;
-    private static TagDto accessibleSharedTagWithoutMetric;
-    private static TagDto inaccessibleOwnDeletedTagWithMetric;
-    private static TagDto inaccessibleSharedDeletedTagWithMetric;
-    private static TagDto inaccessibleForeignTagWithMetric;
-
-    private static ActivityDto accessibleOwnActivityWithMetricsSet;
-    private static ActivityDto accessibleOwnActivityWithMetricsUnset;
-    private static ActivityDto accessibleOwnActivityWithDeletedTags;
-    private static ActivityDto accessibleOwnActivityWithoutTags;
-    private static ActivityDto accessibleSharedActivityWithMetricsSet;
-    private static ActivityDto accessibleSharedActivityWithMetricsUnset;
-    private static ActivityDto inaccessibleActivityWithDeletedSharingTag;
-    private static ActivityDto inaccessibleOwnDeletedActivity;
-    private static ActivityDto inaccessibleForeignActivity;
-    private static ActivityDto inaccessibleNotAddedActivity;
-
-    private static MetricValue ownMetric1Value;
-    private static MetricValue ownMetric2Value;
-    private static MetricValue ownMetric3Value;
-    private static MetricValue ownDeletedMetricValue;
-    private static MetricValue sharedMetric1Value;
-    private static MetricValue sharedMetric2Value;
-    private static MetricValue inaccessibleForeignMetricValue;
-    private static MetricValue sharedDeletedMetricValue;
-    private static MetricValue notAddedMetricValue;
-
     private static final IntegrationTestConfiguration testConfiguration = new IntegrationTestConfiguration();
     private static User searcher;
     private JpaActivityDataSource dataSource;
@@ -266,10 +230,10 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @BeforeAll
     static void setUp() {
-        searcherTenant = newUser().build();
-        sharingUser = newUser().build();
-        grantee1 = newUser().build();
-        grantee2 = newUser().build();
+        TenantDto searcherTenant = newUser().build();
+        TenantDto sharingUser = newUser().build();
+        TenantDto grantee1 = newUser().build();
+        TenantDto grantee2 = newUser().build();
         searcher = new User(searcherTenant.id());
 
         testConfiguration.addUser(searcherTenant);
@@ -285,89 +249,81 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
         MetricDto sharedDeletedMetric = newMetric(sharingUser).deleted().build();
         MetricDto notAddedMetric = newMetric(searcherTenant).build();
 
-        ownMetric1Value = new MetricValue(ownMetric1.id(), randomBigDecimal());
-        ownMetric2Value = new MetricValue(ownMetric2.id(), randomBigDecimal());
-        ownMetric3Value = new MetricValue(ownMetric3.id(), randomBigDecimal());
-        ownDeletedMetricValue = new MetricValue(ownDeletedMetric.id(), randomBigDecimal());
-        sharedMetric1Value = new MetricValue(sharedMetric1.id(), randomBigDecimal());
-        sharedMetric2Value = new MetricValue(sharedMetric2.id(), randomBigDecimal());
-        inaccessibleForeignMetricValue = new MetricValue(inaccessibleForeignMetric.id(), randomBigDecimal());
-        sharedDeletedMetricValue = new MetricValue(sharedDeletedMetric.id(), randomBigDecimal());
-        notAddedMetricValue = new MetricValue(notAddedMetric.id(), randomBigDecimal());
+        MetricValue ownMetric1Value = new MetricValue(ownMetric1.id(), randomBigDecimal());
+        MetricValue ownMetric2Value = new MetricValue(ownMetric2.id(), randomBigDecimal());
+        MetricValue ownMetric3Value = new MetricValue(ownMetric3.id(), randomBigDecimal());
+        MetricValue ownDeletedMetricValue = new MetricValue(ownDeletedMetric.id(), randomBigDecimal());
+        MetricValue sharedMetric1Value = new MetricValue(sharedMetric1.id(), randomBigDecimal());
+        MetricValue sharedMetric2Value = new MetricValue(sharedMetric2.id(), randomBigDecimal());
+        MetricValue inaccessibleForeignMetricValue = new MetricValue(inaccessibleForeignMetric.id(), randomBigDecimal());
+        MetricValue sharedDeletedMetricValue = new MetricValue(sharedDeletedMetric.id(), randomBigDecimal());
+        MetricValue notAddedMetricValue = new MetricValue(notAddedMetric.id(), randomBigDecimal());
 
-        accessibleOwnTagWithMetrics = newTag(searcherTenant)
+        TagDto accessibleOwnTagWithMetrics = newTag(searcherTenant)
                 .named("accessibleOwnTagWithMetrics")
                 .withMetrics(ownMetric1, ownMetric2)
                 .sharedWith(grantee1, grantee2)
                 .build();
 
-        testConfiguration.tags.add(accessibleOwnTagWithMetrics);
-
-        accessibleOwnTagWithDeletedMetric = newTag(searcherTenant)
+        TagDto accessibleOwnTagWithDeletedMetric = newTag(searcherTenant)
                 .named("accessibleOwnTagWithDeletedMetric")
                 .withMetrics(ownDeletedMetric)
                 .sharedWith(grantee1, grantee2)
                 .build();
 
-        testConfiguration.tags.add(accessibleOwnTagWithDeletedMetric);
-
-        accessibleOwnTagWithoutMetric = newTag(searcherTenant)
+        TagDto accessibleOwnTagWithoutMetric = newTag(searcherTenant)
                 .named("accessibleOwnTagWithoutMetric")
                 .withMetrics()
                 .sharedWith(grantee1, grantee2)
                 .build();
 
-        testConfiguration.tags.add(accessibleOwnTagWithoutMetric);
-
-        accessibleSharedTagWithMetric = newTag(sharingUser)
+        TagDto accessibleSharedTagWithMetric = newTag(sharingUser)
                 .named("accessibleSharedTagWithMetric")
                 .withMetrics(sharedMetric1)
                 .sharedWith(searcherTenant)
                 .build();
 
-        testConfiguration.tags.add(accessibleSharedTagWithMetric);
-
-        accessibleSharedTagWithDeletedMetric = newTag(sharingUser)
+        TagDto accessibleSharedTagWithDeletedMetric = newTag(sharingUser)
                 .named("accessibleSharedTagWithDeletedMetric")
                 .withMetrics(sharedDeletedMetric)
                 .sharedWith(searcherTenant, grantee1, grantee2)
                 .build();
 
-        testConfiguration.tags.add(accessibleSharedTagWithDeletedMetric);
-
-        accessibleSharedTagWithoutMetric = newTag(sharingUser)
+        TagDto accessibleSharedTagWithoutMetric = newTag(sharingUser)
                 .named("accessibleSharedTagWithoutMetric")
                 .withMetrics()
                 .sharedWith(searcherTenant, grantee1, grantee2)
                 .build();
 
-        testConfiguration.tags.add(accessibleSharedTagWithoutMetric);
-
-        inaccessibleOwnDeletedTagWithMetric = newTag(searcherTenant)
+        TagDto inaccessibleOwnDeletedTagWithMetric = newTag(searcherTenant)
                 .named("inaccessibleOwnDeletedTagWithMetric")
                 .deleted()
                 .withMetrics(ownMetric3)
                 .build();
 
-        testConfiguration.tags.add(inaccessibleOwnDeletedTagWithMetric);
-
-        inaccessibleSharedDeletedTagWithMetric = newTag(sharingUser)
+        TagDto inaccessibleSharedDeletedTagWithMetric = newTag(sharingUser)
                 .named("inaccessibleSharedDeletedTagWithMetric")
                 .withMetrics(sharedMetric2)
                 .sharedWith(searcherTenant)
                 .deleted()
                 .build();
 
-        testConfiguration.tags.add(inaccessibleSharedDeletedTagWithMetric);
-
-        inaccessibleForeignTagWithMetric = newTag(sharingUser)
+        TagDto inaccessibleForeignTagWithMetric = newTag(sharingUser)
                 .named("inaccessibleForeignTagWithMetric")
                 .withMetrics(inaccessibleForeignMetric)
                 .build();
 
+        testConfiguration.tags.add(accessibleOwnTagWithMetrics);
+        testConfiguration.tags.add(accessibleOwnTagWithDeletedMetric);
+        testConfiguration.tags.add(accessibleOwnTagWithoutMetric);
+        testConfiguration.tags.add(accessibleSharedTagWithMetric);
+        testConfiguration.tags.add(accessibleSharedTagWithDeletedMetric);
+        testConfiguration.tags.add(accessibleSharedTagWithoutMetric);
+        testConfiguration.tags.add(inaccessibleOwnDeletedTagWithMetric);
+        testConfiguration.tags.add(inaccessibleSharedDeletedTagWithMetric);
         testConfiguration.tags.add(inaccessibleForeignTagWithMetric);
 
-        accessibleOwnActivityWithMetricsSet = newActivity(searcherTenant)
+        testConfiguration.activities.add(newActivity(searcherTenant)
                 .named("accessibleOwnActivityWithMetricsSet")
                 .withTags(
                         accessibleOwnTagWithMetrics,
@@ -382,11 +338,9 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                         ownMetric3Value,
                         notAddedMetricValue
                 )
-                .build();
+                .build());
 
-        testConfiguration.activities.add(accessibleOwnActivityWithMetricsSet);
-
-        accessibleOwnActivityWithMetricsUnset = newActivity(searcherTenant)
+        testConfiguration.activities.add(newActivity(searcherTenant)
                 .named("accessibleOwnActivityWithMetricsUnset")
                 .startedAt(1)
                 .withTags(
@@ -396,31 +350,25 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                         inaccessibleOwnDeletedTagWithMetric
                 )
                 .withMetricValues()
-                .build();
+                .build());
 
-        testConfiguration.activities.add(accessibleOwnActivityWithMetricsUnset);
-
-        accessibleOwnActivityWithDeletedTags = newActivity(searcherTenant)
+        testConfiguration.activities.add(newActivity(searcherTenant)
                 .named("accessibleOwnActivityWithDeletedTags")
                 .startedAt(40)
                 .finishedAt(60)
                 .withTags(inaccessibleOwnDeletedTagWithMetric)
                 .withMetricValues(ownMetric3Value)
-                .build();
+                .build());
 
-        testConfiguration.activities.add(accessibleOwnActivityWithDeletedTags);
-
-        accessibleOwnActivityWithoutTags = newActivity(searcherTenant)
+        testConfiguration.activities.add(newActivity(searcherTenant)
                 .named("accessibleOwnActivityWithoutTags")
                 .startedAt(1)
                 .finishedAt(39)
                 .withTags()
                 .withMetricValues()
-                .build();
+                .build());
 
-        testConfiguration.activities.add(accessibleOwnActivityWithoutTags);
-
-        accessibleSharedActivityWithMetricsSet = newActivity(sharingUser)
+        testConfiguration.activities.add(newActivity(sharingUser)
                 .named("accessibleSharedActivityWithMetricsSet")
                 .startedAt(61)
                 .finishedAt(99)
@@ -438,11 +386,9 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                         inaccessibleForeignMetricValue,
                         notAddedMetricValue
                 )
-                .build();
+                .build());
 
-        testConfiguration.activities.add(accessibleSharedActivityWithMetricsSet);
-
-        accessibleSharedActivityWithMetricsUnset = newActivity(sharingUser)
+        testConfiguration.activities.add(newActivity(sharingUser)
                 .named("accessibleSharedActivityWithMetricsUnset")
                 .startedAt(40)
                 .finishedAt(60)
@@ -454,34 +400,24 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                         inaccessibleForeignTagWithMetric
                 )
                 .withMetricValues()
-                .build();
+                .build());
 
-        testConfiguration.activities.add(accessibleSharedActivityWithMetricsUnset);
-
-        inaccessibleActivityWithDeletedSharingTag = newActivity(sharingUser)
+        testConfiguration.activities.add(newActivity(sharingUser)
                 .named("inaccessibleActivityWithDeletedSharingTag")
                 .withTags(inaccessibleSharedDeletedTagWithMetric)
-                .build();
+                .build());
 
-        testConfiguration.activities.add(inaccessibleActivityWithDeletedSharingTag);
-
-        inaccessibleOwnDeletedActivity = newActivity(searcherTenant)
+        testConfiguration.activities.add(newActivity(searcherTenant)
                 .named("inaccessibleOwnDeletedActivity")
                 .deleted()
-                .build();
+                .build());
 
-        testConfiguration.activities.add(inaccessibleOwnDeletedActivity);
-
-        inaccessibleForeignActivity = newActivity(sharingUser)
+        testConfiguration.activities.add(newActivity(sharingUser)
                 .named("inaccessibleForeignActivity")
-                .build();
+                .build());
 
-        testConfiguration.activities.add(inaccessibleForeignActivity);
-
-        inaccessibleNotAddedActivity = newActivity(searcherTenant)
+        testConfiguration.activities.addTransient(newActivity(searcherTenant)
                 .named("inaccessibleNotAddedActivity")
-                .build();
-
-        testConfiguration.activities.addTransient(inaccessibleNotAddedActivity);
+                .build());
     }
 }
