@@ -22,7 +22,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static ovh.equino.actracker.repository.jpa.TestUtil.randomBigDecimal;
 
@@ -183,22 +183,18 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldFindActivitiesInTimeRange() {
-        List<ActivityDto> expectedActivities = Stream.of(
-                        accessibleOwnActivityWithMetricsSet,
-                        accessibleOwnActivityWithMetricsUnset,
-                        accessibleOwnActivityWithDeletedTags,
-                        accessibleSharedActivityWithMetricsUnset
-                )
-                .sorted(comparing(activity -> activity.id().toString()))
-                .toList();
+        Instant timeRangeStart = Instant.ofEpochSecond(40);
+        Instant timeRangeEnd = Instant.ofEpochSecond(60);
+        List<ActivityDto> expectedActivities = testConfiguration.activities
+                .accessibleForInTimeRange(searcher, timeRangeStart, timeRangeEnd);
 
         EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
                 searcher,
                 LARGE_PAGE_SIZE,
                 FIRST_PAGE,
                 null,
-                Instant.ofEpochSecond(40),
-                Instant.ofEpochSecond(60),
+                timeRangeStart,
+                timeRangeEnd,
                 null,
                 null,
                 null
@@ -241,11 +237,10 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldFindActivitiesWithTags() {
-        Set<UUID> requiredTags = Set.of(
-                accessibleOwnTagWithoutMetric.id(),
-                accessibleSharedTagWithoutMetric.id(),
-                inaccessibleOwnDeletedTagWithMetric.id()
-        );
+        Set<UUID> requiredTags = testConfiguration.tags.accessibleForWithLimitOffset(searcher, 3, 0)
+                .stream()
+                .map(TagDto::id)
+                .collect(toUnmodifiableSet());
         List<ActivityDto> expectedActivities = testConfiguration.activities
                 .accessibleForContainingAnyOfTags(searcher, requiredTags);
 

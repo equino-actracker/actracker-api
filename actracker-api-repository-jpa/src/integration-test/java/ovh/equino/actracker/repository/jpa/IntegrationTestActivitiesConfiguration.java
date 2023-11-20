@@ -7,9 +7,12 @@ import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.user.User;
 
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.*;
 
 import static java.util.Comparator.comparing;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static java.util.stream.Stream.concat;
@@ -70,6 +73,23 @@ public final class IntegrationTestActivitiesConfiguration {
                 .toList();
     }
 
+    public List<ActivityDto> accessibleForInTimeRange(User user, Instant rangeStart, Instant rangeEnd) {
+        List<ActivityDto> matchingActivities = accessibleFor(user);
+        if (nonNull(rangeStart)) {
+            matchingActivities = matchingActivities
+                    .stream()
+                    .filter(activity -> isNull(activity.endTime()) || !activity.endTime().isBefore(rangeStart))
+                    .toList();
+        }
+        if (nonNull(rangeEnd)) {
+            matchingActivities = matchingActivities
+                    .stream()
+                    .filter(activity -> isNull(activity.startTime()) || !activity.startTime().isAfter(rangeEnd))
+                    .toList();
+        }
+        return matchingActivities;
+    }
+
     public List<ActivityDto> inaccessibleFor(User user) {
         List<UUID> accessibleActivities = accessibleFor(user)
                 .stream()
@@ -113,23 +133,6 @@ public final class IntegrationTestActivitiesConfiguration {
     }
 
     private ActivityDto toAccessibleFormFor(User user, ActivityDto activity) {
-        Set<UUID> accessibleTagIds = tags.accessibleFor(user)
-                .stream()
-                .map(TagDto::id)
-                .collect(toUnmodifiableSet());
-        Set<UUID> includedAccessibleTags = activity.tags()
-                .stream()
-                .filter(accessibleTagIds::contains)
-                .collect(toUnmodifiableSet());
-        Set<UUID> accessibleMetricIds = tags.accessibleFor(user)
-                .stream()
-                .flatMap(tag -> tag.metrics().stream())
-                .map(MetricDto::id)
-                .collect(toUnmodifiableSet());
-        List<MetricValue> includedAccessibleMetricValues = activity.metricValues()
-                .stream()
-                .filter(metricValue -> accessibleMetricIds.contains(metricValue.metricId()))
-                .toList();
         return new ActivityDto(
                 activity.id(),
                 activity.creatorId(),
@@ -137,10 +140,33 @@ public final class IntegrationTestActivitiesConfiguration {
                 activity.startTime(),
                 activity.endTime(),
                 activity.comment(),
-                includedAccessibleTags,
-                includedAccessibleMetricValues,
+                includedAccessibleTags(user, activity),
+                includedAccessibleMetricValues(user, activity),
                 activity.deleted()
         );
+    }
+
+    private List<MetricValue> includedAccessibleMetricValues(User user, ActivityDto activity) {
+        Set<UUID> accessibleMetricIds = tags.accessibleFor(user)
+                .stream()
+                .flatMap(tag -> tag.metrics().stream())
+                .map(MetricDto::id)
+                .collect(toUnmodifiableSet());
+        return activity.metricValues()
+                .stream()
+                .filter(metricValue -> accessibleMetricIds.contains(metricValue.metricId()))
+                .toList();
+    }
+
+    private Set<UUID> includedAccessibleTags(User user, ActivityDto activity) {
+        Set<UUID> accessibleTagIds = tags.accessibleFor(user)
+                .stream()
+                .map(TagDto::id)
+                .collect(toUnmodifiableSet());
+        return activity.tags()
+                .stream()
+                .filter(accessibleTagIds::contains)
+                .collect(toUnmodifiableSet());
     }
 
 }
