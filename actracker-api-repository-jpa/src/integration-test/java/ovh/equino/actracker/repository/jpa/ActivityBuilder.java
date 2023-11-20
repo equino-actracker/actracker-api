@@ -37,6 +37,21 @@ public final class ActivityBuilder {
         );
     }
 
+    public ActivityBuilder named(String name) {
+        this.newActivity = new ActivityDto(
+                newActivity.id(),
+                newActivity.creatorId(),
+                name,
+                newActivity.startTime(),
+                newActivity.endTime(),
+                newActivity.comment(),
+                newActivity.tags(),
+                newActivity.metricValues(),
+                newActivity.deleted()
+        );
+        return this;
+    }
+
     public ActivityBuilder startedAt(long epochSeconds) {
         this.newActivity = new ActivityDto(
                 newActivity.id(),
