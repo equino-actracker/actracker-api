@@ -99,122 +99,6 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                         new ActivityId(activity.id()),
                         activity
                 ));
-//        return Stream.of(
-//                Arguments.of(
-//                        "accessibleOwnActivityWithMetricsSet",
-//                        new ActivityId(accessibleOwnActivityWithMetricsSet.id()),
-//                        new ActivityDto(
-//                                accessibleOwnActivityWithMetricsSet.id(),
-//                                accessibleOwnActivityWithMetricsSet.creatorId(),
-//                                accessibleOwnActivityWithMetricsSet.title(),
-//                                accessibleOwnActivityWithMetricsSet.startTime(),
-//                                accessibleOwnActivityWithMetricsSet.endTime(),
-//                                accessibleOwnActivityWithMetricsSet.comment(),
-//                                Set.of(
-//                                        accessibleOwnTagWithMetrics.id(),
-//                                        accessibleOwnTagWithDeletedMetric.id(),
-//                                        accessibleOwnTagWithoutMetric.id()
-//                                ),
-//                                List.of(
-//                                        ownMetric1Value,
-//                                        ownMetric2Value
-//                                ),
-//                                accessibleOwnActivityWithMetricsSet.deleted()
-//                        )
-//                ),
-//                Arguments.of(
-//                        "accessibleOwnActivityWithMetricsUnset",
-//                        new ActivityId(accessibleOwnActivityWithMetricsUnset.id()),
-//                        new ActivityDto(
-//                                accessibleOwnActivityWithMetricsUnset.id(),
-//                                accessibleOwnActivityWithMetricsUnset.creatorId(),
-//                                accessibleOwnActivityWithMetricsUnset.title(),
-//                                accessibleOwnActivityWithMetricsUnset.startTime(),
-//                                accessibleOwnActivityWithMetricsUnset.endTime(),
-//                                accessibleOwnActivityWithMetricsUnset.comment(),
-//                                Set.of(
-//                                        accessibleOwnTagWithMetrics.id(),
-//                                        accessibleOwnTagWithDeletedMetric.id(),
-//                                        accessibleOwnTagWithoutMetric.id()
-//                                ),
-//                                emptyList(),
-//                                accessibleOwnActivityWithMetricsUnset.deleted()
-//                        )
-//                ),
-//                Arguments.of(
-//                        "accessibleOwnActivityWithDeletedTags",
-//                        new ActivityId(accessibleOwnActivityWithDeletedTags.id()),
-//                        new ActivityDto(
-//                                accessibleOwnActivityWithDeletedTags.id(),
-//                                accessibleOwnActivityWithDeletedTags.creatorId(),
-//                                accessibleOwnActivityWithDeletedTags.title(),
-//                                accessibleOwnActivityWithDeletedTags.startTime(),
-//                                accessibleOwnActivityWithDeletedTags.endTime(),
-//                                accessibleOwnActivityWithDeletedTags.comment(),
-//                                emptySet(),
-//                                emptyList(),
-//                                accessibleOwnActivityWithDeletedTags.deleted()
-//                        )
-//                ),
-//                Arguments.of(
-//                        "accessibleOwnActivityWithoutTags",
-//                        new ActivityId(accessibleOwnActivityWithoutTags.id()),
-//                        new ActivityDto(
-//                                accessibleOwnActivityWithoutTags.id(),
-//                                accessibleOwnActivityWithoutTags.creatorId(),
-//                                accessibleOwnActivityWithoutTags.title(),
-//                                accessibleOwnActivityWithoutTags.startTime(),
-//                                accessibleOwnActivityWithoutTags.endTime(),
-//                                accessibleOwnActivityWithoutTags.comment(),
-//                                emptySet(),
-//                                emptyList(),
-//                                accessibleOwnActivityWithoutTags.deleted()
-//                        )
-//
-//                ),
-//                Arguments.of(
-//                        "accessibleSharedActivityWithMetricsSet",
-//                        new ActivityId(accessibleSharedActivityWithMetricsSet.id()),
-//                        new ActivityDto(
-//                                accessibleSharedActivityWithMetricsSet.id(),
-//                                accessibleSharedActivityWithMetricsSet.creatorId(),
-//                                accessibleSharedActivityWithMetricsSet.title(),
-//                                accessibleSharedActivityWithMetricsSet.startTime(),
-//                                accessibleSharedActivityWithMetricsSet.endTime(),
-//                                accessibleSharedActivityWithMetricsSet.comment(),
-//                                Set.of(
-//                                        accessibleSharedTagWithMetric.id(),
-//                                        accessibleSharedTagWithDeletedMetric.id(),
-//                                        accessibleSharedTagWithoutMetric.id()
-//                                ),
-//                                List.of(
-//                                        sharedMetric1Value
-//                                ),
-//                                accessibleSharedActivityWithMetricsSet.deleted()
-//                        )
-//
-//                ),
-//                Arguments.of(
-//                        "accessibleSharedActivityWithMetricsUnset",
-//                        new ActivityId(accessibleSharedActivityWithMetricsUnset.id()),
-//                        new ActivityDto(
-//                                accessibleSharedActivityWithMetricsUnset.id(),
-//                                accessibleSharedActivityWithMetricsUnset.creatorId(),
-//                                accessibleSharedActivityWithMetricsUnset.title(),
-//                                accessibleSharedActivityWithMetricsUnset.startTime(),
-//                                accessibleSharedActivityWithMetricsUnset.endTime(),
-//                                accessibleSharedActivityWithMetricsUnset.comment(),
-//                                Set.of(
-//                                        accessibleSharedTagWithMetric.id(),
-//                                        accessibleSharedTagWithDeletedMetric.id(),
-//                                        accessibleSharedTagWithoutMetric.id()
-//                                ),
-//                                emptyList(),
-//                                accessibleSharedActivityWithMetricsUnset.deleted()
-//                        )
-//
-//                )
-//        );
     }
 
     @ParameterizedTest(name = "{0}")
@@ -233,12 +117,6 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                         activity.title(),
                         new ActivityId(activity.id())
                 ));
-//        return Stream.of(
-//                Arguments.of("inaccessibleActivityWithDeletedSharingTag", new ActivityId(inaccessibleActivityWithDeletedSharingTag.id())),
-//                Arguments.of("inaccessibleOwnDeletedActivity", new ActivityId(inaccessibleOwnDeletedActivity.id())),
-//                Arguments.of("inaccessibleForeignActivity", new ActivityId(inaccessibleForeignActivity.id())),
-//                Arguments.of("inaccessibleNotAddedActivity", new ActivityId(inaccessibleNotAddedActivity.id()))
-//        );
     }
 
     @Test
@@ -363,14 +241,13 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldFindActivitiesWithTags() {
-        List<ActivityDto> expectedActivities = Stream.of(
-                        accessibleOwnActivityWithMetricsSet,
-                        accessibleOwnActivityWithMetricsUnset,
-                        accessibleSharedActivityWithMetricsSet,
-                        accessibleSharedActivityWithMetricsUnset
-                )
-                .sorted(comparing(activity -> activity.id().toString()))
-                .toList();
+        Set<UUID> requiredTags = Set.of(
+                accessibleOwnTagWithoutMetric.id(),
+                accessibleSharedTagWithoutMetric.id(),
+                inaccessibleOwnDeletedTagWithMetric.id()
+        );
+        List<ActivityDto> expectedActivities = testConfiguration.activities
+                .accessibleForContainingAnyOfTags(searcher, requiredTags);
 
         EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
                 searcher,
@@ -380,11 +257,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                 null,
                 null,
                 null,
-                Set.of(
-                        accessibleOwnTagWithoutMetric.id(),
-                        accessibleSharedTagWithoutMetric.id(),
-                        inaccessibleOwnDeletedTagWithMetric.id()
-                ),
+                requiredTags,
                 null
         );
 

@@ -2,7 +2,6 @@ package ovh.equino.actracker.repository.jpa;
 
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.MetricValue;
-import ovh.equino.actracker.domain.dashboard.DashboardDto;
 import ovh.equino.actracker.domain.tag.MetricDto;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.user.User;
@@ -14,6 +13,7 @@ import static java.util.Comparator.comparing;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static java.util.stream.Stream.concat;
+import static org.apache.commons.collections4.CollectionUtils.containsAny;
 
 public final class IntegrationTestActivitiesConfiguration {
 
@@ -60,6 +60,13 @@ public final class IntegrationTestActivitiesConfiguration {
         return accessibleFor(user)
                 .stream()
                 .filter(activity -> !excludedIds.contains(activity.id()))
+                .toList();
+    }
+
+    public List<ActivityDto> accessibleForContainingAnyOfTags(User user, Set<UUID> requiredTags) {
+        return accessibleFor(user)
+                .stream()
+                .filter(activity -> containsAny(requiredTags, activity.tags()))
                 .toList();
     }
 
