@@ -14,7 +14,7 @@ import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static java.util.stream.Stream.concat;
 
-public class IntegrationTestTagsConfiguration {
+public final class IntegrationTestTagsConfiguration {
 
     private final List<TagDto> addedTags = new ArrayList<>();
     private final List<TagDto> transientTags = new ArrayList<>();

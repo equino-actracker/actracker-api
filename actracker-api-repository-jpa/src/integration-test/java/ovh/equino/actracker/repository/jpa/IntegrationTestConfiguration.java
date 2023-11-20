@@ -9,8 +9,8 @@ import java.util.List;
 public class IntegrationTestConfiguration {
 
     private final List<TenantDto> addedUsers = new ArrayList<>();
-    public final IntegrationTestActivitiesConfiguration activities = new IntegrationTestActivitiesConfiguration();
     public final IntegrationTestTagsConfiguration tags = new IntegrationTestTagsConfiguration();
+    public final IntegrationTestActivitiesConfiguration activities = new IntegrationTestActivitiesConfiguration(tags);
     public final IntegrationTestDashboardsConfiguration dashboards = new IntegrationTestDashboardsConfiguration(tags);
 
     public void persistIn(IntegrationTestRelationalDataBase database) throws SQLException {
