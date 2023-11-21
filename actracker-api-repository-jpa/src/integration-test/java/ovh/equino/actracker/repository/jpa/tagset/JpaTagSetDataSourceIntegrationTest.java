@@ -88,22 +88,13 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
         return testConfiguration.tagSets.inaccessibleFor(searcher)
                 .stream()
                 .map(tagSet -> Arguments.of(
-                    tagSet.name(),
-                    new TagSetId(tagSet.id())
+                        tagSet.name(),
+                        new TagSetId(tagSet.id())
                 ));
     }
 
     @Test
     void shouldFindAllAccessibleTagSets() {
-        List<TagSetDto> expectedTagSets = Stream.of(
-                        accessibleOwnTagSet1,
-                        accessibleOwnTagSet2,
-                        accessibleOwnTagSet3,
-                        accessibleOwnTagSet4
-                )
-                .sorted(comparing(tagSet -> tagSet.id().toString()))
-                .toList();
-
         EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
                 searcher,
                 LARGE_PAGE_SIZE,
@@ -120,15 +111,10 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
             List<TagSetDto> foundTagSets = dataSource.find(searchCriteria);
             assertThat(foundTagSets)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags")
-                    .containsExactlyElementsOf(expectedTagSets);
+                    .containsExactlyElementsOf(testConfiguration.tagSets.accessibleFor(searcher));
             assertThat(foundTagSets)
                     .flatMap(TagSetDto::tags)
-                    .containsExactlyInAnyOrder(
-                            accessibleOwnTag1.id(),
-                            accessibleSharedTag.id(),
-                            accessibleOwnTag1.id(),
-                            accessibleOwnTag2.id()
-                    );
+                    .containsExactlyInAnyOrderElementsOf(testConfiguration.tagSets.flatTagsAccessibleFor(searcher));
         });
     }
 

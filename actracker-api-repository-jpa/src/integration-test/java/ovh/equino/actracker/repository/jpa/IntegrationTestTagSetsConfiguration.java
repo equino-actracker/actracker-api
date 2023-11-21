@@ -5,10 +5,7 @@ import ovh.equino.actracker.domain.tagset.TagSetDto;
 import ovh.equino.actracker.domain.user.User;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static java.util.Comparator.comparing;
 import static java.util.function.Predicate.not;
@@ -55,6 +52,13 @@ public final class IntegrationTestTagSetsConfiguration {
                 .toList();
         return concat(addedTagSets.stream(), transientTagSets.stream())
                 .filter(tagSet -> !accessibleTagSets.contains(tagSet.id()))
+                .toList();
+    }
+
+    public Collection<UUID> flatTagsAccessibleFor(User user) {
+        return accessibleFor(user)
+                .stream()
+                .flatMap(tagSet -> tagSet.tags().stream())
                 .toList();
     }
 
