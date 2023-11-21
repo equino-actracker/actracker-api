@@ -25,6 +25,17 @@ public final class TagSetBuilder {
         );
     }
 
+    public TagSetBuilder named(String name) {
+        this.newTagSet = new TagSetDto(
+                newTagSet.id(),
+                newTagSet.creatorId(),
+                name,
+                newTagSet.tags(),
+                newTagSet.deleted()
+        );
+        return this;
+    }
+
     public TagSetBuilder deleted() {
         this.newTagSet = new TagSetDto(
                 newTagSet.id(),
