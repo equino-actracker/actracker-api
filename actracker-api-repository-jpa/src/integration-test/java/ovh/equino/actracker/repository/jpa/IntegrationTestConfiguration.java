@@ -10,10 +10,12 @@ public class IntegrationTestConfiguration {
 
     private final List<TenantDto> addedUsers = new ArrayList<>();
     public final IntegrationTestTagsConfiguration tags = new IntegrationTestTagsConfiguration();
+    public final IntegrationTestActivitiesConfiguration activities = new IntegrationTestActivitiesConfiguration(tags);
     public final IntegrationTestDashboardsConfiguration dashboards = new IntegrationTestDashboardsConfiguration(tags);
 
     public void persistIn(IntegrationTestRelationalDataBase database) throws SQLException {
         database.addUsers(addedUsers.toArray(new TenantDto[0]));
+        activities.persistIn(database);
         tags.persistIn(database);
         dashboards.persistIn(database);
     }

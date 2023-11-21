@@ -10,7 +10,7 @@ import ovh.equino.actracker.domain.user.User;
 import java.util.List;
 
 import static java.util.Arrays.stream;
-import static java.util.UUID.randomUUID;
+import static ovh.equino.actracker.repository.jpa.TestUtil.nextUUID;
 import static ovh.equino.actracker.repository.jpa.TestUtil.randomString;
 
 public final class TagBuilder {
@@ -19,17 +19,17 @@ public final class TagBuilder {
 
     TagBuilder(TenantDto creator) {
         this.newTag = new TagDto(
-                randomUUID(),
+                nextUUID(),
                 creator.id(),
                 randomString(),
                 List.of(
-                        new MetricDto(randomUUID(), creator.id(), randomString(), MetricType.NUMERIC, false),
-                        new MetricDto(randomUUID(), creator.id(), randomString(), MetricType.NUMERIC, false),
-                        new MetricDto(randomUUID(), creator.id(), randomString(), MetricType.NUMERIC, false)
+                        new MetricDto(nextUUID(), creator.id(), randomString(), MetricType.NUMERIC, false),
+                        new MetricDto(nextUUID(), creator.id(), randomString(), MetricType.NUMERIC, false),
+                        new MetricDto(nextUUID(), creator.id(), randomString(), MetricType.NUMERIC, false)
                 ),
                 List.of(
-                        new Share(new User(randomUUID()), randomString()),
-                        new Share(new User(randomUUID()), randomString())
+                        new Share(new User(nextUUID()), randomString()),
+                        new Share(new User(nextUUID()), randomString())
                 ),
                 false
         );

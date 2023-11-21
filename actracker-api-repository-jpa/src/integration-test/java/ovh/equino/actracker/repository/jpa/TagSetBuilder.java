@@ -7,8 +7,8 @@ import ovh.equino.actracker.domain.tenant.TenantDto;
 import java.util.Set;
 
 import static java.util.Arrays.stream;
-import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toUnmodifiableSet;
+import static ovh.equino.actracker.repository.jpa.TestUtil.nextUUID;
 import static ovh.equino.actracker.repository.jpa.TestUtil.randomString;
 
 public final class TagSetBuilder {
@@ -17,10 +17,10 @@ public final class TagSetBuilder {
 
     TagSetBuilder(TenantDto creator) {
         this.newTagSet = new TagSetDto(
-                randomUUID(),
+                nextUUID(),
                 creator.id(),
                 randomString(),
-                Set.of(randomUUID(), randomUUID(), randomUUID()),
+                Set.of(nextUUID(), nextUUID(), nextUUID()),
                 false
         );
     }

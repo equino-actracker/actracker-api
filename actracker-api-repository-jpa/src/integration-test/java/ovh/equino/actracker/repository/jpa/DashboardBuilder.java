@@ -12,9 +12,9 @@ import java.util.List;
 import java.util.Set;
 
 import static java.util.Arrays.stream;
-import static java.util.UUID.randomUUID;
 import static ovh.equino.actracker.domain.dashboard.AnalysisMetric.TAG_DURATION;
 import static ovh.equino.actracker.domain.dashboard.AnalysisMetric.TAG_PERCENTAGE;
+import static ovh.equino.actracker.repository.jpa.TestUtil.nextUUID;
 import static ovh.equino.actracker.repository.jpa.TestUtil.randomString;
 
 public final class DashboardBuilder {
@@ -23,31 +23,31 @@ public final class DashboardBuilder {
 
     DashboardBuilder(TenantDto creator) {
         Chart chart1 = new Chart(
-                new ChartId(randomUUID()),
+                new ChartId(nextUUID()),
                 randomString(),
                 GroupBy.SELF,
                 TAG_PERCENTAGE,
-                Set.of(randomUUID(), randomUUID(), randomUUID()),
+                Set.of(nextUUID(), nextUUID(), nextUUID()),
                 false
         );
         Chart chart2 = new Chart(
-                new ChartId(randomUUID()),
+                new ChartId(nextUUID()),
                 randomString(),
                 GroupBy.DAY,
                 TAG_DURATION,
-                Set.of(randomUUID(), randomUUID(), randomUUID()),
+                Set.of(nextUUID(), nextUUID(), nextUUID()),
                 false
         );
 
         this.newDashboard = new DashboardDto(
-                randomUUID(),
+                nextUUID(),
                 creator.id(),
                 randomString(),
                 List.of(chart1, chart2),
                 List.of(
-                        new Share(new User(randomUUID()), randomString()),
-                        new Share(new User(randomUUID()), randomString()),
-                        new Share(new User(randomUUID()), randomString())
+                        new Share(new User(nextUUID()), randomString()),
+                        new Share(new User(nextUUID()), randomString()),
+                        new Share(new User(nextUUID()), randomString())
                 ),
                 false
         );

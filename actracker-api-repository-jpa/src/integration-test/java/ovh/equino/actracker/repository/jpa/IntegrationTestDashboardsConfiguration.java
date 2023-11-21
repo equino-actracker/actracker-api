@@ -15,7 +15,7 @@ import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static java.util.stream.Stream.concat;
 
-public class IntegrationTestDashboardsConfiguration {
+public final class IntegrationTestDashboardsConfiguration {
 
     private final IntegrationTestTagsConfiguration tags;
 

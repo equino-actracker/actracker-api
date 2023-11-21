@@ -14,89 +14,28 @@ import ovh.equino.actracker.domain.tag.MetricDto;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tenant.TenantDto;
 import ovh.equino.actracker.domain.user.User;
+import ovh.equino.actracker.repository.jpa.IntegrationTestConfiguration;
 import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
 
 import java.sql.SQLException;
 import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptySet;
-import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static ovh.equino.actracker.repository.jpa.TestUtil.randomBigDecimal;
 
 abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
 
-    private static TenantDto searcherTenant;
-    private static TenantDto sharingUser;
-    private static TenantDto grantee1;
-    private static TenantDto grantee2;
-
-    private static TagDto accessibleOwnTagWithMetrics;
-    private static TagDto accessibleOwnTagWithDeletedMetric;
-    private static TagDto accessibleOwnTagWithoutMetric;
-    private static TagDto accessibleSharedTagWithMetric;
-    private static TagDto accessibleSharedTagWithDeletedMetric;
-    private static TagDto accessibleSharedTagWithoutMetric;
-    private static TagDto inaccessibleOwnDeletedTagWithMetric;
-    private static TagDto inaccessibleSharedDeletedTagWithMetric;
-    private static TagDto inaccessibleForeignTagWithMetric;
-
-    private static ActivityDto accessibleOwnActivityWithMetricsSet;
-    private static ActivityDto accessibleOwnActivityWithMetricsUnset;
-    private static ActivityDto accessibleOwnActivityWithDeletedTags;
-    private static ActivityDto accessibleOwnActivityWithoutTags;
-    private static ActivityDto accessibleSharedActivityWithMetricsSet;
-    private static ActivityDto accessibleSharedActivityWithMetricsUnset;
-    private static ActivityDto inaccessibleActivityWithDeletedSharingTag;
-    private static ActivityDto inaccessibleOwnDeletedActivity;
-    private static ActivityDto inaccessibleForeignActivity;
-    private static ActivityDto inaccessibleNotAddedActivity;
-
-    private static MetricValue ownMetric1Value;
-    private static MetricValue ownMetric2Value;
-    private static MetricValue ownMetric3Value;
-    private static MetricValue ownDeletedMetricValue;
-    private static MetricValue sharedMetric1Value;
-    private static MetricValue sharedMetric2Value;
-    private static MetricValue inaccessibleForeignMetricValue;
-    private static MetricValue sharedDeletedMetricValue;
-    private static MetricValue notAddedMetricValue;
-
+    private static final IntegrationTestConfiguration testConfiguration = new IntegrationTestConfiguration();
     private static User searcher;
-
     private JpaActivityDataSource dataSource;
 
     @BeforeEach
     void init() throws SQLException {
         this.dataSource = new JpaActivityDataSource(entityManager);
-        database().addUsers(searcherTenant, sharingUser, grantee1, grantee2);
-        database().addTags(
-                accessibleOwnTagWithMetrics,
-                accessibleOwnTagWithDeletedMetric,
-                accessibleOwnTagWithoutMetric,
-                accessibleSharedTagWithMetric,
-                accessibleSharedTagWithDeletedMetric,
-                accessibleSharedTagWithoutMetric,
-                inaccessibleOwnDeletedTagWithMetric,
-                inaccessibleSharedDeletedTagWithMetric,
-                inaccessibleForeignTagWithMetric
-        );
-        database().addActivities(
-                accessibleOwnActivityWithMetricsSet,
-                accessibleOwnActivityWithMetricsUnset,
-                accessibleOwnActivityWithDeletedTags,
-                accessibleOwnActivityWithoutTags,
-                accessibleSharedActivityWithMetricsSet,
-                accessibleSharedActivityWithMetricsUnset,
-                inaccessibleActivityWithDeletedSharingTag,
-                inaccessibleOwnDeletedActivity,
-                inaccessibleForeignActivity
-        );
+        testConfiguration.persistIn(database());
     }
 
     @ParameterizedTest(name = "{0}")
@@ -117,122 +56,13 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
     }
 
     static Stream<Arguments> accessibleActivity() {
-        return Stream.of(
-                Arguments.of(
-                        "accessibleOwnActivityWithMetricsSet",
-                        new ActivityId(accessibleOwnActivityWithMetricsSet.id()),
-                        new ActivityDto(
-                                accessibleOwnActivityWithMetricsSet.id(),
-                                accessibleOwnActivityWithMetricsSet.creatorId(),
-                                accessibleOwnActivityWithMetricsSet.title(),
-                                accessibleOwnActivityWithMetricsSet.startTime(),
-                                accessibleOwnActivityWithMetricsSet.endTime(),
-                                accessibleOwnActivityWithMetricsSet.comment(),
-                                Set.of(
-                                        accessibleOwnTagWithMetrics.id(),
-                                        accessibleOwnTagWithDeletedMetric.id(),
-                                        accessibleOwnTagWithoutMetric.id()
-                                ),
-                                List.of(
-                                        ownMetric1Value,
-                                        ownMetric2Value
-                                ),
-                                accessibleOwnActivityWithMetricsSet.deleted()
-                        )
-                ),
-                Arguments.of(
-                        "accessibleOwnActivityWithMetricsUnset",
-                        new ActivityId(accessibleOwnActivityWithMetricsUnset.id()),
-                        new ActivityDto(
-                                accessibleOwnActivityWithMetricsUnset.id(),
-                                accessibleOwnActivityWithMetricsUnset.creatorId(),
-                                accessibleOwnActivityWithMetricsUnset.title(),
-                                accessibleOwnActivityWithMetricsUnset.startTime(),
-                                accessibleOwnActivityWithMetricsUnset.endTime(),
-                                accessibleOwnActivityWithMetricsUnset.comment(),
-                                Set.of(
-                                        accessibleOwnTagWithMetrics.id(),
-                                        accessibleOwnTagWithDeletedMetric.id(),
-                                        accessibleOwnTagWithoutMetric.id()
-                                ),
-                                emptyList(),
-                                accessibleOwnActivityWithMetricsUnset.deleted()
-                        )
-                ),
-                Arguments.of(
-                        "accessibleOwnActivityWithDeletedTags",
-                        new ActivityId(accessibleOwnActivityWithDeletedTags.id()),
-                        new ActivityDto(
-                                accessibleOwnActivityWithDeletedTags.id(),
-                                accessibleOwnActivityWithDeletedTags.creatorId(),
-                                accessibleOwnActivityWithDeletedTags.title(),
-                                accessibleOwnActivityWithDeletedTags.startTime(),
-                                accessibleOwnActivityWithDeletedTags.endTime(),
-                                accessibleOwnActivityWithDeletedTags.comment(),
-                                emptySet(),
-                                emptyList(),
-                                accessibleOwnActivityWithDeletedTags.deleted()
-                        )
-                ),
-                Arguments.of(
-                        "accessibleOwnActivityWithoutTags",
-                        new ActivityId(accessibleOwnActivityWithoutTags.id()),
-                        new ActivityDto(
-                                accessibleOwnActivityWithoutTags.id(),
-                                accessibleOwnActivityWithoutTags.creatorId(),
-                                accessibleOwnActivityWithoutTags.title(),
-                                accessibleOwnActivityWithoutTags.startTime(),
-                                accessibleOwnActivityWithoutTags.endTime(),
-                                accessibleOwnActivityWithoutTags.comment(),
-                                emptySet(),
-                                emptyList(),
-                                accessibleOwnActivityWithoutTags.deleted()
-                        )
-
-                ),
-                Arguments.of(
-                        "accessibleSharedActivityWithMetricsSet",
-                        new ActivityId(accessibleSharedActivityWithMetricsSet.id()),
-                        new ActivityDto(
-                                accessibleSharedActivityWithMetricsSet.id(),
-                                accessibleSharedActivityWithMetricsSet.creatorId(),
-                                accessibleSharedActivityWithMetricsSet.title(),
-                                accessibleSharedActivityWithMetricsSet.startTime(),
-                                accessibleSharedActivityWithMetricsSet.endTime(),
-                                accessibleSharedActivityWithMetricsSet.comment(),
-                                Set.of(
-                                        accessibleSharedTagWithMetric.id(),
-                                        accessibleSharedTagWithDeletedMetric.id(),
-                                        accessibleSharedTagWithoutMetric.id()
-                                ),
-                                List.of(
-                                        sharedMetric1Value
-                                ),
-                                accessibleSharedActivityWithMetricsSet.deleted()
-                        )
-
-                ),
-                Arguments.of(
-                        "accessibleSharedActivityWithMetricsUnset",
-                        new ActivityId(accessibleSharedActivityWithMetricsUnset.id()),
-                        new ActivityDto(
-                                accessibleSharedActivityWithMetricsUnset.id(),
-                                accessibleSharedActivityWithMetricsUnset.creatorId(),
-                                accessibleSharedActivityWithMetricsUnset.title(),
-                                accessibleSharedActivityWithMetricsUnset.startTime(),
-                                accessibleSharedActivityWithMetricsUnset.endTime(),
-                                accessibleSharedActivityWithMetricsUnset.comment(),
-                                Set.of(
-                                        accessibleSharedTagWithMetric.id(),
-                                        accessibleSharedTagWithDeletedMetric.id(),
-                                        accessibleSharedTagWithoutMetric.id()
-                                ),
-                                emptyList(),
-                                accessibleSharedActivityWithMetricsUnset.deleted()
-                        )
-
-                )
-        );
+        return testConfiguration.activities.accessibleFor(searcher)
+                .stream()
+                .map(activity -> Arguments.of(
+                        activity.title(),
+                        new ActivityId(activity.id()),
+                        activity
+                ));
     }
 
     @ParameterizedTest(name = "{0}")
@@ -245,26 +75,21 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
     }
 
     static Stream<Arguments> inaccessibleActivity() {
-        return Stream.of(
-                Arguments.of("inaccessibleActivityWithDeletedSharingTag", new ActivityId(inaccessibleActivityWithDeletedSharingTag.id())),
-                Arguments.of("inaccessibleOwnDeletedActivity", new ActivityId(inaccessibleOwnDeletedActivity.id())),
-                Arguments.of("inaccessibleForeignActivity", new ActivityId(inaccessibleForeignActivity.id())),
-                Arguments.of("inaccessibleNotAddedActivity", new ActivityId(inaccessibleNotAddedActivity.id()))
-        );
+        return testConfiguration.activities.inaccessibleFor(searcher)
+                .stream()
+                .map(activity -> Arguments.of(
+                        activity.title(),
+                        new ActivityId(activity.id())
+                ));
     }
 
     @Test
     void shouldFindAllAccessibleActivities() {
-        List<ActivityDto> expectedActivities = Stream.of(
-                        accessibleOwnActivityWithMetricsSet,
-                        accessibleOwnActivityWithMetricsUnset,
-                        accessibleOwnActivityWithDeletedTags,
-                        accessibleOwnActivityWithoutTags,
-                        accessibleSharedActivityWithMetricsSet,
-                        accessibleSharedActivityWithMetricsUnset
-                )
-                .sorted(comparing(activity -> activity.id().toString()))
-                .toList();
+        List<ActivityDto> expectedActivities = testConfiguration.activities.accessibleFor(searcher);
+        Collection<UUID> expectedFlattenCharts = testConfiguration.activities
+                .flatTagIdsAccessibleFor(searcher);
+        Collection<MetricValue> expectedFlattenMetricValues = testConfiguration.activities
+                .flatMetricValuesAccessibleFor(searcher);
 
         EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
                 searcher,
@@ -285,48 +110,25 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                     .containsExactlyElementsOf(expectedActivities);
             assertThat(foundActivities)
                     .flatMap(ActivityDto::tags)
-                    .containsExactlyInAnyOrder(
-                            accessibleOwnTagWithMetrics.id(),
-                            accessibleOwnTagWithDeletedMetric.id(),
-                            accessibleOwnTagWithoutMetric.id(),
-                            accessibleOwnTagWithMetrics.id(),
-                            accessibleOwnTagWithDeletedMetric.id(),
-                            accessibleOwnTagWithoutMetric.id(),
-                            accessibleSharedTagWithMetric.id(),
-                            accessibleSharedTagWithDeletedMetric.id(),
-                            accessibleSharedTagWithoutMetric.id(),
-                            accessibleSharedTagWithMetric.id(),
-                            accessibleSharedTagWithDeletedMetric.id(),
-                            accessibleSharedTagWithoutMetric.id()
-                    );
+                    .containsExactlyInAnyOrderElementsOf(expectedFlattenCharts);
             assertThat(foundActivities)
                     .flatMap(ActivityDto::metricValues)
-                    .containsExactlyInAnyOrder(
-                            ownMetric1Value,
-                            ownMetric2Value,
-                            sharedMetric1Value
-                    );
+                    .containsExactlyInAnyOrderElementsOf(expectedFlattenMetricValues);
         });
     }
 
     @Test
     void shouldFindSecondPageOfActivities() {
-        List<ActivityDto> expectedActivities = Stream.of(
-                        accessibleOwnActivityWithMetricsSet,
-                        accessibleOwnActivityWithMetricsUnset,
-                        accessibleOwnActivityWithDeletedTags,
-                        accessibleOwnActivityWithoutTags,
-                        accessibleSharedActivityWithMetricsSet,
-                        accessibleSharedActivityWithMetricsUnset
-                )
-                .sorted(comparing(activity -> activity.id().toString()))
-                .skip(1)
-                .toList();
+        int pageSize = 3;
+        int offset = 1;
+        List<ActivityDto> expectedActivities = testConfiguration.activities
+                .accessibleForWithLimitOffset(searcher, pageSize, offset);
+        String pageId = expectedActivities.get(0).id().toString();
 
         EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
                 searcher,
-                3,
-                expectedActivities.get(0).id().toString(),
+                pageSize,
+                pageId,
                 null,
                 null,
                 null,
@@ -345,22 +147,18 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldFindActivitiesInTimeRange() {
-        List<ActivityDto> expectedActivities = Stream.of(
-                        accessibleOwnActivityWithMetricsSet,
-                        accessibleOwnActivityWithMetricsUnset,
-                        accessibleOwnActivityWithDeletedTags,
-                        accessibleSharedActivityWithMetricsUnset
-                )
-                .sorted(comparing(activity -> activity.id().toString()))
-                .toList();
+        Instant timeRangeStart = Instant.ofEpochSecond(40);
+        Instant timeRangeEnd = Instant.ofEpochSecond(60);
+        List<ActivityDto> expectedActivities = testConfiguration.activities
+                .accessibleForInTimeRange(searcher, timeRangeStart, timeRangeEnd);
 
         EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
                 searcher,
                 LARGE_PAGE_SIZE,
                 FIRST_PAGE,
                 null,
-                Instant.ofEpochSecond(40),
-                Instant.ofEpochSecond(60),
+                timeRangeStart,
+                timeRangeEnd,
                 null,
                 null,
                 null
@@ -376,14 +174,10 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldFindNotExcludedActivities() {
-        List<ActivityDto> expectedActivities = Stream.of(
-                        accessibleOwnActivityWithMetricsSet,
-                        accessibleOwnActivityWithDeletedTags,
-                        accessibleSharedActivityWithMetricsSet,
-                        accessibleSharedActivityWithMetricsUnset
-                )
-                .sorted(comparing(activity -> activity.id().toString()))
-                .toList();
+        List<ActivityDto> allAccessibleActivities = testConfiguration.activities.accessibleFor(searcher);
+        Set<UUID> excludedActivities = Set.of(allAccessibleActivities.get(1).id(), allAccessibleActivities.get(3).id());
+        List<ActivityDto> expectedActivities = testConfiguration.activities
+                .accessibleForExcluding(searcher, excludedActivities);
 
         EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
                 searcher,
@@ -392,7 +186,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                 null,
                 null,
                 null,
-                Set.of(accessibleOwnActivityWithMetricsUnset.id(), accessibleOwnActivityWithoutTags.id()),
+                excludedActivities,
                 null,
                 null
         );
@@ -407,14 +201,12 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldFindActivitiesWithTags() {
-        List<ActivityDto> expectedActivities = Stream.of(
-                        accessibleOwnActivityWithMetricsSet,
-                        accessibleOwnActivityWithMetricsUnset,
-                        accessibleSharedActivityWithMetricsSet,
-                        accessibleSharedActivityWithMetricsUnset
-                )
-                .sorted(comparing(activity -> activity.id().toString()))
-                .toList();
+        Set<UUID> requiredTags = testConfiguration.tags.accessibleForWithLimitOffset(searcher, 3, 0)
+                .stream()
+                .map(TagDto::id)
+                .collect(toUnmodifiableSet());
+        List<ActivityDto> expectedActivities = testConfiguration.activities
+                .accessibleForContainingAnyOfTags(searcher, requiredTags);
 
         EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
                 searcher,
@@ -424,11 +216,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                 null,
                 null,
                 null,
-                Set.of(
-                        accessibleOwnTagWithoutMetric.id(),
-                        accessibleSharedTagWithoutMetric.id(),
-                        inaccessibleOwnDeletedTagWithMetric.id()
-                ),
+                requiredTags,
                 null
         );
 
@@ -442,10 +230,14 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @BeforeAll
     static void setUp() {
-        searcherTenant = newUser().build();
-        sharingUser = newUser().build();
-        grantee1 = newUser().build();
-        grantee2 = newUser().build();
+        TenantDto searcherTenant = newUser().build();
+        TenantDto sharingUser = newUser().build();
+        TenantDto grantee1 = newUser().build();
+        TenantDto grantee2 = newUser().build();
+        searcher = new User(searcherTenant.id());
+
+        testConfiguration.addUser(searcherTenant);
+        testConfiguration.addUser(sharingUser);
 
         MetricDto ownMetric1 = newMetric(searcherTenant).build();
         MetricDto ownMetric2 = newMetric(searcherTenant).build();
@@ -457,54 +249,82 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
         MetricDto sharedDeletedMetric = newMetric(sharingUser).deleted().build();
         MetricDto notAddedMetric = newMetric(searcherTenant).build();
 
-        ownMetric1Value = new MetricValue(ownMetric1.id(), randomBigDecimal());
-        ownMetric2Value = new MetricValue(ownMetric2.id(), randomBigDecimal());
-        ownMetric3Value = new MetricValue(ownMetric3.id(), randomBigDecimal());
-        ownDeletedMetricValue = new MetricValue(ownDeletedMetric.id(), randomBigDecimal());
-        sharedMetric1Value = new MetricValue(sharedMetric1.id(), randomBigDecimal());
-        sharedMetric2Value = new MetricValue(sharedMetric2.id(), randomBigDecimal());
-        inaccessibleForeignMetricValue = new MetricValue(inaccessibleForeignMetric.id(), randomBigDecimal());
-        sharedDeletedMetricValue = new MetricValue(sharedDeletedMetric.id(), randomBigDecimal());
-        notAddedMetricValue = new MetricValue(notAddedMetric.id(), randomBigDecimal());
+        MetricValue ownMetric1Value = new MetricValue(ownMetric1.id(), randomBigDecimal());
+        MetricValue ownMetric2Value = new MetricValue(ownMetric2.id(), randomBigDecimal());
+        MetricValue ownMetric3Value = new MetricValue(ownMetric3.id(), randomBigDecimal());
+        MetricValue ownDeletedMetricValue = new MetricValue(ownDeletedMetric.id(), randomBigDecimal());
+        MetricValue sharedMetric1Value = new MetricValue(sharedMetric1.id(), randomBigDecimal());
+        MetricValue sharedMetric2Value = new MetricValue(sharedMetric2.id(), randomBigDecimal());
+        MetricValue inaccessibleForeignMetricValue = new MetricValue(inaccessibleForeignMetric.id(), randomBigDecimal());
+        MetricValue sharedDeletedMetricValue = new MetricValue(sharedDeletedMetric.id(), randomBigDecimal());
+        MetricValue notAddedMetricValue = new MetricValue(notAddedMetric.id(), randomBigDecimal());
 
-        accessibleOwnTagWithMetrics = newTag(searcherTenant)
+        TagDto accessibleOwnTagWithMetrics = newTag(searcherTenant)
+                .named("accessibleOwnTagWithMetrics")
                 .withMetrics(ownMetric1, ownMetric2)
                 .sharedWith(grantee1, grantee2)
                 .build();
-        accessibleOwnTagWithDeletedMetric = newTag(searcherTenant)
+
+        TagDto accessibleOwnTagWithDeletedMetric = newTag(searcherTenant)
+                .named("accessibleOwnTagWithDeletedMetric")
                 .withMetrics(ownDeletedMetric)
                 .sharedWith(grantee1, grantee2)
                 .build();
-        accessibleOwnTagWithoutMetric = newTag(searcherTenant)
+
+        TagDto accessibleOwnTagWithoutMetric = newTag(searcherTenant)
+                .named("accessibleOwnTagWithoutMetric")
                 .withMetrics()
                 .sharedWith(grantee1, grantee2)
                 .build();
-        accessibleSharedTagWithMetric = newTag(sharingUser)
+
+        TagDto accessibleSharedTagWithMetric = newTag(sharingUser)
+                .named("accessibleSharedTagWithMetric")
                 .withMetrics(sharedMetric1)
                 .sharedWith(searcherTenant)
                 .build();
-        accessibleSharedTagWithDeletedMetric = newTag(sharingUser)
+
+        TagDto accessibleSharedTagWithDeletedMetric = newTag(sharingUser)
+                .named("accessibleSharedTagWithDeletedMetric")
                 .withMetrics(sharedDeletedMetric)
                 .sharedWith(searcherTenant, grantee1, grantee2)
                 .build();
-        accessibleSharedTagWithoutMetric = newTag(sharingUser)
+
+        TagDto accessibleSharedTagWithoutMetric = newTag(sharingUser)
+                .named("accessibleSharedTagWithoutMetric")
                 .withMetrics()
                 .sharedWith(searcherTenant, grantee1, grantee2)
                 .build();
-        inaccessibleOwnDeletedTagWithMetric = newTag(searcherTenant)
+
+        TagDto inaccessibleOwnDeletedTagWithMetric = newTag(searcherTenant)
+                .named("inaccessibleOwnDeletedTagWithMetric")
                 .deleted()
                 .withMetrics(ownMetric3)
                 .build();
-        inaccessibleSharedDeletedTagWithMetric = newTag(sharingUser)
+
+        TagDto inaccessibleSharedDeletedTagWithMetric = newTag(sharingUser)
+                .named("inaccessibleSharedDeletedTagWithMetric")
                 .withMetrics(sharedMetric2)
                 .sharedWith(searcherTenant)
                 .deleted()
                 .build();
-        inaccessibleForeignTagWithMetric = newTag(sharingUser)
+
+        TagDto inaccessibleForeignTagWithMetric = newTag(sharingUser)
+                .named("inaccessibleForeignTagWithMetric")
                 .withMetrics(inaccessibleForeignMetric)
                 .build();
 
-        accessibleOwnActivityWithMetricsSet = newActivity(searcherTenant)
+        testConfiguration.tags.add(accessibleOwnTagWithMetrics);
+        testConfiguration.tags.add(accessibleOwnTagWithDeletedMetric);
+        testConfiguration.tags.add(accessibleOwnTagWithoutMetric);
+        testConfiguration.tags.add(accessibleSharedTagWithMetric);
+        testConfiguration.tags.add(accessibleSharedTagWithDeletedMetric);
+        testConfiguration.tags.add(accessibleSharedTagWithoutMetric);
+        testConfiguration.tags.add(inaccessibleOwnDeletedTagWithMetric);
+        testConfiguration.tags.add(inaccessibleSharedDeletedTagWithMetric);
+        testConfiguration.tags.add(inaccessibleForeignTagWithMetric);
+
+        testConfiguration.activities.add(newActivity(searcherTenant)
+                .named("accessibleOwnActivityWithMetricsSet")
                 .withTags(
                         accessibleOwnTagWithMetrics,
                         accessibleOwnTagWithDeletedMetric,
@@ -518,9 +338,10 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                         ownMetric3Value,
                         notAddedMetricValue
                 )
-                .build();
+                .build());
 
-        accessibleOwnActivityWithMetricsUnset = newActivity(searcherTenant)
+        testConfiguration.activities.add(newActivity(searcherTenant)
+                .named("accessibleOwnActivityWithMetricsUnset")
                 .startedAt(1)
                 .withTags(
                         accessibleOwnTagWithMetrics,
@@ -529,23 +350,26 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                         inaccessibleOwnDeletedTagWithMetric
                 )
                 .withMetricValues()
-                .build();
+                .build());
 
-        accessibleOwnActivityWithDeletedTags = newActivity(searcherTenant)
+        testConfiguration.activities.add(newActivity(searcherTenant)
+                .named("accessibleOwnActivityWithDeletedTags")
                 .startedAt(40)
                 .finishedAt(60)
                 .withTags(inaccessibleOwnDeletedTagWithMetric)
                 .withMetricValues(ownMetric3Value)
-                .build();
+                .build());
 
-        accessibleOwnActivityWithoutTags = newActivity(searcherTenant)
+        testConfiguration.activities.add(newActivity(searcherTenant)
+                .named("accessibleOwnActivityWithoutTags")
                 .startedAt(1)
                 .finishedAt(39)
                 .withTags()
                 .withMetricValues()
-                .build();
+                .build());
 
-        accessibleSharedActivityWithMetricsSet = newActivity(sharingUser)
+        testConfiguration.activities.add(newActivity(sharingUser)
+                .named("accessibleSharedActivityWithMetricsSet")
                 .startedAt(61)
                 .finishedAt(99)
                 .withTags(
@@ -562,9 +386,10 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                         inaccessibleForeignMetricValue,
                         notAddedMetricValue
                 )
-                .build();
+                .build());
 
-        accessibleSharedActivityWithMetricsUnset = newActivity(sharingUser)
+        testConfiguration.activities.add(newActivity(sharingUser)
+                .named("accessibleSharedActivityWithMetricsUnset")
                 .startedAt(40)
                 .finishedAt(60)
                 .withTags(
@@ -575,20 +400,24 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                         inaccessibleForeignTagWithMetric
                 )
                 .withMetricValues()
-                .build();
+                .build());
 
-        inaccessibleActivityWithDeletedSharingTag = newActivity(sharingUser)
+        testConfiguration.activities.add(newActivity(sharingUser)
+                .named("inaccessibleActivityWithDeletedSharingTag")
                 .withTags(inaccessibleSharedDeletedTagWithMetric)
-                .build();
+                .build());
 
-        inaccessibleOwnDeletedActivity = newActivity(searcherTenant)
+        testConfiguration.activities.add(newActivity(searcherTenant)
+                .named("inaccessibleOwnDeletedActivity")
                 .deleted()
-                .build();
+                .build());
 
-        inaccessibleForeignActivity = newActivity(sharingUser).build();
+        testConfiguration.activities.add(newActivity(sharingUser)
+                .named("inaccessibleForeignActivity")
+                .build());
 
-        inaccessibleNotAddedActivity = newActivity(searcherTenant).build();
-
-        searcher = new User(searcherTenant.id());
+        testConfiguration.activities.addTransient(newActivity(searcherTenant)
+                .named("inaccessibleNotAddedActivity")
+                .build());
     }
 }
