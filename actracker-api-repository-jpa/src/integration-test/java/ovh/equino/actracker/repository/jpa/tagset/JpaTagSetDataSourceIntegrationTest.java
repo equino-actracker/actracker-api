@@ -120,20 +120,16 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldFindSecondPageOfTagSets() {
-        List<TagSetDto> expectedTagSets = Stream.of(
-                        accessibleOwnTagSet1,
-                        accessibleOwnTagSet2,
-                        accessibleOwnTagSet3,
-                        accessibleOwnTagSet4
-                )
-                .sorted(comparing(tagSet -> tagSet.id().toString()))
-                .skip(1)
-                .toList();
+        int pageSize = 2;
+        int offset = 1;
+        List<TagSetDto> expectedTagSets = testConfiguration.tagSets
+                .accessibleForWithLimitOffset(searcher, pageSize, offset);
+        String pageId = expectedTagSets.get(0).id().toString();
 
         EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
                 searcher,
-                2,
-                expectedTagSets.get(0).id().toString(),
+                pageSize,
+                pageId,
                 null,
                 null,
                 null,
@@ -146,7 +142,7 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
             List<TagSetDto> foundTagSets = dataSource.find(searchCriteria);
             assertThat(foundTagSets)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags")
-                    .containsExactly(expectedTagSets.get(0), expectedTagSets.get(1));
+                    .containsExactlyElementsOf(expectedTagSets);
         });
     }
 
