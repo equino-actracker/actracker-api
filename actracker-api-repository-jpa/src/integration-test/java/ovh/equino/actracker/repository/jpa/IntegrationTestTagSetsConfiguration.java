@@ -53,6 +53,13 @@ public final class IntegrationTestTagSetsConfiguration {
                 .toList();
     }
 
+    public List<TagSetDto> accessibleForExcluding(User user, Set<UUID> excludedIds) {
+        return accessibleFor(user)
+                .stream()
+                .filter(tagSet -> !excludedIds.contains(tagSet.id()))
+                .toList();
+    }
+
     public List<TagSetDto> inaccessibleFor(User user) {
         List<UUID> accessibleTagSets = accessibleFor(user)
                 .stream()

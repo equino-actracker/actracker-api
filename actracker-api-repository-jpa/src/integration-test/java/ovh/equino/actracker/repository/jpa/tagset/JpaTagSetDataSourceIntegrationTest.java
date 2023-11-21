@@ -19,6 +19,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static java.util.Comparator.comparing;
@@ -148,12 +149,9 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldFindNotExcludedTagSets() {
-        List<TagSetDto> expectedTagSets = Stream.of(
-                        accessibleOwnTagSet2,
-                        accessibleOwnTagSet3
-                )
-                .sorted(comparing(tagSet -> tagSet.id().toString()))
-                .toList();
+        List<TagSetDto> allAccessibleTagSets = testConfiguration.tagSets.accessibleFor(searcher);
+        Set<UUID> excludedTagSets = Set.of(allAccessibleTagSets.get(1).id(), allAccessibleTagSets.get(3).id());
+        List<TagSetDto> expectedTagSets = testConfiguration.tagSets.accessibleForExcluding(searcher, excludedTagSets);
         EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
                 searcher,
                 LARGE_PAGE_SIZE,
@@ -161,7 +159,7 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
                 null,
                 null,
                 null,
-                Set.of(accessibleOwnTagSet1.id(), accessibleOwnTagSet4.id()),
+                excludedTagSets,
                 null,
                 null
         );
