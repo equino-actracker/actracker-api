@@ -10,7 +10,7 @@ public final class IntegrationTestConfiguration {
 
     private final List<TenantDto> addedUsers = new ArrayList<>();
     public final IntegrationTestTagsConfiguration tags = new IntegrationTestTagsConfiguration();
-    public final IntegrationTestTagSetsConfiguration tagSets = new IntegrationTestTagSetsConfiguration();
+    public final IntegrationTestTagSetsConfiguration tagSets = new IntegrationTestTagSetsConfiguration(tags);
     public final IntegrationTestActivitiesConfiguration activities = new IntegrationTestActivitiesConfiguration(tags);
     public final IntegrationTestDashboardsConfiguration dashboards = new IntegrationTestDashboardsConfiguration(tags);
 
