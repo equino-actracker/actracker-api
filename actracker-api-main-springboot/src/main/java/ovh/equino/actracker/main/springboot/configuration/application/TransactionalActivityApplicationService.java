@@ -7,7 +7,7 @@ import ovh.equino.actracker.domain.activity.ActivityDataSource;
 import ovh.equino.actracker.domain.activity.ActivityNotifier;
 import ovh.equino.actracker.domain.activity.ActivityRepository;
 import ovh.equino.actracker.domain.activity.ActivitySearchEngine;
-import ovh.equino.actracker.domain.tag.TagRepository;
+import ovh.equino.actracker.domain.tag.TagDataSource;
 import ovh.equino.security.identity.IdentityProvider;
 
 @Transactional
@@ -18,7 +18,7 @@ class TransactionalActivityApplicationService extends ActivityApplicationService
                                             ActivityDataSource activityDataSource,
                                             ActivitySearchEngine activitySearchEngine,
                                             ActivityNotifier activityNotifier,
-                                            TagRepository tagRepository,
+                                            TagDataSource tagDataSource,
                                             IdentityProvider identityProvider) {
 
         super(
@@ -26,7 +26,7 @@ class TransactionalActivityApplicationService extends ActivityApplicationService
                 activityDataSource,
                 activitySearchEngine,
                 activityNotifier,
-                tagRepository,
+                tagDataSource,
                 identityProvider
         );
     }

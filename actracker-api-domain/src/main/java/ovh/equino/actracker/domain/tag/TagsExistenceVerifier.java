@@ -3,20 +3,20 @@ package ovh.equino.actracker.domain.tag;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 
 public class TagsExistenceVerifier {
 
-    private final TagRepository tagRepository;
+    private final TagDataSource tagDataSource;
     private final User owner;
 
-    public TagsExistenceVerifier(TagRepository tagRepository, User owner) {
-        this.tagRepository = tagRepository;
+    public TagsExistenceVerifier(TagDataSource tagDataSource, User owner) {
+        this.tagDataSource = tagDataSource;
         this.owner = owner;
     }
 
@@ -37,10 +37,8 @@ public class TagsExistenceVerifier {
     }
 
     List<Tag> existingTags(Collection<TagId> tagsToCheck) {
-        Set<UUID> uuids = tagsToCheck.stream()
-                .map(TagId::id)
-                .collect(toUnmodifiableSet());
-        return tagRepository.findByIds(uuids, owner).stream()
+        return tagDataSource.find(new HashSet<>(tagsToCheck), owner)
+                .stream()
                 .map(Tag::fromStorage)
                 .filter(Tag::isNotDeleted)
                 .toList();

@@ -4,8 +4,8 @@ import ovh.equino.actracker.application.SearchResult;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
+import ovh.equino.actracker.domain.tag.TagDataSource;
 import ovh.equino.actracker.domain.tag.TagId;
-import ovh.equino.actracker.domain.tag.TagRepository;
 import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
 import ovh.equino.actracker.domain.tagset.*;
 import ovh.equino.actracker.domain.user.User;
@@ -21,21 +21,21 @@ public class TagSetApplicationService {
     private final TagSetDataSource tagSetDataSource;
     private final TagSetSearchEngine tagSetSearchEngine;
     private final TagSetNotifier tagSetNotifier;
-    private final TagRepository tagRepository;
+    private final TagDataSource tagDataSource;
     private final IdentityProvider identityProvider;
 
     public TagSetApplicationService(TagSetRepository tagSetRepository,
                                     TagSetDataSource tagSetDataSource,
                                     TagSetSearchEngine tagSetSearchEngine,
                                     TagSetNotifier tagSetNotifier,
-                                    TagRepository tagRepository,
+                                    TagDataSource tagDataSource,
                                     IdentityProvider identityProvider) {
 
         this.tagSetRepository = tagSetRepository;
         this.tagSetDataSource = tagSetDataSource;
         this.tagSetSearchEngine = tagSetSearchEngine;
         this.tagSetNotifier = tagSetNotifier;
-        this.tagRepository = tagRepository;
+        this.tagDataSource = tagDataSource;
         this.identityProvider = identityProvider;
     }
 
@@ -45,7 +45,7 @@ public class TagSetApplicationService {
 
         TagSetDto newTagSetData = new TagSetDto(createTagSetCommand.name(), createTagSetCommand.tags());
 
-        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, creator);
+        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagDataSource, creator);
 
         TagSet tagSet = TagSet.create(newTagSetData, creator, tagsExistenceVerifier);
         tagSetRepository.add(tagSet.forStorage());
@@ -88,7 +88,7 @@ public class TagSetApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
-        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, updater);
+        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagDataSource, updater);
 
         TagSetDto tagSetDto = tagSetRepository.findById(tagSetId)
                 .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));
@@ -111,7 +111,7 @@ public class TagSetApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
-        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, updater);
+        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagDataSource, updater);
 
         TagSetDto tagSetDto = tagSetRepository.findById(tagSetId)
                 .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));
@@ -134,7 +134,7 @@ public class TagSetApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
-        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, updater);
+        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagDataSource, updater);
 
         TagSetDto tagSetDto = tagSetRepository.findById(tagSetId)
                 .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));
@@ -157,7 +157,7 @@ public class TagSetApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User remover = new User(requesterIdentity.getId());
 
-        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, remover);
+        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagDataSource, remover);
 
         TagSetDto tagSetDto = tagSetRepository.findById(tagSetId)
                 .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));

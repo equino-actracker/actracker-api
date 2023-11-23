@@ -24,21 +24,21 @@ public class ActivityApplicationService {
     private final ActivityDataSource activityDataSource;
     private final ActivitySearchEngine activitySearchEngine;
     private final ActivityNotifier activityNotifier;
-    private final TagRepository tagRepository;
+    private final TagDataSource tagDataSource;
     private final IdentityProvider identityProvider;
 
     public ActivityApplicationService(ActivityRepository activityRepository,
                                       ActivityDataSource activityDataSource,
                                       ActivitySearchEngine activitySearchEngine,
                                       ActivityNotifier activityNotifier,
-                                      TagRepository tagRepository,
+                                      TagDataSource tagDataSource,
                                       IdentityProvider identityProvider) {
 
         this.activityRepository = activityRepository;
         this.activityDataSource = activityDataSource;
         this.activitySearchEngine = activitySearchEngine;
         this.activityNotifier = activityNotifier;
-        this.tagRepository = tagRepository;
+        this.tagDataSource = tagDataSource;
         this.identityProvider = identityProvider;
     }
 
@@ -46,7 +46,7 @@ public class ActivityApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User creator = new User(requesterIdentity.getId());
 
-        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, creator);
+        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagDataSource, creator);
         MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
 
         ActivityDto newActivityData = new ActivityDto(
@@ -105,7 +105,7 @@ public class ActivityApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User switcher = new User(requesterIdentity.getId());
 
-        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, switcher);
+        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagDataSource, switcher);
         MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
 
         ActivityDto activityToSwitch = new ActivityDto(
@@ -154,7 +154,7 @@ public class ActivityApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
-        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, updater);
+        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagDataSource, updater);
         MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
 
         ActivityDto activityDto = activityRepository.findById(activityId)
@@ -179,7 +179,7 @@ public class ActivityApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
-        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, updater);
+        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagDataSource, updater);
         MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
 
         ActivityDto activityDto = activityRepository.findById(activityId)
@@ -204,7 +204,7 @@ public class ActivityApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
-        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, updater);
+        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagDataSource, updater);
         MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
 
         ActivityDto activityDto = activityRepository.findById(activityId)
@@ -229,7 +229,7 @@ public class ActivityApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
-        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, updater);
+        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagDataSource, updater);
         MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
 
         ActivityDto activityDto = activityRepository.findById(activityId)
@@ -254,7 +254,7 @@ public class ActivityApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
-        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, updater);
+        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagDataSource, updater);
         MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
 
         ActivityDto activityDto = activityRepository.findById(activityId)
@@ -279,7 +279,7 @@ public class ActivityApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
-        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, updater);
+        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagDataSource, updater);
         MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
 
         ActivityDto activityDto = activityRepository.findById(activityId)
@@ -304,7 +304,7 @@ public class ActivityApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
-        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, updater);
+        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagDataSource, updater);
         MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
 
         ActivityDto activityDto = activityRepository.findById(activityId)
@@ -329,7 +329,7 @@ public class ActivityApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
-        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, updater);
+        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagDataSource, updater);
         MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
 
         ActivityDto activityDto = activityRepository.findById(activityId)
@@ -354,7 +354,7 @@ public class ActivityApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User remover = new User(requesterIdentity.getId());
 
-        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagRepository, remover);
+        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagDataSource, remover);
         MetricsExistenceVerifier metricsExistenceVerifier = new MetricsExistenceVerifier(tagsExistenceVerifier);
 
         ActivityDto activityDto = activityRepository.findById(activityId)

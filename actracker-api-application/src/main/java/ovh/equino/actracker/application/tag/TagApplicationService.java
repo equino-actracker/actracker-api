@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static java.util.stream.Collectors.toUnmodifiableSet;
+
 public class TagApplicationService {
 
     private final TagRepository tagRepository;
@@ -74,9 +76,12 @@ public class TagApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User searcher = new User(requesterIdentity.getId());
 
-        return tagRepository.findByIds(tagIds, searcher).stream()
-                .map(Tag::fromStorage)
-                .map(tag -> tag.forClient(searcher))
+        Set<TagId> domainTagIds = tagIds
+                .stream()
+                .map(TagId::new)
+                .collect(toUnmodifiableSet());
+
+        return tagDataSource.find(domainTagIds, searcher).stream()
                 .map(this::toTagResult)
                 .toList();
     }

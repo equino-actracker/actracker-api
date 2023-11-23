@@ -3,15 +3,11 @@ package ovh.equino.actracker.repository.jpa.tag;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaQuery;
-import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tag.TagRepository;
-import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaDAO;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 class JpaTagRepository extends JpaDAO implements TagRepository {
@@ -56,50 +52,5 @@ class JpaTagRepository extends JpaDAO implements TagRepository {
         return typedQuery.getResultList().stream()
                 .findFirst()
                 .map(mapper::toDto);
-    }
-
-    @Override
-    public List<TagDto> findByIds(Set<UUID> tagIds, User searcher) {
-
-        TagQueryBuilder queryBuilder = new TagQueryBuilder(entityManager);
-
-        CriteriaQuery<TagEntity> query = queryBuilder.select()
-                .where(
-                        queryBuilder.and(
-                                queryBuilder.isAccessibleFor(searcher),
-                                queryBuilder.hasId(tagIds)
-                        )
-                );
-
-        TypedQuery<TagEntity> typedQuery = entityManager.createQuery(query);
-        return typedQuery.getResultList().stream()
-                .map(mapper::toDto)
-                .toList();
-    }
-
-    @Override
-    public List<TagDto> find(EntitySearchCriteria searchCriteria) {
-
-        TagQueryBuilder queryBuilder = new TagQueryBuilder(entityManager);
-
-        CriteriaQuery<TagEntity> query = queryBuilder.select()
-                .where(
-                        queryBuilder.and(
-                                queryBuilder.isAccessibleFor(searchCriteria.searcher()),
-                                queryBuilder.isNotDeleted(),
-                                queryBuilder.isInPage(searchCriteria.pageId()),
-                                queryBuilder.isNotExcluded(searchCriteria.excludeFilter()),
-                                queryBuilder.matchesTerm(searchCriteria.term())
-                        )
-                )
-                .orderBy(queryBuilder.ascending("id"));
-
-        TypedQuery<TagEntity> typedQuery = entityManager
-                .createQuery(query)
-                .setMaxResults(searchCriteria.pageSize());
-
-        return typedQuery.getResultList().stream()
-                .map(mapper::toDto)
-                .toList();
     }
 }
