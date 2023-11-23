@@ -7,6 +7,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.share.Share;
+import ovh.equino.actracker.domain.tag.MetricDto;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tenant.TenantDto;
@@ -15,13 +17,13 @@ import ovh.equino.actracker.repository.jpa.IntegrationTestConfiguration;
 import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
 
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toUnmodifiableSet;
+import static java.util.stream.Stream.concat;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 
 abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
 
@@ -172,6 +174,32 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
             assertThat(foundTags)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("shares", "metrics")
                     .containsExactlyElementsOf(expectedTags);
+        });
+    }
+
+    @Test
+    void shouldFindTagsByIds() {
+        List<TagDto> accessibleTags = testConfiguration.tags.accessibleFor(searcher);
+        Collection<TagDto> inaccessibleTags = testConfiguration.tags.inaccessibleFor(searcher);
+        Collection<MetricDto> flattenMetrics = testConfiguration.tags.flatMetricsAccessibleFor(searcher);
+        Collection<Share> flattenShares = testConfiguration.tags.flatSharesAccessibleFor(searcher);
+        Set<TagId> allTagIds = concat(accessibleTags.stream(), inaccessibleTags.stream())
+                .map(TagDto::id)
+                .map(TagId::new)
+                .collect(toUnmodifiableSet());
+
+        inTransaction(() -> {
+            List<TagDto> foundTags = dataSource.find(allTagIds, searcher);
+            assertThat(foundTags)
+                    .usingRecursiveFieldByFieldElementComparatorIgnoringFields("shares", "metrics")
+                    .containsExactlyElementsOf(accessibleTags);
+            // TODO
+            //            assertThat(foundTags)
+//                    .flatMap(TagDto::metrics)
+//                    .containsExactlyInAnyOrderElementsOf(flattenMetrics);
+//            assertThat(foundTags)
+//                    .flatMap(TagDto::shares)
+//                    .containsExactlyInAnyOrderElementsOf(flattenShares);
         });
     }
 

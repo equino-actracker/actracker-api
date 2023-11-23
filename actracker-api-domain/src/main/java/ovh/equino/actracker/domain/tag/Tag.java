@@ -164,6 +164,7 @@ public class Tag implements Entity {
         return new TagDto(id.id(), creator.id(), name, metrics, shares, deleted);
     }
 
+    // TODO delete
     public TagDto forClient(User client) {
         if (isNotAccessibleFor(client)) {
             throw new EntityNotFoundException(Tag.class, this.id.id());

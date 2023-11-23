@@ -127,4 +127,9 @@ class JpaTagDataSource extends JpaDAO implements TagDataSource {
                 ))
                 .toList();
     }
+
+    @Override
+    public List<TagDto> find(Set<TagId> tagIds, User searcher) {
+        return emptyList();
+    }
 }
