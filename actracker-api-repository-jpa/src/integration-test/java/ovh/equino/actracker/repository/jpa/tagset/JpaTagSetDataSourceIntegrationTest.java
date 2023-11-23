@@ -12,48 +12,28 @@ import ovh.equino.actracker.domain.tagset.TagSetDto;
 import ovh.equino.actracker.domain.tagset.TagSetId;
 import ovh.equino.actracker.domain.tenant.TenantDto;
 import ovh.equino.actracker.domain.user.User;
+import ovh.equino.actracker.repository.jpa.IntegrationTestConfiguration;
 import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
 
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Stream;
 
-import static java.util.Collections.emptySet;
-import static java.util.Comparator.comparing;
 import static org.assertj.core.api.Assertions.assertThat;
 
 abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
 
-    private static TenantDto searcherTenant;
-    private static TenantDto sharingUser;
-
-    private static TagDto accessibleOwnTag1;
-    private static TagDto accessibleOwnTag2;
-    private static TagDto accessibleSharedTag;
-    private static TagDto inaccessibleOwnDeletedTag;
-    private static TagDto inaccessibleSharedDeletedTag;
-    private static TagDto inaccessibleForeignTag;
-
-    private static TagSetDto accessibleOwnTagSet1;
-    private static TagSetDto accessibleOwnTagSet2;
-    private static TagSetDto accessibleOwnTagSet3;
-    private static TagSetDto accessibleOwnTagSet4;
-    private static TagSetDto inaccessibleOwnDeletedTagSet;
-    private static TagSetDto inaccessibleForeignTagSet;
-    private static TagSetDto inaccessibleNotAddedTagSet;
-
+    private static final IntegrationTestConfiguration testConfiguration = new IntegrationTestConfiguration();
     private static User searcher;
-
     private JpaTagSetDataSource dataSource;
 
     @BeforeEach
     void init() throws SQLException {
         this.dataSource = new JpaTagSetDataSource(entityManager);
-        database().addUsers(searcherTenant, sharingUser);
-        database().addTags(accessibleOwnTag1, accessibleOwnTag2, accessibleSharedTag, inaccessibleOwnDeletedTag, inaccessibleSharedDeletedTag, inaccessibleForeignTag);
-        database().addTagSets(accessibleOwnTagSet1, accessibleOwnTagSet2, accessibleOwnTagSet3, accessibleOwnTagSet4, inaccessibleOwnDeletedTagSet, inaccessibleForeignTagSet);
+        testConfiguration.persistIn(database());
     }
 
     @ParameterizedTest(name = "{0}")
@@ -68,52 +48,13 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
     }
 
     private static Stream<Arguments> accessibleTagSet() {
-        return Stream.of(
-                Arguments.of(
-                        "accessibleOwnTagSet1",
-                        new TagSetId(accessibleOwnTagSet1.id()),
-                        new TagSetDto(
-                                accessibleOwnTagSet1.id(),
-                                accessibleOwnTagSet1.creatorId(),
-                                accessibleOwnTagSet1.name(),
-                                Set.of(accessibleOwnTag1.id(), accessibleSharedTag.id()),
-                                accessibleOwnTagSet1.deleted()
-                        )
-                ),
-                Arguments.of(
-                        "accessibleOwnTagSet2",
-                        new TagSetId(accessibleOwnTagSet2.id()),
-                        new TagSetDto(
-                                accessibleOwnTagSet2.id(),
-                                accessibleOwnTagSet2.creatorId(),
-                                accessibleOwnTagSet2.name(),
-                                Set.of(accessibleOwnTag1.id(), accessibleOwnTag2.id()),
-                                accessibleOwnTagSet2.deleted()
-                        )
-                ),
-                Arguments.of(
-                        "accessibleOwnTagSet3",
-                        new TagSetId(accessibleOwnTagSet3.id()),
-                        new TagSetDto(
-                                accessibleOwnTagSet3.id(),
-                                accessibleOwnTagSet3.creatorId(),
-                                accessibleOwnTagSet3.name(),
-                                emptySet(),
-                                accessibleOwnTagSet4.deleted()
-                        )
-                ),
-                Arguments.of(
-                        "accessibleOwnTagSet4",
-                        new TagSetId(accessibleOwnTagSet4.id()),
-                        new TagSetDto(
-                                accessibleOwnTagSet4.id(),
-                                accessibleOwnTagSet4.creatorId(),
-                                accessibleOwnTagSet4.name(),
-                                emptySet(),
-                                accessibleOwnTagSet4.deleted()
-                        )
-                )
-        );
+        return testConfiguration.tagSets.accessibleFor(searcher)
+                .stream()
+                .map(tagSet -> Arguments.of(
+                        tagSet.name(),
+                        new TagSetId(tagSet.id()),
+                        tagSet
+                ));
     }
 
     @ParameterizedTest(name = "{0}")
@@ -126,28 +67,51 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
     }
 
     private static Stream<Arguments> inaccessibleTagSet() {
-        return Stream.of(
-                Arguments.of("inaccessibleOwnDeletedTagSet", new TagSetId(inaccessibleOwnDeletedTagSet.id())),
-                Arguments.of("inaccessibleForeignTagSet", new TagSetId(inaccessibleForeignTagSet.id())),
-                Arguments.of("inaccessibleNotAddedTagSet", new TagSetId(inaccessibleNotAddedTagSet.id()))
-        );
+        return testConfiguration.tagSets.inaccessibleFor(searcher)
+                .stream()
+                .map(tagSet -> Arguments.of(
+                        tagSet.name(),
+                        new TagSetId(tagSet.id())
+                ));
     }
 
     @Test
     void shouldFindAllAccessibleTagSets() {
-        List<TagSetDto> expectedTagSets = Stream.of(
-                        accessibleOwnTagSet1,
-                        accessibleOwnTagSet2,
-                        accessibleOwnTagSet3,
-                        accessibleOwnTagSet4
-                )
-                .sorted(comparing(tagSet -> tagSet.id().toString()))
-                .toList();
-
         EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
                 searcher,
                 LARGE_PAGE_SIZE,
                 FIRST_PAGE,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+
+        inTransaction(() -> {
+            List<TagSetDto> foundTagSets = dataSource.find(searchCriteria);
+            assertThat(foundTagSets)
+                    .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags")
+                    .containsExactlyElementsOf(testConfiguration.tagSets.accessibleFor(searcher));
+            assertThat(foundTagSets)
+                    .flatMap(TagSetDto::tags)
+                    .containsExactlyInAnyOrderElementsOf(testConfiguration.tagSets.flatTagsAccessibleFor(searcher));
+        });
+    }
+
+    @Test
+    void shouldFindSecondPageOfTagSets() {
+        int pageSize = 2;
+        int offset = 1;
+        List<TagSetDto> expectedTagSets = testConfiguration.tagSets
+                .accessibleForWithLimitOffset(searcher, pageSize, offset);
+        String pageId = expectedTagSets.get(0).id().toString();
+
+        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
+                searcher,
+                pageSize,
+                pageId,
                 null,
                 null,
                 null,
@@ -161,57 +125,14 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
             assertThat(foundTagSets)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags")
                     .containsExactlyElementsOf(expectedTagSets);
-            assertThat(foundTagSets)
-                    .flatMap(TagSetDto::tags)
-                    .containsExactlyInAnyOrder(
-                            accessibleOwnTag1.id(),
-                            accessibleSharedTag.id(),
-                            accessibleOwnTag1.id(),
-                            accessibleOwnTag2.id()
-                    );
-        });
-    }
-
-    @Test
-    void shouldFindSecondPageOfTagSets() {
-        List<TagSetDto> expectedTagSets = Stream.of(
-                        accessibleOwnTagSet1,
-                        accessibleOwnTagSet2,
-                        accessibleOwnTagSet3,
-                        accessibleOwnTagSet4
-                )
-                .sorted(comparing(tagSet -> tagSet.id().toString()))
-                .skip(1)
-                .toList();
-
-        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
-                searcher,
-                2,
-                expectedTagSets.get(0).id().toString(),
-                null,
-                null,
-                null,
-                null,
-                null,
-                null
-        );
-
-        inTransaction(() -> {
-            List<TagSetDto> foundTagSets = dataSource.find(searchCriteria);
-            assertThat(foundTagSets)
-                    .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags")
-                    .containsExactly(expectedTagSets.get(0), expectedTagSets.get(1));
         });
     }
 
     @Test
     void shouldFindNotExcludedTagSets() {
-        List<TagSetDto> expectedTagSets = Stream.of(
-                        accessibleOwnTagSet2,
-                        accessibleOwnTagSet3
-                )
-                .sorted(comparing(tagSet -> tagSet.id().toString()))
-                .toList();
+        List<TagSetDto> allAccessibleTagSets = testConfiguration.tagSets.accessibleFor(searcher);
+        Set<UUID> excludedTagSets = Set.of(allAccessibleTagSets.get(1).id(), allAccessibleTagSets.get(3).id());
+        List<TagSetDto> expectedTagSets = testConfiguration.tagSets.accessibleForExcluding(searcher, excludedTagSets);
         EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
                 searcher,
                 LARGE_PAGE_SIZE,
@@ -219,7 +140,7 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
                 null,
                 null,
                 null,
-                Set.of(accessibleOwnTagSet1.id(), accessibleOwnTagSet4.id()),
+                excludedTagSets,
                 null,
                 null
         );
@@ -233,22 +154,45 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @BeforeAll
     static void setUp() {
-        searcherTenant = newUser().build();
-        sharingUser = newUser().build();
+        TenantDto searcherTenant = newUser().build();
+        TenantDto sharingUser = newUser().build();
+        TenantDto grantee1 = newUser().build();
+        TenantDto grantee2 = newUser().build();
+        searcher = new User(searcherTenant.id());
 
-        accessibleOwnTag1 = newTag(searcherTenant).build();
-        accessibleOwnTag2 = newTag(searcherTenant).build();
-        accessibleSharedTag = newTag(sharingUser).sharedWith(searcherTenant).build();
-        inaccessibleOwnDeletedTag = newTag(searcherTenant).deleted().build();
-        inaccessibleSharedDeletedTag = newTag(sharingUser).sharedWith(searcherTenant).deleted().build();
-        inaccessibleForeignTag = newTag(sharingUser).build();
+        testConfiguration.addUser(searcherTenant);
+        testConfiguration.addUser(sharingUser);
 
-        accessibleOwnTagSet1 = newTagSet(searcherTenant)
+        TagDto accessibleOwnTag1 = newTag(searcherTenant).build();
+        TagDto accessibleOwnTag2 = newTag(searcherTenant)
+                .sharedWith(grantee1, grantee2)
+                .sharedWithNonExisting("nonExistingGrantee1", "nonExistingGrantee2")
+                .build();
+        TagDto accessibleSharedTag = newTag(sharingUser).sharedWith(searcherTenant).build();
+        TagDto inaccessibleOwnDeletedTag = newTag(searcherTenant).deleted().build();
+        TagDto inaccessibleSharedDeletedTag = newTag(sharingUser).sharedWith(searcherTenant).deleted().build();
+        TagDto inaccessibleForeignTag = newTag(sharingUser).build();
+        TagDto inaccessibleNotPersistedTag = newTag(searcherTenant).named("Inaccessible not persisted tag").build();
+
+        testConfiguration.tags.add(accessibleOwnTag1);
+        testConfiguration.tags.add(accessibleOwnTag2);
+        testConfiguration.tags.add(accessibleSharedTag);
+        testConfiguration.tags.add(inaccessibleOwnDeletedTag);
+        testConfiguration.tags.add(inaccessibleSharedDeletedTag);
+        testConfiguration.tags.add(inaccessibleForeignTag);
+        testConfiguration.tags.addTransient(inaccessibleNotPersistedTag);
+
+        testConfiguration.tagSets.add(newTagSet(searcherTenant)
+                .named("accessibleOwnTagSet1")
                 .withTags(
                         accessibleOwnTag1,
-                        accessibleSharedTag
-                ).build();
-        accessibleOwnTagSet2 = newTagSet(searcherTenant)
+                        accessibleSharedTag,
+                        inaccessibleNotPersistedTag
+                )
+                .build());
+
+        testConfiguration.tagSets.add(newTagSet(searcherTenant)
+                .named("accessibleOwnTagSet2")
                 .withTags(
                         accessibleOwnTag1,
                         accessibleOwnTag2,
@@ -256,18 +200,24 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
                         inaccessibleSharedDeletedTag,
                         inaccessibleForeignTag
                 )
-                .build();
-        accessibleOwnTagSet3 = newTagSet(searcherTenant)
+                .build());
+
+        testConfiguration.tagSets.add(newTagSet(searcherTenant)
+                .named("accessibleOwnTagSet3")
                 .withTags(
                         inaccessibleOwnDeletedTag,
                         inaccessibleSharedDeletedTag,
                         inaccessibleForeignTag
                 )
-                .build();
-        accessibleOwnTagSet4 = newTagSet(searcherTenant)
+                .build());
+
+        testConfiguration.tagSets.add(newTagSet(searcherTenant)
+                .named("accessibleOwnTagSet4")
                 .withTags()
-                .build();
-        inaccessibleOwnDeletedTagSet = newTagSet(searcherTenant)
+                .build());
+
+        testConfiguration.tagSets.add(newTagSet(searcherTenant)
+                .named("inaccessibleOwnDeletedTagSet")
                 .deleted()
                 .withTags(
                         accessibleOwnTag1,
@@ -275,17 +225,20 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
                         inaccessibleOwnDeletedTag,
                         inaccessibleForeignTag
                 )
-                .build();
-        inaccessibleForeignTagSet = newTagSet(sharingUser)
+                .build());
+
+        testConfiguration.tagSets.add(newTagSet(sharingUser)
+                .named("inaccessibleForeignTagSet")
                 .withTags(
                         accessibleOwnTag1,
                         accessibleSharedTag,
                         inaccessibleSharedDeletedTag,
                         inaccessibleForeignTag
                 )
-                .build();
-        inaccessibleNotAddedTagSet = newTagSet(searcherTenant).build();
+                .build());
 
-        searcher = new User(searcherTenant.id());
+        testConfiguration.tagSets.addTransient(newTagSet(searcherTenant)
+                .named("inaccessibleNotAddedTagSet")
+                .build());
     }
 }

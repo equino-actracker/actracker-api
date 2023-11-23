@@ -6,17 +6,19 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class IntegrationTestConfiguration {
+public final class IntegrationTestConfiguration {
 
     private final List<TenantDto> addedUsers = new ArrayList<>();
     public final IntegrationTestTagsConfiguration tags = new IntegrationTestTagsConfiguration();
+    public final IntegrationTestTagSetsConfiguration tagSets = new IntegrationTestTagSetsConfiguration(tags);
     public final IntegrationTestActivitiesConfiguration activities = new IntegrationTestActivitiesConfiguration(tags);
     public final IntegrationTestDashboardsConfiguration dashboards = new IntegrationTestDashboardsConfiguration(tags);
 
     public void persistIn(IntegrationTestRelationalDataBase database) throws SQLException {
         database.addUsers(addedUsers.toArray(new TenantDto[0]));
-        activities.persistIn(database);
         tags.persistIn(database);
+        tagSets.persistIn(database);
+        activities.persistIn(database);
         dashboards.persistIn(database);
     }
 
