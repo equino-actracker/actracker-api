@@ -130,6 +130,23 @@ class JpaTagDataSource extends JpaDAO implements TagDataSource {
 
     @Override
     public List<TagDto> find(Set<TagId> tagIds, User searcher) {
-        return emptyList();
+        SelectTagsQuery selectTags = new SelectTagsQuery(entityManager);
+        List<TagProjection> tagResults = selectTags
+                .where(
+                        selectTags.predicate().and(
+                                selectTags.predicate().isAccessibleFor(searcher),
+                                selectTags.predicate().isNotDeleted()
+                        )
+                )
+                .orderBy(selectTags.sort().ascending("id"))
+                .execute();
+
+        return tagResults
+                .stream()
+                .map(tagResult -> tagResult.toTag(
+                        emptyList(),
+                        emptyList()
+                ))
+                .toList();
     }
 }
