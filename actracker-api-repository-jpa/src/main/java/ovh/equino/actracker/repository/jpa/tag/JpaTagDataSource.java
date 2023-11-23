@@ -141,11 +141,47 @@ class JpaTagDataSource extends JpaDAO implements TagDataSource {
                 .orderBy(selectTags.sort().ascending("id"))
                 .execute();
 
+        Set<UUID> foundTagIds = tagResults
+                .stream()
+                .map(TagProjection::id)
+                .map(UUID::fromString)
+                .collect(toUnmodifiableSet());
+
+        SelectShareJoinTagQuery selectShareJoinTag = new SelectShareJoinTagQuery(entityManager);
+        Map<String, List<Share>> sharesByTagId = selectShareJoinTag
+                .where(
+                        selectShareJoinTag.predicate().and(
+                                selectShareJoinTag.predicate().hasTagIdIn(foundTagIds),
+                                selectShareJoinTag.predicate().isAccessibleFor(searcher)
+                        )
+                )
+                .execute()
+                .stream()
+                .collect(groupingBy(
+                        ShareJoinTagProjection::tagId,
+                        mapping(ShareJoinTagProjection::toShare, toList())
+                ));
+
+        SelectMetricJoinTagQuery selectMetricJoinTag = new SelectMetricJoinTagQuery(entityManager);
+        Map<String, List<MetricDto>> metricsByTagId = selectMetricJoinTag
+                .where(
+                        selectMetricJoinTag.predicate().and(
+                                selectMetricJoinTag.predicate().hasTagIdIn(foundTagIds),
+                                selectMetricJoinTag.predicate().isNotDeleted()
+                        )
+                )
+                .execute()
+                .stream()
+                .collect(groupingBy(
+                        MetricJoinTagProjection::tagId,
+                        mapping(MetricJoinTagProjection::toMetric, toList())
+                ));
+
         return tagResults
                 .stream()
                 .map(tagResult -> tagResult.toTag(
-                        emptyList(),
-                        emptyList()
+                        sharesByTagId.getOrDefault(tagResult.id(), emptyList()),
+                        metricsByTagId.getOrDefault(tagResult.id(), emptyList())
                 ))
                 .toList();
     }
