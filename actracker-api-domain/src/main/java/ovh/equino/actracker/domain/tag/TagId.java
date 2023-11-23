@@ -1,5 +1,6 @@
 package ovh.equino.actracker.domain.tag;
 
+import java.util.Objects;
 import java.util.UUID;
 
 import static java.util.Objects.isNull;
@@ -20,5 +21,18 @@ public record TagId(UUID id) {
     @Override
     public String toString() {
         return id.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TagId tagId = (TagId) o;
+        return Objects.equals(id, tagId.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

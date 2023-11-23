@@ -15,12 +15,11 @@ import ovh.equino.actracker.repository.jpa.IntegrationTestConfiguration;
 import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
 
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toUnmodifiableSet;
+import static java.util.stream.Stream.concat;
 import static org.assertj.core.api.Assertions.assertThat;
 
 abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
@@ -172,6 +171,29 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
             assertThat(foundTags)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("shares", "metrics")
                     .containsExactlyElementsOf(expectedTags);
+        });
+    }
+
+    @Test
+    void shouldFindTagsByIds() {
+        List<TagDto> accessibleTags = testConfiguration.tags.accessibleFor(searcher);
+        Collection<TagDto> inaccessibleTags = testConfiguration.tags.inaccessibleFor(searcher);
+        Set<TagId> allTagIds = concat(accessibleTags.stream(), inaccessibleTags.stream())
+                .map(TagDto::id)
+                .map(TagId::new)
+                .collect(toUnmodifiableSet());
+
+        inTransaction(() -> {
+            List<TagDto> foundTags = dataSource.find(allTagIds, searcher);
+            assertThat(foundTags)
+                    .usingRecursiveFieldByFieldElementComparatorIgnoringFields("shares", "metrics")
+                    .containsExactlyElementsOf(accessibleTags);
+            assertThat(foundTags)
+                    .flatMap(TagDto::metrics)
+                    .containsExactlyInAnyOrderElementsOf(testConfiguration.tags.flatMetricsAccessibleFor(searcher));
+            assertThat(foundTags)
+                    .flatMap(TagDto::shares)
+                    .containsExactlyInAnyOrderElementsOf(testConfiguration.tags.flatSharesAccessibleFor(searcher));
         });
     }
 

@@ -1,12 +1,13 @@
 package ovh.equino.actracker.domain.tag;
 
 import ovh.equino.actracker.domain.Entity;
-import ovh.equino.actracker.domain.exception.EntityEditForbidden;
-import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.user.User;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
@@ -125,23 +126,6 @@ public class Tag implements Entity {
         }).execute();
     }
 
-    void updateTo(TagDto tag, User updater) {
-        if (isEditForbiddenFor(updater)) {
-            throw new EntityEditForbidden(Tag.class);
-        }
-
-        Collection<Metric> newMetrics = findNewMetrics(tag.metrics());
-        Collection<Metric> deletedMetrics = findDeletedMetrics(tag.metrics());
-        Collection<Metric> updatedMetrics = findUpdatedMetrics(tag.metrics());
-
-        this.name = tag.name();
-        this.metrics.clear();
-        this.metrics.addAll(newMetrics);
-        this.metrics.addAll(deletedMetrics);
-        this.metrics.addAll(updatedMetrics);
-        validate();
-    }
-
     public static Tag fromStorage(TagDto tag) {
         List<Metric> metrics = tag.metrics().stream()
                 .map(Metric::fromStorage)
@@ -159,17 +143,6 @@ public class Tag implements Entity {
 
     public TagDto forStorage() {
         List<MetricDto> metrics = this.metrics.stream()
-                .map(Metric::forStorage)
-                .toList();
-        return new TagDto(id.id(), creator.id(), name, metrics, shares, deleted);
-    }
-
-    public TagDto forClient(User client) {
-        if (isNotAccessibleFor(client)) {
-            throw new EntityNotFoundException(Tag.class, this.id.id());
-        }
-        List<MetricDto> metrics = this.metrics.stream()
-                .filter(Metric::isNotDeleted)
                 .map(Metric::forStorage)
                 .toList();
         return new TagDto(id.id(), creator.id(), name, metrics, shares, deleted);
@@ -202,14 +175,6 @@ public class Tag implements Entity {
                 .anyMatch(isEqual(user));
     }
 
-    boolean isNotAccessibleFor(User user) {
-        return !isAccessibleFor(user);
-    }
-
-    private boolean isEditForbiddenFor(User user) {
-        return !creator.equals(user);
-    }
-
     @Override
     public void validate() {
         validator.validate(this);
@@ -217,51 +182,6 @@ public class Tag implements Entity {
 
     String name() {
         return name;
-    }
-
-    private Collection<Metric> findUpdatedMetrics(Collection<MetricDto> requestedMetrics) {
-        return requireNonNullElse(requestedMetrics, new ArrayList<MetricDto>())
-                .stream()
-                .map(this::toUpdatedMetric)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .toList();
-    }
-
-    private Optional<Metric> toUpdatedMetric(MetricDto metricDto) {
-        Optional<Metric> metricForUpdate = this.metrics.stream()
-                .filter(Metric::isNotDeleted)
-                .filter(metric -> metric.id().id().equals(metricDto.id()))
-                .findAny();
-        metricForUpdate.ifPresent(metric -> metric.updateTo(metricDto));
-        return metricForUpdate;
-    }
-
-    private Collection<Metric> findDeletedMetrics(Collection<MetricDto> requestedMetrics) {
-        List<UUID> requestedMetricIds = requireNonNullElse(requestedMetrics, new ArrayList<MetricDto>())
-                .stream()
-                .map(MetricDto::id)
-                .filter(Objects::nonNull)
-                .toList();
-        List<Metric> deletedMetrics = this.metrics.stream()
-                .filter(metric -> metric.isDeleted() || !requestedMetricIds.contains(metric.id().id()))
-                .toList();
-        deletedMetrics.forEach(Metric::delete);
-
-        return deletedMetrics;
-    }
-
-    private Collection<Metric> findNewMetrics(Collection<MetricDto> requestedMetrics) {
-        List<UUID> existingMetricIds = this.metrics.stream()
-                .filter(Metric::isNotDeleted)
-                .map(Metric::id)
-                .map(MetricId::id)
-                .toList();
-        return requireNonNullElse(requestedMetrics, new ArrayList<MetricDto>())
-                .stream()
-                .filter(metric -> !existingMetricIds.contains(metric.id()))
-                .map(metric -> Metric.create(metric, this.creator))
-                .toList();
     }
 
     @Override
