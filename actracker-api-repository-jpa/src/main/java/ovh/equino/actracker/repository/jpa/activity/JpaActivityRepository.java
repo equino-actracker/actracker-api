@@ -6,13 +6,9 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivityRepository;
-import ovh.equino.actracker.domain.activity.MetricValue;
-import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaDAO;
-import ovh.equino.actracker.repository.jpa.tag.MetricEntity;
 
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -92,30 +88,6 @@ class JpaActivityRepository extends JpaDAO implements ActivityRepository {
         TypedQuery<ActivityEntity> typedQuery = entityManager
                 .createQuery(query)
                 .setMaxResults(searchCriteria.pageSize());
-
-        return typedQuery.getResultList().stream()
-                .map(mapper::toDto)
-                .toList();
-    }
-
-    @Override
-    public List<ActivityDto> findUnfinishedStartedBefore(Instant startTime, User user) {
-
-        Timestamp startTimestamp = isNull(startTime) ? null : Timestamp.from(startTime);
-
-        ActivityQueryBuilder queryBuilder = new ActivityQueryBuilder(entityManager);
-
-        CriteriaQuery<ActivityEntity> query = queryBuilder.select()
-                .where(
-                        queryBuilder.and(
-                                queryBuilder.isAccessibleFor(user),
-                                queryBuilder.isStartedBeforeOrAt(startTimestamp),
-                                queryBuilder.isNotFinished(),
-                                queryBuilder.isNotDeleted()
-                        )
-                );
-
-        TypedQuery<ActivityEntity> typedQuery = entityManager.createQuery(query);
 
         return typedQuery.getResultList().stream()
                 .map(mapper::toDto)
