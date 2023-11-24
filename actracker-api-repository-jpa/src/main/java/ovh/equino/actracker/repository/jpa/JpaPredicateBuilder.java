@@ -49,6 +49,10 @@ public abstract class JpaPredicateBuilder<E> {
     }
 
     public JpaPredicate isAccessibleFor(User searcher) {
+        return isOwner(searcher);
+    }
+
+    public JpaPredicate isOwner(User searcher) {
         return () -> criteriaBuilder.equal(
                 root.get("creatorId"),
                 searcher.id().toString()
