@@ -2,7 +2,7 @@ package ovh.equino.actracker.main.springboot.configuration.security;
 
 import org.springframework.stereotype.Repository;
 import ovh.equino.actracker.domain.tenant.TenantDto;
-import ovh.equino.actracker.domain.tenant.TenantRepository;
+import ovh.equino.actracker.domain.tenant.TenantDataSource;
 import ovh.equino.security.spring.basic.identity.Identity;
 import ovh.equino.security.spring.basic.identity.IdentityRepository;
 
@@ -11,15 +11,15 @@ import java.util.Optional;
 @Repository
 class ActrackerIdentityRepository implements IdentityRepository {
 
-    private final TenantRepository tenantRepository;
+    private final TenantDataSource tenantDataSource;
 
-    ActrackerIdentityRepository(TenantRepository tenantRepository) {
-        this.tenantRepository = tenantRepository;
+    ActrackerIdentityRepository(TenantDataSource tenantDataSource) {
+        this.tenantDataSource = tenantDataSource;
     }
 
     @Override
     public Optional<Identity> loadByUsername(String username) {
-        return tenantRepository.findByUsername(username)
+        return tenantDataSource.findByUsername(username)
                 .map(this::toIdentity);
     }
 

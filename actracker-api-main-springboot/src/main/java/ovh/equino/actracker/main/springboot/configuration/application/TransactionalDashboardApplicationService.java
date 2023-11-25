@@ -8,7 +8,7 @@ import ovh.equino.actracker.domain.dashboard.DashboardNotifier;
 import ovh.equino.actracker.domain.dashboard.DashboardRepository;
 import ovh.equino.actracker.domain.dashboard.DashboardSearchEngine;
 import ovh.equino.actracker.domain.dashboard.generation.DashboardGenerationEngine;
-import ovh.equino.actracker.domain.tenant.TenantRepository;
+import ovh.equino.actracker.domain.tenant.TenantDataSource;
 import ovh.equino.security.identity.IdentityProvider;
 
 @Transactional
@@ -20,7 +20,7 @@ class TransactionalDashboardApplicationService extends DashboardApplicationServi
                                              DashboardSearchEngine dashboardSearchEngine,
                                              DashboardGenerationEngine dashboardGenerationEngine,
                                              DashboardNotifier dashboardNotifier,
-                                             TenantRepository tenantRepository,
+                                             TenantDataSource tenantDataSource,
                                              IdentityProvider identityProvider) {
 
         super(
@@ -29,7 +29,7 @@ class TransactionalDashboardApplicationService extends DashboardApplicationServi
                 dashboardSearchEngine,
                 dashboardGenerationEngine,
                 dashboardNotifier,
-                tenantRepository,
+                tenantDataSource,
                 identityProvider
         );
     }
