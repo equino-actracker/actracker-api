@@ -424,6 +424,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
 
         testConfiguration.activities.add(newActivity(searcherTenant)
                 .named("inaccessibleOwnDeletedActivity")
+                .startedAt(40)
                 .deleted()
                 .build());
 

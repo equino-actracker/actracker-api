@@ -151,6 +151,7 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
                 .where(
                         selectActivities.predicate().and(
                                 selectActivities.predicate().isOwner(owner),
+                                selectActivities.predicate().isNotDeleted(),
                                 selectActivities.predicate().isStarted(),
                                 selectActivities.predicate().isStartedBeforeOrAt(Timestamp.from(startTime)),
                                 selectActivities.predicate().isNotFinished()
