@@ -59,7 +59,8 @@ abstract class JpaTenantDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @BeforeAll
     static void setUp() {
-        testConfiguration.addUser(newUser().named("existingUser").build());
+        testConfiguration.addUser(newUser().named("existingUser1").build());
+        testConfiguration.addUser(newUser().named("existingUser2").build());
         testConfiguration.addTransientUser(newUser().named("nonExistingUser").build());
     }
 }
