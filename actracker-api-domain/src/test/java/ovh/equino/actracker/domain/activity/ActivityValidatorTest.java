@@ -125,7 +125,7 @@ class ActivityValidatorTest {
                 validator
         );
         List<String> validationErrors = List.of(
-                NOT_EXISTING_TAGS_ERROR.formatted(singleton(nonExistingTag))
+                NOT_EXISTING_TAGS_ERROR.formatted(singleton(nonExistingTag.id()))
         );
 
         // then
@@ -159,7 +159,7 @@ class ActivityValidatorTest {
                 validator
         );
         List<String> validationErrors = List.of(
-                NOT_EXISTING_METRICS_ERROR.formatted(singleton(nonExistingMetric))
+                NOT_EXISTING_METRICS_ERROR.formatted(singleton(nonExistingMetric.id()))
         );
 
         // then
@@ -198,8 +198,8 @@ class ActivityValidatorTest {
         );
         List<String> validationErrors = List.of(
                 END_BEFORE_START_ERROR,
-                NOT_EXISTING_TAGS_ERROR.formatted(singleton(nonExistingTag)),
-                NOT_EXISTING_METRICS_ERROR.formatted(singleton(nonExistingMetric))
+                NOT_EXISTING_TAGS_ERROR.formatted(singleton(nonExistingTag.id())),
+                NOT_EXISTING_METRICS_ERROR.formatted(singleton(nonExistingMetric.id()))
         );
 
         // then

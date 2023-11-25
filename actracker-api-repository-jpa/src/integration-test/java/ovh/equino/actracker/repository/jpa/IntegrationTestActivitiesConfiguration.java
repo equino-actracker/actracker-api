@@ -90,6 +90,16 @@ public final class IntegrationTestActivitiesConfiguration {
         return matchingActivities;
     }
 
+    public List<ActivityDto> accessibleOwnUnfinishedStartedBefore(User user, Instant startTime) {
+        return accessibleFor(user)
+                .stream()
+                .filter(activity -> isOwner(user, activity))
+                .filter(activity -> nonNull(activity.startTime()))
+                .filter(activity -> isNull(activity.endTime()))
+                .filter(activity -> activity.startTime().isBefore(startTime))
+                .toList();
+    }
+
     public List<ActivityDto> inaccessibleFor(User user) {
         List<UUID> accessibleActivities = accessibleFor(user)
                 .stream()

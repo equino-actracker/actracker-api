@@ -126,20 +126,10 @@ public class ActivityApplicationService {
         Instant switchTime = newActivity.isStarted() ? newActivity.startTime() : now();
         newActivity.start(switchTime, switcher);
 
-        List<Activity> activitiesToFinish = activityRepository.findUnfinishedStartedBefore(switchTime, switcher).stream()
-                .map(activity -> Activity.fromStorage(activity, tagsExistenceVerifier, metricsExistenceVerifier))
-                .toList();
-
-        activitiesToFinish.forEach(activity -> activity.finish(switchTime, switcher));
-        activitiesToFinish.stream()
-                .map(Activity::forStorage)
-                .forEach(activity -> activityRepository.update(activity.id(), activity));
+        List<ActivityId> activitiesToFinish = activityDataSource.findOwnUnfinishedStartedBefore(switchTime, switcher);
+        finishAllAt(switchTime, activitiesToFinish, switcher, tagsExistenceVerifier, metricsExistenceVerifier);
 
         activityRepository.add(newActivity.forStorage());
-
-        activitiesToFinish.stream()
-                .map(Activity::forChangeNotification)
-                .forEach(activityNotifier::notifyChanged);
         activityNotifier.notifyChanged(newActivity.forChangeNotification());
 
         return activityDataSource.find(newActivity.id(), switcher)
@@ -148,6 +138,25 @@ public class ActivityApplicationService {
                     String message = "Could not find created activity with ID=%s".formatted(newActivity.id());
                     return new RuntimeException(message);
                 });
+    }
+
+    private void finishAllAt(Instant switchTime,
+                             List<ActivityId> activitiesToFinish,
+                             User switcher,
+                             TagsExistenceVerifier tagsExistenceVerifier,
+                             MetricsExistenceVerifier metricsExistenceVerifier) {
+
+        for (ActivityId activityId : activitiesToFinish) {
+            Activity activityToFinish = activityRepository.findById(activityId.id())
+                    .map(activity -> Activity.fromStorage(activity, tagsExistenceVerifier, metricsExistenceVerifier))
+                    .orElseThrow(() -> {
+                        String message = "Could not find activity to stop with ID=%s".formatted(activityId.id());
+                        return new RuntimeException(message);
+                    });
+            activityToFinish.finish(switchTime, switcher);
+            activityRepository.update(activityId.id(), activityToFinish.forStorage());
+            activityNotifier.notifyChanged(activityToFinish.forChangeNotification());
+        }
     }
 
     public ActivityResult renameActivity(String newTitle, UUID activityId) {
