@@ -3,12 +3,21 @@ package ovh.equino.actracker.repository.jpa.activity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaQuery;
+import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivityRepository;
+import ovh.equino.actracker.domain.activity.MetricValue;
+import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaDAO;
+import ovh.equino.actracker.repository.jpa.tag.MetricEntity;
 
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import static java.util.Objects.isNull;
 
 class JpaActivityRepository extends JpaDAO implements ActivityRepository {
 
@@ -53,5 +62,63 @@ class JpaActivityRepository extends JpaDAO implements ActivityRepository {
         return typedQuery.getResultList().stream()
                 .findFirst()
                 .map(mapper::toDto);
+    }
+
+    @Override
+    public List<ActivityDto> find(EntitySearchCriteria searchCriteria) {
+
+        Timestamp timeRangeStart = isNull(searchCriteria.timeRangeStart())
+                ? null
+                : Timestamp.from(searchCriteria.timeRangeStart());
+        Timestamp timeRangeEnd = isNull(searchCriteria.timeRangeEnd())
+                ? null
+                : Timestamp.from(searchCriteria.timeRangeEnd());
+
+        ActivityQueryBuilder queryBuilder = new ActivityQueryBuilder(entityManager);
+
+        CriteriaQuery<ActivityEntity> query = queryBuilder.select()
+                .where(
+                        queryBuilder.and(
+                                queryBuilder.isAccessibleFor(searchCriteria.searcher()),
+                                queryBuilder.isNotDeleted(),
+                                queryBuilder.isInTimeRange(timeRangeStart, timeRangeEnd),
+                                queryBuilder.hasAnyOfTag(searchCriteria.tags()),
+                                queryBuilder.isInPage(searchCriteria.pageId()),
+                                queryBuilder.isNotExcluded(searchCriteria.excludeFilter())
+                        )
+                )
+                .orderBy(queryBuilder.sortingSequence(searchCriteria.sortCriteria()));
+
+        TypedQuery<ActivityEntity> typedQuery = entityManager
+                .createQuery(query)
+                .setMaxResults(searchCriteria.pageSize());
+
+        return typedQuery.getResultList().stream()
+                .map(mapper::toDto)
+                .toList();
+    }
+
+    @Override
+    public List<ActivityDto> findUnfinishedStartedBefore(Instant startTime, User user) {
+
+        Timestamp startTimestamp = isNull(startTime) ? null : Timestamp.from(startTime);
+
+        ActivityQueryBuilder queryBuilder = new ActivityQueryBuilder(entityManager);
+
+        CriteriaQuery<ActivityEntity> query = queryBuilder.select()
+                .where(
+                        queryBuilder.and(
+                                queryBuilder.isAccessibleFor(user),
+                                queryBuilder.isStartedBeforeOrAt(startTimestamp),
+                                queryBuilder.isNotFinished(),
+                                queryBuilder.isNotDeleted()
+                        )
+                );
+
+        TypedQuery<ActivityEntity> typedQuery = entityManager.createQuery(query);
+
+        return typedQuery.getResultList().stream()
+                .map(mapper::toDto)
+                .toList();
     }
 }

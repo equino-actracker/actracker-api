@@ -3,10 +3,12 @@ package ovh.equino.actracker.repository.jpa.dashboard;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaQuery;
+import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
 import ovh.equino.actracker.domain.dashboard.DashboardRepository;
 import ovh.equino.actracker.repository.jpa.JpaDAO;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -49,4 +51,29 @@ class JpaDashboardRepository extends JpaDAO implements DashboardRepository {
                 .findFirst()
                 .map(mapper::toDto);
     }
+
+    @Override
+    public List<DashboardDto> find(EntitySearchCriteria searchCriteria) {
+        DashboardQueryBuilder queryBuilder = new DashboardQueryBuilder(entityManager);
+
+        CriteriaQuery<DashboardEntity> query = queryBuilder.select()
+                .where(
+                        queryBuilder.and(
+                                queryBuilder.isAccessibleFor(searchCriteria.searcher()),
+                                queryBuilder.isNotDeleted(),
+                                queryBuilder.isInPage(searchCriteria.pageId()),
+                                queryBuilder.isNotExcluded(searchCriteria.excludeFilter())
+                        )
+                )
+                .orderBy(queryBuilder.ascending("id"));
+
+        TypedQuery<DashboardEntity> typedQuery = entityManager
+                .createQuery(query)
+                .setMaxResults(searchCriteria.pageSize());
+
+        return typedQuery.getResultList().stream()
+                .map(mapper::toDto)
+                .toList();
+    }
+
 }

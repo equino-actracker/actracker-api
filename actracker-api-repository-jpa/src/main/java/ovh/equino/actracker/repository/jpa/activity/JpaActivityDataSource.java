@@ -10,7 +10,6 @@ import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaDAO;
 
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.*;
 
 import static java.util.Collections.emptyList;
@@ -140,25 +139,6 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
                         tagsByActivityId.getOrDefault(result.id(), emptySet()),
                         metricValues.getOrDefault(result.id(), emptyList())
                 ))
-                .toList();
-    }
-
-    @Override
-    public List<ActivityId> findOwnUnfinishedStartedBefore(Instant startTime, User owner) {
-
-        SelectActivitiesQuery selectActivities = new SelectActivitiesQuery(entityManager);
-        return selectActivities
-                .where(
-                        selectActivities.predicate().and(
-                                selectActivities.predicate().isOwner(owner),
-                                selectActivities.predicate().isStarted(),
-                                selectActivities.predicate().isStartedBeforeOrAt(Timestamp.from(startTime)),
-                                selectActivities.predicate().isNotFinished()
-                        )
-                )
-                .execute()
-                .stream()
-                .map(result -> new ActivityId(UUID.fromString(result.id())))
                 .toList();
     }
 }
