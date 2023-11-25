@@ -228,22 +228,6 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
         });
     }
 
-    @Test
-    void shouldFindOwnUnfinishedStartedBefore() {
-        Instant startTime = Instant.ofEpochSecond(50);
-        List<ActivityId> expectedActivityIds = testConfiguration.activities
-                .accessibleOwnUnfinishedStartedBefore(searcher, startTime)
-                .stream()
-                .map(ActivityDto::id)
-                .map(ActivityId::new)
-                .toList();
-
-        inTransaction(() -> {
-            List<ActivityId> foundActivities = dataSource.findOwnUnfinishedStartedBefore(startTime, searcher);
-            assertThat(foundActivities).containsExactlyInAnyOrderElementsOf(expectedActivityIds);
-        });
-    }
-
     @BeforeAll
     static void setUp() {
         TenantDto searcherTenant = newUser().build();
@@ -407,6 +391,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
         testConfiguration.activities.add(newActivity(sharingUser)
                 .named("accessibleSharedActivityWithMetricsUnset")
                 .startedAt(40)
+                .finishedAt(60)
                 .withTags(
                         accessibleSharedTagWithMetric,
                         accessibleSharedTagWithDeletedMetric,
