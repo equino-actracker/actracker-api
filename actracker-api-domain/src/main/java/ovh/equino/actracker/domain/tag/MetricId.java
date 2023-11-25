@@ -16,9 +16,4 @@ public record MetricId(
     public MetricId() {
         this(randomUUID());
     }
-
-    @Override
-    public String toString() {
-        return id.toString();
-    }
 }

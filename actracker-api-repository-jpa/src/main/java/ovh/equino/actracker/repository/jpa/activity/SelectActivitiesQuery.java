@@ -72,7 +72,7 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
         return ActivityProjection.class;
     }
 
-    public class PredicateBuilder extends JpaPredicateBuilder<ActivityEntity> {
+    final class PredicateBuilder extends JpaPredicateBuilder<ActivityEntity> {
         private PredicateBuilder() {
             super(criteriaBuilder, root);
         }
@@ -87,20 +87,28 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
             return and(startTimeInRange, endTimeInRange);
         }
 
-        private JpaPredicate isStartedAfter(Timestamp timeRangeEnd) {
-            return () -> criteriaBuilder.greaterThan(root.get("startTime"), timeRangeEnd);
+        JpaPredicate isStartedBeforeOrAt(Timestamp startTime) {
+            return () -> criteriaBuilder.lessThanOrEqualTo(root.get("startTime"), startTime);
         }
 
-        private JpaPredicate isFinishedBefore(Timestamp timeRangeStart) {
-            return () -> criteriaBuilder.lessThan(root.get("endTime"), timeRangeStart);
+        private JpaPredicate isStartedAfter(Timestamp startTime) {
+            return () -> criteriaBuilder.greaterThan(root.get("startTime"), startTime);
+        }
+
+        private JpaPredicate isFinishedBefore(Timestamp endTime) {
+            return () -> criteriaBuilder.lessThan(root.get("endTime"), endTime);
         }
 
         private JpaPredicate isFinished() {
             return () -> criteriaBuilder.isNotNull(root.get("endTime"));
         }
 
-        private JpaPredicate isStarted() {
+        JpaPredicate isStarted() {
             return () -> criteriaBuilder.isNotNull(root.get("startTime"));
+        }
+
+        JpaPredicate isNotFinished() {
+            return not(isFinished());
         }
 
         @Override

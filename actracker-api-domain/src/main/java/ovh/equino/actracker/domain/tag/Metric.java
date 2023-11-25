@@ -1,10 +1,8 @@
 package ovh.equino.actracker.domain.tag;
 
 import ovh.equino.actracker.domain.Entity;
-import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.user.User;
 
-import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 
 class Metric implements Entity {
@@ -43,14 +41,6 @@ class Metric implements Entity {
         this.deleted = true;
     }
 
-    void updateTo(MetricDto metric) {
-        this.name = metric.name();
-        if (metric.type() != this.type) {
-            throw new EntityInvalidException(Metric.class, singletonList("Metric type cannot be changed."));
-        }
-        validate();
-    }
-
     static Metric fromStorage(MetricDto metric) {
         return new Metric(
                 new MetricId(metric.id()),
@@ -62,16 +52,6 @@ class Metric implements Entity {
     }
 
     MetricDto forStorage() {
-        return new MetricDto(
-                id.id(),
-                creator.id(),
-                name,
-                type,
-                deleted
-        );
-    }
-
-    MetricDto forClient() {
         return new MetricDto(
                 id.id(),
                 creator.id(),
