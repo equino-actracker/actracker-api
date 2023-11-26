@@ -7,6 +7,8 @@ import ovh.equino.actracker.repository.jpa.JpaDAO;
 
 import java.util.List;
 
+import static java.util.stream.Collectors.toList;
+
 class JpaNotificationDataSource extends JpaDAO implements NotificationDataSource {
 
     JpaNotificationDataSource(EntityManager entityManager) {
@@ -15,6 +17,12 @@ class JpaNotificationDataSource extends JpaDAO implements NotificationDataSource
 
     @Override
     public List<Notification<?>> getPage(int limit) {
-        throw new RuntimeException("not implemented yet");
+        return new SelectNotificationsQuery(entityManager)
+                .limit(limit)
+                .execute()
+                .stream()
+                .map(NotificationProjection::toNotification)
+                .collect(toList());
+
     }
 }
