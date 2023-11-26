@@ -13,6 +13,4 @@ public interface NotificationRepository {
     Optional<Notification<?>> findById(UUID notificationId);
 
     void delete(UUID notificationId);
-
-    List<Notification<?>> getPage(int limit);
 }

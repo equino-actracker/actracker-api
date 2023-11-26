@@ -31,23 +31,6 @@ class JpaNotificationRepository extends JpaDAO implements NotificationRepository
     }
 
     @Override
-    public List<Notification<?>> getPage(int limit) {
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<NotificationEntity> criteriaQuery = criteriaBuilder.createQuery(NotificationEntity.class);
-        Root<NotificationEntity> rootEntity = criteriaQuery.from(NotificationEntity.class);
-
-        criteriaQuery
-                .select(rootEntity);
-
-        return entityManager.createQuery(criteriaQuery)
-                .setMaxResults(limit)
-                .getResultList()
-                .stream()
-                .map(notificationMapper::toDto)
-                .collect(toList());
-    }
-
-    @Override
     public Optional<Notification<?>> findById(UUID notificationId) {
         NotificationEntity notificationEntity = entityManager.find(NotificationEntity.class, notificationId.toString());
         if(isNull(notificationEntity)) {

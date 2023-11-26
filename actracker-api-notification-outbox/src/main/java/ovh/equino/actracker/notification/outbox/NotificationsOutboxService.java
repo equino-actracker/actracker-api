@@ -18,9 +18,7 @@ public class NotificationsOutboxService {
     }
 
     public void publishOutboxedNotifications(int messagesCount) {
-        // TODO
-//        notificationDataSource.getPage(messagesCount)
-        notificationRepository.getPage(messagesCount)
+        notificationDataSource.getPage(messagesCount)
                 .forEach(this::publishAndDelete);
     }
 
