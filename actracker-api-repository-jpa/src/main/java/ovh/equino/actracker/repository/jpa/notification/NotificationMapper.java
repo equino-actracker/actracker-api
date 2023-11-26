@@ -1,4 +1,4 @@
-package ovh.equino.actracker.repository.jpa.outbox;
+package ovh.equino.actracker.repository.jpa.notification;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

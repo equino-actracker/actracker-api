@@ -1,4 +1,4 @@
-package ovh.equino.actracker.repository.jpa.outbox;
+package ovh.equino.actracker.repository.jpa.notification;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
