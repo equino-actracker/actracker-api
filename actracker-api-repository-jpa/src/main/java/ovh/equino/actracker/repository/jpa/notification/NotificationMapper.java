@@ -1,29 +1,17 @@
 package ovh.equino.actracker.repository.jpa.notification;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import ovh.equino.actracker.domain.Notification;
-
-import java.util.UUID;
+import ovh.equino.actracker.domain.exception.ParseException;
 
 class NotificationMapper {
 
-    private final ObjectMapper objectMapper;
-
     NotificationMapper() {
-        objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
     }
 
     Notification<?> toDto(NotificationEntity entity) {
         try {
-            Object data = objectMapper.readValue(
-                    entity.data,
-                    Class.forName(entity.dataType)
-            );
-            return new Notification<>(UUID.fromString(entity.id), entity.version, data);
-        } catch (JsonProcessingException | ClassNotFoundException e) {
+            return Notification.fromJson(entity.data);
+        } catch (ParseException e) {
             throw new RuntimeException(e);
         }
     }
@@ -32,10 +20,10 @@ class NotificationMapper {
         try {
             NotificationEntity entity = new NotificationEntity();
             entity.id = dto.id().toString();
-            entity.data = objectMapper.writeValueAsString(dto.data());
+            entity.data = dto.toJson();
             entity.dataType = dto.notificationType().getCanonicalName();
             return entity;
-        } catch (JsonProcessingException e) {
+        } catch (ParseException e) {
             throw new RuntimeException(e);
         }
     }
