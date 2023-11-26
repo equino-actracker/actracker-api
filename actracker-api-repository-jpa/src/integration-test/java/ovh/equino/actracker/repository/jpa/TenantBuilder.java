@@ -13,6 +13,15 @@ public final class TenantBuilder {
         newTenant = new TenantDto(nextUUID(), randomString(), randomString());
     }
 
+    public TenantBuilder named(String name) {
+        newTenant = new TenantDto(
+                newTenant.id(),
+                name,
+                newTenant.password()
+        );
+        return this;
+    }
+
     public TenantDto build() {
         return newTenant;
     }

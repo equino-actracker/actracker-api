@@ -6,7 +6,7 @@ import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tag.*;
-import ovh.equino.actracker.domain.tenant.TenantRepository;
+import ovh.equino.actracker.domain.tenant.TenantDataSource;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.security.identity.Identity;
 import ovh.equino.security.identity.IdentityProvider;
@@ -24,21 +24,21 @@ public class TagApplicationService {
     private final TagSearchEngine tagSearchEngine;
     private final TagNotifier tagNotifier;
     private final IdentityProvider identityProvider;
-    private final TenantRepository tenantRepository;
+    private final TenantDataSource tenantDataSource;
 
     public TagApplicationService(TagRepository tagRepository,
                                  TagDataSource tagDataSource,
                                  TagSearchEngine tagSearchEngine,
                                  TagNotifier tagNotifier,
                                  IdentityProvider identityProvider,
-                                 TenantRepository tenantRepository) {
+                                 TenantDataSource tenantDataSource) {
 
         this.tagRepository = tagRepository;
         this.tagDataSource = tagDataSource;
         this.tagSearchEngine = tagSearchEngine;
         this.tagNotifier = tagNotifier;
         this.identityProvider = identityProvider;
-        this.tenantRepository = tenantRepository;
+        this.tenantDataSource = tenantDataSource;
     }
 
     public TagResult createTag(CreateTagCommand createTagCommand) {
@@ -258,7 +258,7 @@ public class TagApplicationService {
     }
 
     private Share resolveShare(String grantee) {
-        return tenantRepository.findByUsername(grantee)
+        return tenantDataSource.findByUsername(grantee)
                 .map(tenant -> new Share(
                         new User(tenant.id()),
                         tenant.username()

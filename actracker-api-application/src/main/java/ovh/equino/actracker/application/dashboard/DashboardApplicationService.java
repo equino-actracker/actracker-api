@@ -7,7 +7,7 @@ import ovh.equino.actracker.domain.dashboard.*;
 import ovh.equino.actracker.domain.dashboard.generation.*;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.share.Share;
-import ovh.equino.actracker.domain.tenant.TenantRepository;
+import ovh.equino.actracker.domain.tenant.TenantDataSource;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.security.identity.Identity;
 import ovh.equino.security.identity.IdentityProvider;
@@ -26,7 +26,7 @@ public class DashboardApplicationService {
     private final DashboardSearchEngine dashboardSearchEngine;
     private final DashboardGenerationEngine dashboardGenerationEngine;
     private final DashboardNotifier dashboardNotifier;
-    private final TenantRepository tenantRepository;
+    private final TenantDataSource tenantDataSource;
     private final IdentityProvider identityProvider;
 
     public DashboardApplicationService(DashboardRepository dashboardRepository,
@@ -34,7 +34,7 @@ public class DashboardApplicationService {
                                        DashboardSearchEngine dashboardSearchEngine,
                                        DashboardGenerationEngine dashboardGenerationEngine,
                                        DashboardNotifier dashboardNotifier,
-                                       TenantRepository tenantRepository,
+                                       TenantDataSource tenantDataSource,
                                        IdentityProvider identityProvider) {
 
         this.dashboardRepository = dashboardRepository;
@@ -42,7 +42,7 @@ public class DashboardApplicationService {
         this.dashboardSearchEngine = dashboardSearchEngine;
         this.dashboardGenerationEngine = dashboardGenerationEngine;
         this.dashboardNotifier = dashboardNotifier;
-        this.tenantRepository = tenantRepository;
+        this.tenantDataSource = tenantDataSource;
         this.identityProvider = identityProvider;
     }
 
@@ -254,7 +254,7 @@ public class DashboardApplicationService {
 
 
     private Share resolveShare(String grantee) {
-        return tenantRepository.findByUsername(grantee)
+        return tenantDataSource.findByUsername(grantee)
                 .map(tenant -> new Share(
                         new User(tenant.id()),
                         tenant.username()

@@ -11,7 +11,7 @@ import ovh.equino.actracker.domain.tag.TagDataSource;
 import ovh.equino.actracker.domain.tag.TagNotifier;
 import ovh.equino.actracker.domain.tag.TagRepository;
 import ovh.equino.actracker.domain.tag.TagSearchEngine;
-import ovh.equino.actracker.domain.tenant.TenantRepository;
+import ovh.equino.actracker.domain.tenant.TenantDataSource;
 import ovh.equino.security.identity.IdentityProvider;
 
 import java.util.List;
@@ -27,9 +27,9 @@ class TransactionalTagApplicationService extends TagApplicationService {
                                        TagSearchEngine tagSearchEngine,
                                        TagNotifier tagNotifier,
                                        IdentityProvider identityProvider,
-                                       TenantRepository tenantRepository) {
+                                       TenantDataSource tenantDataSource) {
 
-        super(tagRepository, tagDataSource, tagSearchEngine, tagNotifier, identityProvider, tenantRepository);
+        super(tagRepository, tagDataSource, tagSearchEngine, tagNotifier, identityProvider, tenantDataSource);
     }
 
     @Override
