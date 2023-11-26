@@ -3,12 +3,16 @@ package ovh.equino.actracker.repository.jpa.notification;
 import ovh.equino.actracker.domain.Notification;
 import ovh.equino.actracker.domain.exception.ParseException;
 
-record NotificationProjection(String data) {
+import java.util.UUID;
+
+record NotificationProjection(String id, Long version, String dataType, String data) {
 
     Notification<?> toNotification() {
         try {
-            return Notification.fromJson(data);
-        } catch (ParseException e) {
+            Class<?> notificationType = Class.forName(dataType);
+            Object deserializedData = Notification.fromJsonData(data, notificationType);
+            return new Notification<>(UUID.fromString(id), version, deserializedData, notificationType);
+        } catch (ParseException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
     }

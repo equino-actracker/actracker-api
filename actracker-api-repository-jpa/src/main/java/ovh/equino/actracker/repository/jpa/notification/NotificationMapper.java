@@ -3,6 +3,8 @@ package ovh.equino.actracker.repository.jpa.notification;
 import ovh.equino.actracker.domain.Notification;
 import ovh.equino.actracker.domain.exception.ParseException;
 
+import java.util.UUID;
+
 class NotificationMapper {
 
     NotificationMapper() {
@@ -10,8 +12,10 @@ class NotificationMapper {
 
     Notification<?> toDto(NotificationEntity entity) {
         try {
-            return Notification.fromJson(entity.data);
-        } catch (ParseException e) {
+            Class<?> notificationType = Class.forName(entity.dataType);
+            Object data = Notification.fromJsonData(entity.data, notificationType);
+            return new Notification<>(UUID.fromString(entity.id), entity.version, data, notificationType);
+        } catch (ParseException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
@@ -20,7 +24,7 @@ class NotificationMapper {
         try {
             NotificationEntity entity = new NotificationEntity();
             entity.id = dto.id().toString();
-            entity.data = dto.toJson();
+            entity.data = dto.toJsonData();
             entity.dataType = dto.notificationType().getCanonicalName();
             return entity;
         } catch (ParseException e) {

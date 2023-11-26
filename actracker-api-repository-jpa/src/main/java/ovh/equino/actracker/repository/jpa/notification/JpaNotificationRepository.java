@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.toList;
 
 class JpaNotificationRepository extends JpaDAO implements NotificationRepository {
@@ -26,6 +27,7 @@ class JpaNotificationRepository extends JpaDAO implements NotificationRepository
     public void save(Notification<?> notification) {
         NotificationEntity notificationEntity = notificationMapper.toEntity(notification);
         entityManager.merge(notificationEntity);
+        entityManager.flush();  // TODO ?there is something wrong with transactionality if this needs to be called?
     }
 
     @Override
@@ -48,16 +50,17 @@ class JpaNotificationRepository extends JpaDAO implements NotificationRepository
     @Override
     public Optional<Notification<?>> findById(UUID notificationId) {
         NotificationEntity notificationEntity = entityManager.find(NotificationEntity.class, notificationId.toString());
-        entityManager.detach(notificationEntity);
-        return Optional.ofNullable(notificationEntity)
+        if(isNull(notificationEntity)) {
+            return Optional.empty();
+        }
+        entityManager.refresh(notificationEntity); // TODO ?there is something wrong with transactionality if this needs to be called?
+        return Optional.of(notificationEntity)
                 .map(notificationMapper::toDto);
     }
 
     @Override
     public void delete(UUID notificationId) {
-        NotificationEntity notificationToDelete = this.findById(notificationId)
-                .map(notificationMapper::toEntity)
-                .orElseThrow();
-        entityManager.remove(notificationToDelete);
+        NotificationEntity notification = entityManager.find(NotificationEntity.class, notificationId.toString());
+        entityManager.remove(notification);
     }
 }
