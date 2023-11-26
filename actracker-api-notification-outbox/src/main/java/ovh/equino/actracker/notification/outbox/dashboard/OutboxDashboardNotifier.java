@@ -3,14 +3,14 @@ package ovh.equino.actracker.notification.outbox.dashboard;
 import ovh.equino.actracker.domain.Notification;
 import ovh.equino.actracker.domain.dashboard.DashboardChangedNotification;
 import ovh.equino.actracker.domain.dashboard.DashboardNotifier;
-import ovh.equino.actracker.notification.outbox.NotificationsOutboxRepository;
+import ovh.equino.actracker.notification.outbox.NotificationRepository;
 
 class OutboxDashboardNotifier implements DashboardNotifier {
 
-    private final NotificationsOutboxRepository outbox;
+    private final NotificationRepository notificationRepository;
 
-    OutboxDashboardNotifier(NotificationsOutboxRepository outbox) {
-        this.outbox = outbox;
+    OutboxDashboardNotifier(NotificationRepository notificationRepository) {
+        this.notificationRepository = notificationRepository;
     }
 
     @Override
@@ -19,6 +19,6 @@ class OutboxDashboardNotifier implements DashboardNotifier {
                 dashboardChangedNotification.id(),
                 dashboardChangedNotification
         );
-        outbox.save(notification);
+        notificationRepository.save(notification);
     }
 }

@@ -3,14 +3,14 @@ package ovh.equino.actracker.notification.outbox.tagset;
 import ovh.equino.actracker.domain.Notification;
 import ovh.equino.actracker.domain.tagset.TagSetChangedNotification;
 import ovh.equino.actracker.domain.tagset.TagSetNotifier;
-import ovh.equino.actracker.notification.outbox.NotificationsOutboxRepository;
+import ovh.equino.actracker.notification.outbox.NotificationRepository;
 
 class OutboxTagSetNotifier implements TagSetNotifier {
 
-    private final NotificationsOutboxRepository outbox;
+    private final NotificationRepository notificationRepository;
 
-    OutboxTagSetNotifier(NotificationsOutboxRepository outbox) {
-        this.outbox = outbox;
+    OutboxTagSetNotifier(NotificationRepository notificationRepository) {
+        this.notificationRepository = notificationRepository;
     }
 
     @Override
@@ -19,6 +19,6 @@ class OutboxTagSetNotifier implements TagSetNotifier {
                 tagSetChangedNotification.id(),
                 tagSetChangedNotification
         );
-        outbox.save(notification);
+        notificationRepository.save(notification);
     }
 }

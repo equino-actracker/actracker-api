@@ -8,8 +8,9 @@ import ovh.equino.actracker.domain.activity.ActivityNotifier;
 import ovh.equino.actracker.domain.dashboard.DashboardNotifier;
 import ovh.equino.actracker.domain.tag.TagNotifier;
 import ovh.equino.actracker.domain.tagset.TagSetNotifier;
+import ovh.equino.actracker.notification.outbox.NotificationDataSource;
 import ovh.equino.actracker.notification.outbox.NotificationPublisher;
-import ovh.equino.actracker.notification.outbox.NotificationsOutboxRepository;
+import ovh.equino.actracker.notification.outbox.NotificationRepository;
 import ovh.equino.actracker.notification.outbox.NotificationsOutboxService;
 
 @Configuration
@@ -29,9 +30,10 @@ class NotificationConfiguration {
 
     @Bean
     NotificationsOutboxService notificationsOutboxService(
-            NotificationsOutboxRepository outboxRepository,
+            NotificationRepository notificationRepository,
+            NotificationDataSource notificationDataSource,
             NotificationPublisher notificationPublisher) {
 
-        return new NotificationsOutboxService(outboxRepository, notificationPublisher);
+        return new NotificationsOutboxService(notificationRepository, notificationDataSource, notificationPublisher);
     }
 }

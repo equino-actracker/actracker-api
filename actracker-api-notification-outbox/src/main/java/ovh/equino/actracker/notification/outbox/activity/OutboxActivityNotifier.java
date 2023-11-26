@@ -3,14 +3,14 @@ package ovh.equino.actracker.notification.outbox.activity;
 import ovh.equino.actracker.domain.Notification;
 import ovh.equino.actracker.domain.activity.ActivityChangedNotification;
 import ovh.equino.actracker.domain.activity.ActivityNotifier;
-import ovh.equino.actracker.notification.outbox.NotificationsOutboxRepository;
+import ovh.equino.actracker.notification.outbox.NotificationRepository;
 
 class OutboxActivityNotifier implements ActivityNotifier {
 
-    private final NotificationsOutboxRepository outbox;
+    private final NotificationRepository notificationRepository;
 
-    OutboxActivityNotifier(NotificationsOutboxRepository outbox) {
-        this.outbox = outbox;
+    OutboxActivityNotifier(NotificationRepository notificationRepository) {
+        this.notificationRepository = notificationRepository;
     }
 
     @Override
@@ -19,6 +19,6 @@ class OutboxActivityNotifier implements ActivityNotifier {
                 activityChangedNotification.id(),
                 activityChangedNotification
         );
-        outbox.save(notification);
+        notificationRepository.save(notification);
     }
 }
