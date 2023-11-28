@@ -70,6 +70,7 @@ class TagSetTest {
 
         @Test
         void shouldFailWhenEntityInvalid() {
+
             // given
             TagSet tagSet = new TagSet(
                     new TagSetId(),
@@ -88,6 +89,20 @@ class TagSetTest {
             )
                     .isInstanceOf(EntityInvalidException.class);
         }
+
+//        @Test
+//        void shouldFailWhenUserNotAllowed() {
+//            // given
+//            User unprivilegedUser = new User(randomUUID());
+//            TagSetDto tagSetDto = new TagSetDto(OLD_NAME, null);
+//            TagSet tagSet = TagSet.create(tagSetDto, CREATOR, tagsExistenceVerifier);
+//
+//            // then
+//            assertThatThrownBy(() ->
+//                    tagSet.rename(NEW_NAME, unprivilegedUser)
+//            )
+//                    .isInstanceOf(EntityEditForbidden.class);
+//        }
     }
 
     @Nested
