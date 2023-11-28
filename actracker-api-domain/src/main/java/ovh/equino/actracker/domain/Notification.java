@@ -40,9 +40,25 @@ public record Notification<T>(
         }
     }
 
+    public String toJsonData() throws ParseException {
+        try {
+            return objectMapper().writeValueAsString(data);
+        } catch (JsonProcessingException e) {
+            throw new ParseException(e);
+        }
+    }
+
     public static Notification<?> fromJson(String json) throws ParseException {
         try {
             JavaType notificationType = getNotificationType(json);
+            return objectMapper().readValue(json, notificationType);
+        } catch (JsonProcessingException e) {
+            throw new ParseException(e);
+        }
+    }
+
+    public static <T> T fromJsonData(String json, Class<T> notificationType) throws ParseException {
+        try {
             return objectMapper().readValue(json, notificationType);
         } catch (JsonProcessingException e) {
             throw new ParseException(e);

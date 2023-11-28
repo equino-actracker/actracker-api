@@ -1,9 +1,11 @@
 package ovh.equino.actracker.repository.jpa;
 
+import ovh.equino.actracker.domain.Notification;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.MetricValue;
 import ovh.equino.actracker.domain.dashboard.Chart;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
+import ovh.equino.actracker.domain.exception.ParseException;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tag.MetricDto;
 import ovh.equino.actracker.domain.tag.TagDto;
@@ -245,6 +247,24 @@ public abstract class IntegrationTestRelationalDataBase {
             preparedStatement.setString(1, chart.id().toString());
             preparedStatement.setString(2, tagId.toString());
             preparedStatement.execute();
+        }
+    }
+
+    public synchronized void addNotifications(Notification<?>... notifications) throws SQLException, ParseException {
+        List<Notification<?>> notAddedNotifications = stream(notifications)
+                .filter(notification -> !addedEntityIds.contains(notification.id()))
+                .toList();
+        Connection connection = getConnection();
+        for (Notification<?> notification : notAddedNotifications) {
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "insert into outbox_notification (id, version, entity, entity_type) values (?, ?, ?, ?);"
+            );
+            preparedStatement.setString(1, notification.id().toString());
+            preparedStatement.setLong(2, notification.version());
+            preparedStatement.setString(3, notification.toJsonData());
+            preparedStatement.setString(4, notification.notificationType().getCanonicalName());
+            preparedStatement.execute();
+            addedEntityIds.add(notification.id());
         }
     }
 }

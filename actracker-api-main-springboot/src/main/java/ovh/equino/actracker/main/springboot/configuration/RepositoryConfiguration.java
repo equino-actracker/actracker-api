@@ -17,7 +17,8 @@ import ovh.equino.actracker.domain.tag.TagRepository;
 import ovh.equino.actracker.domain.tagset.TagSetDataSource;
 import ovh.equino.actracker.domain.tagset.TagSetRepository;
 import ovh.equino.actracker.domain.tenant.TenantDataSource;
-import ovh.equino.actracker.notification.outbox.NotificationsOutboxRepository;
+import ovh.equino.actracker.notification.outbox.NotificationDataSource;
+import ovh.equino.actracker.notification.outbox.NotificationRepository;
 
 import javax.sql.DataSource;
 import java.util.Properties;
@@ -30,15 +31,16 @@ import java.util.Properties;
                 classes = {
                         ActivityRepository.class,
                         TagRepository.class,
-                        TenantDataSource.class,
-                        NotificationsOutboxRepository.class,
+                        NotificationRepository.class,
                         TagSetRepository.class,
                         DashboardRepository.class,
 
+                        TenantDataSource.class,
                         ActivityDataSource.class,
                         TagDataSource.class,
                         TagSetDataSource.class,
-                        DashboardDataSource.class
+                        DashboardDataSource.class,
+                        NotificationDataSource.class,
                 }
         )
 )
