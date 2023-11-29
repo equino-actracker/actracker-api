@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ovh.equino.actracker.domain.exception.EntityEditForbidden;
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.user.User;
@@ -33,16 +34,12 @@ class DashboardTest {
     private DashboardValidator validator;
 
     // TODO all should fail when non accessible to user (not found)
-    // TODO all should fail when user not allowed to edit (edit failure)
 
     @Nested
     @DisplayName("rename")
     class RenameDashboardTest {
 
         private static final String NEW_NAME = "new dashboard name";
-
-        // TODO All should fail when dashboard inaccessible (entity not found)
-        // TODO all edit should fail when user not allowed (entity edit exception)
 
         @Test
         void shouldRenameDashboard() {
@@ -79,10 +76,28 @@ class DashboardTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() ->
-                    dashboard.rename(NEW_NAME, CREATOR)
-            )
+            assertThatThrownBy(() -> dashboard.rename(NEW_NAME, CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenUserNotAllowed() {
+            // given
+            User unprivilegedUser = new User(randomUUID());
+            Dashboard dashboard = new Dashboard(
+                    new DashboardId(),
+                    CREATOR,
+                    DASHBOARD_NAME,
+                    EMPTY_CHARTS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
+            );
+
+
+            // then
+            assertThatThrownBy(() -> dashboard.rename(NEW_NAME, unprivilegedUser))
+                    .isInstanceOf(EntityEditForbidden.class);
         }
     }
 
@@ -159,10 +174,27 @@ class DashboardTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() ->
-                    dashboard.delete(CREATOR)
-            )
+            assertThatThrownBy(() -> dashboard.delete(CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenUserNotAllowed() {
+            // given
+            User unprivilegedUser = new User(randomUUID());
+            Dashboard dashboard = new Dashboard(
+                    new DashboardId(),
+                    CREATOR,
+                    DASHBOARD_NAME,
+                    EMPTY_CHARTS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
+            );
+
+            // then
+            assertThatThrownBy(() -> dashboard.delete(unprivilegedUser))
+                    .isInstanceOf(EntityEditForbidden.class);
         }
     }
 
@@ -318,10 +350,28 @@ class DashboardTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() ->
-                    dashboard.share(newShare, CREATOR)
-            )
+            assertThatThrownBy(() -> dashboard.share(newShare, CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenUserNotAllowed() {
+            // given
+            User unprivilegedUser = new User(randomUUID());
+            Dashboard dashboard = new Dashboard(
+                    new DashboardId(),
+                    CREATOR,
+                    DASHBOARD_NAME,
+                    EMPTY_CHARTS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
+            );
+            Share newShare = new Share(GRANTEE_NAME);
+
+            // then
+            assertThatThrownBy(() -> dashboard.share(newShare, unprivilegedUser))
+                    .isInstanceOf(EntityEditForbidden.class);
         }
     }
 
@@ -411,10 +461,28 @@ class DashboardTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() ->
-                    dashboard.unshare(GRANTEE_NAME, CREATOR)
-            )
+            assertThatThrownBy(() -> dashboard.unshare(GRANTEE_NAME, CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenUserNotAllowed() {
+            // given
+            User unprivilegedUser = new User(randomUUID());
+            Share existingShare = new Share(new User(randomUUID()), GRANTEE_NAME);
+            Dashboard dashboard = new Dashboard(
+                    new DashboardId(),
+                    CREATOR,
+                    DASHBOARD_NAME,
+                    EMPTY_CHARTS,
+                    singletonList(existingShare),
+                    !DELETED,
+                    validator
+            );
+
+            // then
+            assertThatThrownBy(() -> dashboard.unshare(existingShare.granteeName(), unprivilegedUser))
+                    .isInstanceOf(EntityEditForbidden.class);
         }
     }
 
@@ -425,7 +493,7 @@ class DashboardTest {
         private static final String CHART_NAME = "chart name";
         private static final Set<UUID> EMPTY_TAGS = emptySet();
 
-        // TODO should fail when adding dashboard with not accessible tag
+        // TODO should fail when adding chart with not accessible tag
 
         @Test
         void shouldAddFirstChart() {
@@ -500,10 +568,28 @@ class DashboardTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() ->
-                    dashboard.addChart(newChart, CREATOR)
-            )
+            assertThatThrownBy(() -> dashboard.addChart(newChart, CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenUserNotAllowed() {
+            // given
+            User unprivilegedUser = new User(randomUUID());
+            Dashboard dashboard = new Dashboard(
+                    new DashboardId(),
+                    CREATOR,
+                    DASHBOARD_NAME,
+                    EMPTY_CHARTS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
+            );
+            Chart newChart = new Chart(CHART_NAME, GroupBy.SELF, AnalysisMetric.METRIC_VALUE, EMPTY_TAGS);
+
+            // then
+            assertThatThrownBy(() -> dashboard.addChart(newChart, unprivilegedUser))
+                    .isInstanceOf(EntityEditForbidden.class);
         }
     }
 
@@ -648,10 +734,34 @@ class DashboardTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() ->
-                    dashboard.deleteChart(new ChartId(), CREATOR)
-            )
+            assertThatThrownBy(() -> dashboard.deleteChart(new ChartId(), CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenUserNotAllowed() {
+            // given
+            User unprivilegedUser = new User(randomUUID());
+            Chart existingChart = new Chart(
+                    CHART_NAME,
+                    GroupBy.SELF,
+                    AnalysisMetric.METRIC_VALUE,
+                    EMPTY_TAGS
+            );
+
+            Dashboard dashboard = new Dashboard(
+                    new DashboardId(),
+                    CREATOR,
+                    DASHBOARD_NAME,
+                    List.of(existingChart),
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
+            );
+
+            // then
+            assertThatThrownBy(() -> dashboard.deleteChart(existingChart.id(), unprivilegedUser))
+                    .isInstanceOf(EntityEditForbidden.class);
         }
     }
 }
