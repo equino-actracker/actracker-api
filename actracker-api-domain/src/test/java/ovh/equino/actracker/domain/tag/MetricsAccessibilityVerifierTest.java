@@ -27,10 +27,21 @@ class MetricsAccessibilityVerifierTest {
     private static final MetricDto ACCESSIBLE_METRIC_2 = metric("accessible metric 2");
     private static final MetricDto INACCESSIBLE_METRIC_1 = metric("inaccessible metric 1");
     private static final MetricDto INACCESSIBLE_METRIC_2 = metric("inaccessible metric 2");
+
     private static final TagDto ACCESSIBLE_TAG_1 = tag("accessible tag 1", ACCESSIBLE_METRIC_1);
     private static final TagDto ACCESSIBLE_TAG_2 = tag("accessible tag 2", ACCESSIBLE_METRIC_2);
     private static final TagDto INACCESSIBLE_TAG_1 = tag("inaccessible tag 1", INACCESSIBLE_METRIC_1);
     private static final TagDto INACCESSIBLE_TAG_2 = tag("inaccessible tag 2", INACCESSIBLE_METRIC_2);
+
+    private static final MetricId ACCESSIBLE_METRIC_1_ID = new MetricId(ACCESSIBLE_METRIC_1.id());
+    private static final MetricId ACCESSIBLE_METRIC_2_ID = new MetricId(ACCESSIBLE_METRIC_2.id());
+    private static final MetricId INACCESSIBLE_METRIC_1_ID = new MetricId(INACCESSIBLE_METRIC_1.id());
+    private static final MetricId INACCESSIBLE_METRIC_2_ID = new MetricId(INACCESSIBLE_METRIC_2.id());
+
+    private static final TagId ACCESSIBLE_TAG_1_ID = new TagId(ACCESSIBLE_TAG_1.id());
+    private static final TagId ACCESSIBLE_TAG_2_ID = new TagId(ACCESSIBLE_TAG_2.id());
+    private static final TagId INACCESSIBLE_TAG_1_ID = new TagId(INACCESSIBLE_TAG_1.id());
+    private static final TagId INACCESSIBLE_TAG_2_ID = new TagId(INACCESSIBLE_TAG_2.id());
 
     @Mock
     private TagDataSource tagDataSource;
@@ -38,38 +49,40 @@ class MetricsAccessibilityVerifierTest {
 
     @BeforeEach
     void init() {
-        when(tagDataSource.find(any(Set.class), any(User.class)))
-                .thenReturn(List.of(ACCESSIBLE_TAG_1, ACCESSIBLE_TAG_2));
         metricsAccessibilityVerifier = new MetricsAccessibilityVerifier(tagDataSource, new User(randomUUID()));
     }
 
     @Test
     void shouldFindAccessibleMetrics() {
+        // given
+        when(tagDataSource.find(any(Set.class), any(User.class)))
+                .thenReturn(List.of(ACCESSIBLE_TAG_1, ACCESSIBLE_TAG_2));
+
         // when
         Set<MetricId> accessibleMetrics = metricsAccessibilityVerifier.accessibleOf(
-                List.of(
-                        new MetricId(ACCESSIBLE_METRIC_1.id()),
-                        new MetricId(ACCESSIBLE_METRIC_2.id()),
-                        new MetricId(INACCESSIBLE_METRIC_1.id()),
-                        new MetricId(INACCESSIBLE_METRIC_2.id())
+                List.of(ACCESSIBLE_METRIC_1_ID,
+                        ACCESSIBLE_METRIC_2_ID,
+                        INACCESSIBLE_METRIC_1_ID,
+                        INACCESSIBLE_METRIC_2_ID
                 ),
                 List.of(
-                        new TagId(ACCESSIBLE_TAG_1.id()),
-                        new TagId(ACCESSIBLE_TAG_2.id()),
-                        new TagId(INACCESSIBLE_TAG_1.id()),
-                        new TagId(INACCESSIBLE_TAG_2.id())
+                        ACCESSIBLE_TAG_1_ID,
+                        ACCESSIBLE_TAG_2_ID,
+                        INACCESSIBLE_TAG_1_ID,
+                        INACCESSIBLE_TAG_2_ID
                 )
         );
 
         // then
-        assertThat(accessibleMetrics).containsExactlyInAnyOrder(
-                new MetricId(ACCESSIBLE_METRIC_1.id()),
-                new MetricId(ACCESSIBLE_METRIC_2.id())
-        );
+        assertThat(accessibleMetrics).containsExactlyInAnyOrder(ACCESSIBLE_METRIC_1_ID, ACCESSIBLE_METRIC_2_ID);
     }
 
     @Test
     void shouldFindInaccessibleMetrics() {
+        // given
+        when(tagDataSource.find(any(Set.class), any(User.class)))
+                .thenReturn(List.of(ACCESSIBLE_TAG_1, ACCESSIBLE_TAG_2));
+
         // when
         Set<MetricId> inaccessibleMetrics = metricsAccessibilityVerifier.nonAccessibleOf(
                 List.of(

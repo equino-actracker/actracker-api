@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static java.util.Collections.emptyList;
@@ -27,10 +28,16 @@ class TagsAccessibilityVerifierTest {
     private static final MetricDto ACCESSIBLE_METRIC_2 = metric("accessible metric 2");
     private static final MetricDto INACCESSIBLE_METRIC_1 = metric("inaccessible metric 1");
     private static final MetricDto INACCESSIBLE_METRIC_2 = metric("inaccessible metric 2");
+
     private static final TagDto ACCESSIBLE_TAG_1 = tag("accessible tag 1", ACCESSIBLE_METRIC_1);
     private static final TagDto ACCESSIBLE_TAG_2 = tag("accessible tag 2", ACCESSIBLE_METRIC_2);
     private static final TagDto INACCESSIBLE_TAG_1 = tag("inaccessible tag 1", INACCESSIBLE_METRIC_1);
     private static final TagDto INACCESSIBLE_TAG_2 = tag("inaccessible tag 2", INACCESSIBLE_METRIC_2);
+
+    private static final TagId ACCESSIBLE_TAG_1_ID = new TagId(ACCESSIBLE_TAG_1.id());
+    private static final TagId ACCESSIBLE_TAG_2_ID = new TagId(ACCESSIBLE_TAG_2.id());
+    private static final TagId INACCESSIBLE_TAG_1_ID = new TagId(INACCESSIBLE_TAG_1.id());
+    private static final TagId INACCESSIBLE_TAG_2_ID = new TagId(INACCESSIBLE_TAG_2.id());
 
     @Mock
     private TagDataSource tagDataSource;
@@ -38,47 +45,73 @@ class TagsAccessibilityVerifierTest {
 
     @BeforeEach
     void init() {
-        when(tagDataSource.find(any(Set.class), any(User.class)))
-                .thenReturn(List.of(ACCESSIBLE_TAG_1, ACCESSIBLE_TAG_2));
         tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, new User(randomUUID()));
     }
 
     @Test
     void shouldFindAccessibleTags() {
+        // given
+        when(tagDataSource.find(any(Set.class), any(User.class)))
+                .thenReturn(List.of(ACCESSIBLE_TAG_1, ACCESSIBLE_TAG_2));
+
         // when
         Set<TagId> accessibleTags = tagsAccessibilityVerifier.accessibleOf(
                 List.of(
-                        new TagId(ACCESSIBLE_TAG_1.id()),
-                        new TagId(ACCESSIBLE_TAG_2.id()),
-                        new TagId(INACCESSIBLE_TAG_1.id()),
-                        new TagId(INACCESSIBLE_TAG_2.id())
+                        ACCESSIBLE_TAG_1_ID,
+                        ACCESSIBLE_TAG_2_ID,
+                        INACCESSIBLE_TAG_1_ID,
+                        INACCESSIBLE_TAG_2_ID
                 )
         );
 
         // then
-        assertThat(accessibleTags).containsExactlyInAnyOrder(
-                new TagId(ACCESSIBLE_TAG_1.id()),
-                new TagId(ACCESSIBLE_TAG_2.id())
-        );
+        assertThat(accessibleTags).containsExactlyInAnyOrder(ACCESSIBLE_TAG_1_ID, ACCESSIBLE_TAG_2_ID);
     }
 
     @Test
     void shouldFindInaccessibleTags() {
+        // given
+        when(tagDataSource.find(any(Set.class), any(User.class)))
+                .thenReturn(List.of(ACCESSIBLE_TAG_1, ACCESSIBLE_TAG_2));
+
         // when
         Set<TagId> nonAccessibleTags = tagsAccessibilityVerifier.nonAccessibleOf(
                 List.of(
-                        new TagId(ACCESSIBLE_TAG_1.id()),
-                        new TagId(ACCESSIBLE_TAG_2.id()),
-                        new TagId(INACCESSIBLE_TAG_1.id()),
-                        new TagId(INACCESSIBLE_TAG_2.id())
+                        ACCESSIBLE_TAG_1_ID,
+                        ACCESSIBLE_TAG_2_ID,
+                        INACCESSIBLE_TAG_1_ID,
+                        INACCESSIBLE_TAG_2_ID
                 )
         );
 
         // then
-        assertThat(nonAccessibleTags).containsExactlyInAnyOrder(
-                new TagId(INACCESSIBLE_TAG_1.id()),
-                new TagId(INACCESSIBLE_TAG_2.id())
-        );
+        assertThat(nonAccessibleTags).containsExactlyInAnyOrder(INACCESSIBLE_TAG_1_ID, INACCESSIBLE_TAG_2_ID);
+    }
+
+    @Test
+    void shouldConfirmTagAccessible() {
+        // given
+        when(tagDataSource.find(any(TagId.class), any(User.class)))
+                .thenReturn(Optional.of(ACCESSIBLE_TAG_1));
+
+        // when
+        boolean isAccessible = tagsAccessibilityVerifier.isAccessible(ACCESSIBLE_TAG_1_ID);
+
+        // then
+        assertThat(isAccessible).isTrue();
+    }
+
+    @Test
+    void shouldConfirmTagInaccessible() {
+        // given
+        when(tagDataSource.find(any(TagId.class), any(User.class)))
+                .thenReturn(Optional.empty());
+
+        // when
+        boolean isAccessible = tagsAccessibilityVerifier.isAccessible(INACCESSIBLE_TAG_1_ID);
+
+        // then
+        assertThat(isAccessible).isFalse();
     }
 
     private static MetricDto metric(String name) {

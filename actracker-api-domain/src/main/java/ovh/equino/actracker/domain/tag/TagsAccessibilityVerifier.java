@@ -20,6 +20,10 @@ public class TagsAccessibilityVerifier {
         this.user = user;
     }
 
+    public boolean isAccessible(TagId tag) {
+        return tagDataSource.find(tag, user).isPresent();
+    }
+
     public Set<TagId> nonAccessibleOf(Collection<TagId> tags) {
         Set<TagId> accessibleTags = accessibleOf(tags);
         return tags.stream()
