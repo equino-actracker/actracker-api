@@ -821,7 +821,7 @@ class TagTest {
             );
 
             // then
-            assertThatThrownBy(() -> tag.share(existingShare, unprivilegedUser))
+            assertThatThrownBy(() -> tag.unshare(existingShare.granteeName(), unprivilegedUser))
                     .isInstanceOf(EntityEditForbidden.class);
         }
 

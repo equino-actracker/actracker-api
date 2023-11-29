@@ -21,7 +21,8 @@ import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TagSetTest {
@@ -204,12 +205,11 @@ class TagSetTest {
         @Test
         void shouldFailWhenUserNotAllowed() {
             // given
-            TagId existingTag = new TagId();
             TagSet tagSet = new TagSet(
                     new TagSetId(),
                     CREATOR,
                     TAG_SET_NAME,
-                    singleton(existingTag),
+                    EMPTY_TAGS,
                     !DELETED,
                     validator,
                     tagsExistenceVerifier
@@ -318,11 +318,12 @@ class TagSetTest {
         @Test
         void shouldFailWhenUserNotAllowed() {
             // given
+            TagId existingTag = new TagId();
             TagSet tagSet = new TagSet(
                     new TagSetId(),
                     CREATOR,
                     TAG_SET_NAME,
-                    EMPTY_TAGS,
+                    singleton(existingTag),
                     !DELETED,
                     validator,
                     tagsExistenceVerifier
@@ -331,14 +332,14 @@ class TagSetTest {
             User unprivilegedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> tagSet.removeTag(new TagId(randomUUID()), unprivilegedUser))
+            assertThatThrownBy(() -> tagSet.removeTag(existingTag, unprivilegedUser))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
 
     @Nested
     @DisplayName("delete")
-    class DeleteTest {
+    class DeleteTest  {
 
         @Test
         void shouldDeleteTagSet() {

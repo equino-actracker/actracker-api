@@ -1035,7 +1035,7 @@ class ActivityTest {
                     metricsExistenceVerifier,
                     validator
             );
-            MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_VALUE.metricId(), TEN);
+            MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
 
             // then
             assertThatThrownBy(() -> activity.setMetricValue(newMetricValue, unpriviledgedUser))
