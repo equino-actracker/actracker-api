@@ -32,11 +32,17 @@ class DashboardTest {
     @Mock
     private DashboardValidator validator;
 
+    // TODO all should fail when non accessible to user (not found)
+    // TODO all should fail when user not allowed to edit (edit failure)
+
     @Nested
     @DisplayName("rename")
     class RenameDashboardTest {
 
         private static final String NEW_NAME = "new dashboard name";
+
+        // TODO All should fail when dashboard inaccessible (entity not found)
+        // TODO all edit should fail when user not allowed (entity edit exception)
 
         @Test
         void shouldRenameDashboard() {
@@ -418,6 +424,8 @@ class DashboardTest {
 
         private static final String CHART_NAME = "chart name";
         private static final Set<UUID> EMPTY_TAGS = emptySet();
+
+        // TODO should fail when adding dashboard with not accessible tag
 
         @Test
         void shouldAddFirstChart() {

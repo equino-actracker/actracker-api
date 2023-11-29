@@ -54,6 +54,9 @@ class ActivityTest {
                 .thenReturn(emptySet());
     }
 
+    // TODO all edit should fail when activity not accessible (entity not exists)
+    // TODO should fail when activity not editable (entity edit exception)
+
     @Nested
     @DisplayName("rename")
     class RenameTest {
@@ -481,6 +484,8 @@ class ActivityTest {
     @DisplayName("assignTag")
     class AssignTagTest {
 
+        // TODO should fail when assigning non accessible tag
+
         @Test
         void shouldAssignFirstTag() {
             // given
@@ -772,6 +777,8 @@ class ActivityTest {
             when(metricsExistenceVerifier.notExisting(any(), any()))
                     .thenReturn(singleton(NON_EXISTING_METRIC_ID));
         }
+
+        // TODO should fail when assigning inaccessible metric value
 
         @Test
         void shouldSetNewValueIfExistingMetricNotSet() {

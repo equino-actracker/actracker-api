@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ovh.equino.actracker.domain.exception.EntityEditForbidden;
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.user.User;
@@ -30,6 +31,8 @@ class TagTest {
 
     @Mock
     private TagValidator validator;
+
+    // TODO all should fail when tag inaccessible (entity not found)
 
     @Nested
     @DisplayName("rename")
@@ -71,10 +74,28 @@ class TagTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() ->
-                    tag.rename(NEW_NAME, CREATOR)
-            )
+            assertThatThrownBy(() -> tag.rename(NEW_NAME, CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenUserNotAllowed() {
+            // given
+            Tag tag = new Tag(
+                    new TagId(),
+                    CREATOR,
+                    TAG_NAME,
+                    EMPTY_METRICS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
+            );
+
+            User unprivilegedUser = new User(randomUUID());
+
+            // then
+            assertThatThrownBy(() -> tag.rename(NEW_NAME, unprivilegedUser))
+                    .isInstanceOf(EntityEditForbidden.class);
         }
     }
 
@@ -96,13 +117,7 @@ class TagTest {
                     !DELETED,
                     validator
             );
-            Metric newMetric = new Metric(
-                    new MetricId(),
-                    CREATOR,
-                    METRIC_NAME + 1,
-                    NUMERIC,
-                    !DELETED
-            );
+            Metric newMetric = new Metric(new MetricId(), CREATOR, METRIC_NAME + 1, NUMERIC, !DELETED);
 
             // when
             tag.addMetric(newMetric.name(), newMetric.type(), CREATOR);
@@ -116,13 +131,7 @@ class TagTest {
         @Test
         void shouldAddAnotherMetric() {
             // given
-            Metric existingMetric = new Metric(
-                    new MetricId(),
-                    CREATOR,
-                    METRIC_NAME + 1,
-                    NUMERIC,
-                    !DELETED
-            );
+            Metric existingMetric = new Metric(new MetricId(), CREATOR, METRIC_NAME + 1, NUMERIC, !DELETED);
             Tag tag = new Tag(
                     new TagId(),
                     CREATOR,
@@ -132,13 +141,7 @@ class TagTest {
                     !DELETED,
                     validator
             );
-            Metric newMetric = new Metric(
-                    new MetricId(),
-                    CREATOR,
-                    METRIC_NAME + 2,
-                    NUMERIC,
-                    !DELETED
-            );
+            Metric newMetric = new Metric(new MetricId(), CREATOR, METRIC_NAME + 2, NUMERIC, !DELETED);
 
             // when
             tag.addMetric(newMetric.name(), newMetric.type(), CREATOR);
@@ -165,10 +168,28 @@ class TagTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() ->
-                    tag.addMetric(newMetric.name(), newMetric.type(), CREATOR)
-            )
+            assertThatThrownBy(() -> tag.addMetric(newMetric.name(), newMetric.type(), CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenUserNotAllowed() {
+            // given
+            User unprivilegedUser = new User(randomUUID());
+            Metric newMetric = new Metric(new MetricId(), unprivilegedUser, METRIC_NAME, NUMERIC, !DELETED);
+            Tag tag = new Tag(
+                    new TagId(),
+                    CREATOR,
+                    TAG_NAME,
+                    EMPTY_METRICS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
+            );
+
+            // then
+            assertThatThrownBy(() -> tag.addMetric(newMetric.name(), newMetric.type(), unprivilegedUser))
+                    .isInstanceOf(EntityEditForbidden.class);
         }
     }
 
@@ -294,10 +315,28 @@ class TagTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() ->
-                    tag.deleteMetric(new MetricId(), CREATOR)
-            )
+            assertThatThrownBy(() -> tag.deleteMetric(new MetricId(), CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenUserNotAllowed() {
+            // given
+            User unprivilegedUser = new User(randomUUID());
+            Metric existingMetric = new Metric(new MetricId(), CREATOR, METRIC_NAME, NUMERIC, !DELETED);
+            Tag tag = new Tag(
+                    new TagId(),
+                    CREATOR,
+                    TAG_NAME,
+                    singletonList(existingMetric),
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
+            );
+
+            // then
+            assertThatThrownBy(() -> tag.deleteMetric(existingMetric.id(), unprivilegedUser))
+                    .isInstanceOf(EntityEditForbidden.class);
         }
     }
 
@@ -402,10 +441,28 @@ class TagTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() ->
-                    tag.renameMetric(NEW_METRIC_NAME, new MetricId(), CREATOR)
-            )
+            assertThatThrownBy(() -> tag.renameMetric(NEW_METRIC_NAME, new MetricId(), CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenUserNotAllowed() {
+            // given
+            User unprivilegedUser = new User(randomUUID());
+            Metric existingMetric = new Metric(new MetricId(), CREATOR, METRIC_NAME, NUMERIC, !DELETED);
+            Tag tag = new Tag(
+                    new TagId(),
+                    CREATOR,
+                    TAG_NAME,
+                    singletonList(existingMetric),
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
+            );
+
+            // then
+            assertThatThrownBy(() -> tag.renameMetric(NEW_METRIC_NAME, existingMetric.id(), unprivilegedUser))
+                    .isInstanceOf(EntityEditForbidden.class);
         }
     }
 
@@ -458,10 +515,27 @@ class TagTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() ->
-                    tag.delete(CREATOR)
-            )
+            assertThatThrownBy(() -> tag.delete(CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenUserNotAllowed() {
+            // given
+            User unprivilegedUser = new User(randomUUID());
+            Tag tag = new Tag(
+                    new TagId(),
+                    CREATOR,
+                    TAG_NAME,
+                    EMPTY_METRICS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
+            );
+
+            // then
+            assertThatThrownBy(() -> tag.delete(unprivilegedUser))
+                    .isInstanceOf(EntityEditForbidden.class);
         }
     }
 
@@ -617,10 +691,28 @@ class TagTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() ->
-                    tag.share(newShare, CREATOR)
-            )
+            assertThatThrownBy(() -> tag.share(newShare, CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenUserNotAllowed() {
+            // given
+            User unprivilegedUser = new User(randomUUID());
+            Tag tag = new Tag(
+                    new TagId(),
+                    CREATOR,
+                    TAG_NAME,
+                    EMPTY_METRICS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    validator
+            );
+            Share newShare = new Share(GRANTEE_NAME);
+
+            // then
+            assertThatThrownBy(() -> tag.share(newShare, unprivilegedUser))
+                    .isInstanceOf(EntityEditForbidden.class);
         }
     }
 
@@ -709,10 +801,29 @@ class TagTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() ->
-                    tag.unshare(GRANTEE_NAME, CREATOR)
-            )
+            assertThatThrownBy(() -> tag.unshare(GRANTEE_NAME, CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
         }
+
+        @Test
+        void shouldFailWhenUserNotAllowed() {
+            // given
+            User unprivilegedUser = new User(randomUUID());
+            Share existingShare = new Share(new User(randomUUID()), GRANTEE_NAME);
+            Tag tag = new Tag(
+                    new TagId(),
+                    CREATOR,
+                    TAG_NAME,
+                    EMPTY_METRICS,
+                    singletonList(existingShare),
+                    !DELETED,
+                    validator
+            );
+
+            // then
+            assertThatThrownBy(() -> tag.share(existingShare, unprivilegedUser))
+                    .isInstanceOf(EntityEditForbidden.class);
+        }
+
     }
 }
