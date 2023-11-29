@@ -7,9 +7,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.tag.MetricId;
-import ovh.equino.actracker.domain.tag.MetricsExistenceVerifier;
+import ovh.equino.actracker.domain.tag.MetricsAccessibilityVerifier;
 import ovh.equino.actracker.domain.tag.TagId;
-import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
+import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.user.User;
 
 import java.time.Instant;
@@ -42,15 +42,15 @@ class ActivityValidatorTest {
     private static final boolean DELETED = true;
 
     @Mock
-    private TagsExistenceVerifier tagsExistenceVerifier;
+    private TagsAccessibilityVerifier tagsAccessibilityVerifier;
     @Mock
-    private MetricsExistenceVerifier metricsExistenceVerifier;
+    private MetricsAccessibilityVerifier metricsAccessibilityVerifier;
 
     private ActivityValidator validator;
 
     @BeforeEach
     void setUp() {
-        this.validator = new ActivityValidator(tagsExistenceVerifier, metricsExistenceVerifier);
+        this.validator = new ActivityValidator(tagsAccessibilityVerifier, metricsAccessibilityVerifier);
     }
 
     @Test
@@ -66,8 +66,8 @@ class ActivityValidatorTest {
                 EMPTY_TAGS,
                 EMPTY_METRIC_VALUES,
                 !DELETED,
-                tagsExistenceVerifier,
-                metricsExistenceVerifier,
+                tagsAccessibilityVerifier,
+                metricsAccessibilityVerifier,
                 validator
         );
 
@@ -90,8 +90,8 @@ class ActivityValidatorTest {
                 EMPTY_TAGS,
                 EMPTY_METRIC_VALUES,
                 !DELETED,
-                tagsExistenceVerifier,
-                metricsExistenceVerifier,
+                tagsAccessibilityVerifier,
+                metricsAccessibilityVerifier,
                 validator
         );
         List<String> validationErrors = List.of(END_BEFORE_START_ERROR);
@@ -107,7 +107,7 @@ class ActivityValidatorTest {
         // given
         TagId nonExistingTag = new TagId();
 
-        when(tagsExistenceVerifier.notExisting(any()))
+        when(tagsAccessibilityVerifier.nonAccessibleOf(any()))
                 .thenReturn(singleton(nonExistingTag));
 
         Activity activity = new Activity(
@@ -120,8 +120,8 @@ class ActivityValidatorTest {
                 singleton(nonExistingTag),
                 EMPTY_METRIC_VALUES,
                 !DELETED,
-                tagsExistenceVerifier,
-                metricsExistenceVerifier,
+                tagsAccessibilityVerifier,
+                metricsAccessibilityVerifier,
                 validator
         );
         List<String> validationErrors = List.of(
@@ -141,7 +141,7 @@ class ActivityValidatorTest {
         MetricId nonExistingMetric = new MetricId();
         MetricValue valueOfNonExistingMetric = new MetricValue(nonExistingMetric.id(), TEN);
 
-        when(metricsExistenceVerifier.notExisting(any(), any()))
+        when(metricsAccessibilityVerifier.nonAccessibleOf(any(), any()))
                 .thenReturn(singleton(nonExistingMetric));
 
         Activity activity = new Activity(
@@ -154,8 +154,8 @@ class ActivityValidatorTest {
                 singleton(existingTag),
                 singleton(valueOfNonExistingMetric),
                 !DELETED,
-                tagsExistenceVerifier,
-                metricsExistenceVerifier,
+                tagsAccessibilityVerifier,
+                metricsAccessibilityVerifier,
                 validator
         );
         List<String> validationErrors = List.of(
@@ -177,9 +177,9 @@ class ActivityValidatorTest {
         MetricId nonExistingMetric = new MetricId();
         MetricValue valueOfNonExistingMetric = new MetricValue(nonExistingMetric.id(), TEN);
 
-        when(tagsExistenceVerifier.notExisting(any()))
+        when(tagsAccessibilityVerifier.nonAccessibleOf(any()))
                 .thenReturn(singleton(nonExistingTag));
-        when(metricsExistenceVerifier.notExisting(any(), any()))
+        when(metricsAccessibilityVerifier.nonAccessibleOf(any(), any()))
                 .thenReturn(singleton(nonExistingMetric));
 
         Activity activity = new Activity(
@@ -192,8 +192,8 @@ class ActivityValidatorTest {
                 singleton(nonExistingTag),
                 singleton(valueOfNonExistingMetric),
                 !DELETED,
-                tagsExistenceVerifier,
-                metricsExistenceVerifier,
+                tagsAccessibilityVerifier,
+                metricsAccessibilityVerifier,
                 validator
         );
         List<String> validationErrors = List.of(

@@ -24,8 +24,8 @@ public class Activity implements Entity {
     final List<MetricValue> metricValues;
     private boolean deleted;
 
-    private final TagsExistenceVerifier tagsExistenceVerifier;
-    private final MetricsExistenceVerifier metricsExistenceVerifier;
+    private final TagsAccessibilityVerifier tagsAccessibilityVerifier;
+    private final MetricsAccessibilityVerifier metricsAccessibilityVerifier;
     private final ActivityValidator validator;
 
     Activity(
@@ -38,8 +38,8 @@ public class Activity implements Entity {
             Collection<TagId> tags,
             Collection<MetricValue> metricValues,
             boolean deleted,
-            TagsExistenceVerifier tagsExistenceVerifier,
-            MetricsExistenceVerifier metricsExistenceVerifier,
+            TagsAccessibilityVerifier tagsAccessibilityVerifier,
+            MetricsAccessibilityVerifier metricsAccessibilityVerifier,
             ActivityValidator validator) {
 
         this.id = requireNonNull(id);
@@ -52,12 +52,12 @@ public class Activity implements Entity {
         this.metricValues = new ArrayList<>(metricValues);
         this.deleted = deleted;
 
-        this.tagsExistenceVerifier = tagsExistenceVerifier;
-        this.metricsExistenceVerifier = metricsExistenceVerifier;
+        this.tagsAccessibilityVerifier = tagsAccessibilityVerifier;
+        this.metricsAccessibilityVerifier = metricsAccessibilityVerifier;
         this.validator = validator;
     }
 
-    public static Activity create(ActivityDto activity, User creator, TagsExistenceVerifier tagsExistenceVerifier, MetricsExistenceVerifier metricsExistenceVerifier) {
+    public static Activity create(ActivityDto activity, User creator, TagsAccessibilityVerifier tagsAccessibilityVerifier, MetricsAccessibilityVerifier metricsAccessibilityVerifier) {
         Activity newActivity = new Activity(
                 new ActivityId(),
                 creator,
@@ -68,9 +68,9 @@ public class Activity implements Entity {
                 toTagIds(activity),
                 activity.metricValues(),
                 false,
-                tagsExistenceVerifier,
-                metricsExistenceVerifier,
-                new ActivityValidator(tagsExistenceVerifier, metricsExistenceVerifier)
+                tagsAccessibilityVerifier,
+                metricsAccessibilityVerifier,
+                new ActivityValidator(tagsAccessibilityVerifier, metricsAccessibilityVerifier)
         );
         newActivity.validate();
         return newActivity;
@@ -83,43 +83,43 @@ public class Activity implements Entity {
     }
 
     public void rename(String newTitle, User editor) {
-        new ActivityEditOperation(editor, this, tagsExistenceVerifier, metricsExistenceVerifier,
+        new ActivityEditOperation(editor, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier,
                 () -> this.title = newTitle
         ).execute();
     }
 
     public void start(Instant startTime, User updater) {
-        new ActivityEditOperation(updater, this, tagsExistenceVerifier, metricsExistenceVerifier,
+        new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier,
                 () -> this.startTime = startTime
         ).execute();
     }
 
     public void finish(Instant endTime, User updater) {
-        new ActivityEditOperation(updater, this, tagsExistenceVerifier, metricsExistenceVerifier,
+        new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier,
                 () -> this.endTime = endTime
         ).execute();
     }
 
     public void updateComment(String comment, User updater) {
-        new ActivityEditOperation(updater, this, tagsExistenceVerifier, metricsExistenceVerifier,
+        new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier,
                 () -> this.comment = comment
         ).execute();
     }
 
     public void assignTag(TagId tagId, User updater) {
-        new ActivityEditOperation(updater, this, tagsExistenceVerifier, metricsExistenceVerifier,
+        new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier,
                 () -> this.tags.add(tagId)
         ).execute();
     }
 
     public void removeTag(TagId tagId, User updater) {
-        new ActivityEditOperation(updater, this, tagsExistenceVerifier, metricsExistenceVerifier,
+        new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier,
                 () -> this.tags.remove(tagId)
         ).execute();
     }
 
     public void setMetricValue(MetricValue newMetricValue, User updater) {
-        new ActivityEditOperation(updater, this, tagsExistenceVerifier, metricsExistenceVerifier, () -> {
+        new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier, () -> {
 
             List<MetricValue> otherValues = metricValues.stream()
                     .filter(value -> !value.metricId().equals(newMetricValue.metricId()))
@@ -132,7 +132,7 @@ public class Activity implements Entity {
     }
 
     public void unsetMetricValue(MetricId metricId, User updater) {
-        new ActivityEditOperation(updater, this, tagsExistenceVerifier, metricsExistenceVerifier, () -> {
+        new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier, () -> {
 
             List<MetricValue> remainingMetricValues = metricValues.stream()
                     .filter(value -> !value.metricId().equals(metricId.id()))
@@ -144,12 +144,12 @@ public class Activity implements Entity {
     }
 
     public void delete(User remover) {
-        new ActivityEditOperation(remover, this, tagsExistenceVerifier, metricsExistenceVerifier,
+        new ActivityEditOperation(remover, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier,
                 () -> this.deleted = true
         ).execute();
     }
 
-    public static Activity fromStorage(ActivityDto activity, TagsExistenceVerifier tagsExistenceVerifier, MetricsExistenceVerifier metricsExistenceVerifier) {
+    public static Activity fromStorage(ActivityDto activity, TagsAccessibilityVerifier tagsAccessibilityVerifier, MetricsAccessibilityVerifier metricsAccessibilityVerifier) {
         return new Activity(
                 new ActivityId(activity.id()),
                 new User(activity.creatorId()),
@@ -160,9 +160,9 @@ public class Activity implements Entity {
                 toTagIds(activity),
                 activity.metricValues(),
                 activity.deleted(),
-                tagsExistenceVerifier,
-                metricsExistenceVerifier,
-                new ActivityValidator(tagsExistenceVerifier, metricsExistenceVerifier)
+                tagsAccessibilityVerifier,
+                metricsAccessibilityVerifier,
+                new ActivityValidator(tagsAccessibilityVerifier, metricsAccessibilityVerifier)
         );
     }
 

@@ -2,9 +2,9 @@ package ovh.equino.actracker.domain.activity;
 
 import ovh.equino.actracker.domain.EntityValidator;
 import ovh.equino.actracker.domain.tag.MetricId;
-import ovh.equino.actracker.domain.tag.MetricsExistenceVerifier;
+import ovh.equino.actracker.domain.tag.MetricsAccessibilityVerifier;
 import ovh.equino.actracker.domain.tag.TagId;
-import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
+import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 
 import java.time.Instant;
 import java.util.*;
@@ -13,12 +13,12 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 class ActivityValidator extends EntityValidator<Activity> {
 
-    private final TagsExistenceVerifier tagsExistenceVerifier;
-    private final MetricsExistenceVerifier metricsExistenceVerifier;
+    private final TagsAccessibilityVerifier tagsAccessibilityVerifier;
+    private final MetricsAccessibilityVerifier metricsAccessibilityVerifier;
 
-    ActivityValidator(TagsExistenceVerifier tagsExistenceVerifier, MetricsExistenceVerifier metricsExistenceVerifier) {
-        this.tagsExistenceVerifier = tagsExistenceVerifier;
-        this.metricsExistenceVerifier = metricsExistenceVerifier;
+    ActivityValidator(TagsAccessibilityVerifier tagsAccessibilityVerifier, MetricsAccessibilityVerifier metricsAccessibilityVerifier) {
+        this.tagsAccessibilityVerifier = tagsAccessibilityVerifier;
+        this.metricsAccessibilityVerifier = metricsAccessibilityVerifier;
     }
 
     @Override
@@ -55,7 +55,7 @@ class ActivityValidator extends EntityValidator<Activity> {
     }
 
     private Optional<String> checkContainsNonExistingTags(Activity activity) {
-        Set<TagId> notExistingTags = tagsExistenceVerifier.notExisting(activity.tags());
+        Set<TagId> notExistingTags = tagsAccessibilityVerifier.nonAccessibleOf(activity.tags());
         if (isEmpty(notExistingTags)) {
             return Optional.empty();
         }
@@ -67,9 +67,9 @@ class ActivityValidator extends EntityValidator<Activity> {
 
     private Optional<String> checkContainsValuesOfNonExistingMetrics(Activity activity) {
 
-        Set<MetricId> notExistingMetrics = metricsExistenceVerifier.notExisting(
-                activity.tags(),
-                activity.selectedMetrics()
+        Set<MetricId> notExistingMetrics = metricsAccessibilityVerifier.nonAccessibleOf(
+                activity.selectedMetrics(),
+                activity.tags()
         );
         if (isEmpty(notExistingMetrics)) {
             return Optional.empty();

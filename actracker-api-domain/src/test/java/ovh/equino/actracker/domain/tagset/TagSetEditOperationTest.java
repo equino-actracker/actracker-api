@@ -5,7 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ovh.equino.actracker.domain.tag.TagId;
-import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
+import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
@@ -23,16 +23,16 @@ class TagSetEditOperationTest {
     private static final boolean DELETED = true;
 
     @Mock
-    private TagsExistenceVerifier tagsExistenceVerifier;
+    private TagsAccessibilityVerifier tagsAccessibilityVerifier;
 
     @Test
     void shouldPreserveNotExistingTags() {
         // given
         TagId notExistingTag = new TagId(randomUUID());
         TagId existingTag = new TagId(randomUUID());
-        when(tagsExistenceVerifier.notExisting(any()))
+        when(tagsAccessibilityVerifier.nonAccessibleOf(any()))
                 .thenReturn(singleton(notExistingTag));
-        when(tagsExistenceVerifier.existing(any()))
+        when(tagsAccessibilityVerifier.accessibleOf(any()))
                 .thenReturn(singleton(existingTag));
         TagSet tagSet = new TagSet(
                 new TagSetId(randomUUID()),
@@ -40,10 +40,10 @@ class TagSetEditOperationTest {
                 "tag set name",
                 List.of(notExistingTag, existingTag),
                 !DELETED,
-                new TagSetValidator(tagsExistenceVerifier),
-                tagsExistenceVerifier
+                new TagSetValidator(tagsAccessibilityVerifier),
+                tagsAccessibilityVerifier
         );
-        TagSetEditOperation editOperation = new TagSetEditOperation(CREATOR, tagSet, tagsExistenceVerifier, () -> {
+        TagSetEditOperation editOperation = new TagSetEditOperation(CREATOR, tagSet, tagsAccessibilityVerifier, () -> {
         });
 
         // when

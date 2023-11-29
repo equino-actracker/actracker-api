@@ -7,7 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.tag.TagId;
-import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
+import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
@@ -30,19 +30,19 @@ class TagSetValidatorTest {
     private static final String NOT_EXISTING_TAGS_ERROR = "Selected tags do not exist: %s";
 
     @Mock
-    private TagsExistenceVerifier tagsExistenceVerifier;
+    private TagsAccessibilityVerifier tagsAccessibilityVerifier;
 
     private TagSetValidator validator;
 
     @BeforeEach
     void setUp() {
-        this.validator = new TagSetValidator(tagsExistenceVerifier);
+        this.validator = new TagSetValidator(tagsAccessibilityVerifier);
     }
 
     @Test
     void shouldNotFailWhenTagSetValid() {
         // given
-        when(tagsExistenceVerifier.notExisting(any())).thenReturn(emptySet());
+        when(tagsAccessibilityVerifier.nonAccessibleOf(any())).thenReturn(emptySet());
         TagSet tagSet = new TagSet(
                 new TagSetId(),
                 CREATOR,
@@ -50,7 +50,7 @@ class TagSetValidatorTest {
                 singletonList(new TagId()),
                 !DELETED,
                 validator,
-                tagsExistenceVerifier
+                tagsAccessibilityVerifier
         );
 
         // then
@@ -60,7 +60,7 @@ class TagSetValidatorTest {
     @Test
     void shouldFailWhenNameBlank() {
         // given
-        when(tagsExistenceVerifier.notExisting(any())).thenReturn(emptySet());
+        when(tagsAccessibilityVerifier.nonAccessibleOf(any())).thenReturn(emptySet());
         TagSet tagSet = new TagSet(
                 new TagSetId(),
                 CREATOR,
@@ -68,7 +68,7 @@ class TagSetValidatorTest {
                 singletonList(new TagId()),
                 !DELETED,
                 validator,
-                tagsExistenceVerifier
+                tagsAccessibilityVerifier
         );
         List<String> validationErrors = List.of(EMPTY_NAME_ERROR);
 
@@ -81,7 +81,7 @@ class TagSetValidatorTest {
     @Test
     void shouldFailWhenNameNull() {
         // given
-        when(tagsExistenceVerifier.notExisting(any())).thenReturn(emptySet());
+        when(tagsAccessibilityVerifier.nonAccessibleOf(any())).thenReturn(emptySet());
         TagSet tagSet = new TagSet(
                 new TagSetId(),
                 CREATOR,
@@ -89,7 +89,7 @@ class TagSetValidatorTest {
                 singletonList(new TagId()),
                 !DELETED,
                 validator,
-                tagsExistenceVerifier
+                tagsAccessibilityVerifier
         );
         List<String> validationErrors = List.of(EMPTY_NAME_ERROR);
 
@@ -103,7 +103,7 @@ class TagSetValidatorTest {
     void shouldFailWhenTagSetContainsNotExistingTag() {
         // given
         TagId notExistingTag = new TagId();
-        when(tagsExistenceVerifier.notExisting(any())).thenReturn(singleton(notExistingTag));
+        when(tagsAccessibilityVerifier.nonAccessibleOf(any())).thenReturn(singleton(notExistingTag));
         TagSet tagSet = new TagSet(
                 new TagSetId(),
                 CREATOR,
@@ -111,7 +111,7 @@ class TagSetValidatorTest {
                 singletonList(notExistingTag),
                 !DELETED,
                 validator,
-                tagsExistenceVerifier
+                tagsAccessibilityVerifier
         );
         List<String> validationErrors = List.of(
                 NOT_EXISTING_TAGS_ERROR.formatted(singletonList(notExistingTag.id()))
@@ -127,7 +127,7 @@ class TagSetValidatorTest {
     void shouldFailWhenMultipleErrorsOccurred() {
         // given
         TagId notExistingTag = new TagId();
-        when(tagsExistenceVerifier.notExisting(any())).thenReturn(singleton(notExistingTag));
+        when(tagsAccessibilityVerifier.nonAccessibleOf(any())).thenReturn(singleton(notExistingTag));
         TagSet tagSet = new TagSet(
                 new TagSetId(),
                 CREATOR,
@@ -135,7 +135,7 @@ class TagSetValidatorTest {
                 singletonList(notExistingTag),
                 !DELETED,
                 validator,
-                tagsExistenceVerifier
+                tagsAccessibilityVerifier
         );
         List<String> validationErrors = List.of(
                 EMPTY_NAME_ERROR,
