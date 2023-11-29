@@ -1,5 +1,6 @@
 package ovh.equino.actracker.domain.tag;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -8,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ovh.equino.actracker.domain.exception.EntityEditForbidden;
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
+import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.user.User;
 
@@ -18,6 +20,7 @@ import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 import static ovh.equino.actracker.domain.tag.MetricType.NUMERIC;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,9 +33,14 @@ class TagTest {
     private static final boolean DELETED = true;
 
     @Mock
+    private TagsAccessibilityVerifier tagsAccessibilityVerifier;
+    @Mock
     private TagValidator validator;
 
-    // TODO all should fail when tag inaccessible (entity not found)
+    @BeforeEach
+    void init() {
+        when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+    }
 
     @Nested
     @DisplayName("rename")
@@ -49,6 +57,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -69,6 +78,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
@@ -76,6 +86,27 @@ class TagTest {
             // then
             assertThatThrownBy(() -> tag.rename(NEW_NAME, CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenNotAccessibleToUser() {
+            // given
+            Tag tag = new Tag(
+                    new TagId(),
+                    CREATOR,
+                    TAG_NAME,
+                    EMPTY_METRICS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    tagsAccessibilityVerifier,
+                    validator
+            );
+
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+
+            // then
+            assertThatThrownBy(() -> tag.rename(NEW_NAME, CREATOR))
+                    .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
@@ -88,6 +119,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -104,6 +136,7 @@ class TagTest {
     class AddMetricTest {
 
         private static final String METRIC_NAME = "metric name";
+        // TODO should fail adding non-existing metric
 
         @Test
         void shouldAddFirstMetric() {
@@ -115,6 +148,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
             Metric newMetric = new Metric(new MetricId(), CREATOR, METRIC_NAME + 1, NUMERIC, !DELETED);
@@ -139,6 +173,7 @@ class TagTest {
                     singleton(existingMetric),
                     EMPTY_SHARES,
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
             Metric newMetric = new Metric(new MetricId(), CREATOR, METRIC_NAME + 2, NUMERIC, !DELETED);
@@ -163,6 +198,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
@@ -170,6 +206,28 @@ class TagTest {
             // then
             assertThatThrownBy(() -> tag.addMetric(newMetric.name(), newMetric.type(), CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenNonAccessibleToUser() {
+            // given
+            Metric newMetric = new Metric(new MetricId(), CREATOR, METRIC_NAME, NUMERIC, !DELETED);
+            Tag tag = new Tag(
+                    new TagId(),
+                    CREATOR,
+                    TAG_NAME,
+                    EMPTY_METRICS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    tagsAccessibilityVerifier,
+                    validator
+            );
+
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+
+            // then
+            assertThatThrownBy(() -> tag.addMetric(newMetric.name(), newMetric.type(), CREATOR))
+                    .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
@@ -184,6 +242,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -199,6 +258,8 @@ class TagTest {
 
         private static final String METRIC_NAME = "metric name";
 
+        // TODO should fail adding non-existing metric
+
         @Test
         void shouldDeleteExistingMetric() {
             // given
@@ -212,6 +273,7 @@ class TagTest {
                     List.of(existingMetric1, existingMetric2, metricToDelete),
                     EMPTY_SHARES,
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -238,6 +300,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -259,6 +322,7 @@ class TagTest {
                     singleton(existingMetric),
                     EMPTY_SHARES,
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -285,6 +349,7 @@ class TagTest {
                     List.of(deletedMetric, existingMetric),
                     EMPTY_SHARES,
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -310,6 +375,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
@@ -317,6 +383,28 @@ class TagTest {
             // then
             assertThatThrownBy(() -> tag.deleteMetric(new MetricId(), CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenNonAccessibleToUser() {
+            // given
+            Metric existingMetric = new Metric(new MetricId(), CREATOR, METRIC_NAME, NUMERIC, !DELETED);
+            Tag tag = new Tag(
+                    new TagId(),
+                    CREATOR,
+                    TAG_NAME,
+                    singletonList(existingMetric),
+                    EMPTY_SHARES,
+                    !DELETED,
+                    tagsAccessibilityVerifier,
+                    validator
+            );
+
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+
+            // then
+            assertThatThrownBy(() -> tag.deleteMetric(existingMetric.id(), CREATOR))
+                    .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
@@ -331,6 +419,7 @@ class TagTest {
                     singletonList(existingMetric),
                     EMPTY_SHARES,
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -347,6 +436,8 @@ class TagTest {
         private static final String METRIC_NAME = "metric name";
         private static final String NEW_METRIC_NAME = "new metric name";
 
+        // TODO should fail adding non-existing metric
+
         @Test
         void shouldRenameExistingMetric() {
             // given
@@ -359,6 +450,7 @@ class TagTest {
                     List.of(existingMetric, metricToRename),
                     EMPTY_SHARES,
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -385,6 +477,7 @@ class TagTest {
                     singleton(existingMetric),
                     EMPTY_SHARES,
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -411,6 +504,7 @@ class TagTest {
                     List.of(nonDeletedMetric, deletedMetric),
                     EMPTY_SHARES,
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -436,6 +530,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
@@ -443,6 +538,28 @@ class TagTest {
             // then
             assertThatThrownBy(() -> tag.renameMetric(NEW_METRIC_NAME, new MetricId(), CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenNonAccessibleToUser() {
+            // given
+            Metric existingMetric = new Metric(new MetricId(), CREATOR, METRIC_NAME, NUMERIC, !DELETED);
+            Tag tag = new Tag(
+                    new TagId(),
+                    CREATOR,
+                    TAG_NAME,
+                    singletonList(existingMetric),
+                    EMPTY_SHARES,
+                    !DELETED,
+                    tagsAccessibilityVerifier,
+                    validator
+            );
+
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+
+            // then
+            assertThatThrownBy(() -> tag.renameMetric(NEW_METRIC_NAME, existingMetric.id(), CREATOR))
+                    .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
@@ -457,6 +574,7 @@ class TagTest {
                     singletonList(existingMetric),
                     EMPTY_SHARES,
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -484,6 +602,7 @@ class TagTest {
                     List.of(metric1, metric2),
                     EMPTY_SHARES,
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -510,6 +629,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
@@ -517,6 +637,27 @@ class TagTest {
             // then
             assertThatThrownBy(() -> tag.delete(CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenNonAccessibleToUser() {
+            // given
+            Tag tag = new Tag(
+                    new TagId(),
+                    CREATOR,
+                    TAG_NAME,
+                    EMPTY_METRICS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    tagsAccessibilityVerifier,
+                    validator
+            );
+
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+
+            // then
+            assertThatThrownBy(() -> tag.delete(CREATOR))
+                    .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
@@ -530,6 +671,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -556,6 +698,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -577,6 +720,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -599,6 +743,7 @@ class TagTest {
                     EMPTY_METRICS,
                     singletonList(existingShare),
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -621,6 +766,7 @@ class TagTest {
                     EMPTY_METRICS,
                     singletonList(existingShare),
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -643,6 +789,7 @@ class TagTest {
                     EMPTY_METRICS,
                     singletonList(existingShare),
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -665,6 +812,7 @@ class TagTest {
                     EMPTY_METRICS,
                     singletonList(existingShare),
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -685,6 +833,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
             Share newShare = new Share(GRANTEE_NAME);
@@ -693,6 +842,28 @@ class TagTest {
             // then
             assertThatThrownBy(() -> tag.share(newShare, CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenNonAccessibleToUser() {
+            // given
+            Tag tag = new Tag(
+                    new TagId(),
+                    CREATOR,
+                    TAG_NAME,
+                    EMPTY_METRICS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    tagsAccessibilityVerifier,
+                    validator
+            );
+            Share newShare = new Share(GRANTEE_NAME);
+
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+
+            // then
+            assertThatThrownBy(() -> tag.share(newShare, CREATOR))
+                    .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
@@ -706,6 +877,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
             Share newShare = new Share(GRANTEE_NAME);
@@ -733,6 +905,7 @@ class TagTest {
                     EMPTY_METRICS,
                     singletonList(existingShare),
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -754,6 +927,7 @@ class TagTest {
                     EMPTY_METRICS,
                     singletonList(existingShare),
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -776,6 +950,7 @@ class TagTest {
                     EMPTY_METRICS,
                     List.of(share1, share2),
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -796,6 +971,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
@@ -803,6 +979,28 @@ class TagTest {
             // then
             assertThatThrownBy(() -> tag.unshare(GRANTEE_NAME, CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenNonAccessibleToUser() {
+            // given
+            Share existingShare = new Share(new User(randomUUID()), GRANTEE_NAME);
+            Tag tag = new Tag(
+                    new TagId(),
+                    CREATOR,
+                    TAG_NAME,
+                    EMPTY_METRICS,
+                    singletonList(existingShare),
+                    !DELETED,
+                    tagsAccessibilityVerifier,
+                    validator
+            );
+
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+
+            // then
+            assertThatThrownBy(() -> tag.unshare(existingShare.granteeName(), CREATOR))
+                    .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
@@ -817,6 +1015,7 @@ class TagTest {
                     EMPTY_METRICS,
                     singletonList(existingShare),
                     !DELETED,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -824,6 +1023,5 @@ class TagTest {
             assertThatThrownBy(() -> tag.unshare(existingShare.granteeName(), unprivilegedUser))
                     .isInstanceOf(EntityEditForbidden.class);
         }
-
     }
 }

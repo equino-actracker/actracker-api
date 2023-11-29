@@ -23,6 +23,8 @@ class TagValidatorTest {
     private static final String VALIDATION_ERROR = "Tag invalid: %s";
     private static final String EMPTY_NAME_ERROR = "Name is empty";
 
+    private TagsAccessibilityVerifier tagsAccessibilityVerifier = null;
+
     private TagValidator validator;
 
     @BeforeEach
@@ -40,6 +42,7 @@ class TagValidatorTest {
                 EMPTY_METRICS,
                 EMPTY_SHARES,
                 !DELETED,
+                tagsAccessibilityVerifier,
                 validator
         );
 
@@ -57,6 +60,7 @@ class TagValidatorTest {
                 EMPTY_METRICS,
                 EMPTY_SHARES,
                 !DELETED,
+                tagsAccessibilityVerifier,
                 validator
         );
         List<String> validationErrors = List.of(EMPTY_NAME_ERROR);
@@ -77,6 +81,7 @@ class TagValidatorTest {
                 EMPTY_METRICS,
                 EMPTY_SHARES,
                 !DELETED,
+                tagsAccessibilityVerifier,
                 validator
         );
         List<String> validationErrors = List.of(EMPTY_NAME_ERROR);

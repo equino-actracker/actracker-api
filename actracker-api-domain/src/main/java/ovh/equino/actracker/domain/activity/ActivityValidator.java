@@ -13,6 +13,7 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 class ActivityValidator extends EntityValidator<Activity> {
 
+    // TODO validate during Activity creation before removing verifiers from validator
     private final TagsAccessibilityVerifier tagsAccessibilityVerifier;
     private final MetricsAccessibilityVerifier metricsAccessibilityVerifier;
 

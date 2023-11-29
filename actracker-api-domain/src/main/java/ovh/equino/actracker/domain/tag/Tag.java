@@ -1,18 +1,17 @@
 package ovh.equino.actracker.domain.tag;
 
 import ovh.equino.actracker.domain.Entity;
+import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
 import static java.util.UUID.randomUUID;
-import static java.util.function.Predicate.isEqual;
 
 public class Tag implements Entity {
 
@@ -23,6 +22,7 @@ public class Tag implements Entity {
     final List<Share> shares;
     private boolean deleted;
 
+    private final TagsAccessibilityVerifier tagsAccessibilityVerifier;
     private final TagValidator validator;
 
     Tag(TagId id,
@@ -31,6 +31,7 @@ public class Tag implements Entity {
         Collection<Metric> metrics,
         List<Share> shares,
         boolean deleted,
+        TagsAccessibilityVerifier tagsAccessibilityVerifier,
         TagValidator validator) {
 
         this.id = requireNonNull(id);
@@ -40,10 +41,11 @@ public class Tag implements Entity {
         this.shares = new ArrayList<>(shares);
         this.deleted = deleted;
 
+        this.tagsAccessibilityVerifier = tagsAccessibilityVerifier;
         this.validator = validator;
     }
 
-    public static Tag create(TagDto tag, User creator) {
+    public static Tag create(TagDto tag, User creator, TagsAccessibilityVerifier tagsAccessibilityVerifier) {
 
         List<Metric> metrics = requireNonNullElse(tag.metrics(), new ArrayList<MetricDto>()).stream()
                 .map(metric -> Metric.create(metric, creator))
@@ -56,6 +58,7 @@ public class Tag implements Entity {
                 metrics,
                 tag.shares(),
                 false,
+                tagsAccessibilityVerifier,
                 new TagValidator()
         );
 
@@ -64,12 +67,18 @@ public class Tag implements Entity {
     }
 
     public void rename(String newName, User updater) {
+        if (!tagsAccessibilityVerifier.isAccessible(this.id)) {
+            throw new EntityNotFoundException(Tag.class, this.id.id());
+        }
         new TagEditOperation(updater, this, () ->
                 this.name = newName
         ).execute();
     }
 
     public void addMetric(String name, MetricType type, User updater) {
+        if (!tagsAccessibilityVerifier.isAccessible(this.id)) {
+            throw new EntityNotFoundException(Tag.class, this.id.id());
+        }
         Metric newMetric = new Metric(new MetricId(randomUUID()), updater, name, type, false);
         new TagEditOperation(updater, this, () ->
                 this.metrics.add(newMetric)
@@ -77,6 +86,9 @@ public class Tag implements Entity {
     }
 
     public void deleteMetric(MetricId metricId, User updater) {
+        if (!tagsAccessibilityVerifier.isAccessible(this.id)) {
+            throw new EntityNotFoundException(Tag.class, this.id.id());
+        }
         new TagEditOperation(updater, this, () ->
                 this.metrics.stream()
                         .filter(metric -> metric.id().equals(metricId))
@@ -86,6 +98,9 @@ public class Tag implements Entity {
     }
 
     public void renameMetric(String newName, MetricId metricId, User updater) {
+        if (!tagsAccessibilityVerifier.isAccessible(this.id)) {
+            throw new EntityNotFoundException(Tag.class, this.id.id());
+        }
         new TagEditOperation(updater, this, () ->
                 this.metrics.stream()
                         .filter(metric -> metric.id().equals(metricId))
@@ -95,6 +110,9 @@ public class Tag implements Entity {
     }
 
     public void delete(User remover) {
+        if (!tagsAccessibilityVerifier.isAccessible(this.id)) {
+            throw new EntityNotFoundException(Tag.class, this.id.id());
+        }
         new TagEditOperation(remover, this, () -> {
             this.metrics.forEach(Metric::delete);
             this.deleted = true;
@@ -102,6 +120,9 @@ public class Tag implements Entity {
     }
 
     public void share(Share newShare, User granter) {
+        if (!tagsAccessibilityVerifier.isAccessible(this.id)) {
+            throw new EntityNotFoundException(Tag.class, this.id.id());
+        }
         new TagEditOperation(granter, this, () -> {
 
             List<String> existingGranteeNames = this.shares.stream()
@@ -115,6 +136,9 @@ public class Tag implements Entity {
     }
 
     public void unshare(String granteeName, User granter) {
+        if (!tagsAccessibilityVerifier.isAccessible(this.id)) {
+            throw new EntityNotFoundException(Tag.class, this.id.id());
+        }
         new TagEditOperation(granter, this, () -> {
 
             List<Share> sharesWithExclusion = this.shares.stream()
@@ -126,7 +150,7 @@ public class Tag implements Entity {
         }).execute();
     }
 
-    public static Tag fromStorage(TagDto tag) {
+    public static Tag fromStorage(TagDto tag, TagsAccessibilityVerifier tagsAccessibilityVerifier) {
         List<Metric> metrics = tag.metrics().stream()
                 .map(Metric::fromStorage)
                 .toList();
@@ -137,6 +161,7 @@ public class Tag implements Entity {
                 metrics,
                 tag.shares(),
                 tag.deleted(),
+                tagsAccessibilityVerifier,
                 new TagValidator()
         );
     }
@@ -158,21 +183,6 @@ public class Tag implements Entity {
 
     boolean isDeleted() {
         return deleted;
-    }
-
-    boolean isNotDeleted() {
-        return !isDeleted();
-    }
-
-    boolean isAccessibleFor(User user) {
-        return creator.equals(user) || isGrantee(user);
-    }
-
-    private boolean isGrantee(User user) {
-        return shares.stream()
-                .map(Share::grantee)
-                .filter(Objects::nonNull)
-                .anyMatch(isEqual(user));
     }
 
     @Override
