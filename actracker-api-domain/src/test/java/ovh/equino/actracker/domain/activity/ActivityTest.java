@@ -1,12 +1,12 @@
 package ovh.equino.actracker.domain.activity;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ovh.equino.actracker.domain.exception.EntityEditForbidden;
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.tag.MetricId;
 import ovh.equino.actracker.domain.tag.MetricsExistenceVerifier;
@@ -19,7 +19,8 @@ import java.util.List;
 import java.util.Set;
 
 import static java.math.BigDecimal.*;
-import static java.util.Collections.*;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singleton;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -46,13 +47,7 @@ class ActivityTest {
     @Mock
     private ActivityValidator validator;
 
-    @BeforeEach
-    void init() {
-        when(tagsExistenceVerifier.notExisting(any()))
-                .thenReturn(emptySet());
-        when(metricsExistenceVerifier.notExisting(any(), any()))
-                .thenReturn(emptySet());
-    }
+    // TODO all edit should fail when activity not accessible (entity not exists)
 
     @Nested
     @DisplayName("rename")
@@ -156,6 +151,30 @@ class ActivityTest {
             // then
             assertThatThrownBy(() -> activity.rename(NEW_TITLE, CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenUserNotAllowed() {
+            // given
+            User unpriviledgedUser = new User(randomUUID());
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
+
+            // then
+            assertThatThrownBy(() -> activity.rename(NEW_TITLE, unpriviledgedUser))
+                    .isInstanceOf(EntityEditForbidden.class);
         }
     }
 
@@ -263,6 +282,30 @@ class ActivityTest {
             assertThatThrownBy(() -> activity.start(NEW_START_TIME, CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
         }
+
+        @Test
+        void shouldFailWhenUserNotAllowed() {
+            // given
+            User unpriviledgedUser = new User(randomUUID());
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
+
+            // then
+            assertThatThrownBy(() -> activity.start(NEW_START_TIME, unpriviledgedUser))
+                    .isInstanceOf(EntityEditForbidden.class);
+        }
     }
 
     @Nested
@@ -368,6 +411,30 @@ class ActivityTest {
             // then
             assertThatThrownBy(() -> activity.finish(NEW_END_TIME, CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenUserNotAllowed() {
+            // given
+            User unpriviledgedUser = new User(randomUUID());
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
+
+            // then
+            assertThatThrownBy(() -> activity.finish(NEW_END_TIME, unpriviledgedUser))
+                    .isInstanceOf(EntityEditForbidden.class);
         }
     }
 
@@ -475,11 +542,37 @@ class ActivityTest {
             assertThatThrownBy(() -> activity.updateComment(NEW_COMMENT, CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
         }
+
+        @Test
+        void shouldFailWhenUserNotAllowed() {
+            // given
+            User unpriviledgedUser = new User(randomUUID());
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
+
+            // then
+            assertThatThrownBy(() -> activity.updateComment(NEW_COMMENT, unpriviledgedUser))
+                    .isInstanceOf(EntityEditForbidden.class);
+        }
     }
 
     @Nested
     @DisplayName("assignTag")
     class AssignTagTest {
+
+        // TODO should fail when assigning non accessible tag
 
         @Test
         void shouldAssignFirstTag() {
@@ -587,6 +680,30 @@ class ActivityTest {
             assertThatThrownBy(() -> activity.assignTag(new TagId(), CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
         }
+
+        @Test
+        void shouldFailWhenUserNotAllowed() {
+            // given
+            User unpriviledgedUser = new User(randomUUID());
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
+
+            // then
+            assertThatThrownBy(() -> activity.assignTag(new TagId(), unpriviledgedUser))
+                    .isInstanceOf(EntityEditForbidden.class);
+        }
     }
 
     @Nested
@@ -594,8 +711,7 @@ class ActivityTest {
     class RemoveTagTest {
 
         @Test
-        void
-        shouldRemoveAssignedTag() {
+        void shouldRemoveAssignedTag() {
             // given
             TagId tagToRemove = new TagId(randomUUID());
             TagId existingTag = new TagId(randomUUID());
@@ -700,6 +816,31 @@ class ActivityTest {
             assertThatThrownBy(() -> activity.removeTag(new TagId(), CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
         }
+
+        @Test
+        void shouldFailWhenUserNotAllowed() {
+            // given
+            User unpriviledgedUser = new User(randomUUID());
+            TagId existingTag = new TagId();
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    singleton(existingTag),
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
+
+            // then
+            assertThatThrownBy(() -> activity.removeTag(existingTag, unpriviledgedUser))
+                    .isInstanceOf(EntityEditForbidden.class);
+        }
     }
 
     @Nested
@@ -754,6 +895,30 @@ class ActivityTest {
             assertThatThrownBy(() -> activity.delete(CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
         }
+
+        @Test
+        void shouldFailWhenUserNotAllowed() {
+            // given
+            User unpriviledgedUser = new User(randomUUID());
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
+
+            // then
+            assertThatThrownBy(() -> activity.delete(unpriviledgedUser))
+                    .isInstanceOf(EntityEditForbidden.class);
+        }
     }
 
     @Nested
@@ -765,13 +930,7 @@ class ActivityTest {
         private static final MetricValue EXISTING_METRIC_VALUE = new MetricValue(EXISTING_METRIC_ID.id(), ZERO);
         private static final MetricValue NON_EXISTING_METRIC_VALUE = new MetricValue(NON_EXISTING_METRIC_ID.id(), ONE);
 
-        @BeforeEach
-        void setUp() {
-            when(metricsExistenceVerifier.existing(any(), any()))
-                    .thenReturn(singleton(EXISTING_METRIC_ID));
-            when(metricsExistenceVerifier.notExisting(any(), any()))
-                    .thenReturn(singleton(NON_EXISTING_METRIC_ID));
-        }
+        // TODO should fail when assigning inaccessible metric value
 
         @Test
         void shouldSetNewValueIfExistingMetricNotSet() {
@@ -791,6 +950,10 @@ class ActivityTest {
                     validator
             );
             MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
+            when(metricsExistenceVerifier.existing(any(), any()))
+                    .thenReturn(singleton(EXISTING_METRIC_ID));
+            when(metricsExistenceVerifier.notExisting(any(), any()))
+                    .thenReturn(singleton(NON_EXISTING_METRIC_ID));
 
             // when
             activity.setMetricValue(newMetricValue, CREATOR);
@@ -817,6 +980,10 @@ class ActivityTest {
                     validator
             );
             MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
+            when(metricsExistenceVerifier.existing(any(), any()))
+                    .thenReturn(singleton(EXISTING_METRIC_ID));
+            when(metricsExistenceVerifier.notExisting(any(), any()))
+                    .thenReturn(singleton(NON_EXISTING_METRIC_ID));
 
             // when
             activity.setMetricValue(newMetricValue, CREATOR);
@@ -849,6 +1016,31 @@ class ActivityTest {
             assertThatThrownBy(() -> activity.setMetricValue(newMetricValue, CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
         }
+
+        @Test
+        void shouldFailWhenUserNotAllowed() {
+            // given
+            User unpriviledgedUser = new User(randomUUID());
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    List.of(EXISTING_METRIC_VALUE),
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
+            MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
+
+            // then
+            assertThatThrownBy(() -> activity.setMetricValue(newMetricValue, unpriviledgedUser))
+                    .isInstanceOf(EntityEditForbidden.class);
+        }
     }
 
     @Nested
@@ -859,14 +1051,6 @@ class ActivityTest {
         private static final MetricId NON_EXISTING_METRIC_ID = new MetricId();
         private static final MetricValue EXISTING_METRIC_VALUE = new MetricValue(EXISTING_METRIC_ID.id(), ZERO);
         private static final MetricValue NON_EXISTING_METRIC_VALUE = new MetricValue(NON_EXISTING_METRIC_ID.id(), ONE);
-
-        @BeforeEach
-        void setUp() {
-            when(metricsExistenceVerifier.existing(any(), any()))
-                    .thenReturn(singleton(EXISTING_METRIC_ID));
-            when(metricsExistenceVerifier.notExisting(any(), any()))
-                    .thenReturn(singleton(NON_EXISTING_METRIC_ID));
-        }
 
         @Test
         void shouldRemoveValueWhenExistingMetricValueSet() {
@@ -885,6 +1069,10 @@ class ActivityTest {
                     metricsExistenceVerifier,
                     validator
             );
+            when(metricsExistenceVerifier.existing(any(), any()))
+                    .thenReturn(singleton(EXISTING_METRIC_ID));
+            when(metricsExistenceVerifier.notExisting(any(), any()))
+                    .thenReturn(singleton(NON_EXISTING_METRIC_ID));
 
             // when
             activity.unsetMetricValue(EXISTING_METRIC_ID, CREATOR);
@@ -910,6 +1098,10 @@ class ActivityTest {
                     metricsExistenceVerifier,
                     validator
             );
+            when(metricsExistenceVerifier.existing(any(), any()))
+                    .thenReturn(singleton(EXISTING_METRIC_ID));
+            when(metricsExistenceVerifier.notExisting(any(), any()))
+                    .thenReturn(singleton(NON_EXISTING_METRIC_ID));
 
             // when
             activity.unsetMetricValue(EXISTING_METRIC_ID, CREATOR);
@@ -935,6 +1127,10 @@ class ActivityTest {
                     metricsExistenceVerifier,
                     validator
             );
+            when(metricsExistenceVerifier.existing(any(), any()))
+                    .thenReturn(singleton(EXISTING_METRIC_ID));
+            when(metricsExistenceVerifier.notExisting(any(), any()))
+                    .thenReturn(singleton(NON_EXISTING_METRIC_ID));
 
             // when
             activity.unsetMetricValue(NON_EXISTING_METRIC_ID, CREATOR);
@@ -960,6 +1156,10 @@ class ActivityTest {
                     metricsExistenceVerifier,
                     validator
             );
+            when(metricsExistenceVerifier.existing(any(), any()))
+                    .thenReturn(singleton(EXISTING_METRIC_ID));
+            when(metricsExistenceVerifier.notExisting(any(), any()))
+                    .thenReturn(singleton(NON_EXISTING_METRIC_ID));
 
             // when
             activity.unsetMetricValue(NON_EXISTING_METRIC_ID, CREATOR);
@@ -990,6 +1190,30 @@ class ActivityTest {
             // then
             assertThatThrownBy(() -> activity.unsetMetricValue(new MetricId(), CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenUserNotAllowed() {
+            // given
+            User unpriviledgedUser = new User(randomUUID());
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    List.of(EXISTING_METRIC_VALUE, NON_EXISTING_METRIC_VALUE),
+                    !DELETED,
+                    tagsExistenceVerifier,
+                    metricsExistenceVerifier,
+                    validator
+            );
+
+            // then
+            assertThatThrownBy(() -> activity.unsetMetricValue(EXISTING_METRIC_ID, unpriviledgedUser))
+                    .isInstanceOf(EntityEditForbidden.class);
         }
     }
 }

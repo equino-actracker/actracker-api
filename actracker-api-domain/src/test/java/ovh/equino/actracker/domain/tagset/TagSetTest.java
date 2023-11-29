@@ -1,12 +1,12 @@
 package ovh.equino.actracker.domain.tagset;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ovh.equino.actracker.domain.exception.EntityEditForbidden;
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
@@ -15,7 +15,8 @@ import ovh.equino.actracker.domain.user.User;
 import java.util.List;
 import java.util.Set;
 
-import static java.util.Collections.*;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singleton;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -36,11 +37,7 @@ class TagSetTest {
     @Mock
     private TagSetValidator validator;
 
-    @BeforeEach
-    void init() {
-        when(tagsExistenceVerifier.notExisting(any()))
-                .thenReturn(emptySet());
-    }
+    // TODO all should fail when tag set inaccessible to user (entity not found)
 
     @Nested
     @DisplayName("rename")
@@ -83,10 +80,28 @@ class TagSetTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() ->
-                    tagSet.rename(NEW_NAME, CREATOR)
-            )
+            assertThatThrownBy(() -> tagSet.rename(NEW_NAME, CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenUserNotAllowed() {
+            // given
+            TagSet tagSet = new TagSet(
+                    new TagSetId(),
+                    CREATOR,
+                    TAG_SET_NAME,
+                    EMPTY_TAGS,
+                    !DELETED,
+                    validator,
+                    tagsExistenceVerifier
+            );
+
+            User unprivilegedUser = new User(randomUUID());
+
+            // then
+            assertThatThrownBy(() -> tagSet.rename(NEW_NAME, unprivilegedUser))
+                    .isInstanceOf(EntityEditForbidden.class);
         }
     }
 
@@ -163,6 +178,10 @@ class TagSetTest {
             assertThat(tagSet.tags()).containsExactly(existingTag);
         }
 
+        void shouldFailWhenAssigningNonAccessibleTag() {
+            // TODO
+        }
+
         @Test
         void shouldFailWhenEntityInvalid() {
             // given
@@ -179,10 +198,29 @@ class TagSetTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() ->
-                    tagSet.assignTag(newTag, CREATOR)
-            )
+            assertThatThrownBy(() -> tagSet.assignTag(newTag, CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenUserNotAllowed() {
+            // given
+            TagSet tagSet = new TagSet(
+                    new TagSetId(),
+                    CREATOR,
+                    TAG_SET_NAME,
+                    EMPTY_TAGS,
+                    !DELETED,
+                    validator,
+                    tagsExistenceVerifier
+            );
+            TagId newTag = new TagId();
+
+            User unprivilegedUser = new User(randomUUID());
+
+            // then
+            assertThatThrownBy(() -> tagSet.assignTag(newTag, unprivilegedUser))
+                    .isInstanceOf(EntityEditForbidden.class);
         }
     }
 
@@ -273,16 +311,35 @@ class TagSetTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() ->
-                    tagSet.removeTag(new TagId(), CREATOR)
-            )
+            assertThatThrownBy(() -> tagSet.removeTag(new TagId(), CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenUserNotAllowed() {
+            // given
+            TagId existingTag = new TagId();
+            TagSet tagSet = new TagSet(
+                    new TagSetId(),
+                    CREATOR,
+                    TAG_SET_NAME,
+                    singleton(existingTag),
+                    !DELETED,
+                    validator,
+                    tagsExistenceVerifier
+            );
+
+            User unprivilegedUser = new User(randomUUID());
+
+            // then
+            assertThatThrownBy(() -> tagSet.removeTag(existingTag, unprivilegedUser))
+                    .isInstanceOf(EntityEditForbidden.class);
         }
     }
 
     @Nested
     @DisplayName("delete")
-    class DeleteTest {
+    class DeleteTest  {
 
         @Test
         void shouldDeleteTagSet() {
@@ -304,26 +361,43 @@ class TagSetTest {
             assertThat(tagSet.deleted()).isTrue();
         }
 
-    }
+        @Test
+        void shouldFailWhenTagSetInvalid() {
+            // given
+            TagSet tagSet = new TagSet(
+                    new TagSetId(),
+                    CREATOR,
+                    TAG_SET_NAME,
+                    EMPTY_TAGS,
+                    !DELETED,
+                    validator,
+                    tagsExistenceVerifier
+            );
+            doThrow(EntityInvalidException.class).when(validator).validate(any());
 
-    @Test
-    void shouldFailWhenTagSetInvalid() {
-        // given
-        TagSet tagSet = new TagSet(
-                new TagSetId(),
-                CREATOR,
-                TAG_SET_NAME,
-                EMPTY_TAGS,
-                !DELETED,
-                validator,
-                tagsExistenceVerifier
-        );
-        doThrow(EntityInvalidException.class).when(validator).validate(any());
+            // then
+            assertThatThrownBy(() -> tagSet.delete(CREATOR))
+                    .isInstanceOf(EntityInvalidException.class);
+        }
 
-        // then
-        assertThatThrownBy(() ->
-                tagSet.delete(CREATOR)
-        )
-                .isInstanceOf(EntityInvalidException.class);
+        @Test
+        void shouldFailWhenUserNotAllowed() {
+            // given
+            TagSet tagSet = new TagSet(
+                    new TagSetId(),
+                    CREATOR,
+                    TAG_SET_NAME,
+                    EMPTY_TAGS,
+                    !DELETED,
+                    validator,
+                    tagsExistenceVerifier
+            );
+
+            User unprivilegedUser = new User(randomUUID());
+
+            // then
+            assertThatThrownBy(() -> tagSet.delete(unprivilegedUser))
+                    .isInstanceOf(EntityEditForbidden.class);
+        }
     }
 }
