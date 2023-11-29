@@ -1,0 +1,116 @@
+package ovh.equino.actracker.domain.tag;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import ovh.equino.actracker.domain.user.User;
+
+import java.util.List;
+import java.util.Set;
+
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static java.util.UUID.randomUUID;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static ovh.equino.actracker.domain.tag.MetricType.NUMERIC;
+
+@ExtendWith(MockitoExtension.class)
+class MetricsAccessibilityVerifierTest {
+
+    private static final boolean DELETED = true;
+
+    private static final MetricDto ACCESSIBLE_METRIC_1 = metric("accessible metric 1");
+    private static final MetricDto ACCESSIBLE_METRIC_2 = metric("accessible metric 2");
+    private static final MetricDto INACCESSIBLE_METRIC_1 = metric("inaccessible metric 1");
+    private static final MetricDto INACCESSIBLE_METRIC_2 = metric("inaccessible metric 2");
+    private static final TagDto ACCESSIBLE_TAG_1 = tag("accessible tag 1", ACCESSIBLE_METRIC_1);
+    private static final TagDto ACCESSIBLE_TAG_2 = tag("accessible tag 2", ACCESSIBLE_METRIC_2);
+    private static final TagDto INACCESSIBLE_TAG_1 = tag("inaccessible tag 1", INACCESSIBLE_METRIC_1);
+    private static final TagDto INACCESSIBLE_TAG_2 = tag("inaccessible tag 2", INACCESSIBLE_METRIC_2);
+
+    @Mock
+    private TagDataSource tagDataSource;
+    private MetricsAccessibilityVerifier metricsAccessibilityVerifier;
+
+    @BeforeEach
+    void init() {
+        when(tagDataSource.find(any(Set.class), any(User.class)))
+                .thenReturn(List.of(ACCESSIBLE_TAG_1, ACCESSIBLE_TAG_2));
+        metricsAccessibilityVerifier = new MetricsAccessibilityVerifier(tagDataSource, new User(randomUUID()));
+    }
+
+    @Test
+    void shouldFindAccessibleMetrics() {
+        // when
+        Set<MetricId> accessibleMetrics = metricsAccessibilityVerifier.accessibleOf(
+                List.of(
+                        new MetricId(ACCESSIBLE_METRIC_1.id()),
+                        new MetricId(ACCESSIBLE_METRIC_2.id()),
+                        new MetricId(INACCESSIBLE_METRIC_1.id()),
+                        new MetricId(INACCESSIBLE_METRIC_2.id())
+                ),
+                List.of(
+                        new TagId(ACCESSIBLE_TAG_1.id()),
+                        new TagId(ACCESSIBLE_TAG_2.id()),
+                        new TagId(INACCESSIBLE_TAG_1.id()),
+                        new TagId(INACCESSIBLE_TAG_2.id())
+                )
+        );
+
+        // then
+        assertThat(accessibleMetrics).containsExactlyInAnyOrder(
+                new MetricId(ACCESSIBLE_METRIC_1.id()),
+                new MetricId(ACCESSIBLE_METRIC_2.id())
+        );
+    }
+
+    @Test
+    void shouldFindInaccessibleMetrics() {
+        // when
+        Set<MetricId> inaccessibleMetrics = metricsAccessibilityVerifier.nonAccessibleOf(
+                List.of(
+                        new MetricId(ACCESSIBLE_METRIC_1.id()),
+                        new MetricId(ACCESSIBLE_METRIC_2.id()),
+                        new MetricId(INACCESSIBLE_METRIC_1.id()),
+                        new MetricId(INACCESSIBLE_METRIC_2.id())
+                ),
+                List.of(
+                        new TagId(ACCESSIBLE_TAG_1.id()),
+                        new TagId(ACCESSIBLE_TAG_2.id()),
+                        new TagId(INACCESSIBLE_TAG_1.id()),
+                        new TagId(INACCESSIBLE_TAG_2.id())
+                )
+        );
+
+        // then
+        assertThat(inaccessibleMetrics).containsExactlyInAnyOrder(
+                new MetricId(INACCESSIBLE_METRIC_1.id()),
+                new MetricId(INACCESSIBLE_METRIC_2.id())
+        );
+    }
+
+    private static MetricDto metric(String name) {
+        return new MetricDto(
+                randomUUID(),
+                randomUUID(),
+                name,
+                NUMERIC,
+                !DELETED
+        );
+    }
+
+    private static TagDto tag(String name, MetricDto metric) {
+        return new TagDto(
+                randomUUID(),
+                randomUUID(),
+                name,
+                singletonList(metric),
+                emptyList(),
+                !DELETED
+        );
+    }
+}
