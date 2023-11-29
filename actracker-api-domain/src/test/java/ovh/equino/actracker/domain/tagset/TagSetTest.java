@@ -38,12 +38,6 @@ class TagSetTest {
 
     // TODO all should fail when tag set inaccessible to user (entity not found)
 
-//    @BeforeEach
-//    void init() {
-//        when(tagsExistenceVerifier.notExisting(any()))
-//                .thenReturn(emptySet());
-//    }
-
     @Nested
     @DisplayName("rename")
     class RenameTest {
