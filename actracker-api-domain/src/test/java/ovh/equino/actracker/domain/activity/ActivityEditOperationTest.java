@@ -5,9 +5,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ovh.equino.actracker.domain.tag.MetricId;
-import ovh.equino.actracker.domain.tag.MetricsExistenceVerifier;
+import ovh.equino.actracker.domain.tag.MetricsAccessibilityVerifier;
 import ovh.equino.actracker.domain.tag.TagId;
-import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
+import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.user.User;
 
 import java.math.BigDecimal;
@@ -27,9 +27,9 @@ class ActivityEditOperationTest {
     private static final boolean DELETED = true;
 
     @Mock
-    private TagsExistenceVerifier tagsExistenceVerifier;
+    private TagsAccessibilityVerifier tagsAccessibilityVerifier;
     @Mock
-    private MetricsExistenceVerifier metricsExistenceVerifier;
+    private MetricsAccessibilityVerifier metricsAccessibilityVerifier;
     @Mock
     private ActivityValidator validator;
 
@@ -38,9 +38,9 @@ class ActivityEditOperationTest {
         // given
         TagId existingTagId = new TagId(randomUUID());
         TagId nonExistingTagId = new TagId(randomUUID());
-        when(tagsExistenceVerifier.existing(any()))
+        when(tagsAccessibilityVerifier.accessibleOf(any()))
                 .thenReturn(singleton(existingTagId));
-        when(tagsExistenceVerifier.notExisting(any()))
+        when(tagsAccessibilityVerifier.nonAccessibleOf(any()))
                 .thenReturn(singleton(nonExistingTagId));
 
         Activity activity = new Activity(
@@ -53,12 +53,12 @@ class ActivityEditOperationTest {
                 List.of(existingTagId, nonExistingTagId),
                 emptyList(),
                 !DELETED,
-                tagsExistenceVerifier,
-                metricsExistenceVerifier,
+                tagsAccessibilityVerifier,
+                metricsAccessibilityVerifier,
                 validator
         );
         ActivityEditOperation editOperation = new ActivityEditOperation(
-                CREATOR, activity, tagsExistenceVerifier, metricsExistenceVerifier, () -> {
+                CREATOR, activity, tagsAccessibilityVerifier, metricsAccessibilityVerifier, () -> {
         });
 
         // when
@@ -78,9 +78,9 @@ class ActivityEditOperationTest {
         MetricValue valueOfExistingMetric = new MetricValue(existingMetricId.id(), BigDecimal.ONE);
         MetricId nonExistingMetricId = new MetricId(randomUUID());
         MetricValue valueOfNonExistingMetric = new MetricValue(nonExistingMetricId.id(), BigDecimal.ZERO);
-        when(metricsExistenceVerifier.existing(any(), any()))
+        when(metricsAccessibilityVerifier.accessibleOf(any(), any()))
                 .thenReturn(singleton(existingMetricId));
-        when(metricsExistenceVerifier.notExisting(any(), any()))
+        when(metricsAccessibilityVerifier.nonAccessibleOf(any(), any()))
                 .thenReturn(singleton(nonExistingMetricId));
 
         Activity activity = new Activity(
@@ -93,12 +93,12 @@ class ActivityEditOperationTest {
                 emptyList(),
                 List.of(valueOfExistingMetric, valueOfNonExistingMetric),
                 !DELETED,
-                tagsExistenceVerifier,
-                metricsExistenceVerifier,
+                tagsAccessibilityVerifier,
+                metricsAccessibilityVerifier,
                 validator
         );
         ActivityEditOperation editOperation = new ActivityEditOperation(
-                CREATOR, activity, tagsExistenceVerifier, metricsExistenceVerifier, () -> {
+                CREATOR, activity, tagsAccessibilityVerifier, metricsAccessibilityVerifier, () -> {
         });
 
         // when

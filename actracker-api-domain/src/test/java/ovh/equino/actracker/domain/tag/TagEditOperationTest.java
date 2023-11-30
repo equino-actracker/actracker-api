@@ -14,6 +14,8 @@ class TagEditOperationTest {
     private static final User CREATOR = new User(randomUUID());
     private static final boolean DELETED = true;
 
+    private final TagsAccessibilityVerifier tagsAccessibilityVerifier = null;
+
     @Test
     void shouldPreserveDeletedMetrics() {
         // given
@@ -38,6 +40,7 @@ class TagEditOperationTest {
                 List.of(deletedMetric, nonDeletedMetric),
                 emptyList(),
                 !DELETED,
+                tagsAccessibilityVerifier,
                 new TagValidator()
         );
         TagEditOperation editOperation = new TagEditOperation(CREATOR, tag, () -> {

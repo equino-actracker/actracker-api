@@ -9,7 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ovh.equino.actracker.domain.exception.EntityEditForbidden;
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.tag.TagId;
-import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
+import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
@@ -33,7 +33,7 @@ class TagSetTest {
     private static final boolean DELETED = true;
 
     @Mock
-    private TagsExistenceVerifier tagsExistenceVerifier;
+    private TagsAccessibilityVerifier tagsAccessibilityVerifier;
     @Mock
     private TagSetValidator validator;
 
@@ -55,7 +55,7 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     validator,
-                    tagsExistenceVerifier
+                    tagsAccessibilityVerifier
             );
 
             // when
@@ -75,7 +75,7 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     validator,
-                    tagsExistenceVerifier
+                    tagsAccessibilityVerifier
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
@@ -94,7 +94,7 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     validator,
-                    tagsExistenceVerifier
+                    tagsAccessibilityVerifier
             );
 
             User unprivilegedUser = new User(randomUUID());
@@ -119,7 +119,7 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     validator,
-                    tagsExistenceVerifier
+                    tagsAccessibilityVerifier
             );
 
             TagId newTag = new TagId(randomUUID());
@@ -142,9 +142,9 @@ class TagSetTest {
                     singleton(existingTag),
                     !DELETED,
                     validator,
-                    tagsExistenceVerifier
+                    tagsAccessibilityVerifier
             );
-            when(tagsExistenceVerifier.existing(any()))
+            when(tagsAccessibilityVerifier.accessibleOf(any()))
                     .thenReturn(singleton(existingTag));
             TagId newTag = new TagId();
 
@@ -166,9 +166,9 @@ class TagSetTest {
                     singleton(existingTag),
                     !DELETED,
                     validator,
-                    tagsExistenceVerifier
+                    tagsAccessibilityVerifier
             );
-            when(tagsExistenceVerifier.existing(any()))
+            when(tagsAccessibilityVerifier.accessibleOf(any()))
                     .thenReturn(singleton(existingTag));
 
             // when
@@ -193,7 +193,7 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     validator,
-                    tagsExistenceVerifier
+                    tagsAccessibilityVerifier
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
@@ -212,7 +212,7 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     validator,
-                    tagsExistenceVerifier
+                    tagsAccessibilityVerifier
             );
             TagId newTag = new TagId();
 
@@ -240,9 +240,9 @@ class TagSetTest {
                     List.of(tagToPreserve, tagToRemove),
                     !DELETED,
                     validator,
-                    tagsExistenceVerifier
+                    tagsAccessibilityVerifier
             );
-            when(tagsExistenceVerifier.existing(any()))
+            when(tagsAccessibilityVerifier.accessibleOf(any()))
                     .thenReturn(Set.of(tagToPreserve, tagToRemove));
 
             // when
@@ -262,7 +262,7 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     validator,
-                    tagsExistenceVerifier
+                    tagsAccessibilityVerifier
             );
 
             // when
@@ -283,10 +283,10 @@ class TagSetTest {
                     singleton(existingTag),
                     !DELETED,
                     validator,
-                    tagsExistenceVerifier
+                    tagsAccessibilityVerifier
             );
 
-            when(tagsExistenceVerifier.existing(any()))
+            when(tagsAccessibilityVerifier.accessibleOf(any()))
                     .thenReturn(singleton(existingTag));
 
             // when
@@ -306,7 +306,7 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     validator,
-                    tagsExistenceVerifier
+                    tagsAccessibilityVerifier
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
@@ -326,7 +326,7 @@ class TagSetTest {
                     singleton(existingTag),
                     !DELETED,
                     validator,
-                    tagsExistenceVerifier
+                    tagsAccessibilityVerifier
             );
 
             User unprivilegedUser = new User(randomUUID());
@@ -351,7 +351,7 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     validator,
-                    tagsExistenceVerifier
+                    tagsAccessibilityVerifier
             );
 
             // when
@@ -371,7 +371,7 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     validator,
-                    tagsExistenceVerifier
+                    tagsAccessibilityVerifier
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
@@ -390,7 +390,7 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     validator,
-                    tagsExistenceVerifier
+                    tagsAccessibilityVerifier
             );
 
             User unprivilegedUser = new User(randomUUID());

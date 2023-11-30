@@ -2,7 +2,7 @@ package ovh.equino.actracker.domain.tagset;
 
 import ovh.equino.actracker.domain.Entity;
 import ovh.equino.actracker.domain.tag.TagId;
-import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
+import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.*;
@@ -20,7 +20,7 @@ public class TagSet implements Entity {
     final Set<TagId> tags;
     private boolean deleted;
 
-    private final TagsExistenceVerifier tagsExistenceVerifier;
+    private final TagsAccessibilityVerifier tagsAccessibilityVerifier;
     private final TagSetValidator validator;
 
     TagSet(TagSetId id,
@@ -29,7 +29,7 @@ public class TagSet implements Entity {
            Collection<TagId> tags,
            boolean deleted,
            TagSetValidator validator,
-           TagsExistenceVerifier tagsExistenceVerifier) {
+           TagsAccessibilityVerifier tagsAccessibilityVerifier) {
 
         this.id = requireNonNull(id);
         this.creator = requireNonNull(creator);
@@ -38,56 +38,56 @@ public class TagSet implements Entity {
         this.deleted = deleted;
 
         this.validator = validator;
-        this.tagsExistenceVerifier = tagsExistenceVerifier;
+        this.tagsAccessibilityVerifier = tagsAccessibilityVerifier;
     }
 
-    public static TagSet create(TagSetDto tagSet, User creator, TagsExistenceVerifier tagsExistenceVerifier) {
+    public static TagSet create(TagSetDto tagSet, User creator, TagsAccessibilityVerifier tagsAccessibilityVerifier) {
         TagSet newTagSet = new TagSet(
                 new TagSetId(),
                 creator,
                 tagSet.name(),
                 toTagIds(tagSet),
                 false,
-                new TagSetValidator(tagsExistenceVerifier),
-                tagsExistenceVerifier
+                new TagSetValidator(tagsAccessibilityVerifier),
+                tagsAccessibilityVerifier
         );
         newTagSet.validate();
         return newTagSet;
     }
 
     public void rename(String newName, User updater) {
-        new TagSetEditOperation(updater, this, tagsExistenceVerifier,
+        new TagSetEditOperation(updater, this, tagsAccessibilityVerifier,
                 () -> name = newName
         ).execute();
     }
 
     public void assignTag(TagId newTag, User updater) {
-        new TagSetEditOperation(updater, this, tagsExistenceVerifier,
+        new TagSetEditOperation(updater, this, tagsAccessibilityVerifier,
                 () -> tags.add(newTag)
         ).execute();
     }
 
     public void removeTag(TagId tag, User updater) {
-        new TagSetEditOperation(updater, this, tagsExistenceVerifier,
+        new TagSetEditOperation(updater, this, tagsAccessibilityVerifier,
                 () -> tags.remove(tag)
         ).execute();
     }
 
     public void delete(User remover) {
-        new TagSetEditOperation(remover, this, tagsExistenceVerifier,
+        new TagSetEditOperation(remover, this, tagsAccessibilityVerifier,
                 () -> deleted = true
         ).execute();
     }
 
-    public static TagSet fromStorage(TagSetDto tagSet, TagsExistenceVerifier tagsExistenceVerifier) {
+    public static TagSet fromStorage(TagSetDto tagSet, TagsAccessibilityVerifier tagsAccessibilityVerifier) {
         return new TagSet(
                 new TagSetId(tagSet.id()),
                 new User(tagSet.creatorId()),
                 tagSet.name(),
                 toTagIds(tagSet),
                 tagSet.deleted(),
-                new TagSetValidator(tagsExistenceVerifier),
-                tagsExistenceVerifier
+                new TagSetValidator(tagsAccessibilityVerifier),
+                tagsAccessibilityVerifier
         );
     }
 

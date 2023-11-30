@@ -2,7 +2,7 @@ package ovh.equino.actracker.domain.tagset;
 
 import ovh.equino.actracker.domain.EntityValidator;
 import ovh.equino.actracker.domain.tag.TagId;
-import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
+import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 
 import java.util.*;
 
@@ -11,10 +11,11 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 class TagSetValidator extends EntityValidator<TagSet> {
 
-    private final TagsExistenceVerifier tagsExistenceVerifier;
+    // TODO validate during TagSet creation before removing verifiers from validator
+    private final TagsAccessibilityVerifier tagsAccessibilityVerifier;
 
-    TagSetValidator(TagsExistenceVerifier tagsExistenceVerifier) {
-        this.tagsExistenceVerifier = tagsExistenceVerifier;
+    TagSetValidator(TagsAccessibilityVerifier tagsAccessibilityVerifier) {
+        this.tagsAccessibilityVerifier = tagsAccessibilityVerifier;
     }
 
     @Override
@@ -40,7 +41,7 @@ class TagSetValidator extends EntityValidator<TagSet> {
     }
 
     private Optional<String> checkNonExistingTagsError(TagSet tagSet) {
-        Set<TagId> notExistingTags = tagsExistenceVerifier.notExisting(tagSet.tags());
+        Set<TagId> notExistingTags = tagsAccessibilityVerifier.nonAccessibleOf(tagSet.tags());
         if (isNotEmpty(notExistingTags)) {
             List<UUID> notExistingTagIds = notExistingTags.stream().map(TagId::id).toList();
             return Optional.of("Selected tags do not exist: %s".formatted(notExistingTagIds));

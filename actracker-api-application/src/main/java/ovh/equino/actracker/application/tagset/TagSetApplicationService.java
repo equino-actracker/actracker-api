@@ -6,7 +6,7 @@ import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.tag.TagDataSource;
 import ovh.equino.actracker.domain.tag.TagId;
-import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
+import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.tagset.*;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.security.identity.Identity;
@@ -45,9 +45,9 @@ public class TagSetApplicationService {
 
         TagSetDto newTagSetData = new TagSetDto(createTagSetCommand.name(), createTagSetCommand.tags());
 
-        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagDataSource, creator);
+        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, creator);
 
-        TagSet tagSet = TagSet.create(newTagSetData, creator, tagsExistenceVerifier);
+        TagSet tagSet = TagSet.create(newTagSetData, creator, tagsAccessibilityVerifier);
         tagSetRepository.add(tagSet.forStorage());
 
         tagSetNotifier.notifyChanged(tagSet.forChangeNotification());
@@ -88,12 +88,12 @@ public class TagSetApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
-        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagDataSource, updater);
+        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, updater);
 
         TagSetDto tagSetDto = tagSetRepository.findById(tagSetId)
                 .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));
 
-        TagSet tagSet = TagSet.fromStorage(tagSetDto, tagsExistenceVerifier);
+        TagSet tagSet = TagSet.fromStorage(tagSetDto, tagsAccessibilityVerifier);
         tagSet.rename(newName, updater);
         tagSetRepository.update(tagSetId, tagSet.forStorage());
 
@@ -111,12 +111,12 @@ public class TagSetApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
-        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagDataSource, updater);
+        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, updater);
 
         TagSetDto tagSetDto = tagSetRepository.findById(tagSetId)
                 .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));
 
-        TagSet tagSet = TagSet.fromStorage(tagSetDto, tagsExistenceVerifier);
+        TagSet tagSet = TagSet.fromStorage(tagSetDto, tagsAccessibilityVerifier);
         tagSet.assignTag(new TagId(tagId), updater);
         tagSetRepository.update(tagSetId, tagSet.forStorage());
 
@@ -134,12 +134,12 @@ public class TagSetApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
-        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagDataSource, updater);
+        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, updater);
 
         TagSetDto tagSetDto = tagSetRepository.findById(tagSetId)
                 .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));
 
-        TagSet tagSet = TagSet.fromStorage(tagSetDto, tagsExistenceVerifier);
+        TagSet tagSet = TagSet.fromStorage(tagSetDto, tagsAccessibilityVerifier);
         tagSet.removeTag(new TagId(tagId), updater);
         tagSetRepository.update(tagSetId, tagSet.forStorage());
 
@@ -157,12 +157,12 @@ public class TagSetApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User remover = new User(requesterIdentity.getId());
 
-        TagsExistenceVerifier tagsExistenceVerifier = new TagsExistenceVerifier(tagDataSource, remover);
+        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, remover);
 
         TagSetDto tagSetDto = tagSetRepository.findById(tagSetId)
                 .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));
 
-        TagSet tagSet = TagSet.fromStorage(tagSetDto, tagsExistenceVerifier);
+        TagSet tagSet = TagSet.fromStorage(tagSetDto, tagsAccessibilityVerifier);
 
         tagSet.delete(remover);
         tagSetRepository.update(tagSetId, tagSet.forStorage());

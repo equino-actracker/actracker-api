@@ -3,9 +3,9 @@ package ovh.equino.actracker.domain.activity;
 import ovh.equino.actracker.domain.EntityEditOperation;
 import ovh.equino.actracker.domain.EntityModification;
 import ovh.equino.actracker.domain.tag.MetricId;
-import ovh.equino.actracker.domain.tag.MetricsExistenceVerifier;
+import ovh.equino.actracker.domain.tag.MetricsAccessibilityVerifier;
 import ovh.equino.actracker.domain.tag.TagId;
-import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
+import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
@@ -16,20 +16,20 @@ import static java.util.stream.Collectors.toUnmodifiableSet;
 
 class ActivityEditOperation extends EntityEditOperation<Activity> {
 
-    private final TagsExistenceVerifier tagsExistenceVerifier;
-    private final MetricsExistenceVerifier metricsExistenceVerifier;
+    private final TagsAccessibilityVerifier tagsAccessibilityVerifier;
+    private final MetricsAccessibilityVerifier metricsAccessibilityVerifier;
     private Set<TagId> tagsToPreserve;
     private List<MetricValue> metricValuesToPreserve;
 
     protected ActivityEditOperation(User editor,
                                     Activity entity,
-                                    TagsExistenceVerifier tagsExistenceVerifier,
-                                    MetricsExistenceVerifier metricsExistenceVerifier,
+                                    TagsAccessibilityVerifier tagsAccessibilityVerifier,
+                                    MetricsAccessibilityVerifier metricsAccessibilityVerifier,
                                     EntityModification entityModification) {
 
         super(editor, entity, entityModification);
-        this.tagsExistenceVerifier = tagsExistenceVerifier;
-        this.metricsExistenceVerifier = metricsExistenceVerifier;
+        this.tagsAccessibilityVerifier = tagsAccessibilityVerifier;
+        this.metricsAccessibilityVerifier = metricsAccessibilityVerifier;
     }
 
     @Override
@@ -39,8 +39,8 @@ class ActivityEditOperation extends EntityEditOperation<Activity> {
     }
 
     private void preserveTags() {
-        this.tagsToPreserve = tagsExistenceVerifier.notExisting(entity.tags);
-        Set<TagId> existingTags = tagsExistenceVerifier.existing(entity.tags);
+        this.tagsToPreserve = tagsAccessibilityVerifier.nonAccessibleOf(entity.tags);
+        Set<TagId> existingTags = tagsAccessibilityVerifier.accessibleOf(entity.tags);
         entity.tags.clear();
         entity.tags.addAll(existingTags);
     }
@@ -50,11 +50,11 @@ class ActivityEditOperation extends EntityEditOperation<Activity> {
                 .map(MetricValue::metricId)
                 .map(MetricId::new)
                 .collect(toUnmodifiableSet());
-        Set<UUID> notExistingAssignedMetricIds = metricsExistenceVerifier.notExisting(entity.tags, assignedMetricIds)
+        Set<UUID> notExistingAssignedMetricIds = metricsAccessibilityVerifier.nonAccessibleOf(assignedMetricIds, entity.tags)
                 .stream()
                 .map(MetricId::id)
                 .collect(toUnmodifiableSet());
-        Set<UUID> existingAssignedMetricIds = metricsExistenceVerifier.existing(entity.tags, assignedMetricIds)
+        Set<UUID> existingAssignedMetricIds = metricsAccessibilityVerifier.accessibleOf(assignedMetricIds, entity.tags)
                 .stream()
                 .map(MetricId::id)
                 .collect(toUnmodifiableSet());

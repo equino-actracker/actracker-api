@@ -9,9 +9,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ovh.equino.actracker.domain.exception.EntityEditForbidden;
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.tag.MetricId;
-import ovh.equino.actracker.domain.tag.MetricsExistenceVerifier;
+import ovh.equino.actracker.domain.tag.MetricsAccessibilityVerifier;
 import ovh.equino.actracker.domain.tag.TagId;
-import ovh.equino.actracker.domain.tag.TagsExistenceVerifier;
+import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.user.User;
 
 import java.time.Instant;
@@ -41,9 +41,9 @@ class ActivityTest {
     private static final boolean DELETED = true;
 
     @Mock
-    private TagsExistenceVerifier tagsExistenceVerifier;
+    private TagsAccessibilityVerifier tagsAccessibilityVerifier;
     @Mock
-    private MetricsExistenceVerifier metricsExistenceVerifier;
+    private MetricsAccessibilityVerifier metricsAccessibilityVerifier;
     @Mock
     private ActivityValidator validator;
 
@@ -67,8 +67,8 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
 
@@ -92,8 +92,8 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
 
@@ -117,8 +117,8 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
 
@@ -142,8 +142,8 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
@@ -167,8 +167,8 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
 
@@ -197,8 +197,8 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
 
@@ -222,8 +222,8 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
 
@@ -247,8 +247,8 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
 
@@ -272,8 +272,8 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
@@ -297,8 +297,8 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
 
@@ -327,8 +327,8 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
 
@@ -352,8 +352,8 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
 
@@ -377,8 +377,8 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
 
@@ -402,8 +402,8 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
@@ -427,8 +427,8 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
 
@@ -457,8 +457,8 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
 
@@ -482,8 +482,8 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
 
@@ -507,8 +507,8 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
 
@@ -532,8 +532,8 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
@@ -557,8 +557,8 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
 
@@ -587,8 +587,8 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
             TagId newTag = new TagId();
@@ -604,7 +604,7 @@ class ActivityTest {
         void shouldAssignAnotherTag() {
             // given
             TagId existingTag = new TagId();
-            when(tagsExistenceVerifier.existing(any()))
+            when(tagsAccessibilityVerifier.accessibleOf(any()))
                     .thenReturn(singleton(existingTag));
             Activity activity = new Activity(
                     new ActivityId(),
@@ -616,8 +616,8 @@ class ActivityTest {
                     singleton(existingTag),
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
             TagId newTag = new TagId();
@@ -633,7 +633,7 @@ class ActivityTest {
         void shouldNotDuplicateAssignedTag() {
             // given
             TagId existingTag = new TagId();
-            when(tagsExistenceVerifier.existing(any()))
+            when(tagsAccessibilityVerifier.accessibleOf(any()))
                     .thenReturn(singleton(existingTag));
             Activity activity = new Activity(
                     new ActivityId(),
@@ -645,8 +645,8 @@ class ActivityTest {
                     singleton(existingTag),
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
 
@@ -670,8 +670,8 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
@@ -695,8 +695,8 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
 
@@ -715,7 +715,7 @@ class ActivityTest {
             // given
             TagId tagToRemove = new TagId(randomUUID());
             TagId existingTag = new TagId(randomUUID());
-            when(tagsExistenceVerifier.existing(any()))
+            when(tagsAccessibilityVerifier.accessibleOf(any()))
                     .thenReturn(Set.of(existingTag, tagToRemove));
             Activity activity = new Activity(
                     new ActivityId(),
@@ -727,8 +727,8 @@ class ActivityTest {
                     Set.of(existingTag, tagToRemove),
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
 
@@ -753,8 +753,8 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
 
@@ -769,7 +769,7 @@ class ActivityTest {
         void shouldKeepTagsUnchangedWhenRemovingUnassignedTag() {
             // given
             TagId existingTag = new TagId();
-            when(tagsExistenceVerifier.existing(any()))
+            when(tagsAccessibilityVerifier.accessibleOf(any()))
                     .thenReturn(singleton(existingTag));
             Activity activity = new Activity(
                     new ActivityId(),
@@ -781,8 +781,8 @@ class ActivityTest {
                     singleton(existingTag),
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
 
@@ -806,8 +806,8 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
@@ -832,8 +832,8 @@ class ActivityTest {
                     singleton(existingTag),
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
 
@@ -860,8 +860,8 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
 
@@ -885,8 +885,8 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
@@ -910,8 +910,8 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
 
@@ -945,14 +945,14 @@ class ActivityTest {
                     EMPTY_TAGS,
                     List.of(NON_EXISTING_METRIC_VALUE),
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
             MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
-            when(metricsExistenceVerifier.existing(any(), any()))
+            when(metricsAccessibilityVerifier.accessibleOf(any(), any()))
                     .thenReturn(singleton(EXISTING_METRIC_ID));
-            when(metricsExistenceVerifier.notExisting(any(), any()))
+            when(metricsAccessibilityVerifier.nonAccessibleOf(any(), any()))
                     .thenReturn(singleton(NON_EXISTING_METRIC_ID));
 
             // when
@@ -975,14 +975,14 @@ class ActivityTest {
                     EMPTY_TAGS,
                     List.of(EXISTING_METRIC_VALUE, NON_EXISTING_METRIC_VALUE),
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
             MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
-            when(metricsExistenceVerifier.existing(any(), any()))
+            when(metricsAccessibilityVerifier.accessibleOf(any(), any()))
                     .thenReturn(singleton(EXISTING_METRIC_ID));
-            when(metricsExistenceVerifier.notExisting(any(), any()))
+            when(metricsAccessibilityVerifier.nonAccessibleOf(any(), any()))
                     .thenReturn(singleton(NON_EXISTING_METRIC_ID));
 
             // when
@@ -1005,8 +1005,8 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
@@ -1031,8 +1031,8 @@ class ActivityTest {
                     EMPTY_TAGS,
                     List.of(EXISTING_METRIC_VALUE),
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
             MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
@@ -1065,13 +1065,13 @@ class ActivityTest {
                     EMPTY_TAGS,
                     List.of(EXISTING_METRIC_VALUE, NON_EXISTING_METRIC_VALUE),
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
-            when(metricsExistenceVerifier.existing(any(), any()))
+            when(metricsAccessibilityVerifier.accessibleOf(any(), any()))
                     .thenReturn(singleton(EXISTING_METRIC_ID));
-            when(metricsExistenceVerifier.notExisting(any(), any()))
+            when(metricsAccessibilityVerifier.nonAccessibleOf(any(), any()))
                     .thenReturn(singleton(NON_EXISTING_METRIC_ID));
 
             // when
@@ -1094,13 +1094,13 @@ class ActivityTest {
                     EMPTY_TAGS,
                     List.of(NON_EXISTING_METRIC_VALUE),
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
-            when(metricsExistenceVerifier.existing(any(), any()))
+            when(metricsAccessibilityVerifier.accessibleOf(any(), any()))
                     .thenReturn(singleton(EXISTING_METRIC_ID));
-            when(metricsExistenceVerifier.notExisting(any(), any()))
+            when(metricsAccessibilityVerifier.nonAccessibleOf(any(), any()))
                     .thenReturn(singleton(NON_EXISTING_METRIC_ID));
 
             // when
@@ -1123,13 +1123,13 @@ class ActivityTest {
                     EMPTY_TAGS,
                     List.of(EXISTING_METRIC_VALUE, NON_EXISTING_METRIC_VALUE),
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
-            when(metricsExistenceVerifier.existing(any(), any()))
+            when(metricsAccessibilityVerifier.accessibleOf(any(), any()))
                     .thenReturn(singleton(EXISTING_METRIC_ID));
-            when(metricsExistenceVerifier.notExisting(any(), any()))
+            when(metricsAccessibilityVerifier.nonAccessibleOf(any(), any()))
                     .thenReturn(singleton(NON_EXISTING_METRIC_ID));
 
             // when
@@ -1152,13 +1152,13 @@ class ActivityTest {
                     EMPTY_TAGS,
                     List.of(EXISTING_METRIC_VALUE),
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
-            when(metricsExistenceVerifier.existing(any(), any()))
+            when(metricsAccessibilityVerifier.accessibleOf(any(), any()))
                     .thenReturn(singleton(EXISTING_METRIC_ID));
-            when(metricsExistenceVerifier.notExisting(any(), any()))
+            when(metricsAccessibilityVerifier.nonAccessibleOf(any(), any()))
                     .thenReturn(singleton(NON_EXISTING_METRIC_ID));
 
             // when
@@ -1181,8 +1181,8 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
@@ -1206,8 +1206,8 @@ class ActivityTest {
                     EMPTY_TAGS,
                     List.of(EXISTING_METRIC_VALUE, NON_EXISTING_METRIC_VALUE),
                     !DELETED,
-                    tagsExistenceVerifier,
-                    metricsExistenceVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
                     validator
             );
 

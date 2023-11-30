@@ -45,6 +45,8 @@ public class TagApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User creator = new User(requesterIdentity.getId());
 
+        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, creator);
+
         TagDto tagData = new TagDto(
                 createTagCommand.tagName(),
                 createTagCommand.metricAssignments().stream()
@@ -59,7 +61,7 @@ public class TagApplicationService {
                         .map(this::resolveShare)
                         .toList()
         );
-        Tag tag = Tag.create(tagData, creator);
+        Tag tag = Tag.create(tagData, creator, tagsAccessibilityVerifier);
         tagRepository.add(tag.forStorage());
 
         tagNotifier.notifyChanged(tag.forChangeNotification());
@@ -114,9 +116,11 @@ public class TagApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
+        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, updater);
+
         TagDto tagDto = tagRepository.findById(tagId)
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
-        Tag tag = Tag.fromStorage(tagDto);
+        Tag tag = Tag.fromStorage(tagDto, tagsAccessibilityVerifier);
 
         tag.rename(newName, updater);
         tagRepository.update(tagId, tag.forStorage());
@@ -135,9 +139,11 @@ public class TagApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User remover = new User(requesterIdentity.getId());
 
+        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, remover);
+
         TagDto tagDto = tagRepository.findById(tagId)
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
-        Tag tag = Tag.fromStorage(tagDto);
+        Tag tag = Tag.fromStorage(tagDto, tagsAccessibilityVerifier);
 
         tag.delete(remover);
         tagRepository.update(tagId, tag.forStorage());
@@ -149,9 +155,11 @@ public class TagApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
+        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, updater);
+
         TagDto tagDto = tagRepository.findById(tagId)
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
-        Tag tag = Tag.fromStorage(tagDto);
+        Tag tag = Tag.fromStorage(tagDto, tagsAccessibilityVerifier);
 
         tag.addMetric(metricName, MetricType.valueOf(metricType), updater);
         tagRepository.update(tagId, tag.forStorage());
@@ -171,9 +179,11 @@ public class TagApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
+        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, updater);
+
         TagDto tagDto = tagRepository.findById(tagId)
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
-        Tag tag = Tag.fromStorage(tagDto);
+        Tag tag = Tag.fromStorage(tagDto, tagsAccessibilityVerifier);
 
         tag.deleteMetric(new MetricId(metricId), updater);
         tagRepository.update(tagId, tag.forStorage());
@@ -193,9 +203,11 @@ public class TagApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
+        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, updater);
+
         TagDto tagDto = tagRepository.findById(tagId)
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
-        Tag tag = Tag.fromStorage(tagDto);
+        Tag tag = Tag.fromStorage(tagDto, tagsAccessibilityVerifier);
 
         tag.renameMetric(newName, new MetricId(metricId), updater);
         tagRepository.update(tagId, tag.forStorage());
@@ -215,9 +227,11 @@ public class TagApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User granter = new User(requesterIdentity.getId());
 
+        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, granter);
+
         TagDto tagDto = tagRepository.findById(tagId)
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
-        Tag tag = Tag.fromStorage(tagDto);
+        Tag tag = Tag.fromStorage(tagDto, tagsAccessibilityVerifier);
 
         Share share = resolveShare(newGrantee);
 
@@ -239,9 +253,11 @@ public class TagApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User granter = new User(requesterIdentity.getId());
 
+        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, granter);
+
         TagDto tagDto = tagRepository.findById(tagId)
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
-        Tag tag = Tag.fromStorage(tagDto);
+        Tag tag = Tag.fromStorage(tagDto, tagsAccessibilityVerifier);
 
         tag.unshare(granteeName, granter);
         tagRepository.update(tagId, tag.forStorage());
