@@ -60,7 +60,8 @@ class MetricsAccessibilityVerifierTest {
 
         // when
         Set<MetricId> accessibleMetrics = metricsAccessibilityVerifier.accessibleOf(
-                List.of(ACCESSIBLE_METRIC_1_ID,
+                List.of(
+                        ACCESSIBLE_METRIC_1_ID,
                         ACCESSIBLE_METRIC_2_ID,
                         INACCESSIBLE_METRIC_1_ID,
                         INACCESSIBLE_METRIC_2_ID
@@ -86,23 +87,23 @@ class MetricsAccessibilityVerifierTest {
         // when
         Set<MetricId> inaccessibleMetrics = metricsAccessibilityVerifier.nonAccessibleOf(
                 List.of(
-                        new MetricId(ACCESSIBLE_METRIC_1.id()),
-                        new MetricId(ACCESSIBLE_METRIC_2.id()),
-                        new MetricId(INACCESSIBLE_METRIC_1.id()),
-                        new MetricId(INACCESSIBLE_METRIC_2.id())
+                        ACCESSIBLE_METRIC_1_ID,
+                        ACCESSIBLE_METRIC_2_ID,
+                        INACCESSIBLE_METRIC_1_ID,
+                        INACCESSIBLE_METRIC_2_ID
                 ),
                 List.of(
-                        new TagId(ACCESSIBLE_TAG_1.id()),
-                        new TagId(ACCESSIBLE_TAG_2.id()),
-                        new TagId(INACCESSIBLE_TAG_1.id()),
-                        new TagId(INACCESSIBLE_TAG_2.id())
+                        ACCESSIBLE_TAG_1_ID,
+                        ACCESSIBLE_TAG_2_ID,
+                        INACCESSIBLE_TAG_1_ID,
+                        INACCESSIBLE_TAG_2_ID
                 )
         );
 
         // then
         assertThat(inaccessibleMetrics).containsExactlyInAnyOrder(
-                new MetricId(INACCESSIBLE_METRIC_1.id()),
-                new MetricId(INACCESSIBLE_METRIC_2.id())
+                INACCESSIBLE_METRIC_1_ID,
+                INACCESSIBLE_METRIC_2_ID
         );
     }
 
