@@ -20,7 +20,7 @@ public class TagsAccessibilityVerifier {
         this.user = user;
     }
 
-    public boolean isAccessible(TagId tag) {
+    boolean isAccessible(TagId tag) {
         return tagDataSource.find(tag, user).isPresent();
     }
 

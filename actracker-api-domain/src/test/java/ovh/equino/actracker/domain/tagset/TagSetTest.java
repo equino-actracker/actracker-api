@@ -1,5 +1,6 @@
 package ovh.equino.actracker.domain.tagset;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -8,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ovh.equino.actracker.domain.exception.EntityEditForbidden;
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
+import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.user.User;
@@ -33,13 +35,16 @@ class TagSetTest {
     private static final boolean DELETED = true;
 
     @Mock
+    private TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier;
+    @Mock
     private TagsAccessibilityVerifier tagsAccessibilityVerifier;
     @Mock
     private TagSetValidator validator;
 
-
-    // TODO all should fail when tag set inaccessible to user (entity not found)
-
+    @BeforeEach
+    void init() {
+        when(tagSetsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+    }
 
     @Nested
     @DisplayName("rename")
@@ -57,6 +62,7 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     validator,
+                    tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
 
@@ -77,6 +83,7 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     validator,
+                    tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
@@ -84,6 +91,26 @@ class TagSetTest {
             // then
             assertThatThrownBy(() -> tagSet.rename(NEW_NAME, CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenNotAccessibleToUser() {
+            // given
+            TagSet tagSet = new TagSet(
+                    new TagSetId(),
+                    CREATOR,
+                    TAG_SET_NAME,
+                    EMPTY_TAGS,
+                    !DELETED,
+                    validator,
+                    tagSetsAccessibilityVerifier,
+                    tagsAccessibilityVerifier
+            );
+            when(tagSetsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+
+            // then
+            assertThatThrownBy(() -> tagSet.rename(NEW_NAME, CREATOR))
+                    .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
@@ -96,6 +123,7 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     validator,
+                    tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
 
@@ -121,6 +149,7 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     validator,
+                    tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
 
@@ -144,6 +173,7 @@ class TagSetTest {
                     singleton(existingTag),
                     !DELETED,
                     validator,
+                    tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
             when(tagsAccessibilityVerifier.accessibleOf(any()))
@@ -168,6 +198,7 @@ class TagSetTest {
                     singleton(existingTag),
                     !DELETED,
                     validator,
+                    tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
             when(tagsAccessibilityVerifier.accessibleOf(any()))
@@ -195,6 +226,7 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     validator,
+                    tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
@@ -202,6 +234,27 @@ class TagSetTest {
             // then
             assertThatThrownBy(() -> tagSet.assignTag(newTag, CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenNotAccessibleToUser() {
+            // given
+            TagSet tagSet = new TagSet(
+                    new TagSetId(),
+                    CREATOR,
+                    TAG_SET_NAME,
+                    EMPTY_TAGS,
+                    !DELETED,
+                    validator,
+                    tagSetsAccessibilityVerifier,
+                    tagsAccessibilityVerifier
+            );
+            TagId newTag = new TagId();
+            when(tagSetsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+
+            // then
+            assertThatThrownBy(() -> tagSet.assignTag(newTag, CREATOR))
+                    .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
@@ -214,6 +267,7 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     validator,
+                    tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
             TagId newTag = new TagId();
@@ -242,6 +296,7 @@ class TagSetTest {
                     List.of(tagToPreserve, tagToRemove),
                     !DELETED,
                     validator,
+                    tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
             when(tagsAccessibilityVerifier.accessibleOf(any()))
@@ -264,6 +319,7 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     validator,
+                    tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
 
@@ -285,6 +341,7 @@ class TagSetTest {
                     singleton(existingTag),
                     !DELETED,
                     validator,
+                    tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
 
@@ -308,6 +365,7 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     validator,
+                    tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
@@ -315,6 +373,27 @@ class TagSetTest {
             // then
             assertThatThrownBy(() -> tagSet.removeTag(new TagId(), CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenNotAccessibleToUser() {
+            // given
+            TagId existingTag = new TagId();
+            TagSet tagSet = new TagSet(
+                    new TagSetId(),
+                    CREATOR,
+                    TAG_SET_NAME,
+                    singleton(existingTag),
+                    !DELETED,
+                    validator,
+                    tagSetsAccessibilityVerifier,
+                    tagsAccessibilityVerifier
+            );
+            when(tagSetsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+
+            // then
+            assertThatThrownBy(() -> tagSet.removeTag(existingTag, CREATOR))
+                    .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
@@ -328,6 +407,7 @@ class TagSetTest {
                     singleton(existingTag),
                     !DELETED,
                     validator,
+                    tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
 
@@ -341,7 +421,7 @@ class TagSetTest {
 
     @Nested
     @DisplayName("delete")
-    class DeleteTest  {
+    class DeleteTest {
 
         @Test
         void shouldDeleteTagSet() {
@@ -353,6 +433,7 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     validator,
+                    tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
 
@@ -373,6 +454,7 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     validator,
+                    tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
@@ -380,6 +462,26 @@ class TagSetTest {
             // then
             assertThatThrownBy(() -> tagSet.delete(CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenNotAccessibleToUser() {
+            // given
+            TagSet tagSet = new TagSet(
+                    new TagSetId(),
+                    CREATOR,
+                    TAG_SET_NAME,
+                    EMPTY_TAGS,
+                    !DELETED,
+                    validator,
+                    tagSetsAccessibilityVerifier,
+                    tagsAccessibilityVerifier
+            );
+            when(tagSetsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+
+            // then
+            assertThatThrownBy(() -> tagSet.delete(CREATOR))
+                    .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
@@ -392,6 +494,7 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     validator,
+                    tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
 
