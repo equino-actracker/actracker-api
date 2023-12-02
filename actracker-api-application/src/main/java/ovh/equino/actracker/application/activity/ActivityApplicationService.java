@@ -46,6 +46,7 @@ public class ActivityApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User creator = new User(requesterIdentity.getId());
 
+        ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier = new ActivitiesAccessibilityVerifier(activityDataSource, creator);
         TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, creator);
         MetricsAccessibilityVerifier metricsAccessibilityVerifier = new MetricsAccessibilityVerifier(tagDataSource, creator);
 
@@ -63,7 +64,7 @@ public class ActivityApplicationService {
                         .toList()
         );
 
-        Activity activity = Activity.create(newActivityData, creator, tagsAccessibilityVerifier, metricsAccessibilityVerifier);
+        Activity activity = Activity.create(newActivityData, creator, activitiesAccessibilityVerifier, tagsAccessibilityVerifier, metricsAccessibilityVerifier);
         activityRepository.add(activity.forStorage());
 
         activityNotifier.notifyChanged(activity.forChangeNotification());
@@ -105,6 +106,7 @@ public class ActivityApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User switcher = new User(requesterIdentity.getId());
 
+        ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier = new ActivitiesAccessibilityVerifier(activityDataSource, switcher);
         TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, switcher);
         MetricsAccessibilityVerifier metricsAccessibilityVerifier = new MetricsAccessibilityVerifier(tagDataSource, switcher);
 
@@ -122,12 +124,12 @@ public class ActivityApplicationService {
                         .toList()
         );
 
-        Activity newActivity = Activity.create(activityToSwitch, switcher, tagsAccessibilityVerifier, metricsAccessibilityVerifier);
+        Activity newActivity = Activity.create(activityToSwitch, switcher, activitiesAccessibilityVerifier, tagsAccessibilityVerifier, metricsAccessibilityVerifier);
         Instant switchTime = newActivity.isStarted() ? newActivity.startTime() : now();
         newActivity.start(switchTime, switcher);
 
         List<ActivityId> activitiesToFinish = activityDataSource.findOwnUnfinishedStartedBefore(switchTime, switcher);
-        finishAllAt(switchTime, activitiesToFinish, switcher, tagsAccessibilityVerifier, metricsAccessibilityVerifier);
+        finishAllAt(switchTime, activitiesToFinish, switcher, activitiesAccessibilityVerifier, tagsAccessibilityVerifier, metricsAccessibilityVerifier);
 
         activityRepository.add(newActivity.forStorage());
         activityNotifier.notifyChanged(newActivity.forChangeNotification());
@@ -143,12 +145,13 @@ public class ActivityApplicationService {
     private void finishAllAt(Instant switchTime,
                              List<ActivityId> activitiesToFinish,
                              User switcher,
+                             ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier,
                              TagsAccessibilityVerifier tagsAccessibilityVerifier,
                              MetricsAccessibilityVerifier metricsAccessibilityVerifier) {
 
         for (ActivityId activityId : activitiesToFinish) {
             Activity activityToFinish = activityRepository.findById(activityId.id())
-                    .map(activity -> Activity.fromStorage(activity, tagsAccessibilityVerifier, metricsAccessibilityVerifier))
+                    .map(activity -> Activity.fromStorage(activity, activitiesAccessibilityVerifier, tagsAccessibilityVerifier, metricsAccessibilityVerifier))
                     .orElseThrow(() -> {
                         String message = "Could not find activity to stop with ID=%s".formatted(activityId.id());
                         return new RuntimeException(message);
@@ -163,13 +166,14 @@ public class ActivityApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
+        ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier = new ActivitiesAccessibilityVerifier(activityDataSource, updater);
         TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, updater);
         MetricsAccessibilityVerifier metricsAccessibilityVerifier = new MetricsAccessibilityVerifier(tagDataSource, updater);
 
         ActivityDto activityDto = activityRepository.findById(activityId)
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
-        Activity activity = Activity.fromStorage(activityDto, tagsAccessibilityVerifier, metricsAccessibilityVerifier);
+        Activity activity = Activity.fromStorage(activityDto, activitiesAccessibilityVerifier, tagsAccessibilityVerifier, metricsAccessibilityVerifier);
         activity.rename(newTitle, updater);
 
         activityRepository.update(activityId, activity.forStorage());
@@ -188,13 +192,14 @@ public class ActivityApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
+        ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier = new ActivitiesAccessibilityVerifier(activityDataSource, updater);
         TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, updater);
         MetricsAccessibilityVerifier metricsAccessibilityVerifier = new MetricsAccessibilityVerifier(tagDataSource, updater);
 
         ActivityDto activityDto = activityRepository.findById(activityId)
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
-        Activity activity = Activity.fromStorage(activityDto, tagsAccessibilityVerifier, metricsAccessibilityVerifier);
+        Activity activity = Activity.fromStorage(activityDto, activitiesAccessibilityVerifier, tagsAccessibilityVerifier, metricsAccessibilityVerifier);
         activity.start(startTime, updater);
 
         activityRepository.update(activityId, activity.forStorage());
@@ -213,13 +218,14 @@ public class ActivityApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
+        ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier = new ActivitiesAccessibilityVerifier(activityDataSource, updater);
         TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, updater);
         MetricsAccessibilityVerifier metricsAccessibilityVerifier = new MetricsAccessibilityVerifier(tagDataSource, updater);
 
         ActivityDto activityDto = activityRepository.findById(activityId)
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
-        Activity activity = Activity.fromStorage(activityDto, tagsAccessibilityVerifier, metricsAccessibilityVerifier);
+        Activity activity = Activity.fromStorage(activityDto, activitiesAccessibilityVerifier, tagsAccessibilityVerifier, metricsAccessibilityVerifier);
         activity.finish(endTime, updater);
 
         activityRepository.update(activityId, activity.forStorage());
@@ -238,13 +244,14 @@ public class ActivityApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
+        ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier = new ActivitiesAccessibilityVerifier(activityDataSource, updater);
         TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, updater);
         MetricsAccessibilityVerifier metricsAccessibilityVerifier = new MetricsAccessibilityVerifier(tagDataSource, updater);
 
         ActivityDto activityDto = activityRepository.findById(activityId)
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
-        Activity activity = Activity.fromStorage(activityDto, tagsAccessibilityVerifier, metricsAccessibilityVerifier);
+        Activity activity = Activity.fromStorage(activityDto, activitiesAccessibilityVerifier, tagsAccessibilityVerifier, metricsAccessibilityVerifier);
         activity.updateComment(newComment, updater);
 
         activityRepository.update(activityId, activity.forStorage());
@@ -263,13 +270,14 @@ public class ActivityApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
+        ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier = new ActivitiesAccessibilityVerifier(activityDataSource, updater);
         TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, updater);
         MetricsAccessibilityVerifier metricsAccessibilityVerifier = new MetricsAccessibilityVerifier(tagDataSource, updater);
 
         ActivityDto activityDto = activityRepository.findById(activityId)
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
-        Activity activity = Activity.fromStorage(activityDto, tagsAccessibilityVerifier, metricsAccessibilityVerifier);
+        Activity activity = Activity.fromStorage(activityDto, activitiesAccessibilityVerifier, tagsAccessibilityVerifier, metricsAccessibilityVerifier);
         activity.assignTag(new TagId(tagId), updater);
 
         activityRepository.update(activityId, activity.forStorage());
@@ -288,13 +296,14 @@ public class ActivityApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
+        ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier = new ActivitiesAccessibilityVerifier(activityDataSource, updater);
         TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, updater);
         MetricsAccessibilityVerifier metricsAccessibilityVerifier = new MetricsAccessibilityVerifier(tagDataSource, updater);
 
         ActivityDto activityDto = activityRepository.findById(activityId)
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
-        Activity activity = Activity.fromStorage(activityDto, tagsAccessibilityVerifier, metricsAccessibilityVerifier);
+        Activity activity = Activity.fromStorage(activityDto, activitiesAccessibilityVerifier, tagsAccessibilityVerifier, metricsAccessibilityVerifier);
         activity.removeTag(new TagId(tagId), updater);
 
         activityRepository.update(activityId, activity.forStorage());
@@ -313,13 +322,14 @@ public class ActivityApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
+        ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier = new ActivitiesAccessibilityVerifier(activityDataSource, updater);
         TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, updater);
         MetricsAccessibilityVerifier metricsAccessibilityVerifier = new MetricsAccessibilityVerifier(tagDataSource, updater);
 
         ActivityDto activityDto = activityRepository.findById(activityId)
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
-        Activity activity = Activity.fromStorage(activityDto, tagsAccessibilityVerifier, metricsAccessibilityVerifier);
+        Activity activity = Activity.fromStorage(activityDto, activitiesAccessibilityVerifier, tagsAccessibilityVerifier, metricsAccessibilityVerifier);
         activity.setMetricValue(new MetricValue(metricId, value), updater);
 
         activityRepository.update(activityId, activity.forStorage());
@@ -338,13 +348,14 @@ public class ActivityApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
+        ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier = new ActivitiesAccessibilityVerifier(activityDataSource, updater);
         TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, updater);
         MetricsAccessibilityVerifier metricsAccessibilityVerifier = new MetricsAccessibilityVerifier(tagDataSource, updater);
 
         ActivityDto activityDto = activityRepository.findById(activityId)
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
-        Activity activity = Activity.fromStorage(activityDto, tagsAccessibilityVerifier, metricsAccessibilityVerifier);
+        Activity activity = Activity.fromStorage(activityDto, activitiesAccessibilityVerifier, tagsAccessibilityVerifier, metricsAccessibilityVerifier);
         activity.unsetMetricValue(new MetricId(metricId), updater);
 
         activityRepository.update(activityId, activity.forStorage());
@@ -363,13 +374,14 @@ public class ActivityApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User remover = new User(requesterIdentity.getId());
 
+        ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier = new ActivitiesAccessibilityVerifier(activityDataSource, remover);
         TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, remover);
         MetricsAccessibilityVerifier metricsAccessibilityVerifier = new MetricsAccessibilityVerifier(tagDataSource, remover);
 
         ActivityDto activityDto = activityRepository.findById(activityId)
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
-        Activity activity = Activity.fromStorage(activityDto, tagsAccessibilityVerifier, metricsAccessibilityVerifier);
+        Activity activity = Activity.fromStorage(activityDto, activitiesAccessibilityVerifier, tagsAccessibilityVerifier, metricsAccessibilityVerifier);
         activity.delete(remover);
 
         activityNotifier.notifyChanged(activity.forChangeNotification());
