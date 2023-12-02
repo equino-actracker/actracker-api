@@ -1,5 +1,6 @@
 package ovh.equino.actracker.domain.dashboard;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -8,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ovh.equino.actracker.domain.exception.EntityEditForbidden;
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
+import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.user.User;
 
@@ -20,6 +22,7 @@ import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DashboardTest {
@@ -31,9 +34,14 @@ class DashboardTest {
     private static final boolean DELETED = true;
 
     @Mock
+    private DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier;
+    @Mock
     private DashboardValidator validator;
 
-    // TODO all should fail when non accessible to user (not found)
+    @BeforeEach
+    void init() {
+        when(dashboardsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+    }
 
     @Nested
     @DisplayName("rename")
@@ -51,6 +59,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    dashboardsAccessibilityVerifier,
                     validator
             );
 
@@ -71,6 +80,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    dashboardsAccessibilityVerifier,
                     validator
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
@@ -78,6 +88,26 @@ class DashboardTest {
             // then
             assertThatThrownBy(() -> dashboard.rename(NEW_NAME, CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenNotAccessibleToUser() {
+            // given
+            Dashboard dashboard = new Dashboard(
+                    new DashboardId(),
+                    CREATOR,
+                    DASHBOARD_NAME,
+                    EMPTY_CHARTS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    dashboardsAccessibilityVerifier,
+                    validator
+            );
+            when(dashboardsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+
+            // then
+            assertThatThrownBy(() -> dashboard.rename(NEW_NAME, CREATOR))
+                    .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
@@ -91,9 +121,9 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    dashboardsAccessibilityVerifier,
                     validator
             );
-
 
             // then
             assertThatThrownBy(() -> dashboard.rename(NEW_NAME, unprivilegedUser))
@@ -126,6 +156,7 @@ class DashboardTest {
                     singletonList(existingChart),
                     EMPTY_SHARES,
                     !DELETED,
+                    dashboardsAccessibilityVerifier,
                     validator
             );
 
@@ -149,6 +180,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     DELETED,
+                    dashboardsAccessibilityVerifier,
                     validator
             );
 
@@ -169,6 +201,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    dashboardsAccessibilityVerifier,
                     validator
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
@@ -176,6 +209,26 @@ class DashboardTest {
             // then
             assertThatThrownBy(() -> dashboard.delete(CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenNotAccessibleToUser() {
+            // given
+            Dashboard dashboard = new Dashboard(
+                    new DashboardId(),
+                    CREATOR,
+                    DASHBOARD_NAME,
+                    EMPTY_CHARTS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    dashboardsAccessibilityVerifier,
+                    validator
+            );
+            when(dashboardsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+
+            // then
+            assertThatThrownBy(() -> dashboard.delete(CREATOR))
+                    .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
@@ -189,6 +242,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    dashboardsAccessibilityVerifier,
                     validator
             );
 
@@ -214,6 +268,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    dashboardsAccessibilityVerifier,
                     validator
             );
             Share newShare = new Share(GRANTEE_NAME);
@@ -235,6 +290,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    dashboardsAccessibilityVerifier,
                     validator
             );
             Share newShare = new Share(new User(randomUUID()), GRANTEE_NAME);
@@ -257,6 +313,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     singletonList(existingShare),
                     !DELETED,
+                    dashboardsAccessibilityVerifier,
                     validator
             );
             Share newShare = new Share(new User(randomUUID()), GRANTEE_NAME);
@@ -279,6 +336,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     singletonList(existingShare),
                     !DELETED,
+                    dashboardsAccessibilityVerifier,
                     validator
             );
             Share newShare = new Share(new User(randomUUID()), GRANTEE_NAME);
@@ -301,6 +359,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     singletonList(existingShare),
                     !DELETED,
+                    dashboardsAccessibilityVerifier,
                     validator
             );
             Share newShare = new Share(GRANTEE_NAME);
@@ -323,6 +382,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     singletonList(existingShare),
                     !DELETED,
+                    dashboardsAccessibilityVerifier,
                     validator
             );
             Share newShare = new Share(GRANTEE_NAME);
@@ -344,6 +404,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    dashboardsAccessibilityVerifier,
                     validator
             );
             Share newShare = new Share(GRANTEE_NAME);
@@ -352,6 +413,27 @@ class DashboardTest {
             // then
             assertThatThrownBy(() -> dashboard.share(newShare, CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenNotAccessibleToUser() {
+            // given
+            Dashboard dashboard = new Dashboard(
+                    new DashboardId(),
+                    CREATOR,
+                    DASHBOARD_NAME,
+                    EMPTY_CHARTS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    dashboardsAccessibilityVerifier,
+                    validator
+            );
+            Share newShare = new Share(GRANTEE_NAME);
+            when(dashboardsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+
+            // then
+            assertThatThrownBy(() -> dashboard.share(newShare, CREATOR))
+                    .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
@@ -365,6 +447,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    dashboardsAccessibilityVerifier,
                     validator
             );
             Share newShare = new Share(GRANTEE_NAME);
@@ -392,6 +475,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     singletonList(existingShare),
                     !DELETED,
+                    dashboardsAccessibilityVerifier,
                     validator
             );
 
@@ -413,6 +497,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     singletonList(existingShare),
                     !DELETED,
+                    dashboardsAccessibilityVerifier,
                     validator
             );
 
@@ -436,6 +521,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     List.of(existingShare1, existingShare2),
                     !DELETED,
+                    dashboardsAccessibilityVerifier,
                     validator
             );
 
@@ -456,6 +542,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    dashboardsAccessibilityVerifier,
                     validator
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
@@ -463,6 +550,27 @@ class DashboardTest {
             // then
             assertThatThrownBy(() -> dashboard.unshare(GRANTEE_NAME, CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenNotAccessibleToUser() {
+            // given
+            Share existingShare = new Share(new User(randomUUID()), GRANTEE_NAME);
+            Dashboard dashboard = new Dashboard(
+                    new DashboardId(),
+                    CREATOR,
+                    DASHBOARD_NAME,
+                    EMPTY_CHARTS,
+                    singletonList(existingShare),
+                    !DELETED,
+                    dashboardsAccessibilityVerifier,
+                    validator
+            );
+            when(dashboardsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+
+            // then
+            assertThatThrownBy(() -> dashboard.unshare(existingShare.granteeName(), CREATOR))
+                    .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
@@ -477,6 +585,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     singletonList(existingShare),
                     !DELETED,
+                    dashboardsAccessibilityVerifier,
                     validator
             );
 
@@ -506,6 +615,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    dashboardsAccessibilityVerifier,
                     validator
             );
 
@@ -539,6 +649,7 @@ class DashboardTest {
                     List.of(existingNonDeletedChart, existingDeletedChart),
                     EMPTY_SHARES,
                     !DELETED,
+                    dashboardsAccessibilityVerifier,
                     validator
             );
 
@@ -563,6 +674,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    dashboardsAccessibilityVerifier,
                     validator
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
@@ -570,6 +682,28 @@ class DashboardTest {
             // then
             assertThatThrownBy(() -> dashboard.addChart(newChart, CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenNotAccessibleToUser() {
+            // given
+            Dashboard dashboard = new Dashboard(
+                    new DashboardId(),
+                    CREATOR,
+                    DASHBOARD_NAME,
+                    EMPTY_CHARTS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    dashboardsAccessibilityVerifier,
+                    validator
+            );
+            Chart newChart = new Chart(CHART_NAME, GroupBy.SELF, AnalysisMetric.METRIC_VALUE, EMPTY_TAGS);
+            when(dashboardsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+
+            // then
+            assertThatThrownBy(() -> dashboard.addChart(newChart, CREATOR))
+                    .isInstanceOf(EntityNotFoundException.class);
+
         }
 
         @Test
@@ -583,6 +717,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    dashboardsAccessibilityVerifier,
                     validator
             );
             Chart newChart = new Chart(CHART_NAME, GroupBy.SELF, AnalysisMetric.METRIC_VALUE, EMPTY_TAGS);
@@ -629,6 +764,7 @@ class DashboardTest {
                     List.of(existingNonDeletedChart, existingDeletedChart, chartToDelete),
                     EMPTY_SHARES,
                     !DELETED,
+                    dashboardsAccessibilityVerifier,
                     validator
             );
 
@@ -655,6 +791,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    dashboardsAccessibilityVerifier,
                     validator
             );
 
@@ -676,6 +813,7 @@ class DashboardTest {
                     singletonList(existingChart),
                     EMPTY_SHARES,
                     !DELETED,
+                    dashboardsAccessibilityVerifier,
                     validator
             );
 
@@ -709,6 +847,7 @@ class DashboardTest {
                     List.of(existingNonDeletedChart, existingDeletedChart),
                     EMPTY_SHARES,
                     !DELETED,
+                    dashboardsAccessibilityVerifier,
                     validator
             );
 
@@ -729,6 +868,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    dashboardsAccessibilityVerifier,
                     validator
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
@@ -736,6 +876,33 @@ class DashboardTest {
             // then
             assertThatThrownBy(() -> dashboard.deleteChart(new ChartId(), CREATOR))
                     .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldFailWhenNotAccessibleToUser() {
+            // given
+            Chart existingChart = new Chart(
+                    CHART_NAME,
+                    GroupBy.SELF,
+                    AnalysisMetric.METRIC_VALUE,
+                    EMPTY_TAGS
+            );
+
+            Dashboard dashboard = new Dashboard(
+                    new DashboardId(),
+                    CREATOR,
+                    DASHBOARD_NAME,
+                    List.of(existingChart),
+                    EMPTY_SHARES,
+                    !DELETED,
+                    dashboardsAccessibilityVerifier,
+                    validator
+            );
+            when(dashboardsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+
+            // then
+            assertThatThrownBy(() -> dashboard.deleteChart(existingChart.id(), CREATOR))
+                    .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
@@ -756,6 +923,7 @@ class DashboardTest {
                     List.of(existingChart),
                     EMPTY_SHARES,
                     !DELETED,
+                    dashboardsAccessibilityVerifier,
                     validator
             );
 
