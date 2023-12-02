@@ -29,6 +29,7 @@ class TagSetValidatorTest {
     private static final String EMPTY_NAME_ERROR = "Name is empty";
     private static final String NOT_EXISTING_TAGS_ERROR = "Selected tags do not exist: %s";
 
+    private final TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier = null;
     @Mock
     private TagsAccessibilityVerifier tagsAccessibilityVerifier;
 
@@ -50,6 +51,7 @@ class TagSetValidatorTest {
                 singletonList(new TagId()),
                 !DELETED,
                 validator,
+                tagSetsAccessibilityVerifier,
                 tagsAccessibilityVerifier
         );
 
@@ -68,6 +70,7 @@ class TagSetValidatorTest {
                 singletonList(new TagId()),
                 !DELETED,
                 validator,
+                tagSetsAccessibilityVerifier,
                 tagsAccessibilityVerifier
         );
         List<String> validationErrors = List.of(EMPTY_NAME_ERROR);
@@ -89,6 +92,7 @@ class TagSetValidatorTest {
                 singletonList(new TagId()),
                 !DELETED,
                 validator,
+                tagSetsAccessibilityVerifier,
                 tagsAccessibilityVerifier
         );
         List<String> validationErrors = List.of(EMPTY_NAME_ERROR);
@@ -111,6 +115,7 @@ class TagSetValidatorTest {
                 singletonList(notExistingTag),
                 !DELETED,
                 validator,
+                tagSetsAccessibilityVerifier,
                 tagsAccessibilityVerifier
         );
         List<String> validationErrors = List.of(
@@ -135,6 +140,7 @@ class TagSetValidatorTest {
                 singletonList(notExistingTag),
                 !DELETED,
                 validator,
+                tagSetsAccessibilityVerifier,
                 tagsAccessibilityVerifier
         );
         List<String> validationErrors = List.of(

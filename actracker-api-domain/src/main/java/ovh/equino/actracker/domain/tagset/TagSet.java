@@ -1,6 +1,7 @@
 package ovh.equino.actracker.domain.tagset;
 
 import ovh.equino.actracker.domain.Entity;
+import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.user.User;
@@ -20,6 +21,7 @@ public class TagSet implements Entity {
     final Set<TagId> tags;
     private boolean deleted;
 
+    private final TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier;
     private final TagsAccessibilityVerifier tagsAccessibilityVerifier;
     private final TagSetValidator validator;
 
@@ -29,6 +31,7 @@ public class TagSet implements Entity {
            Collection<TagId> tags,
            boolean deleted,
            TagSetValidator validator,
+           TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier,
            TagsAccessibilityVerifier tagsAccessibilityVerifier) {
 
         this.id = requireNonNull(id);
@@ -37,11 +40,16 @@ public class TagSet implements Entity {
         this.tags = new HashSet<>(tags);
         this.deleted = deleted;
 
-        this.validator = validator;
+        this.tagSetsAccessibilityVerifier = tagSetsAccessibilityVerifier;
         this.tagsAccessibilityVerifier = tagsAccessibilityVerifier;
+        this.validator = validator;
     }
 
-    public static TagSet create(TagSetDto tagSet, User creator, TagsAccessibilityVerifier tagsAccessibilityVerifier) {
+    public static TagSet create(TagSetDto tagSet,
+                                User creator,
+                                TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier,
+                                TagsAccessibilityVerifier tagsAccessibilityVerifier) {
+
         TagSet newTagSet = new TagSet(
                 new TagSetId(),
                 creator,
@@ -49,6 +57,7 @@ public class TagSet implements Entity {
                 toTagIds(tagSet),
                 false,
                 new TagSetValidator(tagsAccessibilityVerifier),
+                tagSetsAccessibilityVerifier,
                 tagsAccessibilityVerifier
         );
         newTagSet.validate();
@@ -56,30 +65,45 @@ public class TagSet implements Entity {
     }
 
     public void rename(String newName, User updater) {
+        if (!tagSetsAccessibilityVerifier.isAccessible(this.id)) {
+            throw new EntityNotFoundException(TagSet.class, id.id());
+        }
         new TagSetEditOperation(updater, this, tagsAccessibilityVerifier,
                 () -> name = newName
         ).execute();
     }
 
     public void assignTag(TagId newTag, User updater) {
+        if (!tagSetsAccessibilityVerifier.isAccessible(this.id)) {
+            throw new EntityNotFoundException(TagSet.class, id.id());
+        }
         new TagSetEditOperation(updater, this, tagsAccessibilityVerifier,
                 () -> tags.add(newTag)
         ).execute();
     }
 
     public void removeTag(TagId tag, User updater) {
+        if (!tagSetsAccessibilityVerifier.isAccessible(this.id)) {
+            throw new EntityNotFoundException(TagSet.class, id.id());
+        }
         new TagSetEditOperation(updater, this, tagsAccessibilityVerifier,
                 () -> tags.remove(tag)
         ).execute();
     }
 
     public void delete(User remover) {
+        if (!tagSetsAccessibilityVerifier.isAccessible(this.id)) {
+            throw new EntityNotFoundException(TagSet.class, id.id());
+        }
         new TagSetEditOperation(remover, this, tagsAccessibilityVerifier,
                 () -> deleted = true
         ).execute();
     }
 
-    public static TagSet fromStorage(TagSetDto tagSet, TagsAccessibilityVerifier tagsAccessibilityVerifier) {
+    public static TagSet fromStorage(TagSetDto tagSet,
+                                     TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier,
+                                     TagsAccessibilityVerifier tagsAccessibilityVerifier) {
+
         return new TagSet(
                 new TagSetId(tagSet.id()),
                 new User(tagSet.creatorId()),
@@ -87,6 +111,7 @@ public class TagSet implements Entity {
                 toTagIds(tagSet),
                 tagSet.deleted(),
                 new TagSetValidator(tagsAccessibilityVerifier),
+                tagSetsAccessibilityVerifier,
                 tagsAccessibilityVerifier
         );
     }

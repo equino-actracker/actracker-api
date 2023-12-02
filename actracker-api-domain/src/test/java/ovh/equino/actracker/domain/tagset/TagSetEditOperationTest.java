@@ -22,6 +22,7 @@ class TagSetEditOperationTest {
     private static final User CREATOR = new User(randomUUID());
     private static final boolean DELETED = true;
 
+    private final TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier = null;
     @Mock
     private TagsAccessibilityVerifier tagsAccessibilityVerifier;
 
@@ -41,6 +42,7 @@ class TagSetEditOperationTest {
                 List.of(notExistingTag, existingTag),
                 !DELETED,
                 new TagSetValidator(tagsAccessibilityVerifier),
+                tagSetsAccessibilityVerifier,
                 tagsAccessibilityVerifier
         );
         TagSetEditOperation editOperation = new TagSetEditOperation(CREATOR, tagSet, tagsAccessibilityVerifier, () -> {
