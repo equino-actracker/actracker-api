@@ -1,6 +1,5 @@
 package ovh.equino.actracker.domain.activity;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -50,11 +49,6 @@ class ActivityTest {
     private MetricsAccessibilityVerifier metricsAccessibilityVerifier;
     @Mock
     private ActivityValidator validator;
-
-    @BeforeEach
-    void init() {
-        when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(true);
-    }
 
     @Nested
     @DisplayName("rename")
@@ -182,17 +176,17 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
-            when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> activity.rename(NEW_TITLE, CREATOR))
+            assertThatThrownBy(() -> activity.rename(NEW_TITLE, unauthorizedUser))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
         void shouldFailWhenUserNotAllowed() {
             // given
-            User unpriviledgedUser = new User(randomUUID());
+            User unauthorizedUser = new User(randomUUID());
             Activity activity = new Activity(
                     new ActivityId(),
                     CREATOR,
@@ -210,7 +204,7 @@ class ActivityTest {
             );
 
             // then
-            assertThatThrownBy(() -> activity.rename(NEW_TITLE, unpriviledgedUser))
+            assertThatThrownBy(() -> activity.rename(NEW_TITLE, unauthorizedUser))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -342,17 +336,16 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
-            when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> activity.start(NEW_START_TIME, CREATOR))
+            assertThatThrownBy(() -> activity.start(NEW_START_TIME, unauthorizedUser))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
         void shouldFailWhenUserNotAllowed() {
             // given
-            User unpriviledgedUser = new User(randomUUID());
             Activity activity = new Activity(
                     new ActivityId(),
                     CREATOR,
@@ -368,9 +361,10 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> activity.start(NEW_START_TIME, unpriviledgedUser))
+            assertThatThrownBy(() -> activity.start(NEW_START_TIME, unauthorizedUser))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -502,17 +496,16 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
-            when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> activity.finish(NEW_END_TIME, CREATOR))
+            assertThatThrownBy(() -> activity.finish(NEW_END_TIME, unauthorizedUser))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
         void shouldFailWhenUserNotAllowed() {
             // given
-            User unpriviledgedUser = new User(randomUUID());
             Activity activity = new Activity(
                     new ActivityId(),
                     CREATOR,
@@ -528,9 +521,10 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> activity.finish(NEW_END_TIME, unpriviledgedUser))
+            assertThatThrownBy(() -> activity.finish(NEW_END_TIME, unauthorizedUser))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -662,17 +656,16 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
-            when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> activity.updateComment(NEW_COMMENT, CREATOR))
+            assertThatThrownBy(() -> activity.updateComment(NEW_COMMENT, unauthorizedUser))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
         void shouldFailWhenUserNotAllowed() {
             // given
-            User unpriviledgedUser = new User(randomUUID());
             Activity activity = new Activity(
                     new ActivityId(),
                     CREATOR,
@@ -688,9 +681,10 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> activity.updateComment(NEW_COMMENT, unpriviledgedUser))
+            assertThatThrownBy(() -> activity.updateComment(NEW_COMMENT, unauthorizedUser))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -830,17 +824,16 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
-            when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> activity.assignTag(new TagId(), CREATOR))
+            assertThatThrownBy(() -> activity.assignTag(new TagId(), unauthorizedUser))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
         void shouldFailWhenUserNotAllowed() {
             // given
-            User unpriviledgedUser = new User(randomUUID());
             Activity activity = new Activity(
                     new ActivityId(),
                     CREATOR,
@@ -856,9 +849,10 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> activity.assignTag(new TagId(), unpriviledgedUser))
+            assertThatThrownBy(() -> activity.assignTag(new TagId(), unauthorizedUser))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -997,17 +991,16 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
-            when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> activity.removeTag(existingTag, CREATOR))
+            assertThatThrownBy(() -> activity.removeTag(existingTag, unauthorizedUser))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
         void shouldFailWhenUserNotAllowed() {
             // given
-            User unpriviledgedUser = new User(randomUUID());
             TagId existingTag = new TagId();
             Activity activity = new Activity(
                     new ActivityId(),
@@ -1024,9 +1017,10 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> activity.removeTag(existingTag, unpriviledgedUser))
+            assertThatThrownBy(() -> activity.removeTag(existingTag, unauthorizedUser))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -1104,17 +1098,16 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
-            when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> activity.delete(CREATOR))
+            assertThatThrownBy(() -> activity.delete(unauthorizedUser))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
         void shouldFailWhenUserNotAllowed() {
             // given
-            User unpriviledgedUser = new User(randomUUID());
             Activity activity = new Activity(
                     new ActivityId(),
                     CREATOR,
@@ -1130,9 +1123,10 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> activity.delete(unpriviledgedUser))
+            assertThatThrownBy(() -> activity.delete(unauthorizedUser))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -1254,18 +1248,17 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
+            User unauthorizedUser = new User(randomUUID());
             MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
-            when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> activity.setMetricValue(newMetricValue, CREATOR))
+            assertThatThrownBy(() -> activity.setMetricValue(newMetricValue, unauthorizedUser))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
         void shouldFailWhenUserNotAllowed() {
             // given
-            User unpriviledgedUser = new User(randomUUID());
             Activity activity = new Activity(
                     new ActivityId(),
                     CREATOR,
@@ -1281,10 +1274,11 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
+            User unauthorizedUser = new User(randomUUID());
             MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
 
             // then
-            assertThatThrownBy(() -> activity.setMetricValue(newMetricValue, unpriviledgedUser))
+            assertThatThrownBy(() -> activity.setMetricValue(newMetricValue, unauthorizedUser))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -1461,17 +1455,16 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
-            when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> activity.unsetMetricValue(EXISTING_METRIC_ID, CREATOR))
+            assertThatThrownBy(() -> activity.unsetMetricValue(EXISTING_METRIC_ID, unauthorizedUser))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
         void shouldFailWhenUserNotAllowed() {
             // given
-            User unpriviledgedUser = new User(randomUUID());
             Activity activity = new Activity(
                     new ActivityId(),
                     CREATOR,
@@ -1487,9 +1480,10 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> activity.unsetMetricValue(EXISTING_METRIC_ID, unpriviledgedUser))
+            assertThatThrownBy(() -> activity.unsetMetricValue(EXISTING_METRIC_ID, unauthorizedUser))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }

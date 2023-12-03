@@ -1,6 +1,5 @@
 package ovh.equino.actracker.domain.tagset;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -40,11 +39,6 @@ class TagSetTest {
     private TagsAccessibilityVerifier tagsAccessibilityVerifier;
     @Mock
     private TagSetValidator validator;
-
-    @BeforeEach
-    void init() {
-        when(tagSetsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
-    }
 
     @Nested
     @DisplayName("rename")
@@ -106,10 +100,10 @@ class TagSetTest {
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
-            when(tagSetsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> tagSet.rename(NEW_NAME, CREATOR))
+            assertThatThrownBy(() -> tagSet.rename(NEW_NAME, unauthorizedUser))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -126,11 +120,10 @@ class TagSetTest {
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
-
-            User unprivilegedUser = new User(randomUUID());
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> tagSet.rename(NEW_NAME, unprivilegedUser))
+            assertThatThrownBy(() -> tagSet.rename(NEW_NAME, unauthorizedUser))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -250,10 +243,10 @@ class TagSetTest {
                     tagsAccessibilityVerifier
             );
             TagId newTag = new TagId();
-            when(tagSetsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> tagSet.assignTag(newTag, CREATOR))
+            assertThatThrownBy(() -> tagSet.assignTag(newTag, unauthorizedUser))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -271,11 +264,10 @@ class TagSetTest {
                     tagsAccessibilityVerifier
             );
             TagId newTag = new TagId();
-
-            User unprivilegedUser = new User(randomUUID());
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> tagSet.assignTag(newTag, unprivilegedUser))
+            assertThatThrownBy(() -> tagSet.assignTag(newTag, unauthorizedUser))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -389,10 +381,10 @@ class TagSetTest {
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
-            when(tagSetsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> tagSet.removeTag(existingTag, CREATOR))
+            assertThatThrownBy(() -> tagSet.removeTag(existingTag, unauthorizedUser))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -410,11 +402,10 @@ class TagSetTest {
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
-
-            User unprivilegedUser = new User(randomUUID());
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> tagSet.removeTag(existingTag, unprivilegedUser))
+            assertThatThrownBy(() -> tagSet.removeTag(existingTag, unauthorizedUser))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -477,10 +468,10 @@ class TagSetTest {
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
-            when(tagSetsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> tagSet.delete(CREATOR))
+            assertThatThrownBy(() -> tagSet.delete(unauthorizedUser))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -497,11 +488,10 @@ class TagSetTest {
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
-
-            User unprivilegedUser = new User(randomUUID());
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> tagSet.delete(unprivilegedUser))
+            assertThatThrownBy(() -> tagSet.delete(unauthorizedUser))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }

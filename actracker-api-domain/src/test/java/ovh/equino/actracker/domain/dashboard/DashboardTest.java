@@ -1,6 +1,5 @@
 package ovh.equino.actracker.domain.dashboard;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -22,7 +21,6 @@ import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DashboardTest {
@@ -37,11 +35,6 @@ class DashboardTest {
     private DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier;
     @Mock
     private DashboardValidator validator;
-
-    @BeforeEach
-    void init() {
-        when(dashboardsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
-    }
 
     @Nested
     @DisplayName("rename")
@@ -103,17 +96,16 @@ class DashboardTest {
                     dashboardsAccessibilityVerifier,
                     validator
             );
-            when(dashboardsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> dashboard.rename(NEW_NAME, CREATOR))
+            assertThatThrownBy(() -> dashboard.rename(NEW_NAME, unauthorizedUser))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
         void shouldFailWhenUserNotAllowed() {
             // given
-            User unprivilegedUser = new User(randomUUID());
             Dashboard dashboard = new Dashboard(
                     new DashboardId(),
                     CREATOR,
@@ -124,9 +116,10 @@ class DashboardTest {
                     dashboardsAccessibilityVerifier,
                     validator
             );
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> dashboard.rename(NEW_NAME, unprivilegedUser))
+            assertThatThrownBy(() -> dashboard.rename(NEW_NAME, unauthorizedUser))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -224,17 +217,16 @@ class DashboardTest {
                     dashboardsAccessibilityVerifier,
                     validator
             );
-            when(dashboardsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> dashboard.delete(CREATOR))
+            assertThatThrownBy(() -> dashboard.delete(unauthorizedUser))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
         void shouldFailWhenUserNotAllowed() {
             // given
-            User unprivilegedUser = new User(randomUUID());
             Dashboard dashboard = new Dashboard(
                     new DashboardId(),
                     CREATOR,
@@ -245,9 +237,10 @@ class DashboardTest {
                     dashboardsAccessibilityVerifier,
                     validator
             );
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> dashboard.delete(unprivilegedUser))
+            assertThatThrownBy(() -> dashboard.delete(unauthorizedUser))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -429,17 +422,16 @@ class DashboardTest {
                     validator
             );
             Share newShare = new Share(GRANTEE_NAME);
-            when(dashboardsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> dashboard.share(newShare, CREATOR))
+            assertThatThrownBy(() -> dashboard.share(newShare, unauthorizedUser))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
         void shouldFailWhenUserNotAllowed() {
             // given
-            User unprivilegedUser = new User(randomUUID());
             Dashboard dashboard = new Dashboard(
                     new DashboardId(),
                     CREATOR,
@@ -450,10 +442,11 @@ class DashboardTest {
                     dashboardsAccessibilityVerifier,
                     validator
             );
+            User unauthorizedUser = new User(randomUUID());
             Share newShare = new Share(GRANTEE_NAME);
 
             // then
-            assertThatThrownBy(() -> dashboard.share(newShare, unprivilegedUser))
+            assertThatThrownBy(() -> dashboard.share(newShare, unauthorizedUser))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -566,17 +559,16 @@ class DashboardTest {
                     dashboardsAccessibilityVerifier,
                     validator
             );
-            when(dashboardsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> dashboard.unshare(existingShare.granteeName(), CREATOR))
+            assertThatThrownBy(() -> dashboard.unshare(existingShare.granteeName(), unauthorizedUser))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
         void shouldFailWhenUserNotAllowed() {
             // given
-            User unprivilegedUser = new User(randomUUID());
             Share existingShare = new Share(new User(randomUUID()), GRANTEE_NAME);
             Dashboard dashboard = new Dashboard(
                     new DashboardId(),
@@ -588,9 +580,10 @@ class DashboardTest {
                     dashboardsAccessibilityVerifier,
                     validator
             );
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> dashboard.unshare(existingShare.granteeName(), unprivilegedUser))
+            assertThatThrownBy(() -> dashboard.unshare(existingShare.granteeName(), unauthorizedUser))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -698,10 +691,10 @@ class DashboardTest {
                     validator
             );
             Chart newChart = new Chart(CHART_NAME, GroupBy.SELF, AnalysisMetric.METRIC_VALUE, EMPTY_TAGS);
-            when(dashboardsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> dashboard.addChart(newChart, CREATOR))
+            assertThatThrownBy(() -> dashboard.addChart(newChart, unauthorizedUser))
                     .isInstanceOf(EntityNotFoundException.class);
 
         }
@@ -709,7 +702,6 @@ class DashboardTest {
         @Test
         void shouldFailWhenUserNotAllowed() {
             // given
-            User unprivilegedUser = new User(randomUUID());
             Dashboard dashboard = new Dashboard(
                     new DashboardId(),
                     CREATOR,
@@ -721,9 +713,10 @@ class DashboardTest {
                     validator
             );
             Chart newChart = new Chart(CHART_NAME, GroupBy.SELF, AnalysisMetric.METRIC_VALUE, EMPTY_TAGS);
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> dashboard.addChart(newChart, unprivilegedUser))
+            assertThatThrownBy(() -> dashboard.addChart(newChart, unauthorizedUser))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -898,17 +891,16 @@ class DashboardTest {
                     dashboardsAccessibilityVerifier,
                     validator
             );
-            when(dashboardsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> dashboard.deleteChart(existingChart.id(), CREATOR))
+            assertThatThrownBy(() -> dashboard.deleteChart(existingChart.id(), unauthorizedUser))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
         void shouldFailWhenUserNotAllowed() {
             // given
-            User unprivilegedUser = new User(randomUUID());
             Chart existingChart = new Chart(
                     CHART_NAME,
                     GroupBy.SELF,
@@ -926,9 +918,10 @@ class DashboardTest {
                     dashboardsAccessibilityVerifier,
                     validator
             );
+            User unauthorizedUser = new User(randomUUID());
 
             // then
-            assertThatThrownBy(() -> dashboard.deleteChart(existingChart.id(), unprivilegedUser))
+            assertThatThrownBy(() -> dashboard.deleteChart(existingChart.id(), unauthorizedUser))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
