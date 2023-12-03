@@ -23,8 +23,6 @@ class DashboardValidatorTest {
     private static final String VALIDATION_ERROR = "Dashboard invalid: %s";
     private static final String EMPTY_NAME_ERROR = "Name is empty";
 
-    private final DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier = null;
-
     private DashboardValidator validator;
 
     @BeforeEach
@@ -42,7 +40,6 @@ class DashboardValidatorTest {
                 EMPTY_CHARTS,
                 EMPTY_SHARES,
                 !DELETED,
-                dashboardsAccessibilityVerifier,
                 validator
         );
 
@@ -60,7 +57,6 @@ class DashboardValidatorTest {
                 EMPTY_CHARTS,
                 EMPTY_SHARES,
                 !DELETED,
-                dashboardsAccessibilityVerifier,
                 validator
         );
         List<String> validationErrors = List.of(EMPTY_NAME_ERROR);
@@ -81,7 +77,6 @@ class DashboardValidatorTest {
                 EMPTY_CHARTS,
                 EMPTY_SHARES,
                 !DELETED,
-                dashboardsAccessibilityVerifier,
                 validator
         );
         List<String> validationErrors = List.of(EMPTY_NAME_ERROR);

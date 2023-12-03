@@ -15,8 +15,6 @@ class DashboardEditOperationTest {
     private static final User CREATOR = new User(randomUUID());
     private static final boolean DELETED = true;
 
-    private final DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier = null;
-
     @Test
     void shouldPreserveDeletedCharts() {
         // given
@@ -29,7 +27,6 @@ class DashboardEditOperationTest {
                 List.of(deletedChart, nonDeletedChart),
                 emptyList(),
                 !DELETED,
-                dashboardsAccessibilityVerifier,
                 new DashboardValidator()
         );
         DashboardEditOperation editOperation = new DashboardEditOperation(CREATOR, dashboard, () -> {
