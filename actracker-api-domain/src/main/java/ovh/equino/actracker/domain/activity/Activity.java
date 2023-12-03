@@ -1,7 +1,11 @@
 package ovh.equino.actracker.domain.activity;
 
 import ovh.equino.actracker.domain.Entity;
-import ovh.equino.actracker.domain.tag.*;
+import ovh.equino.actracker.domain.exception.EntityNotFoundException;
+import ovh.equino.actracker.domain.tag.MetricId;
+import ovh.equino.actracker.domain.tag.MetricsAccessibilityVerifier;
+import ovh.equino.actracker.domain.tag.TagId;
+import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.user.User;
 
 import java.time.Instant;
@@ -24,6 +28,7 @@ public class Activity implements Entity {
     final List<MetricValue> metricValues;
     private boolean deleted;
 
+    private final ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier;
     private final TagsAccessibilityVerifier tagsAccessibilityVerifier;
     private final MetricsAccessibilityVerifier metricsAccessibilityVerifier;
     private final ActivityValidator validator;
@@ -38,6 +43,7 @@ public class Activity implements Entity {
             Collection<TagId> tags,
             Collection<MetricValue> metricValues,
             boolean deleted,
+            ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier,
             TagsAccessibilityVerifier tagsAccessibilityVerifier,
             MetricsAccessibilityVerifier metricsAccessibilityVerifier,
             ActivityValidator validator) {
@@ -52,12 +58,18 @@ public class Activity implements Entity {
         this.metricValues = new ArrayList<>(metricValues);
         this.deleted = deleted;
 
+        this.activitiesAccessibilityVerifier = activitiesAccessibilityVerifier;
         this.tagsAccessibilityVerifier = tagsAccessibilityVerifier;
         this.metricsAccessibilityVerifier = metricsAccessibilityVerifier;
         this.validator = validator;
     }
 
-    public static Activity create(ActivityDto activity, User creator, TagsAccessibilityVerifier tagsAccessibilityVerifier, MetricsAccessibilityVerifier metricsAccessibilityVerifier) {
+    public static Activity create(ActivityDto activity,
+                                  User creator,
+                                  ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier,
+                                  TagsAccessibilityVerifier tagsAccessibilityVerifier,
+                                  MetricsAccessibilityVerifier metricsAccessibilityVerifier) {
+
         Activity newActivity = new Activity(
                 new ActivityId(),
                 creator,
@@ -68,6 +80,7 @@ public class Activity implements Entity {
                 toTagIds(activity),
                 activity.metricValues(),
                 false,
+                activitiesAccessibilityVerifier,
                 tagsAccessibilityVerifier,
                 metricsAccessibilityVerifier,
                 new ActivityValidator(tagsAccessibilityVerifier, metricsAccessibilityVerifier)
@@ -83,42 +96,63 @@ public class Activity implements Entity {
     }
 
     public void rename(String newTitle, User editor) {
+        if (!activitiesAccessibilityVerifier.isAccessible(this.id)) {
+            throw new EntityNotFoundException(Activity.class, id.id());
+        }
         new ActivityEditOperation(editor, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier,
                 () -> this.title = newTitle
         ).execute();
     }
 
     public void start(Instant startTime, User updater) {
+        if (!activitiesAccessibilityVerifier.isAccessible(this.id)) {
+            throw new EntityNotFoundException(Activity.class, id.id());
+        }
         new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier,
                 () -> this.startTime = startTime
         ).execute();
     }
 
     public void finish(Instant endTime, User updater) {
+        if (!activitiesAccessibilityVerifier.isAccessible(this.id)) {
+            throw new EntityNotFoundException(Activity.class, id.id());
+        }
         new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier,
                 () -> this.endTime = endTime
         ).execute();
     }
 
     public void updateComment(String comment, User updater) {
+        if (!activitiesAccessibilityVerifier.isAccessible(this.id)) {
+            throw new EntityNotFoundException(Activity.class, id.id());
+        }
         new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier,
                 () -> this.comment = comment
         ).execute();
     }
 
     public void assignTag(TagId tagId, User updater) {
+        if (!activitiesAccessibilityVerifier.isAccessible(this.id)) {
+            throw new EntityNotFoundException(Activity.class, id.id());
+        }
         new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier,
                 () -> this.tags.add(tagId)
         ).execute();
     }
 
     public void removeTag(TagId tagId, User updater) {
+        if (!activitiesAccessibilityVerifier.isAccessible(this.id)) {
+            throw new EntityNotFoundException(Activity.class, id.id());
+        }
         new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier,
                 () -> this.tags.remove(tagId)
         ).execute();
     }
 
     public void setMetricValue(MetricValue newMetricValue, User updater) {
+        if (!activitiesAccessibilityVerifier.isAccessible(this.id)) {
+            throw new EntityNotFoundException(Activity.class, id.id());
+        }
         new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier, () -> {
 
             List<MetricValue> otherValues = metricValues.stream()
@@ -132,6 +166,9 @@ public class Activity implements Entity {
     }
 
     public void unsetMetricValue(MetricId metricId, User updater) {
+        if (!activitiesAccessibilityVerifier.isAccessible(this.id)) {
+            throw new EntityNotFoundException(Activity.class, id.id());
+        }
         new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier, () -> {
 
             List<MetricValue> remainingMetricValues = metricValues.stream()
@@ -144,12 +181,19 @@ public class Activity implements Entity {
     }
 
     public void delete(User remover) {
+        if (!activitiesAccessibilityVerifier.isAccessible(this.id)) {
+            throw new EntityNotFoundException(Activity.class, id.id());
+        }
         new ActivityEditOperation(remover, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier,
                 () -> this.deleted = true
         ).execute();
     }
 
-    public static Activity fromStorage(ActivityDto activity, TagsAccessibilityVerifier tagsAccessibilityVerifier, MetricsAccessibilityVerifier metricsAccessibilityVerifier) {
+    public static Activity fromStorage(ActivityDto activity,
+                                       ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier,
+                                       TagsAccessibilityVerifier tagsAccessibilityVerifier,
+                                       MetricsAccessibilityVerifier metricsAccessibilityVerifier) {
+
         return new Activity(
                 new ActivityId(activity.id()),
                 new User(activity.creatorId()),
@@ -160,6 +204,7 @@ public class Activity implements Entity {
                 toTagIds(activity),
                 activity.metricValues(),
                 activity.deleted(),
+                activitiesAccessibilityVerifier,
                 tagsAccessibilityVerifier,
                 metricsAccessibilityVerifier,
                 new ActivityValidator(tagsAccessibilityVerifier, metricsAccessibilityVerifier)

@@ -26,6 +26,7 @@ class ActivityEditOperationTest {
     private static final User CREATOR = new User(randomUUID());
     private static final boolean DELETED = true;
 
+    private final ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier = null;
     @Mock
     private TagsAccessibilityVerifier tagsAccessibilityVerifier;
     @Mock
@@ -53,6 +54,7 @@ class ActivityEditOperationTest {
                 List.of(existingTagId, nonExistingTagId),
                 emptyList(),
                 !DELETED,
+                activitiesAccessibilityVerifier,
                 tagsAccessibilityVerifier,
                 metricsAccessibilityVerifier,
                 validator
@@ -93,6 +95,7 @@ class ActivityEditOperationTest {
                 emptyList(),
                 List.of(valueOfExistingMetric, valueOfNonExistingMetric),
                 !DELETED,
+                activitiesAccessibilityVerifier,
                 tagsAccessibilityVerifier,
                 metricsAccessibilityVerifier,
                 validator
