@@ -101,6 +101,7 @@ class TagSetTest {
                     tagsAccessibilityVerifier
             );
             User unauthorizedUser = new User(randomUUID());
+            when(tagSetsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
 
             // then
             assertThatThrownBy(() -> tagSet.rename(NEW_NAME, unauthorizedUser))
@@ -121,6 +122,7 @@ class TagSetTest {
                     tagsAccessibilityVerifier
             );
             User unauthorizedUser = new User(randomUUID());
+            when(tagSetsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // then
             assertThatThrownBy(() -> tagSet.rename(NEW_NAME, unauthorizedUser))
@@ -244,6 +246,7 @@ class TagSetTest {
             );
             TagId newTag = new TagId();
             User unauthorizedUser = new User(randomUUID());
+            when(tagSetsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
 
             // then
             assertThatThrownBy(() -> tagSet.assignTag(newTag, unauthorizedUser))
@@ -265,6 +268,7 @@ class TagSetTest {
             );
             TagId newTag = new TagId();
             User unauthorizedUser = new User(randomUUID());
+            when(tagSetsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // then
             assertThatThrownBy(() -> tagSet.assignTag(newTag, unauthorizedUser))
@@ -382,6 +386,7 @@ class TagSetTest {
                     tagsAccessibilityVerifier
             );
             User unauthorizedUser = new User(randomUUID());
+            when(tagSetsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
 
             // then
             assertThatThrownBy(() -> tagSet.removeTag(existingTag, unauthorizedUser))
@@ -403,6 +408,7 @@ class TagSetTest {
                     tagsAccessibilityVerifier
             );
             User unauthorizedUser = new User(randomUUID());
+            when(tagSetsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // then
             assertThatThrownBy(() -> tagSet.removeTag(existingTag, unauthorizedUser))
@@ -469,6 +475,7 @@ class TagSetTest {
                     tagsAccessibilityVerifier
             );
             User unauthorizedUser = new User(randomUUID());
+            when(tagSetsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
 
             // then
             assertThatThrownBy(() -> tagSet.delete(unauthorizedUser))
@@ -489,6 +496,7 @@ class TagSetTest {
                     tagsAccessibilityVerifier
             );
             User unauthorizedUser = new User(randomUUID());
+            when(tagSetsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // then
             assertThatThrownBy(() -> tagSet.delete(unauthorizedUser))

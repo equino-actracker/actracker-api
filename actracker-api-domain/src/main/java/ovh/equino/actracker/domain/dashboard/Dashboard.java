@@ -62,7 +62,7 @@ public class Dashboard implements Entity {
     }
 
     public void rename(String newName, User editor) {
-        if(!dashboardsAccessibilityVerifier.isAccessible(this.id)) {
+        if (!creator.equals(editor) && !dashboardsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Dashboard.class, id.id());
         }
         new DashboardEditOperation(editor, this, () ->
@@ -71,7 +71,7 @@ public class Dashboard implements Entity {
     }
 
     public void addChart(Chart newChart, User editor) {
-        if(!dashboardsAccessibilityVerifier.isAccessible(this.id)) {
+        if (!creator.equals(editor) && !dashboardsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Dashboard.class, id.id());
         }
         new DashboardEditOperation(editor, this, () ->
@@ -80,7 +80,7 @@ public class Dashboard implements Entity {
     }
 
     public void deleteChart(ChartId chartId, User editor) {
-        if(!dashboardsAccessibilityVerifier.isAccessible(this.id)) {
+        if (!creator.equals(editor) && !dashboardsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Dashboard.class, id.id());
         }
         new DashboardEditOperation(editor, this, () -> {
@@ -100,7 +100,7 @@ public class Dashboard implements Entity {
     }
 
     public void delete(User remover) {
-        if(!dashboardsAccessibilityVerifier.isAccessible(this.id)) {
+        if (!creator.equals(remover) && !dashboardsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Dashboard.class, id.id());
         }
         new DashboardEditOperation(remover, this, () -> {
@@ -116,7 +116,7 @@ public class Dashboard implements Entity {
     }
 
     public void share(Share share, User granter) {
-        if(!dashboardsAccessibilityVerifier.isAccessible(this.id)) {
+        if (!creator.equals(granter) && !dashboardsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Dashboard.class, id.id());
         }
         new DashboardEditOperation(granter, this, () -> {
@@ -132,7 +132,7 @@ public class Dashboard implements Entity {
     }
 
     public void unshare(String granteeName, User granter) {
-        if(!dashboardsAccessibilityVerifier.isAccessible(this.id)) {
+        if (!creator.equals(granter) && !dashboardsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Dashboard.class, id.id());
         }
         new DashboardEditOperation(granter, this, () -> {

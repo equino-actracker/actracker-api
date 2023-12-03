@@ -96,7 +96,7 @@ public class Activity implements Entity {
     }
 
     public void rename(String newTitle, User editor) {
-        if (!activitiesAccessibilityVerifier.isAccessible(this.id)) {
+        if (!creator.equals(editor) && !activitiesAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
         new ActivityEditOperation(editor, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier,
@@ -105,7 +105,7 @@ public class Activity implements Entity {
     }
 
     public void start(Instant startTime, User updater) {
-        if (!activitiesAccessibilityVerifier.isAccessible(this.id)) {
+        if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
         new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier,
@@ -114,7 +114,7 @@ public class Activity implements Entity {
     }
 
     public void finish(Instant endTime, User updater) {
-        if (!activitiesAccessibilityVerifier.isAccessible(this.id)) {
+        if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
         new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier,
@@ -123,7 +123,7 @@ public class Activity implements Entity {
     }
 
     public void updateComment(String comment, User updater) {
-        if (!activitiesAccessibilityVerifier.isAccessible(this.id)) {
+        if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
         new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier,
@@ -132,7 +132,7 @@ public class Activity implements Entity {
     }
 
     public void assignTag(TagId tagId, User updater) {
-        if (!activitiesAccessibilityVerifier.isAccessible(this.id)) {
+        if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
         new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier,
@@ -141,7 +141,7 @@ public class Activity implements Entity {
     }
 
     public void removeTag(TagId tagId, User updater) {
-        if (!activitiesAccessibilityVerifier.isAccessible(this.id)) {
+        if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
         new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier,
@@ -150,7 +150,7 @@ public class Activity implements Entity {
     }
 
     public void setMetricValue(MetricValue newMetricValue, User updater) {
-        if (!activitiesAccessibilityVerifier.isAccessible(this.id)) {
+        if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
         new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier, () -> {
@@ -166,7 +166,7 @@ public class Activity implements Entity {
     }
 
     public void unsetMetricValue(MetricId metricId, User updater) {
-        if (!activitiesAccessibilityVerifier.isAccessible(this.id)) {
+        if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
         new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier, () -> {
@@ -181,7 +181,7 @@ public class Activity implements Entity {
     }
 
     public void delete(User remover) {
-        if (!activitiesAccessibilityVerifier.isAccessible(this.id)) {
+        if (!creator.equals(remover) && !activitiesAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
         new ActivityEditOperation(remover, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier,

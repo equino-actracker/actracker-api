@@ -21,6 +21,7 @@ import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DashboardTest {
@@ -97,6 +98,7 @@ class DashboardTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(dashboardsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
 
             // then
             assertThatThrownBy(() -> dashboard.rename(NEW_NAME, unauthorizedUser))
@@ -117,6 +119,7 @@ class DashboardTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(dashboardsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // then
             assertThatThrownBy(() -> dashboard.rename(NEW_NAME, unauthorizedUser))
@@ -218,6 +221,7 @@ class DashboardTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(dashboardsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
 
             // then
             assertThatThrownBy(() -> dashboard.delete(unauthorizedUser))
@@ -238,6 +242,7 @@ class DashboardTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(dashboardsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // then
             assertThatThrownBy(() -> dashboard.delete(unauthorizedUser))
@@ -423,6 +428,7 @@ class DashboardTest {
             );
             Share newShare = new Share(GRANTEE_NAME);
             User unauthorizedUser = new User(randomUUID());
+            when(dashboardsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
 
             // then
             assertThatThrownBy(() -> dashboard.share(newShare, unauthorizedUser))
@@ -444,6 +450,7 @@ class DashboardTest {
             );
             User unauthorizedUser = new User(randomUUID());
             Share newShare = new Share(GRANTEE_NAME);
+            when(dashboardsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // then
             assertThatThrownBy(() -> dashboard.share(newShare, unauthorizedUser))
@@ -560,6 +567,7 @@ class DashboardTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(dashboardsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
 
             // then
             assertThatThrownBy(() -> dashboard.unshare(existingShare.granteeName(), unauthorizedUser))
@@ -581,6 +589,7 @@ class DashboardTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(dashboardsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // then
             assertThatThrownBy(() -> dashboard.unshare(existingShare.granteeName(), unauthorizedUser))
@@ -692,6 +701,7 @@ class DashboardTest {
             );
             Chart newChart = new Chart(CHART_NAME, GroupBy.SELF, AnalysisMetric.METRIC_VALUE, EMPTY_TAGS);
             User unauthorizedUser = new User(randomUUID());
+            when(dashboardsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
 
             // then
             assertThatThrownBy(() -> dashboard.addChart(newChart, unauthorizedUser))
@@ -714,6 +724,7 @@ class DashboardTest {
             );
             Chart newChart = new Chart(CHART_NAME, GroupBy.SELF, AnalysisMetric.METRIC_VALUE, EMPTY_TAGS);
             User unauthorizedUser = new User(randomUUID());
+            when(dashboardsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // then
             assertThatThrownBy(() -> dashboard.addChart(newChart, unauthorizedUser))
@@ -892,6 +903,7 @@ class DashboardTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(dashboardsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
 
             // then
             assertThatThrownBy(() -> dashboard.deleteChart(existingChart.id(), unauthorizedUser))
@@ -919,6 +931,7 @@ class DashboardTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(dashboardsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // then
             assertThatThrownBy(() -> dashboard.deleteChart(existingChart.id(), unauthorizedUser))
