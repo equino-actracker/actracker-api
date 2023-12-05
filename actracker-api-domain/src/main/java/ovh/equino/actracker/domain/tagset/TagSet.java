@@ -2,6 +2,7 @@ package ovh.equino.actracker.domain.tagset;
 
 import ovh.equino.actracker.domain.Entity;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
+import ovh.equino.actracker.domain.tag.Tag;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.user.User;
@@ -77,6 +78,9 @@ public class TagSet implements Entity {
         if (!creator.equals(updater) && !tagSetsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(TagSet.class, id.id());
         }
+        if (!tagsAccessibilityVerifier.isAccessible(newTag)) {
+            throw new EntityNotFoundException(Tag.class, newTag.id());
+        }
         new TagSetEditOperation(updater, this, tagsAccessibilityVerifier,
                 () -> tags.add(newTag)
         ).execute();
@@ -85,6 +89,9 @@ public class TagSet implements Entity {
     public void removeTag(TagId tag, User updater) {
         if (!creator.equals(updater) && !tagSetsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(TagSet.class, id.id());
+        }
+        if (!tagsAccessibilityVerifier.isAccessible(tag)) {
+            throw new EntityNotFoundException(Tag.class, tag.id());
         }
         new TagSetEditOperation(updater, this, tagsAccessibilityVerifier,
                 () -> tags.remove(tag)
