@@ -1,6 +1,5 @@
 package ovh.equino.actracker.domain.tag;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -36,11 +35,6 @@ class TagTest {
     private TagsAccessibilityVerifier tagsAccessibilityVerifier;
     @Mock
     private TagValidator validator;
-
-    @BeforeEach
-    void init() {
-        when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
-    }
 
     @Nested
     @DisplayName("rename")
@@ -101,11 +95,11 @@ class TagTest {
                     tagsAccessibilityVerifier,
                     validator
             );
-
+            User unauthorizedUser = new User(randomUUID());
             when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> tag.rename(NEW_NAME, CREATOR))
+            assertThatThrownBy(() -> tag.rename(NEW_NAME, unauthorizedUser))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -122,11 +116,11 @@ class TagTest {
                     tagsAccessibilityVerifier,
                     validator
             );
-
-            User unprivilegedUser = new User(randomUUID());
+            User unauthorizedUser = new User(randomUUID());
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> tag.rename(NEW_NAME, unprivilegedUser))
+            assertThatThrownBy(() -> tag.rename(NEW_NAME, unauthorizedUser))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -211,7 +205,6 @@ class TagTest {
         @Test
         void shouldFailWhenNonAccessibleToUser() {
             // given
-            Metric newMetric = new Metric(new MetricId(), CREATOR, METRIC_NAME, NUMERIC, !DELETED);
             Tag tag = new Tag(
                     new TagId(),
                     CREATOR,
@@ -222,19 +215,18 @@ class TagTest {
                     tagsAccessibilityVerifier,
                     validator
             );
-
+            User unauthorizedUser = new User(randomUUID());
             when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            Metric newMetric = new Metric(new MetricId(), unauthorizedUser, METRIC_NAME, NUMERIC, !DELETED);
 
             // then
-            assertThatThrownBy(() -> tag.addMetric(newMetric.name(), newMetric.type(), CREATOR))
+            assertThatThrownBy(() -> tag.addMetric(newMetric.name(), newMetric.type(), unauthorizedUser))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
         void shouldFailWhenUserNotAllowed() {
             // given
-            User unprivilegedUser = new User(randomUUID());
-            Metric newMetric = new Metric(new MetricId(), unprivilegedUser, METRIC_NAME, NUMERIC, !DELETED);
             Tag tag = new Tag(
                     new TagId(),
                     CREATOR,
@@ -245,9 +237,12 @@ class TagTest {
                     tagsAccessibilityVerifier,
                     validator
             );
+            User unauthorizedUser = new User(randomUUID());
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            Metric newMetric = new Metric(new MetricId(), unauthorizedUser, METRIC_NAME, NUMERIC, !DELETED);
 
             // then
-            assertThatThrownBy(() -> tag.addMetric(newMetric.name(), newMetric.type(), unprivilegedUser))
+            assertThatThrownBy(() -> tag.addMetric(newMetric.name(), newMetric.type(), unauthorizedUser))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -399,18 +394,17 @@ class TagTest {
                     tagsAccessibilityVerifier,
                     validator
             );
-
+            User unauthorizedUser = new User(randomUUID());
             when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> tag.deleteMetric(existingMetric.id(), CREATOR))
+            assertThatThrownBy(() -> tag.deleteMetric(existingMetric.id(), unauthorizedUser))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
         void shouldFailWhenUserNotAllowed() {
             // given
-            User unprivilegedUser = new User(randomUUID());
             Metric existingMetric = new Metric(new MetricId(), CREATOR, METRIC_NAME, NUMERIC, !DELETED);
             Tag tag = new Tag(
                     new TagId(),
@@ -422,9 +416,11 @@ class TagTest {
                     tagsAccessibilityVerifier,
                     validator
             );
+            User unauthorizedUser = new User(randomUUID());
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> tag.deleteMetric(existingMetric.id(), unprivilegedUser))
+            assertThatThrownBy(() -> tag.deleteMetric(existingMetric.id(), unauthorizedUser))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -554,18 +550,17 @@ class TagTest {
                     tagsAccessibilityVerifier,
                     validator
             );
-
+            User unauthorizedUser = new User(randomUUID());
             when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> tag.renameMetric(NEW_METRIC_NAME, existingMetric.id(), CREATOR))
+            assertThatThrownBy(() -> tag.renameMetric(NEW_METRIC_NAME, existingMetric.id(), unauthorizedUser))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
         void shouldFailWhenUserNotAllowed() {
             // given
-            User unprivilegedUser = new User(randomUUID());
             Metric existingMetric = new Metric(new MetricId(), CREATOR, METRIC_NAME, NUMERIC, !DELETED);
             Tag tag = new Tag(
                     new TagId(),
@@ -577,9 +572,11 @@ class TagTest {
                     tagsAccessibilityVerifier,
                     validator
             );
+            User unauthorizedUser = new User(randomUUID());
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> tag.renameMetric(NEW_METRIC_NAME, existingMetric.id(), unprivilegedUser))
+            assertThatThrownBy(() -> tag.renameMetric(NEW_METRIC_NAME, existingMetric.id(), unauthorizedUser))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -652,18 +649,17 @@ class TagTest {
                     tagsAccessibilityVerifier,
                     validator
             );
-
+            User unauthorizedUser = new User(randomUUID());
             when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> tag.delete(CREATOR))
+            assertThatThrownBy(() -> tag.delete(unauthorizedUser))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
         void shouldFailWhenUserNotAllowed() {
             // given
-            User unprivilegedUser = new User(randomUUID());
             Tag tag = new Tag(
                     new TagId(),
                     CREATOR,
@@ -674,9 +670,11 @@ class TagTest {
                     tagsAccessibilityVerifier,
                     validator
             );
+            User unauthorizedUser = new User(randomUUID());
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> tag.delete(unprivilegedUser))
+            assertThatThrownBy(() -> tag.delete(unauthorizedUser))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -858,18 +856,17 @@ class TagTest {
                     validator
             );
             Share newShare = new Share(GRANTEE_NAME);
-
+            User unauthorizedUser = new User(randomUUID());
             when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> tag.share(newShare, CREATOR))
+            assertThatThrownBy(() -> tag.share(newShare, unauthorizedUser))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
         void shouldFailWhenUserNotAllowed() {
             // given
-            User unprivilegedUser = new User(randomUUID());
             Tag tag = new Tag(
                     new TagId(),
                     CREATOR,
@@ -881,9 +878,11 @@ class TagTest {
                     validator
             );
             Share newShare = new Share(GRANTEE_NAME);
+            User unauthorizedUser = new User(randomUUID());
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> tag.share(newShare, unprivilegedUser))
+            assertThatThrownBy(() -> tag.share(newShare, unauthorizedUser))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -995,18 +994,17 @@ class TagTest {
                     tagsAccessibilityVerifier,
                     validator
             );
-
+            User unauthorizedUser = new User(randomUUID());
             when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> tag.unshare(existingShare.granteeName(), CREATOR))
+            assertThatThrownBy(() -> tag.unshare(existingShare.granteeName(), unauthorizedUser))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
         void shouldFailWhenUserNotAllowed() {
             // given
-            User unprivilegedUser = new User(randomUUID());
             Share existingShare = new Share(new User(randomUUID()), GRANTEE_NAME);
             Tag tag = new Tag(
                     new TagId(),
@@ -1018,9 +1016,11 @@ class TagTest {
                     tagsAccessibilityVerifier,
                     validator
             );
+            User unauthorizedUser = new User(randomUUID());
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> tag.unshare(existingShare.granteeName(), unprivilegedUser))
+            assertThatThrownBy(() -> tag.unshare(existingShare.granteeName(), unauthorizedUser))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }

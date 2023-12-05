@@ -1,6 +1,7 @@
 package ovh.equino.actracker.domain.dashboard;
 
 import ovh.equino.actracker.domain.Entity;
+import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.user.User;
 
@@ -19,6 +20,7 @@ public class Dashboard implements Entity {
     final List<Share> shares;
     private boolean deleted;
 
+    private final DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier;
     private final DashboardValidator validator;
 
     Dashboard(DashboardId id,
@@ -27,6 +29,7 @@ public class Dashboard implements Entity {
               List<Chart> charts,
               List<Share> shares,
               boolean deleted,
+              DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier,
               DashboardValidator validator) {
 
         this.id = id;
@@ -36,10 +39,14 @@ public class Dashboard implements Entity {
         this.shares = new ArrayList<>(shares);
         this.deleted = deleted;
 
+        this.dashboardsAccessibilityVerifier = dashboardsAccessibilityVerifier;
         this.validator = validator;
     }
 
-    public static Dashboard create(DashboardDto dashboard, User creator) {
+    public static Dashboard create(DashboardDto dashboard,
+                                   User creator,
+                                   DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier) {
+
         Dashboard newDashboard = new Dashboard(
                 new DashboardId(),
                 creator,
@@ -47,6 +54,7 @@ public class Dashboard implements Entity {
                 dashboard.charts(),
                 dashboard.shares(),
                 false,
+                dashboardsAccessibilityVerifier,
                 new DashboardValidator()
         );
         newDashboard.validate();
@@ -54,18 +62,27 @@ public class Dashboard implements Entity {
     }
 
     public void rename(String newName, User editor) {
+        if (!creator.equals(editor) && !dashboardsAccessibilityVerifier.isAccessible(this.id)) {
+            throw new EntityNotFoundException(Dashboard.class, id.id());
+        }
         new DashboardEditOperation(editor, this, () ->
                 this.name = newName
         ).execute();
     }
 
     public void addChart(Chart newChart, User editor) {
+        if (!creator.equals(editor) && !dashboardsAccessibilityVerifier.isAccessible(this.id)) {
+            throw new EntityNotFoundException(Dashboard.class, id.id());
+        }
         new DashboardEditOperation(editor, this, () ->
                 charts.add(newChart)
         ).execute();
     }
 
     public void deleteChart(ChartId chartId, User editor) {
+        if (!creator.equals(editor) && !dashboardsAccessibilityVerifier.isAccessible(this.id)) {
+            throw new EntityNotFoundException(Dashboard.class, id.id());
+        }
         new DashboardEditOperation(editor, this, () -> {
 
             List<Chart> deletedCharts = charts.stream()
@@ -83,6 +100,9 @@ public class Dashboard implements Entity {
     }
 
     public void delete(User remover) {
+        if (!creator.equals(remover) && !dashboardsAccessibilityVerifier.isAccessible(this.id)) {
+            throw new EntityNotFoundException(Dashboard.class, id.id());
+        }
         new DashboardEditOperation(remover, this, () -> {
 
             List<Chart> allChartsDeleted = this.charts.stream()
@@ -96,6 +116,9 @@ public class Dashboard implements Entity {
     }
 
     public void share(Share share, User granter) {
+        if (!creator.equals(granter) && !dashboardsAccessibilityVerifier.isAccessible(this.id)) {
+            throw new EntityNotFoundException(Dashboard.class, id.id());
+        }
         new DashboardEditOperation(granter, this, () -> {
 
             List<String> existingGranteeNames = this.shares.stream()
@@ -109,6 +132,9 @@ public class Dashboard implements Entity {
     }
 
     public void unshare(String granteeName, User granter) {
+        if (!creator.equals(granter) && !dashboardsAccessibilityVerifier.isAccessible(this.id)) {
+            throw new EntityNotFoundException(Dashboard.class, id.id());
+        }
         new DashboardEditOperation(granter, this, () -> {
 
             List<Share> sharesWithExclusion = this.shares.stream()
@@ -120,7 +146,9 @@ public class Dashboard implements Entity {
         }).execute();
     }
 
-    public static Dashboard fromStorage(DashboardDto dashboard) {
+    public static Dashboard fromStorage(DashboardDto dashboard,
+                                        DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier) {
+
         return new Dashboard(
                 new DashboardId(dashboard.id()),
                 new User(dashboard.creatorId()),
@@ -128,6 +156,7 @@ public class Dashboard implements Entity {
                 dashboard.charts(),
                 dashboard.shares(),
                 dashboard.deleted(),
+                dashboardsAccessibilityVerifier,
                 new DashboardValidator()
         );
     }

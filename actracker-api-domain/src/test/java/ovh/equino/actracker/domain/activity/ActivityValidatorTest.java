@@ -41,6 +41,7 @@ class ActivityValidatorTest {
     private static final List<MetricValue> EMPTY_METRIC_VALUES = emptyList();
     private static final boolean DELETED = true;
 
+    private ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier = null;
     @Mock
     private TagsAccessibilityVerifier tagsAccessibilityVerifier;
     @Mock
@@ -66,6 +67,7 @@ class ActivityValidatorTest {
                 EMPTY_TAGS,
                 EMPTY_METRIC_VALUES,
                 !DELETED,
+                activitiesAccessibilityVerifier,
                 tagsAccessibilityVerifier,
                 metricsAccessibilityVerifier,
                 validator
@@ -90,6 +92,7 @@ class ActivityValidatorTest {
                 EMPTY_TAGS,
                 EMPTY_METRIC_VALUES,
                 !DELETED,
+                activitiesAccessibilityVerifier,
                 tagsAccessibilityVerifier,
                 metricsAccessibilityVerifier,
                 validator
@@ -120,6 +123,7 @@ class ActivityValidatorTest {
                 singleton(nonExistingTag),
                 EMPTY_METRIC_VALUES,
                 !DELETED,
+                activitiesAccessibilityVerifier,
                 tagsAccessibilityVerifier,
                 metricsAccessibilityVerifier,
                 validator
@@ -154,6 +158,7 @@ class ActivityValidatorTest {
                 singleton(existingTag),
                 singleton(valueOfNonExistingMetric),
                 !DELETED,
+                activitiesAccessibilityVerifier,
                 tagsAccessibilityVerifier,
                 metricsAccessibilityVerifier,
                 validator
@@ -192,6 +197,7 @@ class ActivityValidatorTest {
                 singleton(nonExistingTag),
                 singleton(valueOfNonExistingMetric),
                 !DELETED,
+                activitiesAccessibilityVerifier,
                 tagsAccessibilityVerifier,
                 metricsAccessibilityVerifier,
                 validator

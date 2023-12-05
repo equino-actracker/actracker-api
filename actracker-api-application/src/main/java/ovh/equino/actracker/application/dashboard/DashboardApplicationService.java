@@ -59,6 +59,8 @@ public class DashboardApplicationService {
         Identity requestIdentity = identityProvider.provideIdentity();
         User creator = new User(requestIdentity.getId());
 
+        DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier = new DashboardsAccessibilityVerifier(dashboardDataSource, creator);
+
         DashboardDto dashboardDataWithSharesResolved = new DashboardDto(
                 createDashboardCommand.name(),
                 createDashboardCommand.chartAssignments().stream()
@@ -72,7 +74,7 @@ public class DashboardApplicationService {
                         .map(this::resolveShare)
                         .toList()
         );
-        Dashboard dashboard = Dashboard.create(dashboardDataWithSharesResolved, creator);
+        Dashboard dashboard = Dashboard.create(dashboardDataWithSharesResolved, creator, dashboardsAccessibilityVerifier);
         dashboardRepository.add(dashboard.forStorage());
         dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
 
@@ -113,9 +115,11 @@ public class DashboardApplicationService {
         Identity requestIdentity = identityProvider.provideIdentity();
         User updater = new User(requestIdentity.getId());
 
+        DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier = new DashboardsAccessibilityVerifier(dashboardDataSource, updater);
+
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
-        Dashboard dashboard = Dashboard.fromStorage(dashboardDto);
+        Dashboard dashboard = Dashboard.fromStorage(dashboardDto, dashboardsAccessibilityVerifier);
 
         dashboard.rename(newName, updater);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
@@ -133,9 +137,11 @@ public class DashboardApplicationService {
         Identity requestIdentity = identityProvider.provideIdentity();
         User remover = new User(requestIdentity.getId());
 
+        DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier = new DashboardsAccessibilityVerifier(dashboardDataSource, remover);
+
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
-        Dashboard dashboard = Dashboard.fromStorage(dashboardDto);
+        Dashboard dashboard = Dashboard.fromStorage(dashboardDto, dashboardsAccessibilityVerifier);
 
         dashboard.delete(remover);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
@@ -146,9 +152,11 @@ public class DashboardApplicationService {
         Identity requestIdentity = identityProvider.provideIdentity();
         User updater = new User(requestIdentity.getId());
 
+        DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier = new DashboardsAccessibilityVerifier(dashboardDataSource, updater);
+
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
-        Dashboard dashboard = Dashboard.fromStorage(dashboardDto);
+        Dashboard dashboard = Dashboard.fromStorage(dashboardDto, dashboardsAccessibilityVerifier);
 
         Chart newChart = new Chart(
                 newChartAssignment.name(),
@@ -166,15 +174,18 @@ public class DashboardApplicationService {
                 .orElseThrow(() -> {
                     String message = "Could not find updated dashboard with ID=%s".formatted(dashboard.id());
                     return new RuntimeException(message);
-                });    }
+                });
+    }
 
     public DashboardResult deleteChart(UUID chartId, UUID dashboardId) {
         Identity requestIdentity = identityProvider.provideIdentity();
         User updater = new User(requestIdentity.getId());
 
+        DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier = new DashboardsAccessibilityVerifier(dashboardDataSource, updater);
+
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
-        Dashboard dashboard = Dashboard.fromStorage(dashboardDto);
+        Dashboard dashboard = Dashboard.fromStorage(dashboardDto, dashboardsAccessibilityVerifier);
 
         dashboard.deleteChart(new ChartId(chartId), updater);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
@@ -192,9 +203,11 @@ public class DashboardApplicationService {
         Identity requestIdentity = identityProvider.provideIdentity();
         User granter = new User(requestIdentity.getId());
 
+        DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier = new DashboardsAccessibilityVerifier(dashboardDataSource, granter);
+
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
-        Dashboard dashboard = Dashboard.fromStorage(dashboardDto);
+        Dashboard dashboard = Dashboard.fromStorage(dashboardDto, dashboardsAccessibilityVerifier);
 
         Share share = resolveShare(newGrantee);
 
@@ -214,9 +227,11 @@ public class DashboardApplicationService {
         Identity requestIdentity = identityProvider.provideIdentity();
         User granter = new User(requestIdentity.getId());
 
+        DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier = new DashboardsAccessibilityVerifier(dashboardDataSource, granter);
+
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
-        Dashboard dashboard = Dashboard.fromStorage(dashboardDto);
+        Dashboard dashboard = Dashboard.fromStorage(dashboardDto, dashboardsAccessibilityVerifier);
 
         dashboard.unshare(granteeName, granter);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
@@ -234,6 +249,8 @@ public class DashboardApplicationService {
         Identity requestIdentity = identityProvider.provideIdentity();
         User generator = new User(requestIdentity.getId());
 
+        DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier = new DashboardsAccessibilityVerifier(dashboardDataSource, generator);
+
         DashboardGenerationCriteria generationCriteria = new DashboardGenerationCriteria(
                 generateDashboardQuery.dashboardId(),
                 generator,
@@ -246,12 +263,11 @@ public class DashboardApplicationService {
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
 
-        Dashboard dashboard = Dashboard.fromStorage(dashboardDto);
+        Dashboard dashboard = Dashboard.fromStorage(dashboardDto, dashboardsAccessibilityVerifier);
         DashboardData dashboardData = dashboardGenerationEngine.generateDashboard(dashboard.forStorage(), generationCriteria);
 
         return toGenerationResult(dashboardData);
     }
-
 
     private Share resolveShare(String grantee) {
         return tenantDataSource.findByUsername(grantee)

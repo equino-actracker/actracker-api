@@ -18,6 +18,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class TagSetsAccessibilityVerifierTest {
 
+    private static final User USER = null;
     private static final TagSetDto ACCESSIBLE_TAG_SET = new TagSetDto(
             randomUUID(),
             randomUUID(),
@@ -32,7 +33,7 @@ class TagSetsAccessibilityVerifierTest {
 
     @BeforeEach
     void init() {
-        tagSetsAccessibilityVerifier = new TagSetsAccessibilityVerifier(tagSetDataSource, new User(randomUUID()));
+        tagSetsAccessibilityVerifier = new TagSetsAccessibilityVerifier(tagSetDataSource, USER);
     }
 
     @Test

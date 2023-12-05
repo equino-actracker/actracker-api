@@ -11,7 +11,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 class TagSetValidator extends EntityValidator<TagSet> {
 
-    // TODO validate during TagSet creation before removing verifiers from validator
+    // TODO validate dependencies during create and edit before removing from here
     private final TagsAccessibilityVerifier tagsAccessibilityVerifier;
 
     TagSetValidator(TagsAccessibilityVerifier tagsAccessibilityVerifier) {

@@ -65,7 +65,7 @@ public class TagSet implements Entity {
     }
 
     public void rename(String newName, User updater) {
-        if (!tagSetsAccessibilityVerifier.isAccessible(this.id)) {
+        if (!creator.equals(updater) && !tagSetsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(TagSet.class, id.id());
         }
         new TagSetEditOperation(updater, this, tagsAccessibilityVerifier,
@@ -74,7 +74,7 @@ public class TagSet implements Entity {
     }
 
     public void assignTag(TagId newTag, User updater) {
-        if (!tagSetsAccessibilityVerifier.isAccessible(this.id)) {
+        if (!creator.equals(updater) && !tagSetsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(TagSet.class, id.id());
         }
         new TagSetEditOperation(updater, this, tagsAccessibilityVerifier,
@@ -83,7 +83,7 @@ public class TagSet implements Entity {
     }
 
     public void removeTag(TagId tag, User updater) {
-        if (!tagSetsAccessibilityVerifier.isAccessible(this.id)) {
+        if (!creator.equals(updater) && !tagSetsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(TagSet.class, id.id());
         }
         new TagSetEditOperation(updater, this, tagsAccessibilityVerifier,
@@ -92,7 +92,7 @@ public class TagSet implements Entity {
     }
 
     public void delete(User remover) {
-        if (!tagSetsAccessibilityVerifier.isAccessible(this.id)) {
+        if (!creator.equals(remover) && !tagSetsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(TagSet.class, id.id());
         }
         new TagSetEditOperation(remover, this, tagsAccessibilityVerifier,
