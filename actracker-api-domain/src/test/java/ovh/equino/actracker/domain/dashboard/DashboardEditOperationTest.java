@@ -1,6 +1,7 @@
 package ovh.equino.actracker.domain.dashboard;
 
 import org.junit.jupiter.api.Test;
+import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
@@ -16,6 +17,7 @@ class DashboardEditOperationTest {
     private static final boolean DELETED = true;
 
     private final DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier = null;
+    private final TagsAccessibilityVerifier tagsAccessibilityVerifier = null;
 
     @Test
     void shouldPreserveDeletedCharts() {
@@ -30,6 +32,7 @@ class DashboardEditOperationTest {
                 emptyList(),
                 !DELETED,
                 dashboardsAccessibilityVerifier,
+                tagsAccessibilityVerifier,
                 new DashboardValidator()
         );
         DashboardEditOperation editOperation = new DashboardEditOperation(CREATOR, dashboard, () -> {

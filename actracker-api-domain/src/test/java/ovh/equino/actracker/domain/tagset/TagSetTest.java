@@ -147,8 +147,8 @@ class TagSetTest {
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
-
             TagId newTag = new TagId(randomUUID());
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // when
             tagSet.assignTag(newTag, CREATOR);
@@ -171,8 +171,8 @@ class TagSetTest {
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
-            when(tagsAccessibilityVerifier.accessibleOf(any()))
-                    .thenReturn(singleton(existingTag));
+            when(tagsAccessibilityVerifier.accessibleOf(any())).thenReturn(singleton(existingTag)); // TODO remove
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
             TagId newTag = new TagId();
 
             // when
@@ -196,8 +196,8 @@ class TagSetTest {
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
-            when(tagsAccessibilityVerifier.accessibleOf(any()))
-                    .thenReturn(singleton(existingTag));
+            when(tagsAccessibilityVerifier.accessibleOf(any())).thenReturn(singleton(existingTag)); // TODO remove
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // when
             tagSet.assignTag(existingTag, CREATOR);
@@ -206,8 +206,24 @@ class TagSetTest {
             assertThat(tagSet.tags()).containsExactly(existingTag);
         }
 
+        @Test
         void shouldFailWhenAssigningNonAccessibleTag() {
-            // TODO
+            TagSet tagSet = new TagSet(
+                    new TagSetId(),
+                    CREATOR,
+                    TAG_SET_NAME,
+                    EMPTY_TAGS,
+                    !DELETED,
+                    validator,
+                    tagSetsAccessibilityVerifier,
+                    tagsAccessibilityVerifier
+            );
+            TagId newTag = new TagId(randomUUID());
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+
+            // then
+            assertThatThrownBy(() -> tagSet.assignTag(newTag, CREATOR))
+                    .isInstanceOf(EntityInvalidException.class);
         }
 
         @Test
@@ -224,6 +240,7 @@ class TagSetTest {
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
@@ -269,6 +286,7 @@ class TagSetTest {
             TagId newTag = new TagId();
             User unauthorizedUser = new User(randomUUID());
             when(tagSetsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);  // TODO remove, checking if user allowed to edit should be first
 
             // then
             assertThatThrownBy(() -> tagSet.assignTag(newTag, unauthorizedUser))
@@ -295,8 +313,8 @@ class TagSetTest {
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
-            when(tagsAccessibilityVerifier.accessibleOf(any()))
-                    .thenReturn(Set.of(tagToPreserve, tagToRemove));
+            when(tagsAccessibilityVerifier.accessibleOf(any())).thenReturn(Set.of(tagToPreserve, tagToRemove)); // TODO remove
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // when
             tagSet.removeTag(tagToRemove, CREATOR);
@@ -318,6 +336,7 @@ class TagSetTest {
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // when
             tagSet.removeTag(new TagId(), CREATOR);
@@ -341,14 +360,35 @@ class TagSetTest {
                     tagsAccessibilityVerifier
             );
 
-            when(tagsAccessibilityVerifier.accessibleOf(any()))
-                    .thenReturn(singleton(existingTag));
+            when(tagsAccessibilityVerifier.accessibleOf(any())).thenReturn(singleton(existingTag)); // TODO remove
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // when
             tagSet.removeTag(new TagId(), CREATOR);
 
             // then
             assertThat(tagSet.tags()).containsExactly(existingTag);
+        }
+
+        @Test
+        void shouldFailWhenRemovingNonAccessibleTag() {
+            // given
+            TagId tagToRemove = new TagId();
+            TagSet tagSet = new TagSet(
+                    new TagSetId(),
+                    CREATOR,
+                    TAG_SET_NAME,
+                    List.of(tagToRemove),
+                    !DELETED,
+                    validator,
+                    tagSetsAccessibilityVerifier,
+                    tagsAccessibilityVerifier
+            );
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+
+            // then
+            assertThatThrownBy(() -> tagSet.removeTag(tagToRemove, CREATOR))
+                    .isInstanceOf(EntityInvalidException.class);
         }
 
         @Test
@@ -364,6 +404,7 @@ class TagSetTest {
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
@@ -409,6 +450,7 @@ class TagSetTest {
             );
             User unauthorizedUser = new User(randomUUID());
             when(tagSetsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);  // TODO remove, checking if user allowed to edit should be first
 
             // then
             assertThatThrownBy(() -> tagSet.removeTag(existingTag, unauthorizedUser))

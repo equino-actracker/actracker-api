@@ -130,7 +130,6 @@ class TagTest {
     class AddMetricTest {
 
         private static final String METRIC_NAME = "metric name";
-        // TODO should fail adding non-existing metric
 
         @Test
         void shouldAddFirstMetric() {
@@ -252,8 +251,6 @@ class TagTest {
     class DeleteMetricTest {
 
         private static final String METRIC_NAME = "metric name";
-
-        // TODO should fail adding non-existing metric
 
         @Test
         void shouldDeleteExistingMetric() {
@@ -431,8 +428,6 @@ class TagTest {
 
         private static final String METRIC_NAME = "metric name";
         private static final String NEW_METRIC_NAME = "new metric name";
-
-        // TODO should fail adding non-existing metric
 
         @Test
         void shouldRenameExistingMetric() {

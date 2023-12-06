@@ -10,6 +10,8 @@ import ovh.equino.actracker.domain.exception.EntityEditForbidden;
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.share.Share;
+import ovh.equino.actracker.domain.tag.TagId;
+import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
@@ -35,6 +37,8 @@ class DashboardTest {
     @Mock
     private DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier;
     @Mock
+    private TagsAccessibilityVerifier tagsAccessibilityVerifier;
+    @Mock
     private DashboardValidator validator;
 
     @Nested
@@ -54,6 +58,7 @@ class DashboardTest {
                     EMPTY_SHARES,
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -75,6 +80,7 @@ class DashboardTest {
                     EMPTY_SHARES,
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
@@ -95,6 +101,7 @@ class DashboardTest {
                     EMPTY_SHARES,
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
@@ -116,6 +123,7 @@ class DashboardTest {
                     EMPTY_SHARES,
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
@@ -153,6 +161,7 @@ class DashboardTest {
                     EMPTY_SHARES,
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -177,6 +186,7 @@ class DashboardTest {
                     EMPTY_SHARES,
                     DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -198,6 +208,7 @@ class DashboardTest {
                     EMPTY_SHARES,
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
@@ -218,6 +229,7 @@ class DashboardTest {
                     EMPTY_SHARES,
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
@@ -239,6 +251,7 @@ class DashboardTest {
                     EMPTY_SHARES,
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
@@ -267,6 +280,7 @@ class DashboardTest {
                     EMPTY_SHARES,
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
             Share newShare = new Share(GRANTEE_NAME);
@@ -289,6 +303,7 @@ class DashboardTest {
                     EMPTY_SHARES,
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
             Share newShare = new Share(new User(randomUUID()), GRANTEE_NAME);
@@ -312,6 +327,7 @@ class DashboardTest {
                     singletonList(existingShare),
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
             Share newShare = new Share(new User(randomUUID()), GRANTEE_NAME);
@@ -335,6 +351,7 @@ class DashboardTest {
                     singletonList(existingShare),
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
             Share newShare = new Share(new User(randomUUID()), GRANTEE_NAME);
@@ -358,6 +375,7 @@ class DashboardTest {
                     singletonList(existingShare),
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
             Share newShare = new Share(GRANTEE_NAME);
@@ -381,6 +399,7 @@ class DashboardTest {
                     singletonList(existingShare),
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
             Share newShare = new Share(GRANTEE_NAME);
@@ -403,6 +422,7 @@ class DashboardTest {
                     EMPTY_SHARES,
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
             Share newShare = new Share(GRANTEE_NAME);
@@ -424,6 +444,7 @@ class DashboardTest {
                     EMPTY_SHARES,
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
             Share newShare = new Share(GRANTEE_NAME);
@@ -446,6 +467,7 @@ class DashboardTest {
                     EMPTY_SHARES,
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
@@ -476,6 +498,7 @@ class DashboardTest {
                     singletonList(existingShare),
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -498,6 +521,7 @@ class DashboardTest {
                     singletonList(existingShare),
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -522,6 +546,7 @@ class DashboardTest {
                     List.of(existingShare1, existingShare2),
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -543,6 +568,7 @@ class DashboardTest {
                     EMPTY_SHARES,
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
@@ -564,6 +590,7 @@ class DashboardTest {
                     singletonList(existingShare),
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
@@ -586,6 +613,7 @@ class DashboardTest {
                     singletonList(existingShare),
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
@@ -604,12 +632,10 @@ class DashboardTest {
         private static final String CHART_NAME = "chart name";
         private static final Set<UUID> EMPTY_TAGS = emptySet();
 
-        // TODO should fail when adding chart with not accessible tag
-
         @Test
         void shouldAddFirstChart() {
             // given
-            Chart newChart = new Chart(CHART_NAME, GroupBy.SELF, AnalysisMetric.METRIC_VALUE, EMPTY_TAGS);
+            Chart newChart = new Chart(CHART_NAME, GroupBy.SELF, AnalysisMetric.METRIC_VALUE, Set.of(new TagId().id()));
             Dashboard dashboard = new Dashboard(
                     new DashboardId(),
                     CREATOR,
@@ -618,8 +644,10 @@ class DashboardTest {
                     EMPTY_SHARES,
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
+            when(tagsAccessibilityVerifier.nonAccessibleOf(any())).thenReturn(emptySet());
 
             // when
             dashboard.addChart(newChart, CREATOR);
@@ -652,10 +680,13 @@ class DashboardTest {
                     EMPTY_SHARES,
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
             Chart newChart = new Chart(CHART_NAME + 3, GroupBy.SELF, AnalysisMetric.METRIC_VALUE, EMPTY_TAGS);
+
+            when(tagsAccessibilityVerifier.nonAccessibleOf(any())).thenReturn(emptySet());
 
             // when
             dashboard.addChart(newChart, CREATOR);
@@ -663,6 +694,29 @@ class DashboardTest {
             // then
             assertThat(dashboard.charts)
                     .containsExactlyInAnyOrder(existingNonDeletedChart, existingDeletedChart, newChart);
+        }
+
+        @Test
+        void shouldFailWhenAddingChartWithNonAccessibleTag() {
+            // given
+            TagId nonAccessibleTag = new TagId();
+            Chart newChart = new Chart(CHART_NAME, GroupBy.SELF, AnalysisMetric.METRIC_VALUE, Set.of(nonAccessibleTag.id()));
+            Dashboard dashboard = new Dashboard(
+                    new DashboardId(),
+                    CREATOR,
+                    CHART_NAME,
+                    EMPTY_CHARTS,
+                    EMPTY_SHARES,
+                    !DELETED,
+                    dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
+                    validator
+            );
+            when(tagsAccessibilityVerifier.nonAccessibleOf(any())).thenReturn(Set.of(nonAccessibleTag));
+
+            // then
+            assertThatThrownBy(() -> dashboard.addChart(newChart, CREATOR))
+                    .isInstanceOf(EntityInvalidException.class);
         }
 
         @Test
@@ -677,8 +731,10 @@ class DashboardTest {
                     EMPTY_SHARES,
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
+            when(tagsAccessibilityVerifier.nonAccessibleOf(any())).thenReturn(emptySet());
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
@@ -697,6 +753,7 @@ class DashboardTest {
                     EMPTY_SHARES,
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
             Chart newChart = new Chart(CHART_NAME, GroupBy.SELF, AnalysisMetric.METRIC_VALUE, EMPTY_TAGS);
@@ -706,7 +763,6 @@ class DashboardTest {
             // then
             assertThatThrownBy(() -> dashboard.addChart(newChart, unauthorizedUser))
                     .isInstanceOf(EntityNotFoundException.class);
-
         }
 
         @Test
@@ -720,6 +776,7 @@ class DashboardTest {
                     EMPTY_SHARES,
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
             Chart newChart = new Chart(CHART_NAME, GroupBy.SELF, AnalysisMetric.METRIC_VALUE, EMPTY_TAGS);
@@ -769,6 +826,7 @@ class DashboardTest {
                     EMPTY_SHARES,
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -796,6 +854,7 @@ class DashboardTest {
                     EMPTY_SHARES,
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -818,6 +877,7 @@ class DashboardTest {
                     EMPTY_SHARES,
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -852,6 +912,7 @@ class DashboardTest {
                     EMPTY_SHARES,
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
 
@@ -873,6 +934,7 @@ class DashboardTest {
                     EMPTY_SHARES,
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
@@ -900,6 +962,7 @@ class DashboardTest {
                     EMPTY_SHARES,
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
@@ -928,6 +991,7 @@ class DashboardTest {
                     EMPTY_SHARES,
                     !DELETED,
                     dashboardsAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());

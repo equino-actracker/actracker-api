@@ -1,14 +1,19 @@
 package ovh.equino.actracker.domain.dashboard;
 
 import ovh.equino.actracker.domain.Entity;
+import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.share.Share;
+import ovh.equino.actracker.domain.tag.TagId;
+import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static java.util.Collections.unmodifiableList;
+import static java.util.stream.Collectors.toUnmodifiableSet;
 
 
 public class Dashboard implements Entity {
@@ -21,6 +26,7 @@ public class Dashboard implements Entity {
     private boolean deleted;
 
     private final DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier;
+    private final TagsAccessibilityVerifier tagsAccessibilityVerifier;
     private final DashboardValidator validator;
 
     Dashboard(DashboardId id,
@@ -30,6 +36,7 @@ public class Dashboard implements Entity {
               List<Share> shares,
               boolean deleted,
               DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier,
+              TagsAccessibilityVerifier tagsAccessibilityVerifier,
               DashboardValidator validator) {
 
         this.id = id;
@@ -40,12 +47,14 @@ public class Dashboard implements Entity {
         this.deleted = deleted;
 
         this.dashboardsAccessibilityVerifier = dashboardsAccessibilityVerifier;
+        this.tagsAccessibilityVerifier = tagsAccessibilityVerifier;
         this.validator = validator;
     }
 
     public static Dashboard create(DashboardDto dashboard,
                                    User creator,
-                                   DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier) {
+                                   DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier,
+                                   TagsAccessibilityVerifier tagsAccessibilityVerifier) {
 
         Dashboard newDashboard = new Dashboard(
                 new DashboardId(),
@@ -55,6 +64,7 @@ public class Dashboard implements Entity {
                 dashboard.shares(),
                 false,
                 dashboardsAccessibilityVerifier,
+                tagsAccessibilityVerifier,
                 new DashboardValidator()
         );
         newDashboard.validate();
@@ -74,6 +84,17 @@ public class Dashboard implements Entity {
         if (!creator.equals(editor) && !dashboardsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Dashboard.class, id.id());
         }
+        Set<TagId> includedTags = newChart.includedTags()
+                .stream()
+                .map(TagId::new)
+                .collect(toUnmodifiableSet());
+        tagsAccessibilityVerifier.nonAccessibleOf(includedTags)
+                .stream()
+                .findFirst()
+                .ifPresent((inaccessibleTag) -> {
+                    String errorMessage = "Tag with ID %s not found".formatted(inaccessibleTag.id());
+                    throw new EntityInvalidException(Dashboard.class, errorMessage);
+                });
         new DashboardEditOperation(editor, this, () ->
                 charts.add(newChart)
         ).execute();
@@ -147,7 +168,8 @@ public class Dashboard implements Entity {
     }
 
     public static Dashboard fromStorage(DashboardDto dashboard,
-                                        DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier) {
+                                        DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier,
+                                        TagsAccessibilityVerifier tagsAccessibilityVerifier) {
 
         return new Dashboard(
                 new DashboardId(dashboard.id()),
@@ -157,6 +179,7 @@ public class Dashboard implements Entity {
                 dashboard.shares(),
                 dashboard.deleted(),
                 dashboardsAccessibilityVerifier,
+                tagsAccessibilityVerifier,
                 new DashboardValidator()
         );
     }

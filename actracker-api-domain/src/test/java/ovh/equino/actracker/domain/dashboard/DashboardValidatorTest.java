@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.share.Share;
+import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
@@ -24,6 +25,7 @@ class DashboardValidatorTest {
     private static final String EMPTY_NAME_ERROR = "Name is empty";
 
     private final DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier = null;
+    private final TagsAccessibilityVerifier tagsAccessibilityVerifier = null;
 
     private DashboardValidator validator;
 
@@ -43,6 +45,7 @@ class DashboardValidatorTest {
                 EMPTY_SHARES,
                 !DELETED,
                 dashboardsAccessibilityVerifier,
+                tagsAccessibilityVerifier,
                 validator
         );
 
@@ -61,6 +64,7 @@ class DashboardValidatorTest {
                 EMPTY_SHARES,
                 !DELETED,
                 dashboardsAccessibilityVerifier,
+                tagsAccessibilityVerifier,
                 validator
         );
         List<String> validationErrors = List.of(EMPTY_NAME_ERROR);
@@ -82,6 +86,7 @@ class DashboardValidatorTest {
                 EMPTY_SHARES,
                 !DELETED,
                 dashboardsAccessibilityVerifier,
+                tagsAccessibilityVerifier,
                 validator
         );
         List<String> validationErrors = List.of(EMPTY_NAME_ERROR);
