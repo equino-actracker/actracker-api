@@ -371,7 +371,7 @@ class TagSetTest {
         }
 
         @Test
-        void shouldFailWhenRemovingNonAccessibleTag() {
+        void shouldKeepTagsUnchangedWhenRemovingNonAccessibleTag() {
             // given
             TagId tagToRemove = new TagId();
             TagSet tagSet = new TagSet(
@@ -384,11 +384,14 @@ class TagSetTest {
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
+            when(tagsAccessibilityVerifier.accessibleOf(any())).thenReturn(singleton(tagToRemove)); // TODO remove
             when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
 
+            // when
+            tagSet.removeTag(tagToRemove, CREATOR);
+
             // then
-            assertThatThrownBy(() -> tagSet.removeTag(tagToRemove, CREATOR))
-                    .isInstanceOf(EntityInvalidException.class);
+            assertThat(tagSet.tags()).containsExactly(tagToRemove);
         }
 
         @Test

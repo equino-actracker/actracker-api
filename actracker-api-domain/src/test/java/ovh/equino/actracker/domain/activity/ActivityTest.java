@@ -25,6 +25,7 @@ import static java.util.Collections.singleton;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -701,8 +702,6 @@ class ActivityTest {
     @DisplayName("assignTag")
     class AssignTagTest {
 
-        // TODO should fail when assigning non accessible tag
-
         @Test
         void shouldAssignFirstTag() {
             // given
@@ -787,6 +786,11 @@ class ActivityTest {
 
             // then
             assertThat(activity.tags()).containsExactly(existingTag);
+        }
+
+        @Test
+        void shouldFailWhenAssigningNonAccessibleTag() {
+            fail();
         }
 
         @Test
@@ -955,6 +959,11 @@ class ActivityTest {
 
             // then
             assertThat(activity.tags()).containsExactly(existingTag);
+        }
+
+        @Test
+        void shouldKeepTagsUnchangedWhenRemovingNonAccessibleTag() {
+            fail();
         }
 
         @Test
@@ -1154,8 +1163,6 @@ class ActivityTest {
         private static final MetricValue EXISTING_METRIC_VALUE = new MetricValue(EXISTING_METRIC_ID.id(), ZERO);
         private static final MetricValue NON_EXISTING_METRIC_VALUE = new MetricValue(NON_EXISTING_METRIC_ID.id(), ONE);
 
-        // TODO should fail when assigning inaccessible metric value
-
         @Test
         void shouldSetNewValueIfExistingMetricNotSet() {
             // given
@@ -1216,6 +1223,11 @@ class ActivityTest {
 
             // then
             assertThat(activity.metricValues).containsExactlyInAnyOrder(NON_EXISTING_METRIC_VALUE, newMetricValue);
+        }
+
+        @Test
+        void shouldFailWhenSettingValueOfNonAccessibleMetric() {
+            fail();
         }
 
         @Test
@@ -1369,7 +1381,7 @@ class ActivityTest {
         }
 
         @Test
-        void shouldLeaveValuesUnchangedWhenNonExistingMetricValueSet() {
+        void shouldLeaveValuesUnchangedWhenNonAccessibleMetricValueSet() {
             // given
             Activity activity = new Activity(
                     new ActivityId(),
@@ -1399,7 +1411,7 @@ class ActivityTest {
         }
 
         @Test
-        void shouldLeaveValuesUnchangedWhenNonExistingMetricValueNotSet() {
+        void shouldLeaveValuesUnchangedWhenNonAccessibleMetricValueNotSet() {
             // given
             Activity activity = new Activity(
                     new ActivityId(),
