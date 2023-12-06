@@ -716,7 +716,7 @@ class DashboardTest {
 
             // then
             assertThatThrownBy(() -> dashboard.addChart(newChart, CREATOR))
-                    .isInstanceOf(EntityNotFoundException.class);
+                    .isInstanceOf(EntityInvalidException.class);
         }
 
         @Test

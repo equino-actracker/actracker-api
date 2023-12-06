@@ -223,7 +223,7 @@ class TagSetTest {
 
             // then
             assertThatThrownBy(() -> tagSet.assignTag(newTag, CREATOR))
-                    .isInstanceOf(EntityNotFoundException.class);
+                    .isInstanceOf(EntityInvalidException.class);
         }
 
         @Test
@@ -388,7 +388,7 @@ class TagSetTest {
 
             // then
             assertThatThrownBy(() -> tagSet.removeTag(tagToRemove, CREATOR))
-                    .isInstanceOf(EntityNotFoundException.class);
+                    .isInstanceOf(EntityInvalidException.class);
         }
 
         @Test

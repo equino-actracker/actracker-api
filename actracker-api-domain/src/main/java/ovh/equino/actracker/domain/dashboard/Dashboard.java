@@ -1,9 +1,9 @@
 package ovh.equino.actracker.domain.dashboard;
 
 import ovh.equino.actracker.domain.Entity;
+import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.share.Share;
-import ovh.equino.actracker.domain.tag.Tag;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.user.User;
@@ -92,7 +92,8 @@ public class Dashboard implements Entity {
                 .stream()
                 .findFirst()
                 .ifPresent((inaccessibleTag) -> {
-                    throw new EntityNotFoundException(Tag.class, inaccessibleTag.id());
+                    String errorMessage = "Tag with ID %s not found".formatted(inaccessibleTag.id());
+                    throw new EntityInvalidException(Dashboard.class, errorMessage);
                 });
         new DashboardEditOperation(editor, this, () ->
                 charts.add(newChart)
