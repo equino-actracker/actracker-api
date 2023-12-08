@@ -25,7 +25,6 @@ import static java.util.Collections.singleton;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -1232,10 +1231,9 @@ class ActivityTest {
                     validator
             );
             MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
-            when(metricsAccessibilityVerifier.accessibleOf(any(), any()))
-                    .thenReturn(singleton(EXISTING_METRIC_ID));
-            when(metricsAccessibilityVerifier.nonAccessibleOf(any(), any()))
-                    .thenReturn(singleton(NON_EXISTING_METRIC_ID));
+            when(metricsAccessibilityVerifier.isAccessible(any(), any())).thenReturn(true);
+            when(metricsAccessibilityVerifier.accessibleOf(any(), any())).thenReturn(singleton(EXISTING_METRIC_ID)); // TODO delete
+            when(metricsAccessibilityVerifier.nonAccessibleOf(any(), any())).thenReturn(singleton(NON_EXISTING_METRIC_ID)); // TODO delete
 
             // when
             activity.setMetricValue(newMetricValue, CREATOR);
@@ -1263,10 +1261,9 @@ class ActivityTest {
                     validator
             );
             MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
-            when(metricsAccessibilityVerifier.accessibleOf(any(), any()))
-                    .thenReturn(singleton(EXISTING_METRIC_ID));
-            when(metricsAccessibilityVerifier.nonAccessibleOf(any(), any()))
-                    .thenReturn(singleton(NON_EXISTING_METRIC_ID));
+            when(metricsAccessibilityVerifier.isAccessible(any(), any())).thenReturn(true);
+            when(metricsAccessibilityVerifier.accessibleOf(any(), any())).thenReturn(singleton(EXISTING_METRIC_ID)); // TODO delete
+            when(metricsAccessibilityVerifier.nonAccessibleOf(any(), any())).thenReturn(singleton(NON_EXISTING_METRIC_ID)); // TODO delete
 
             // when
             activity.setMetricValue(newMetricValue, CREATOR);
@@ -1277,7 +1274,28 @@ class ActivityTest {
 
         @Test
         void shouldFailWhenSettingValueOfNonAccessibleMetric() {
-            fail();
+            // given
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_TITLE,
+                    EMPTY_TAGS,
+                    List.of(NON_EXISTING_METRIC_VALUE),
+                    !DELETED,
+                    activitiesAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
+                    validator
+            );
+            MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
+            when(metricsAccessibilityVerifier.isAccessible(any(), any())).thenReturn(false);
+
+            // then
+            assertThatThrownBy(() -> activity.setMetricValue(newMetricValue, CREATOR))
+                    .isInstanceOf(EntityInvalidException.class);
         }
 
         @Test
@@ -1298,6 +1316,7 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
+            when(metricsAccessibilityVerifier.isAccessible(any(), any())).thenReturn(true);
             doThrow(EntityInvalidException.class).when(validator).validate(any());
             MetricValue newMetricValue = new MetricValue(randomUUID(), TEN);
 
@@ -1352,6 +1371,7 @@ class ActivityTest {
                     validator
             );
             when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(metricsAccessibilityVerifier.isAccessible(any(), any())).thenReturn(true);
             User unauthorizedUser = new User(randomUUID());
             MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
 

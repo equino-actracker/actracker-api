@@ -7,7 +7,6 @@ import ovh.equino.actracker.domain.tag.MetricId;
 import ovh.equino.actracker.domain.tag.MetricsAccessibilityVerifier;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
-import ovh.equino.actracker.domain.tagset.TagSet;
 import ovh.equino.actracker.domain.user.User;
 
 import java.time.Instant;
@@ -137,9 +136,9 @@ public class Activity implements Entity {
         if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
-        if(!tagsAccessibilityVerifier.isAccessible(tagId)) {
+        if (!tagsAccessibilityVerifier.isAccessible(tagId)) {
             String errorMessage = "Tag with ID %s does not exist".formatted(tagId.id());
-            throw new EntityInvalidException(TagSet.class, errorMessage);
+            throw new EntityInvalidException(Activity.class, errorMessage);
         }
         new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier,
                 () -> this.tags.add(tagId)
@@ -159,8 +158,13 @@ public class Activity implements Entity {
     }
 
     public void setMetricValue(MetricValue newMetricValue, User updater) {
+        MetricId metricId = new MetricId(newMetricValue.metricId());
         if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
+        }
+        if (!metricsAccessibilityVerifier.isAccessible(metricId, tags)) {
+            String errorMessage = "Metric with ID %s does not exist in selected tags".formatted(metricId.id());
+            throw new EntityInvalidException(Activity.class, errorMessage);
         }
         new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier, () -> {
 
