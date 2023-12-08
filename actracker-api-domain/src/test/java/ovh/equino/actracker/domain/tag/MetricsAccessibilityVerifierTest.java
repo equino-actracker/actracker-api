@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static java.util.Collections.emptyList;
@@ -105,6 +106,48 @@ class MetricsAccessibilityVerifierTest {
                 INACCESSIBLE_METRIC_1_ID,
                 INACCESSIBLE_METRIC_2_ID
         );
+    }
+
+    @Test
+    void shouldConfirmMetricAccessible() {
+        // given
+        when(tagDataSource.find(any(Set.class), any(User.class)))
+                .thenReturn(List.of(ACCESSIBLE_TAG_1, ACCESSIBLE_TAG_2));
+
+        // when
+        boolean isAccessible = metricsAccessibilityVerifier.isAccessible(
+                ACCESSIBLE_METRIC_1_ID,
+                List.of(
+                        ACCESSIBLE_TAG_1_ID,
+                        ACCESSIBLE_TAG_2_ID,
+                        INACCESSIBLE_TAG_1_ID,
+                        INACCESSIBLE_TAG_2_ID
+                )
+        );
+
+        // then
+        assertThat(isAccessible).isTrue();
+    }
+
+    @Test
+    void shouldConfirmMetricInaccessible() {
+        // given
+        when(tagDataSource.find(any(Set.class), any(User.class)))
+                .thenReturn(emptyList());
+
+        // when
+        boolean isAccessible = metricsAccessibilityVerifier.isAccessible(
+                INACCESSIBLE_METRIC_1_ID,
+                List.of(
+                        ACCESSIBLE_TAG_1_ID,
+                        ACCESSIBLE_TAG_2_ID,
+                        INACCESSIBLE_TAG_1_ID,
+                        INACCESSIBLE_TAG_2_ID
+                )
+        );
+
+        // then
+        assertThat(isAccessible).isFalse();
     }
 
     private static MetricDto metric(String name) {

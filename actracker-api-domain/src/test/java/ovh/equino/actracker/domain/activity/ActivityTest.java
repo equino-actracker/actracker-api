@@ -701,8 +701,6 @@ class ActivityTest {
     @DisplayName("assignTag")
     class AssignTagTest {
 
-        // TODO should fail when assigning non accessible tag
-
         @Test
         void shouldAssignFirstTag() {
             // given
@@ -722,6 +720,7 @@ class ActivityTest {
                     validator
             );
             TagId newTag = new TagId();
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // when
             activity.assignTag(newTag, CREATOR);
@@ -752,6 +751,7 @@ class ActivityTest {
                     validator
             );
             TagId newTag = new TagId();
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // when
             activity.assignTag(newTag, CREATOR);
@@ -764,8 +764,6 @@ class ActivityTest {
         void shouldNotDuplicateAssignedTag() {
             // given
             TagId existingTag = new TagId();
-            when(tagsAccessibilityVerifier.accessibleOf(any()))
-                    .thenReturn(singleton(existingTag));
             Activity activity = new Activity(
                     new ActivityId(),
                     CREATOR,
@@ -781,12 +779,40 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
+            when(tagsAccessibilityVerifier.accessibleOf(any())).thenReturn(singleton(existingTag)); // TODO remove
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // when
             activity.assignTag(existingTag, CREATOR);
 
             // then
             assertThat(activity.tags()).containsExactly(existingTag);
+        }
+
+        @Test
+        void shouldFailWhenAssigningNonAccessibleTag() {
+            // given
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    EMPTY_TAGS,
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    activitiesAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
+                    validator
+            );
+            TagId newTag = new TagId();
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+
+            // then
+            assertThatThrownBy(() -> activity.assignTag(newTag, CREATOR))
+                    .isInstanceOf(EntityInvalidException.class);
         }
 
         @Test
@@ -807,6 +833,7 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
@@ -859,6 +886,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
             when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // then
@@ -876,8 +904,6 @@ class ActivityTest {
             // given
             TagId tagToRemove = new TagId(randomUUID());
             TagId existingTag = new TagId(randomUUID());
-            when(tagsAccessibilityVerifier.accessibleOf(any()))
-                    .thenReturn(Set.of(existingTag, tagToRemove));
             Activity activity = new Activity(
                     new ActivityId(),
                     CREATOR,
@@ -893,13 +919,14 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
+            when(tagsAccessibilityVerifier.accessibleOf(any())).thenReturn(Set.of(existingTag, tagToRemove)); // TODO remove
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // when
             activity.removeTag(tagToRemove, CREATOR);
 
             // then
             assertThat(activity.tags()).containsExactly(existingTag);
-
         }
 
         @Test
@@ -920,6 +947,7 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // when
             activity.removeTag(new TagId(), CREATOR);
@@ -932,8 +960,6 @@ class ActivityTest {
         void shouldKeepTagsUnchangedWhenRemovingUnassignedTag() {
             // given
             TagId existingTag = new TagId();
-            when(tagsAccessibilityVerifier.accessibleOf(any()))
-                    .thenReturn(singleton(existingTag));
             Activity activity = new Activity(
                     new ActivityId(),
                     CREATOR,
@@ -949,12 +975,42 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
+            when(tagsAccessibilityVerifier.accessibleOf(any())).thenReturn(singleton(existingTag)); // TODO remove
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // when
             activity.removeTag(new TagId(), CREATOR);
 
             // then
             assertThat(activity.tags()).containsExactly(existingTag);
+        }
+
+        @Test
+        void shouldKeepTagsUnchangedWhenRemovingNonAccessibleTag() {
+            // given
+            TagId tagToRemove = new TagId(randomUUID());
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_COMMENT,
+                    Set.of(tagToRemove),
+                    EMPTY_METRIC_VALUES,
+                    !DELETED,
+                    activitiesAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
+                    validator
+            );
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+
+            // when
+            activity.removeTag(tagToRemove, CREATOR);
+
+            // then
+            assertThat(activity.tags()).containsExactly(tagToRemove);
         }
 
         @Test
@@ -975,6 +1031,7 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
@@ -1030,6 +1087,7 @@ class ActivityTest {
             );
             User unauthorizedUser = new User(randomUUID());
             when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // then
             assertThatThrownBy(() -> activity.removeTag(existingTag, unauthorizedUser))
@@ -1154,8 +1212,6 @@ class ActivityTest {
         private static final MetricValue EXISTING_METRIC_VALUE = new MetricValue(EXISTING_METRIC_ID.id(), ZERO);
         private static final MetricValue NON_EXISTING_METRIC_VALUE = new MetricValue(NON_EXISTING_METRIC_ID.id(), ONE);
 
-        // TODO should fail when assigning inaccessible metric value
-
         @Test
         void shouldSetNewValueIfExistingMetricNotSet() {
             // given
@@ -1175,10 +1231,9 @@ class ActivityTest {
                     validator
             );
             MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
-            when(metricsAccessibilityVerifier.accessibleOf(any(), any()))
-                    .thenReturn(singleton(EXISTING_METRIC_ID));
-            when(metricsAccessibilityVerifier.nonAccessibleOf(any(), any()))
-                    .thenReturn(singleton(NON_EXISTING_METRIC_ID));
+            when(metricsAccessibilityVerifier.isAccessible(any(), any())).thenReturn(true);
+            when(metricsAccessibilityVerifier.accessibleOf(any(), any())).thenReturn(singleton(EXISTING_METRIC_ID)); // TODO delete
+            when(metricsAccessibilityVerifier.nonAccessibleOf(any(), any())).thenReturn(singleton(NON_EXISTING_METRIC_ID)); // TODO delete
 
             // when
             activity.setMetricValue(newMetricValue, CREATOR);
@@ -1206,16 +1261,41 @@ class ActivityTest {
                     validator
             );
             MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
-            when(metricsAccessibilityVerifier.accessibleOf(any(), any()))
-                    .thenReturn(singleton(EXISTING_METRIC_ID));
-            when(metricsAccessibilityVerifier.nonAccessibleOf(any(), any()))
-                    .thenReturn(singleton(NON_EXISTING_METRIC_ID));
+            when(metricsAccessibilityVerifier.isAccessible(any(), any())).thenReturn(true);
+            when(metricsAccessibilityVerifier.accessibleOf(any(), any())).thenReturn(singleton(EXISTING_METRIC_ID)); // TODO delete
+            when(metricsAccessibilityVerifier.nonAccessibleOf(any(), any())).thenReturn(singleton(NON_EXISTING_METRIC_ID)); // TODO delete
 
             // when
             activity.setMetricValue(newMetricValue, CREATOR);
 
             // then
             assertThat(activity.metricValues).containsExactlyInAnyOrder(NON_EXISTING_METRIC_VALUE, newMetricValue);
+        }
+
+        @Test
+        void shouldFailWhenSettingValueOfNonAccessibleMetric() {
+            // given
+            Activity activity = new Activity(
+                    new ActivityId(),
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    ACTIVITY_TITLE,
+                    EMPTY_TAGS,
+                    List.of(NON_EXISTING_METRIC_VALUE),
+                    !DELETED,
+                    activitiesAccessibilityVerifier,
+                    tagsAccessibilityVerifier,
+                    metricsAccessibilityVerifier,
+                    validator
+            );
+            MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
+            when(metricsAccessibilityVerifier.isAccessible(any(), any())).thenReturn(false);
+
+            // then
+            assertThatThrownBy(() -> activity.setMetricValue(newMetricValue, CREATOR))
+                    .isInstanceOf(EntityInvalidException.class);
         }
 
         @Test
@@ -1236,6 +1316,7 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
+            when(metricsAccessibilityVerifier.isAccessible(any(), any())).thenReturn(true);
             doThrow(EntityInvalidException.class).when(validator).validate(any());
             MetricValue newMetricValue = new MetricValue(randomUUID(), TEN);
 
@@ -1290,6 +1371,7 @@ class ActivityTest {
                     validator
             );
             when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(metricsAccessibilityVerifier.isAccessible(any(), any())).thenReturn(true);
             User unauthorizedUser = new User(randomUUID());
             MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
 
@@ -1369,7 +1451,7 @@ class ActivityTest {
         }
 
         @Test
-        void shouldLeaveValuesUnchangedWhenNonExistingMetricValueSet() {
+        void shouldLeaveValuesUnchangedWhenNonAccessibleMetricValueSet() {
             // given
             Activity activity = new Activity(
                     new ActivityId(),
@@ -1399,7 +1481,7 @@ class ActivityTest {
         }
 
         @Test
-        void shouldLeaveValuesUnchangedWhenNonExistingMetricValueNotSet() {
+        void shouldLeaveValuesUnchangedWhenNonAccessibleMetricValueNotSet() {
             // given
             Activity activity = new Activity(
                     new ActivityId(),

@@ -1,6 +1,7 @@
 package ovh.equino.actracker.domain.activity;
 
 import ovh.equino.actracker.domain.Entity;
+import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.tag.MetricId;
 import ovh.equino.actracker.domain.tag.MetricsAccessibilityVerifier;
@@ -135,6 +136,10 @@ public class Activity implements Entity {
         if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
+        if (!tagsAccessibilityVerifier.isAccessible(tagId)) {
+            String errorMessage = "Tag with ID %s does not exist".formatted(tagId.id());
+            throw new EntityInvalidException(Activity.class, errorMessage);
+        }
         new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier,
                 () -> this.tags.add(tagId)
         ).execute();
@@ -144,14 +149,22 @@ public class Activity implements Entity {
         if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
+        if (!tagsAccessibilityVerifier.isAccessible(tagId)) {
+            return;
+        }
         new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier,
                 () -> this.tags.remove(tagId)
         ).execute();
     }
 
     public void setMetricValue(MetricValue newMetricValue, User updater) {
+        MetricId metricId = new MetricId(newMetricValue.metricId());
         if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
+        }
+        if (!metricsAccessibilityVerifier.isAccessible(metricId, tags)) {
+            String errorMessage = "Metric with ID %s does not exist in selected tags".formatted(metricId.id());
+            throw new EntityInvalidException(Activity.class, errorMessage);
         }
         new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier, () -> {
 

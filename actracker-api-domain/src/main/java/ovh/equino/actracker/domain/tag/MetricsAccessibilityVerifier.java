@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import static java.util.Collections.singleton;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 
@@ -18,6 +19,10 @@ public class MetricsAccessibilityVerifier {
     public MetricsAccessibilityVerifier(TagDataSource tagDataSource, User user) {
         this.tagDataSource = tagDataSource;
         this.user = user;
+    }
+
+    public boolean isAccessible(MetricId metric, Collection<TagId> tags) {
+        return accessibleOf(singleton(metric), tags).contains(metric);
     }
 
     public Set<MetricId> accessibleOf(Collection<MetricId> metrics, Collection<TagId> tags) {
