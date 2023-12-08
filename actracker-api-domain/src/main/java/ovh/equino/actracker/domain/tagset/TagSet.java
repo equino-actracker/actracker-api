@@ -92,8 +92,7 @@ public class TagSet implements Entity {
             throw new EntityNotFoundException(TagSet.class, id.id());
         }
         if (!tagsAccessibilityVerifier.isAccessible(tag)) {
-            String errorMessage = "Tag with ID %s does not exist".formatted(tag.id());
-            throw new EntityInvalidException(TagSet.class, errorMessage);
+            return;
         }
         new TagSetEditOperation(updater, this, tagsAccessibilityVerifier,
                 () -> tags.remove(tag)

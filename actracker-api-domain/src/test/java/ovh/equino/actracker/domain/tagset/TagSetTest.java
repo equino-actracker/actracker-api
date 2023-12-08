@@ -384,7 +384,6 @@ class TagSetTest {
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
-            when(tagsAccessibilityVerifier.accessibleOf(any())).thenReturn(singleton(tagToRemove)); // TODO remove
             when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
 
             // when

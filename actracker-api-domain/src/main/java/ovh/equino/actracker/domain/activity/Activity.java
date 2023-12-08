@@ -1,11 +1,13 @@
 package ovh.equino.actracker.domain.activity;
 
 import ovh.equino.actracker.domain.Entity;
+import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.tag.MetricId;
 import ovh.equino.actracker.domain.tag.MetricsAccessibilityVerifier;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
+import ovh.equino.actracker.domain.tagset.TagSet;
 import ovh.equino.actracker.domain.user.User;
 
 import java.time.Instant;
@@ -135,6 +137,10 @@ public class Activity implements Entity {
         if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
+        if(!tagsAccessibilityVerifier.isAccessible(tagId)) {
+            String errorMessage = "Tag with ID %s does not exist".formatted(tagId.id());
+            throw new EntityInvalidException(TagSet.class, errorMessage);
+        }
         new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier,
                 () -> this.tags.add(tagId)
         ).execute();
@@ -143,6 +149,9 @@ public class Activity implements Entity {
     public void removeTag(TagId tagId, User updater) {
         if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
+        }
+        if (!tagsAccessibilityVerifier.isAccessible(tagId)) {
+            return;
         }
         new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier,
                 () -> this.tags.remove(tagId)
