@@ -65,6 +65,7 @@ public class Activity implements Entity {
         this.validator = validator;
     }
 
+    // TODO remove
     public static Activity create(ActivityDto activity,
                                   User creator,
                                   ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier,
@@ -202,6 +203,7 @@ public class Activity implements Entity {
         ).execute();
     }
 
+    // TODO remove
     public static Activity fromStorage(ActivityDto activity,
                                        ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier,
                                        TagsAccessibilityVerifier tagsAccessibilityVerifier,

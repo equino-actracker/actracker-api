@@ -46,6 +46,7 @@ public class TagSet implements Entity {
         this.validator = validator;
     }
 
+    // TODO remove
     public static TagSet create(TagSetDto tagSet,
                                 User creator,
                                 TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier,
@@ -108,6 +109,7 @@ public class TagSet implements Entity {
         ).execute();
     }
 
+    // TODO remove
     public static TagSet fromStorage(TagSetDto tagSet,
                                      TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier,
                                      TagsAccessibilityVerifier tagsAccessibilityVerifier) {

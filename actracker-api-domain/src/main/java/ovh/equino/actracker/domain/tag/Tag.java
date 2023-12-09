@@ -45,6 +45,7 @@ public class Tag implements Entity {
         this.validator = validator;
     }
 
+    // TODO remove
     public static Tag create(TagDto tag, User creator, TagsAccessibilityVerifier tagsAccessibilityVerifier) {
 
         List<Metric> metrics = requireNonNullElse(tag.metrics(), new ArrayList<MetricDto>()).stream()
@@ -150,6 +151,7 @@ public class Tag implements Entity {
         }).execute();
     }
 
+    // TODO remove
     public static Tag fromStorage(TagDto tag, TagsAccessibilityVerifier tagsAccessibilityVerifier) {
         List<Metric> metrics = tag.metrics().stream()
                 .map(Metric::fromStorage)

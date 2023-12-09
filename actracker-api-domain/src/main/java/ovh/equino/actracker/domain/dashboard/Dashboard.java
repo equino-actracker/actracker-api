@@ -51,6 +51,7 @@ public class Dashboard implements Entity {
         this.validator = validator;
     }
 
+    // TODO remove
     public static Dashboard create(DashboardDto dashboard,
                                    User creator,
                                    DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier,
@@ -167,6 +168,7 @@ public class Dashboard implements Entity {
         }).execute();
     }
 
+    // TODO remove
     public static Dashboard fromStorage(DashboardDto dashboard,
                                         DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier,
                                         TagsAccessibilityVerifier tagsAccessibilityVerifier) {
