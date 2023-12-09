@@ -8,9 +8,10 @@ import ovh.equino.actracker.domain.user.User;
 
 import java.time.Instant;
 import java.util.Collection;
-import java.util.Collections;
 
 import static java.lang.Boolean.TRUE;
+import static java.util.Collections.emptyList;
+import static java.util.Objects.requireNonNullElse;
 
 public final class ActivityFactory {
 
@@ -44,8 +45,8 @@ public final class ActivityFactory {
                 startTime,
                 endTime,
                 comment,
-                Collections.emptyList(),
-                Collections.emptyList(),
+                requireNonNullElse(tags, emptyList()),
+                requireNonNullElse(metricValues, emptyList()),
                 !DELETED,
                 activitiesAccessibilityVerifier,
                 tagsAccessibilityVerifier,

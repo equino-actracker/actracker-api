@@ -89,8 +89,7 @@ class TagSetFactoryTest {
     void shouldCreateFailWhenTagNonAccessible() {
         // given
         var nonAccessibleTag = new TagId(randomUUID());
-        when(tagDataSource.find(any(Set.class), any(User.class)))
-                .thenReturn(emptyList());
+        when(tagDataSource.find(any(Set.class), any(User.class))).thenReturn(emptyList());
 
         // then
         assertThatThrownBy(() -> tagSetFactory.create(CREATOR, TAG_SET_NAME, List.of(nonAccessibleTag)))
