@@ -282,6 +282,10 @@ public final class Activity implements Entity {
         return unmodifiableSet(tags);
     }
 
+    List<MetricValue> metricValues() {
+        return unmodifiableList(metricValues);
+    }
+
     String comment() {
         return comment;
     }

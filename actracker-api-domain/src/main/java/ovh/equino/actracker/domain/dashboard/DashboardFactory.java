@@ -65,6 +65,7 @@ public final class DashboardFactory {
         return dashboard;
     }
 
+    // TODO should be user in context, not creator!!!
     public Dashboard reconstitute(DashboardId id,
                                   User creator,
                                   String name,
@@ -72,7 +73,6 @@ public final class DashboardFactory {
                                   Collection<Share> shares,
                                   boolean deleted) {
 
-        // TODO should be user in context, not creator!!!
         var dashboardsAccessibilityVerifier = new DashboardsAccessibilityVerifier(dashboardDataSource, creator);
         var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, creator);
         var validator = new DashboardValidator();

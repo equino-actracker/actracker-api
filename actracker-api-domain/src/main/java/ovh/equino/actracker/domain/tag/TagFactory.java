@@ -46,6 +46,7 @@ public final class TagFactory {
         return tag;
     }
 
+    // TODO should be user in context, not creator!!!
     public Tag reconstitute(TagId id,
                             User creator,
                             String name,
@@ -53,7 +54,6 @@ public final class TagFactory {
                             Collection<Share> shares,
                             boolean deleted) {
 
-        // TODO should be user in context, not creator!!!
         var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, creator);
         var validator = new TagValidator();
 

@@ -27,7 +27,6 @@ public final class TagSetFactory {
                          String name,
                          Collection<TagId> tags) {
 
-        // TODO should be user in context, not creator!!!
         var tagSetAccessibilityVerifier = new TagSetsAccessibilityVerifier(tagSetDataSource, creator);
         var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, creator);
         var validator = new TagSetValidator(tagsAccessibilityVerifier);
@@ -45,6 +44,7 @@ public final class TagSetFactory {
         return tagSet;
     }
 
+    // TODO should be user in context, not creator!!!
     public TagSet reconstitute(TagSetId id,
                                User creator,
                                String name,
