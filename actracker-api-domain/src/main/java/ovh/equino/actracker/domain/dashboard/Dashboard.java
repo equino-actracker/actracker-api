@@ -52,27 +52,6 @@ public final class Dashboard implements Entity {
         this.validator = validator;
     }
 
-    // TODO remove
-    public static Dashboard create(DashboardDto dashboard,
-                                   User creator,
-                                   DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier,
-                                   TagsAccessibilityVerifier tagsAccessibilityVerifier) {
-
-        Dashboard newDashboard = new Dashboard(
-                new DashboardId(),
-                creator,
-                dashboard.name(),
-                dashboard.charts(),
-                dashboard.shares(),
-                false,
-                dashboardsAccessibilityVerifier,
-                tagsAccessibilityVerifier,
-                new DashboardValidator()
-        );
-        newDashboard.validate();
-        return newDashboard;
-    }
-
     public void rename(String newName, User editor) {
         if (!creator.equals(editor) && !dashboardsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Dashboard.class, id.id());
@@ -167,24 +146,6 @@ public final class Dashboard implements Entity {
             this.shares.addAll(sharesWithExclusion);
 
         }).execute();
-    }
-
-    // TODO remove
-    public static Dashboard fromStorage(DashboardDto dashboard,
-                                        DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier,
-                                        TagsAccessibilityVerifier tagsAccessibilityVerifier) {
-
-        return new Dashboard(
-                new DashboardId(dashboard.id()),
-                new User(dashboard.creatorId()),
-                dashboard.name(),
-                dashboard.charts(),
-                dashboard.shares(),
-                dashboard.deleted(),
-                dashboardsAccessibilityVerifier,
-                tagsAccessibilityVerifier,
-                new DashboardValidator()
-        );
     }
 
     public DashboardDto forStorage() {
