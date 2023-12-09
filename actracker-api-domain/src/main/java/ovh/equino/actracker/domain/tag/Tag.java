@@ -29,7 +29,7 @@ public class Tag implements Entity {
         User creator,
         String name,
         Collection<Metric> metrics,
-        List<Share> shares,
+        Collection<Share> shares,
         boolean deleted,
         TagsAccessibilityVerifier tagsAccessibilityVerifier,
         TagValidator validator) {
@@ -183,7 +183,7 @@ public class Tag implements Entity {
         return new TagChangedNotification(dto);
     }
 
-    boolean isDeleted() {
+    boolean deleted() {
         return deleted;
     }
 
@@ -199,6 +199,14 @@ public class Tag implements Entity {
     @Override
     public User creator() {
         return creator;
+    }
+
+    List<Metric> metrics() {
+        return metrics;
+    }
+
+    List<Share> shares() {
+        return shares;
     }
 
     // TODO think about extracting it to superclass

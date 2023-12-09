@@ -20,7 +20,7 @@ class TagEditOperation extends EntityEditOperation<Tag> {
                 .filter(Metric::isNotDeleted)
                 .toList();
         metricsToPreserve = entity.metrics.stream()
-                .filter(Metric::isDeleted)
+                .filter(Metric::deleted)
                 .toList();
         entity.metrics.clear();
         entity.metrics.addAll(nonDeletedMetrics);

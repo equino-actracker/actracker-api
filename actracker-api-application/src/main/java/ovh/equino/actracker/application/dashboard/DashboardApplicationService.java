@@ -282,6 +282,7 @@ public class DashboardApplicationService {
         return toGenerationResult(dashboardData);
     }
 
+    // TODO extract to share resolver service
     private Share resolveShare(String grantee) {
         return tenantDataSource.findByUsername(grantee)
                 .map(tenant -> new Share(

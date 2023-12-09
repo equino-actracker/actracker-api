@@ -273,6 +273,7 @@ public class TagApplicationService {
 
     }
 
+    // TODO extract to share resolver service
     private Share resolveShare(String grantee) {
         return tenantDataSource.findByUsername(grantee)
                 .map(tenant -> new Share(
