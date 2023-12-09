@@ -4,38 +4,40 @@ import ovh.equino.actracker.application.SearchResult;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
-import ovh.equino.actracker.domain.tag.TagDataSource;
 import ovh.equino.actracker.domain.tag.TagId;
-import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.tagset.*;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.security.identity.Identity;
 import ovh.equino.security.identity.IdentityProvider;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+
+import static java.util.stream.Collectors.toUnmodifiableSet;
 
 public class TagSetApplicationService {
 
+    private final TagSetFactory tagSetFactory;
     private final TagSetRepository tagSetRepository;
     private final TagSetDataSource tagSetDataSource;
     private final TagSetSearchEngine tagSetSearchEngine;
     private final TagSetNotifier tagSetNotifier;
-    private final TagDataSource tagDataSource;
     private final IdentityProvider identityProvider;
 
-    public TagSetApplicationService(TagSetRepository tagSetRepository,
+    public TagSetApplicationService(TagSetFactory tagSetFactory,
+                                    TagSetRepository tagSetRepository,
                                     TagSetDataSource tagSetDataSource,
                                     TagSetSearchEngine tagSetSearchEngine,
                                     TagSetNotifier tagSetNotifier,
-                                    TagDataSource tagDataSource,
                                     IdentityProvider identityProvider) {
 
+        this.tagSetFactory = tagSetFactory;
         this.tagSetRepository = tagSetRepository;
         this.tagSetDataSource = tagSetDataSource;
         this.tagSetSearchEngine = tagSetSearchEngine;
         this.tagSetNotifier = tagSetNotifier;
-        this.tagDataSource = tagDataSource;
         this.identityProvider = identityProvider;
     }
 
@@ -43,20 +45,18 @@ public class TagSetApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User creator = new User(requesterIdentity.getId());
 
-        TagSetDto newTagSetData = new TagSetDto(createTagSetCommand.name(), createTagSetCommand.tags());
+        TagSet newTagSet = tagSetFactory.create(
+                creator,
+                createTagSetCommand.name(),
+                toTagIds(createTagSetCommand.tags())
+        );
+        tagSetRepository.add(newTagSet.forStorage());
+        tagSetNotifier.notifyChanged(newTagSet.forChangeNotification());
 
-        TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier = new TagSetsAccessibilityVerifier(tagSetDataSource, creator);
-        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, creator);
-
-        TagSet tagSet = TagSet.create(newTagSetData, creator, tagSetsAccessibilityVerifier, tagsAccessibilityVerifier);
-        tagSetRepository.add(tagSet.forStorage());
-
-        tagSetNotifier.notifyChanged(tagSet.forChangeNotification());
-
-        return tagSetDataSource.find(tagSet.id(), creator)
+        return tagSetDataSource.find(newTagSet.id(), creator)
                 .map(this::toTagSetResult)
                 .orElseThrow(() -> {
-                    String message = "Could not find created tag set with ID=%s".formatted(tagSet.id());
+                    String message = "Could not find created tag set with ID=%s".formatted(newTagSet.id());
                     return new RuntimeException(message);
                 });
     }
@@ -89,13 +89,15 @@ public class TagSetApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
-        TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier = new TagSetsAccessibilityVerifier(tagSetDataSource, updater);
-        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, updater);
-
         TagSetDto tagSetDto = tagSetRepository.findById(tagSetId)
                 .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));
-
-        TagSet tagSet = TagSet.fromStorage(tagSetDto, tagSetsAccessibilityVerifier, tagsAccessibilityVerifier);
+        TagSet tagSet = tagSetFactory.reconstitute(
+                new TagSetId(tagSetDto.id()),
+                new User(tagSetDto.creatorId()),
+                tagSetDto.name(),
+                toTagIds(tagSetDto.tags()),
+                tagSetDto.deleted()
+        );
         tagSet.rename(newName, updater);
         tagSetRepository.update(tagSetId, tagSet.forStorage());
 
@@ -113,13 +115,15 @@ public class TagSetApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
-        TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier = new TagSetsAccessibilityVerifier(tagSetDataSource, updater);
-        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, updater);
-
         TagSetDto tagSetDto = tagSetRepository.findById(tagSetId)
                 .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));
-
-        TagSet tagSet = TagSet.fromStorage(tagSetDto, tagSetsAccessibilityVerifier, tagsAccessibilityVerifier);
+        TagSet tagSet = tagSetFactory.reconstitute(
+                new TagSetId(tagSetDto.id()),
+                new User(tagSetDto.creatorId()),
+                tagSetDto.name(),
+                toTagIds(tagSetDto.tags()),
+                tagSetDto.deleted()
+        );
         tagSet.assignTag(new TagId(tagId), updater);
         tagSetRepository.update(tagSetId, tagSet.forStorage());
 
@@ -137,13 +141,16 @@ public class TagSetApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
-        TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier = new TagSetsAccessibilityVerifier(tagSetDataSource, updater);
-        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, updater);
-
         TagSetDto tagSetDto = tagSetRepository.findById(tagSetId)
                 .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));
+        TagSet tagSet = tagSetFactory.reconstitute(
+                new TagSetId(tagSetDto.id()),
+                new User(tagSetDto.creatorId()),
+                tagSetDto.name(),
+                toTagIds(tagSetDto.tags()),
+                tagSetDto.deleted()
+        );
 
-        TagSet tagSet = TagSet.fromStorage(tagSetDto, tagSetsAccessibilityVerifier, tagsAccessibilityVerifier);
         tagSet.removeTag(new TagId(tagId), updater);
         tagSetRepository.update(tagSetId, tagSet.forStorage());
 
@@ -161,13 +168,15 @@ public class TagSetApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User remover = new User(requesterIdentity.getId());
 
-        TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier = new TagSetsAccessibilityVerifier(tagSetDataSource, remover);
-        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, remover);
-
         TagSetDto tagSetDto = tagSetRepository.findById(tagSetId)
                 .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));
-
-        TagSet tagSet = TagSet.fromStorage(tagSetDto, tagSetsAccessibilityVerifier, tagsAccessibilityVerifier);
+        TagSet tagSet = tagSetFactory.reconstitute(
+                new TagSetId(tagSetDto.id()),
+                new User(tagSetDto.creatorId()),
+                tagSetDto.name(),
+                toTagIds(tagSetDto.tags()),
+                tagSetDto.deleted()
+        );
 
         tagSet.delete(remover);
         tagSetRepository.update(tagSetId, tagSet.forStorage());
@@ -177,5 +186,11 @@ public class TagSetApplicationService {
 
     private TagSetResult toTagSetResult(TagSetDto tagSetResult) {
         return new TagSetResult(tagSetResult.id(), tagSetResult.name(), tagSetResult.tags());
+    }
+
+    private Set<TagId> toTagIds(Collection<UUID> uuids) {
+        return uuids.stream()
+                .map(TagId::new)
+                .collect(toUnmodifiableSet());
     }
 }

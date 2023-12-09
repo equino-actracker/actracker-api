@@ -7,11 +7,7 @@ import ovh.equino.actracker.application.tagset.CreateTagSetCommand;
 import ovh.equino.actracker.application.tagset.SearchTagSetsQuery;
 import ovh.equino.actracker.application.tagset.TagSetApplicationService;
 import ovh.equino.actracker.application.tagset.TagSetResult;
-import ovh.equino.actracker.domain.tag.TagDataSource;
-import ovh.equino.actracker.domain.tagset.TagSetDataSource;
-import ovh.equino.actracker.domain.tagset.TagSetNotifier;
-import ovh.equino.actracker.domain.tagset.TagSetRepository;
-import ovh.equino.actracker.domain.tagset.TagSetSearchEngine;
+import ovh.equino.actracker.domain.tagset.*;
 import ovh.equino.security.identity.IdentityProvider;
 
 import java.util.UUID;
@@ -20,14 +16,14 @@ import java.util.UUID;
 @Service
 class TransactionalTagSetApplicationService extends TagSetApplicationService {
 
-    TransactionalTagSetApplicationService(TagSetRepository tagSetRepository,
+    TransactionalTagSetApplicationService(TagSetFactory tagSetFactory,
+                                          TagSetRepository tagSetRepository,
                                           TagSetDataSource tagSetDataSource,
                                           TagSetSearchEngine tagSetSearchEngine,
                                           TagSetNotifier tagSetNotifier,
-                                          TagDataSource tagDataSource,
                                           IdentityProvider identityProvider) {
 
-        super(tagSetRepository, tagSetDataSource, tagSetSearchEngine, tagSetNotifier, tagDataSource, identityProvider);
+        super(tagSetFactory, tagSetRepository, tagSetDataSource, tagSetSearchEngine, tagSetNotifier, identityProvider);
     }
 
     @Override

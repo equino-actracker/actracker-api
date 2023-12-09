@@ -7,11 +7,13 @@ import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.user.User;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
-import static java.util.Objects.requireNonNullElse;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 
 public class TagSet implements Entity {
@@ -44,26 +46,6 @@ public class TagSet implements Entity {
         this.tagSetsAccessibilityVerifier = tagSetsAccessibilityVerifier;
         this.tagsAccessibilityVerifier = tagsAccessibilityVerifier;
         this.validator = validator;
-    }
-
-    // TODO remove
-    public static TagSet create(TagSetDto tagSet,
-                                User creator,
-                                TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier,
-                                TagsAccessibilityVerifier tagsAccessibilityVerifier) {
-
-        TagSet newTagSet = new TagSet(
-                new TagSetId(),
-                creator,
-                tagSet.name(),
-                toTagIds(tagSet),
-                false,
-                new TagSetValidator(tagsAccessibilityVerifier),
-                tagSetsAccessibilityVerifier,
-                tagsAccessibilityVerifier
-        );
-        newTagSet.validate();
-        return newTagSet;
     }
 
     public void rename(String newName, User updater) {
@@ -109,23 +91,6 @@ public class TagSet implements Entity {
         ).execute();
     }
 
-    // TODO remove
-    public static TagSet fromStorage(TagSetDto tagSet,
-                                     TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier,
-                                     TagsAccessibilityVerifier tagsAccessibilityVerifier) {
-
-        return new TagSet(
-                new TagSetId(tagSet.id()),
-                new User(tagSet.creatorId()),
-                tagSet.name(),
-                toTagIds(tagSet),
-                tagSet.deleted(),
-                new TagSetValidator(tagsAccessibilityVerifier),
-                tagSetsAccessibilityVerifier,
-                tagsAccessibilityVerifier
-        );
-    }
-
     public TagSetDto forStorage() {
         Set<UUID> tagIds = tags.stream()
                 .map(TagId::id)
@@ -156,13 +121,6 @@ public class TagSet implements Entity {
 
     boolean deleted() {
         return this.deleted;
-    }
-
-    private static List<TagId> toTagIds(TagSetDto tagSet) {
-        return requireNonNullElse(tagSet.tags(), new HashSet<UUID>())
-                .stream()
-                .map(TagId::new)
-                .toList();
     }
 
     @Override
