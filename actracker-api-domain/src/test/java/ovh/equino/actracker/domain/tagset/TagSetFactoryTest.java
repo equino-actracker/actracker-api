@@ -14,6 +14,7 @@ import ovh.equino.actracker.domain.user.User;
 import java.util.List;
 import java.util.Set;
 
+import static java.lang.Boolean.TRUE;
 import static java.util.Collections.emptyList;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,7 +28,7 @@ class TagSetFactoryTest {
     private static final TagSetId TAG_SET_ID = new TagSetId();
     private static final User CREATOR = new User(randomUUID());
     private static final String TAG_SET_NAME = "tag set name";
-    private static final Boolean DELETED = true;
+    private static final Boolean DELETED = TRUE;
 
     private final TagSetDataSource tagSetDataSource = null;
     @Mock
@@ -43,7 +44,7 @@ class TagSetFactoryTest {
     @Test
     void shouldCreateMinimalTagSet() {
         // when
-        var tagSet = tagSetFactory.create(CREATOR, TAG_SET_NAME, emptyList());
+        var tagSet = tagSetFactory.create(CREATOR, TAG_SET_NAME, null);
 
         // then
         assertThat(tagSet.id()).isNotNull();
@@ -80,7 +81,7 @@ class TagSetFactoryTest {
         var invalidTagSetName = "";
 
         // then
-        assertThatThrownBy(() -> tagSetFactory.create(CREATOR, invalidTagSetName, emptyList()))
+        assertThatThrownBy(() -> tagSetFactory.create(CREATOR, invalidTagSetName, null))
                 .isInstanceOf(EntityInvalidException.class);
     }
 

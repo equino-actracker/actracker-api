@@ -5,7 +5,7 @@ import ovh.equino.actracker.domain.user.User;
 
 import static java.util.Objects.requireNonNull;
 
-class Metric implements Entity {
+public class Metric implements Entity {
 
     private final MetricId id;
     private final User creator;
@@ -21,6 +21,7 @@ class Metric implements Entity {
         this.deleted = deleted;
     }
 
+    // TODO delete
     static Metric create(MetricDto metric, User creator) {
         Metric newMetric = new Metric(
                 new MetricId(),
@@ -41,6 +42,7 @@ class Metric implements Entity {
         this.deleted = true;
     }
 
+    // TODO delete
     static Metric fromStorage(MetricDto metric) {
         return new Metric(
                 new MetricId(metric.id()),
@@ -61,12 +63,12 @@ class Metric implements Entity {
         );
     }
 
-    boolean isDeleted() {
+    boolean deleted() {
         return deleted;
     }
 
     boolean isNotDeleted() {
-        return !isDeleted();
+        return !deleted();
     }
 
     MetricId id() {

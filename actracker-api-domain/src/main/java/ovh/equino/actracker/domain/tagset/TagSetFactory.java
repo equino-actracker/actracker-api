@@ -8,6 +8,8 @@ import ovh.equino.actracker.domain.user.User;
 import java.util.Collection;
 
 import static java.lang.Boolean.TRUE;
+import static java.util.Collections.emptyList;
+import static java.util.Objects.requireNonNullElse;
 
 public final class TagSetFactory {
 
@@ -32,7 +34,7 @@ public final class TagSetFactory {
         var tagSet = new TagSet(
                 new TagSetId(),
                 creator, name,
-                tags,
+                requireNonNullElse(tags, emptyList()),
                 !DELETED,
                 validator,
                 tagSetAccessibilityVerifier,
