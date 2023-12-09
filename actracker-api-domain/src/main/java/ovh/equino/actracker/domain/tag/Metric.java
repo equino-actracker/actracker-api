@@ -5,7 +5,7 @@ import ovh.equino.actracker.domain.user.User;
 
 import static java.util.Objects.requireNonNull;
 
-public class Metric implements Entity {
+public final class Metric implements Entity {
 
     private final MetricId id;
     private final User creator;

@@ -17,7 +17,7 @@ import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.*;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 
-public class Activity implements Entity {
+public final class Activity implements Entity {
 
     private final ActivityId id;
     private final User creator;

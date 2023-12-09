@@ -12,7 +12,7 @@ import java.util.List;
 import static java.util.Objects.requireNonNull;
 import static java.util.UUID.randomUUID;
 
-public class Tag implements Entity {
+public final class Tag implements Entity {
 
     private final TagId id;
     private final User creator;

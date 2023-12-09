@@ -16,7 +16,7 @@ import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 
 
-public class Dashboard implements Entity {
+public final class Dashboard implements Entity {
 
     private final DashboardId id;
     private final User creator;

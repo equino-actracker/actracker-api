@@ -16,7 +16,7 @@ import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 
-public class TagSet implements Entity {
+public final class TagSet implements Entity {
 
     private final TagSetId id;
     private final User creator;
