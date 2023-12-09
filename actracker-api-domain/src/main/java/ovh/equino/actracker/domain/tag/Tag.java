@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static java.util.Collections.unmodifiableList;
 import static java.util.Objects.requireNonNull;
 import static java.util.UUID.randomUUID;
 
@@ -163,11 +164,11 @@ public final class Tag implements Entity {
     }
 
     List<Metric> metrics() {
-        return metrics;
+        return unmodifiableList(metrics);
     }
 
     List<Share> shares() {
-        return shares;
+        return unmodifiableList(shares);
     }
 
     // TODO think about extracting it to superclass

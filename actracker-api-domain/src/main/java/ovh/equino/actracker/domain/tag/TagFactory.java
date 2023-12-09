@@ -53,6 +53,7 @@ public final class TagFactory {
                             Collection<Share> shares,
                             boolean deleted) {
 
+        // TODO should be user in context, not creator!!!
         var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, creator);
         var validator = new TagValidator();
 

@@ -9,6 +9,7 @@ import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -32,8 +33,8 @@ public final class Dashboard implements Entity {
     Dashboard(DashboardId id,
               User creator,
               String name,
-              List<Chart> charts,
-              List<Share> shares,
+              Collection<Chart> charts,
+              Collection<Share> shares,
               boolean deleted,
               DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier,
               TagsAccessibilityVerifier tagsAccessibilityVerifier,
@@ -208,12 +209,20 @@ public final class Dashboard implements Entity {
         return this.name;
     }
 
+    List<Chart> charts() {
+        return unmodifiableList(charts);
+    }
+
+    List<Share> shares() {
+        return unmodifiableList(shares);
+    }
+
     @Override
     public User creator() {
         return creator;
     }
 
-    public boolean isDeleted() {
+    public boolean deleted() {
         return deleted;
     }
 

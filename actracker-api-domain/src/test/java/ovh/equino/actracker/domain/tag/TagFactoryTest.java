@@ -32,6 +32,7 @@ class TagFactoryTest {
     private final TagDataSource tagDataSource = null;
     @Mock
     private TenantDataSource tenantDataSource;
+
     private TagFactory tagFactory;
 
     @BeforeEach
