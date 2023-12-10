@@ -33,7 +33,8 @@ public final class TagSetFactory {
 
         var tagSet = new TagSet(
                 new TagSetId(),
-                creator, name,
+                creator,
+                name,
                 requireNonNullElse(tags, emptyList()),
                 !DELETED,
                 validator,

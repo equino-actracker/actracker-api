@@ -21,36 +21,12 @@ public final class Metric implements Entity {
         this.deleted = deleted;
     }
 
-    // TODO delete
-    static Metric create(MetricDto metric, User creator) {
-        Metric newMetric = new Metric(
-                new MetricId(),
-                creator,
-                metric.name(),
-                metric.type(),
-                metric.deleted()
-        );
-        newMetric.validate();
-        return newMetric;
-    }
-
     void rename(String newName) {
         this.name = newName;
     }
 
     void delete() {
         this.deleted = true;
-    }
-
-    // TODO delete
-    static Metric fromStorage(MetricDto metric) {
-        return new Metric(
-                new MetricId(metric.id()),
-                new User(metric.creatorId()),
-                metric.name(),
-                metric.type(),
-                metric.deleted()
-        );
     }
 
     MetricDto forStorage() {
