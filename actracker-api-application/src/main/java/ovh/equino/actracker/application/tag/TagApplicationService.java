@@ -19,6 +19,8 @@ import static java.util.stream.Collectors.toUnmodifiableSet;
 
 public class TagApplicationService {
 
+    private final TagFactory tagFactory;
+    private final MetricFactory metricFactory;
     private final TagRepository tagRepository;
     private final TagDataSource tagDataSource;
     private final TagSearchEngine tagSearchEngine;
@@ -26,13 +28,17 @@ public class TagApplicationService {
     private final IdentityProvider identityProvider;
     private final TenantDataSource tenantDataSource;
 
-    public TagApplicationService(TagRepository tagRepository,
+    public TagApplicationService(TagFactory tagFactory,
+                                 MetricFactory metricFactory,
+                                 TagRepository tagRepository,
                                  TagDataSource tagDataSource,
                                  TagSearchEngine tagSearchEngine,
                                  TagNotifier tagNotifier,
                                  IdentityProvider identityProvider,
                                  TenantDataSource tenantDataSource) {
 
+        this.tagFactory = tagFactory;
+        this.metricFactory = metricFactory;
         this.tagRepository = tagRepository;
         this.tagDataSource = tagDataSource;
         this.tagSearchEngine = tagSearchEngine;
@@ -45,23 +51,18 @@ public class TagApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User creator = new User(requesterIdentity.getId());
 
-        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, creator);
+        List<Metric> metrics = createTagCommand.metricAssignments()
+                .stream()
+                .map(metric -> metricFactory.create(
+                        creator, metric.metricName(), MetricType.valueOf(metric.metricType())
+                ))
+                .toList();
+        List<Share> shares = createTagCommand.grantedShares()
+                .stream()
+                .map(Share::new)
+                .toList();
 
-        TagDto tagData = new TagDto(
-                createTagCommand.tagName(),
-                createTagCommand.metricAssignments().stream()
-                        .map(metricAssignment ->
-                                new MetricDto(
-                                        metricAssignment.metricName(),
-                                        MetricType.valueOf(metricAssignment.metricType())
-                                )
-                        )
-                        .toList(),
-                createTagCommand.grantedShares().stream()
-                        .map(this::resolveShare)
-                        .toList()
-        );
-        Tag tag = Tag.create(tagData, creator, tagsAccessibilityVerifier);
+        Tag tag = tagFactory.create(creator, createTagCommand.tagName(), metrics, shares);
         tagRepository.add(tag.forStorage());
 
         tagNotifier.notifyChanged(tag.forChangeNotification());
@@ -116,11 +117,28 @@ public class TagApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
-        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, updater);
-
         TagDto tagDto = tagRepository.findById(tagId)
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
-        Tag tag = Tag.fromStorage(tagDto, tagsAccessibilityVerifier);
+        List<Metric> metrics = tagDto.metrics()
+                .stream()
+                .map(metric -> metricFactory.reconstitute(
+                                new MetricId(metric.id()),
+                                new User(metric.creatorId()),
+                                metric.name(),
+                                metric.type(),
+                                metric.deleted()
+                        )
+                )
+                .toList();
+        Tag tag = tagFactory.reconstitute(
+                updater,
+                new TagId(tagDto.id()),
+                new User(tagDto.creatorId()),
+                tagDto.name(),
+                metrics,
+                tagDto.shares(),
+                tagDto.deleted()
+        );
 
         tag.rename(newName, updater);
         tagRepository.update(tagId, tag.forStorage());
@@ -139,11 +157,28 @@ public class TagApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User remover = new User(requesterIdentity.getId());
 
-        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, remover);
-
         TagDto tagDto = tagRepository.findById(tagId)
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
-        Tag tag = Tag.fromStorage(tagDto, tagsAccessibilityVerifier);
+        List<Metric> metrics = tagDto.metrics()
+                .stream()
+                .map(metric -> metricFactory.reconstitute(
+                                new MetricId(metric.id()),
+                                new User(metric.creatorId()),
+                                metric.name(),
+                                metric.type(),
+                                metric.deleted()
+                        )
+                )
+                .toList();
+        Tag tag = tagFactory.reconstitute(
+                remover,
+                new TagId(tagDto.id()),
+                new User(tagDto.creatorId()),
+                tagDto.name(),
+                metrics,
+                tagDto.shares(),
+                tagDto.deleted()
+        );
 
         tag.delete(remover);
         tagRepository.update(tagId, tag.forStorage());
@@ -155,11 +190,28 @@ public class TagApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
-        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, updater);
-
         TagDto tagDto = tagRepository.findById(tagId)
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
-        Tag tag = Tag.fromStorage(tagDto, tagsAccessibilityVerifier);
+        List<Metric> metrics = tagDto.metrics()
+                .stream()
+                .map(metric -> metricFactory.reconstitute(
+                                new MetricId(metric.id()),
+                                new User(metric.creatorId()),
+                                metric.name(),
+                                metric.type(),
+                                metric.deleted()
+                        )
+                )
+                .toList();
+        Tag tag = tagFactory.reconstitute(
+                updater,
+                new TagId(tagDto.id()),
+                new User(tagDto.creatorId()),
+                tagDto.name(),
+                metrics,
+                tagDto.shares(),
+                tagDto.deleted()
+        );
 
         tag.addMetric(metricName, MetricType.valueOf(metricType), updater);
         tagRepository.update(tagId, tag.forStorage());
@@ -179,11 +231,28 @@ public class TagApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
-        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, updater);
-
         TagDto tagDto = tagRepository.findById(tagId)
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
-        Tag tag = Tag.fromStorage(tagDto, tagsAccessibilityVerifier);
+        List<Metric> metrics = tagDto.metrics()
+                .stream()
+                .map(metric -> metricFactory.reconstitute(
+                                new MetricId(metric.id()),
+                                new User(metric.creatorId()),
+                                metric.name(),
+                                metric.type(),
+                                metric.deleted()
+                        )
+                )
+                .toList();
+        Tag tag = tagFactory.reconstitute(
+                updater,
+                new TagId(tagDto.id()),
+                new User(tagDto.creatorId()),
+                tagDto.name(),
+                metrics,
+                tagDto.shares(),
+                tagDto.deleted()
+        );
 
         tag.deleteMetric(new MetricId(metricId), updater);
         tagRepository.update(tagId, tag.forStorage());
@@ -203,11 +272,28 @@ public class TagApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User updater = new User(requesterIdentity.getId());
 
-        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, updater);
-
         TagDto tagDto = tagRepository.findById(tagId)
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
-        Tag tag = Tag.fromStorage(tagDto, tagsAccessibilityVerifier);
+        List<Metric> metrics = tagDto.metrics()
+                .stream()
+                .map(metric -> metricFactory.reconstitute(
+                                new MetricId(metric.id()),
+                                new User(metric.creatorId()),
+                                metric.name(),
+                                metric.type(),
+                                metric.deleted()
+                        )
+                )
+                .toList();
+        Tag tag = tagFactory.reconstitute(
+                updater,
+                new TagId(tagDto.id()),
+                new User(tagDto.creatorId()),
+                tagDto.name(),
+                metrics,
+                tagDto.shares(),
+                tagDto.deleted()
+        );
 
         tag.renameMetric(newName, new MetricId(metricId), updater);
         tagRepository.update(tagId, tag.forStorage());
@@ -227,11 +313,28 @@ public class TagApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User granter = new User(requesterIdentity.getId());
 
-        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, granter);
-
         TagDto tagDto = tagRepository.findById(tagId)
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
-        Tag tag = Tag.fromStorage(tagDto, tagsAccessibilityVerifier);
+        List<Metric> metrics = tagDto.metrics()
+                .stream()
+                .map(metric -> metricFactory.reconstitute(
+                                new MetricId(metric.id()),
+                                new User(metric.creatorId()),
+                                metric.name(),
+                                metric.type(),
+                                metric.deleted()
+                        )
+                )
+                .toList();
+        Tag tag = tagFactory.reconstitute(
+                granter,
+                new TagId(tagDto.id()),
+                new User(tagDto.creatorId()),
+                tagDto.name(),
+                metrics,
+                tagDto.shares(),
+                tagDto.deleted()
+        );
 
         Share share = resolveShare(newGrantee);
 
@@ -253,11 +356,28 @@ public class TagApplicationService {
         Identity requesterIdentity = identityProvider.provideIdentity();
         User granter = new User(requesterIdentity.getId());
 
-        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, granter);
-
         TagDto tagDto = tagRepository.findById(tagId)
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
-        Tag tag = Tag.fromStorage(tagDto, tagsAccessibilityVerifier);
+        List<Metric> metrics = tagDto.metrics()
+                .stream()
+                .map(metric -> metricFactory.reconstitute(
+                                new MetricId(metric.id()),
+                                new User(metric.creatorId()),
+                                metric.name(),
+                                metric.type(),
+                                metric.deleted()
+                        )
+                )
+                .toList();
+        Tag tag = tagFactory.reconstitute(
+                granter,
+                new TagId(tagDto.id()),
+                new User(tagDto.creatorId()),
+                tagDto.name(),
+                metrics,
+                tagDto.shares(),
+                tagDto.deleted()
+        );
 
         tag.unshare(granteeName, granter);
         tagRepository.update(tagId, tag.forStorage());
@@ -273,6 +393,7 @@ public class TagApplicationService {
 
     }
 
+    // TODO extract to share resolver service
     private Share resolveShare(String grantee) {
         return tenantDataSource.findByUsername(grantee)
                 .map(tenant -> new Share(

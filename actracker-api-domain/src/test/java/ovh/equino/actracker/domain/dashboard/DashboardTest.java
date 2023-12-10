@@ -169,7 +169,7 @@ class DashboardTest {
             dashboard.delete(CREATOR);
 
             // then
-            assertThat(dashboard.isDeleted()).isTrue();
+            assertThat(dashboard.deleted()).isTrue();
             assertThat(dashboard.charts).allSatisfy(
                     chart -> assertThat(chart.isDeleted()).isTrue()
             );
@@ -194,7 +194,7 @@ class DashboardTest {
             dashboard.delete(CREATOR);
 
             // then
-            assertThat(dashboard.isDeleted()).isTrue();
+            assertThat(dashboard.deleted()).isTrue();
         }
 
         @Test

@@ -17,7 +17,7 @@ import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.*;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 
-public class Activity implements Entity {
+public final class Activity implements Entity {
 
     private final ActivityId id;
     private final User creator;
@@ -63,31 +63,6 @@ public class Activity implements Entity {
         this.tagsAccessibilityVerifier = tagsAccessibilityVerifier;
         this.metricsAccessibilityVerifier = metricsAccessibilityVerifier;
         this.validator = validator;
-    }
-
-    public static Activity create(ActivityDto activity,
-                                  User creator,
-                                  ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier,
-                                  TagsAccessibilityVerifier tagsAccessibilityVerifier,
-                                  MetricsAccessibilityVerifier metricsAccessibilityVerifier) {
-
-        Activity newActivity = new Activity(
-                new ActivityId(),
-                creator,
-                activity.title(),
-                activity.startTime(),
-                activity.endTime(),
-                activity.comment(),
-                toTagIds(activity),
-                activity.metricValues(),
-                false,
-                activitiesAccessibilityVerifier,
-                tagsAccessibilityVerifier,
-                metricsAccessibilityVerifier,
-                new ActivityValidator(tagsAccessibilityVerifier, metricsAccessibilityVerifier)
-        );
-        newActivity.validate();
-        return newActivity;
     }
 
     private static List<TagId> toTagIds(ActivityDto activity) {
@@ -202,28 +177,6 @@ public class Activity implements Entity {
         ).execute();
     }
 
-    public static Activity fromStorage(ActivityDto activity,
-                                       ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier,
-                                       TagsAccessibilityVerifier tagsAccessibilityVerifier,
-                                       MetricsAccessibilityVerifier metricsAccessibilityVerifier) {
-
-        return new Activity(
-                new ActivityId(activity.id()),
-                new User(activity.creatorId()),
-                activity.title(),
-                activity.startTime(),
-                activity.endTime(),
-                activity.comment(),
-                toTagIds(activity),
-                activity.metricValues(),
-                activity.deleted(),
-                activitiesAccessibilityVerifier,
-                tagsAccessibilityVerifier,
-                metricsAccessibilityVerifier,
-                new ActivityValidator(tagsAccessibilityVerifier, metricsAccessibilityVerifier)
-        );
-    }
-
     public ActivityDto forStorage() {
         Set<UUID> tagIds = tags.stream()
                 .map(TagId::id)
@@ -278,6 +231,10 @@ public class Activity implements Entity {
 
     Set<TagId> tags() {
         return unmodifiableSet(tags);
+    }
+
+    List<MetricValue> metricValues() {
+        return unmodifiableList(metricValues);
     }
 
     String comment() {

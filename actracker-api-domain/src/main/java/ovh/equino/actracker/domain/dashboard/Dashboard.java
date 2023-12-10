@@ -9,6 +9,7 @@ import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -16,7 +17,7 @@ import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 
 
-public class Dashboard implements Entity {
+public final class Dashboard implements Entity {
 
     private final DashboardId id;
     private final User creator;
@@ -32,8 +33,8 @@ public class Dashboard implements Entity {
     Dashboard(DashboardId id,
               User creator,
               String name,
-              List<Chart> charts,
-              List<Share> shares,
+              Collection<Chart> charts,
+              Collection<Share> shares,
               boolean deleted,
               DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier,
               TagsAccessibilityVerifier tagsAccessibilityVerifier,
@@ -49,26 +50,6 @@ public class Dashboard implements Entity {
         this.dashboardsAccessibilityVerifier = dashboardsAccessibilityVerifier;
         this.tagsAccessibilityVerifier = tagsAccessibilityVerifier;
         this.validator = validator;
-    }
-
-    public static Dashboard create(DashboardDto dashboard,
-                                   User creator,
-                                   DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier,
-                                   TagsAccessibilityVerifier tagsAccessibilityVerifier) {
-
-        Dashboard newDashboard = new Dashboard(
-                new DashboardId(),
-                creator,
-                dashboard.name(),
-                dashboard.charts(),
-                dashboard.shares(),
-                false,
-                dashboardsAccessibilityVerifier,
-                tagsAccessibilityVerifier,
-                new DashboardValidator()
-        );
-        newDashboard.validate();
-        return newDashboard;
     }
 
     public void rename(String newName, User editor) {
@@ -167,23 +148,6 @@ public class Dashboard implements Entity {
         }).execute();
     }
 
-    public static Dashboard fromStorage(DashboardDto dashboard,
-                                        DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier,
-                                        TagsAccessibilityVerifier tagsAccessibilityVerifier) {
-
-        return new Dashboard(
-                new DashboardId(dashboard.id()),
-                new User(dashboard.creatorId()),
-                dashboard.name(),
-                dashboard.charts(),
-                dashboard.shares(),
-                dashboard.deleted(),
-                dashboardsAccessibilityVerifier,
-                tagsAccessibilityVerifier,
-                new DashboardValidator()
-        );
-    }
-
     public DashboardDto forStorage() {
         return new DashboardDto(
                 id.id(), creator.id(), name, unmodifiableList(charts), unmodifiableList(shares), deleted
@@ -206,12 +170,20 @@ public class Dashboard implements Entity {
         return this.name;
     }
 
+    List<Chart> charts() {
+        return unmodifiableList(charts);
+    }
+
+    List<Share> shares() {
+        return unmodifiableList(shares);
+    }
+
     @Override
     public User creator() {
         return creator;
     }
 
-    public boolean isDeleted() {
+    public boolean deleted() {
         return deleted;
     }
 

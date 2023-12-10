@@ -9,11 +9,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static java.util.Collections.unmodifiableList;
 import static java.util.Objects.requireNonNull;
-import static java.util.Objects.requireNonNullElse;
 import static java.util.UUID.randomUUID;
 
-public class Tag implements Entity {
+public final class Tag implements Entity {
 
     private final TagId id;
     private final User creator;
@@ -29,7 +29,7 @@ public class Tag implements Entity {
         User creator,
         String name,
         Collection<Metric> metrics,
-        List<Share> shares,
+        Collection<Share> shares,
         boolean deleted,
         TagsAccessibilityVerifier tagsAccessibilityVerifier,
         TagValidator validator) {
@@ -45,27 +45,6 @@ public class Tag implements Entity {
         this.validator = validator;
     }
 
-    public static Tag create(TagDto tag, User creator, TagsAccessibilityVerifier tagsAccessibilityVerifier) {
-
-        List<Metric> metrics = requireNonNullElse(tag.metrics(), new ArrayList<MetricDto>()).stream()
-                .map(metric -> Metric.create(metric, creator))
-                .toList();
-
-        Tag newTag = new Tag(
-                new TagId(),
-                creator,
-                tag.name(),
-                metrics,
-                tag.shares(),
-                false,
-                tagsAccessibilityVerifier,
-                new TagValidator()
-        );
-
-        newTag.validate();
-        return newTag;
-    }
-
     public void rename(String newName, User updater) {
         if (!creator.equals(updater) && !tagsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Tag.class, this.id.id());
@@ -79,6 +58,7 @@ public class Tag implements Entity {
         if (!creator.equals(updater) && !tagsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Tag.class, this.id.id());
         }
+        // TODO replace with metric factory?
         Metric newMetric = new Metric(new MetricId(randomUUID()), updater, name, type, false);
         new TagEditOperation(updater, this, () ->
                 this.metrics.add(newMetric)
@@ -150,22 +130,6 @@ public class Tag implements Entity {
         }).execute();
     }
 
-    public static Tag fromStorage(TagDto tag, TagsAccessibilityVerifier tagsAccessibilityVerifier) {
-        List<Metric> metrics = tag.metrics().stream()
-                .map(Metric::fromStorage)
-                .toList();
-        return new Tag(
-                new TagId(tag.id()),
-                new User(tag.creatorId()),
-                tag.name(),
-                metrics,
-                tag.shares(),
-                tag.deleted(),
-                tagsAccessibilityVerifier,
-                new TagValidator()
-        );
-    }
-
     public TagDto forStorage() {
         List<MetricDto> metrics = this.metrics.stream()
                 .map(Metric::forStorage)
@@ -181,7 +145,7 @@ public class Tag implements Entity {
         return new TagChangedNotification(dto);
     }
 
-    boolean isDeleted() {
+    boolean deleted() {
         return deleted;
     }
 
@@ -197,6 +161,14 @@ public class Tag implements Entity {
     @Override
     public User creator() {
         return creator;
+    }
+
+    List<Metric> metrics() {
+        return unmodifiableList(metrics);
+    }
+
+    List<Share> shares() {
+        return unmodifiableList(shares);
     }
 
     // TODO think about extracting it to superclass

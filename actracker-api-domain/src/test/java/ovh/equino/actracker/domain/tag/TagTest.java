@@ -274,7 +274,7 @@ class TagTest {
 
             // then
             assertThat(tag.metrics)
-                    .extracting(Metric::id, Metric::isDeleted)
+                    .extracting(Metric::id, Metric::deleted)
                     .containsExactlyInAnyOrder(
                             tuple(existingMetric1.id(), !DELETED),
                             tuple(existingMetric2.id(), !DELETED),
@@ -323,7 +323,7 @@ class TagTest {
 
             // then
             assertThat(tag.metrics)
-                    .extracting(Metric::id, Metric::isDeleted)
+                    .extracting(Metric::id, Metric::deleted)
                     .containsExactlyInAnyOrder(
                             tuple(existingMetric.id(), !DELETED)
                     );
@@ -350,7 +350,7 @@ class TagTest {
 
             // then
             assertThat(tag.metrics)
-                    .extracting(Metric::id, Metric::isDeleted)
+                    .extracting(Metric::id, Metric::deleted)
                     .containsExactlyInAnyOrder(
                             tuple(existingMetric.id(), !DELETED),
                             tuple(deletedMetric.id(), DELETED)
@@ -602,9 +602,9 @@ class TagTest {
             tag.delete(CREATOR);
 
             // then
-            assertThat(tag.isDeleted()).isTrue();
+            assertThat(tag.deleted()).isTrue();
             assertThat(tag.metrics)
-                    .extracting(Metric::id, Metric::isDeleted)
+                    .extracting(Metric::id, Metric::deleted)
                     .containsExactlyInAnyOrder(
                             tuple(metric1.id(), DELETED),
                             tuple(metric2.id(), DELETED)

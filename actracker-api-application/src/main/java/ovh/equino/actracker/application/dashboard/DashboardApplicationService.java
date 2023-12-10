@@ -7,8 +7,6 @@ import ovh.equino.actracker.domain.dashboard.*;
 import ovh.equino.actracker.domain.dashboard.generation.*;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.share.Share;
-import ovh.equino.actracker.domain.tag.TagDataSource;
-import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.tenant.TenantDataSource;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.security.identity.Identity;
@@ -23,30 +21,30 @@ import static java.util.Objects.requireNonNullElse;
 
 public class DashboardApplicationService {
 
+    private final DashboardFactory dashboardFactory;
     private final DashboardRepository dashboardRepository;
     private final DashboardDataSource dashboardDataSource;
     private final DashboardSearchEngine dashboardSearchEngine;
     private final DashboardGenerationEngine dashboardGenerationEngine;
     private final DashboardNotifier dashboardNotifier;
-    private final TagDataSource tagDataSource;
     private final TenantDataSource tenantDataSource;
     private final IdentityProvider identityProvider;
 
-    public DashboardApplicationService(DashboardRepository dashboardRepository,
+    public DashboardApplicationService(DashboardFactory dashboardFactory,
+                                       DashboardRepository dashboardRepository,
                                        DashboardDataSource dashboardDataSource,
                                        DashboardSearchEngine dashboardSearchEngine,
                                        DashboardGenerationEngine dashboardGenerationEngine,
                                        DashboardNotifier dashboardNotifier,
-                                       TagDataSource tagDataSource,
                                        TenantDataSource tenantDataSource,
                                        IdentityProvider identityProvider) {
 
+        this.dashboardFactory = dashboardFactory;
         this.dashboardRepository = dashboardRepository;
         this.dashboardDataSource = dashboardDataSource;
         this.dashboardSearchEngine = dashboardSearchEngine;
         this.dashboardGenerationEngine = dashboardGenerationEngine;
         this.dashboardNotifier = dashboardNotifier;
-        this.tagDataSource = tagDataSource;
         this.tenantDataSource = tenantDataSource;
         this.identityProvider = identityProvider;
     }
@@ -64,23 +62,18 @@ public class DashboardApplicationService {
         Identity requestIdentity = identityProvider.provideIdentity();
         User creator = new User(requestIdentity.getId());
 
-        DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier = new DashboardsAccessibilityVerifier(dashboardDataSource, creator);
-        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, creator);
-
-        DashboardDto dashboardDataWithSharesResolved = new DashboardDto(
-                createDashboardCommand.name(),
-                createDashboardCommand.chartAssignments().stream()
-                        .map(chartAssignment -> new Chart(
-                                chartAssignment.name(),
-                                GroupBy.valueOf(chartAssignment.groupBy()),
-                                AnalysisMetric.valueOf(chartAssignment.analysisMetric()),
-                                chartAssignment.includedTags()))
-                        .toList(),
-                createDashboardCommand.shares().stream()
-                        .map(this::resolveShare)
-                        .toList()
-        );
-        Dashboard dashboard = Dashboard.create(dashboardDataWithSharesResolved, creator, dashboardsAccessibilityVerifier, tagsAccessibilityVerifier);
+        List<Chart> charts = createDashboardCommand.chartAssignments().stream()
+                .map(chartAssignment -> new Chart(
+                        chartAssignment.name(),
+                        GroupBy.valueOf(chartAssignment.groupBy()),
+                        AnalysisMetric.valueOf(chartAssignment.analysisMetric()),
+                        chartAssignment.includedTags()))
+                .toList();
+        List<Share> shares = createDashboardCommand.shares()
+                .stream()
+                .map(Share::new)
+                .toList();
+        Dashboard dashboard = dashboardFactory.create(creator, createDashboardCommand.name(), charts, shares);
         dashboardRepository.add(dashboard.forStorage());
         dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
 
@@ -121,12 +114,17 @@ public class DashboardApplicationService {
         Identity requestIdentity = identityProvider.provideIdentity();
         User updater = new User(requestIdentity.getId());
 
-        DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier = new DashboardsAccessibilityVerifier(dashboardDataSource, updater);
-        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, updater);
-
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
-        Dashboard dashboard = Dashboard.fromStorage(dashboardDto, dashboardsAccessibilityVerifier, tagsAccessibilityVerifier);
+        Dashboard dashboard = dashboardFactory.reconstitute(
+                updater,
+                new DashboardId(dashboardDto.id()),
+                new User(dashboardDto.creatorId()),
+                dashboardDto.name(),
+                dashboardDto.charts(),
+                dashboardDto.shares(),
+                dashboardDto.deleted()
+        );
 
         dashboard.rename(newName, updater);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
@@ -144,12 +142,17 @@ public class DashboardApplicationService {
         Identity requestIdentity = identityProvider.provideIdentity();
         User remover = new User(requestIdentity.getId());
 
-        DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier = new DashboardsAccessibilityVerifier(dashboardDataSource, remover);
-        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, remover);
-
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
-        Dashboard dashboard = Dashboard.fromStorage(dashboardDto, dashboardsAccessibilityVerifier, tagsAccessibilityVerifier);
+        Dashboard dashboard = dashboardFactory.reconstitute(
+                remover,
+                new DashboardId(dashboardDto.id()),
+                new User(dashboardDto.creatorId()),
+                dashboardDto.name(),
+                dashboardDto.charts(),
+                dashboardDto.shares(),
+                dashboardDto.deleted()
+        );
 
         dashboard.delete(remover);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
@@ -160,12 +163,17 @@ public class DashboardApplicationService {
         Identity requestIdentity = identityProvider.provideIdentity();
         User updater = new User(requestIdentity.getId());
 
-        DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier = new DashboardsAccessibilityVerifier(dashboardDataSource, updater);
-        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, updater);
-
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
-        Dashboard dashboard = Dashboard.fromStorage(dashboardDto, dashboardsAccessibilityVerifier, tagsAccessibilityVerifier);
+        Dashboard dashboard = dashboardFactory.reconstitute(
+                updater,
+                new DashboardId(dashboardDto.id()),
+                new User(dashboardDto.creatorId()),
+                dashboardDto.name(),
+                dashboardDto.charts(),
+                dashboardDto.shares(),
+                dashboardDto.deleted()
+        );
 
         Chart newChart = new Chart(
                 newChartAssignment.name(),
@@ -190,12 +198,17 @@ public class DashboardApplicationService {
         Identity requestIdentity = identityProvider.provideIdentity();
         User updater = new User(requestIdentity.getId());
 
-        DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier = new DashboardsAccessibilityVerifier(dashboardDataSource, updater);
-        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, updater);
-
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
-        Dashboard dashboard = Dashboard.fromStorage(dashboardDto, dashboardsAccessibilityVerifier, tagsAccessibilityVerifier);
+        Dashboard dashboard = dashboardFactory.reconstitute(
+                updater,
+                new DashboardId(dashboardDto.id()),
+                new User(dashboardDto.creatorId()),
+                dashboardDto.name(),
+                dashboardDto.charts(),
+                dashboardDto.shares(),
+                dashboardDto.deleted()
+        );
 
         dashboard.deleteChart(new ChartId(chartId), updater);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
@@ -213,12 +226,17 @@ public class DashboardApplicationService {
         Identity requestIdentity = identityProvider.provideIdentity();
         User granter = new User(requestIdentity.getId());
 
-        DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier = new DashboardsAccessibilityVerifier(dashboardDataSource, granter);
-        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, granter);
-
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
-        Dashboard dashboard = Dashboard.fromStorage(dashboardDto, dashboardsAccessibilityVerifier, tagsAccessibilityVerifier);
+        Dashboard dashboard = dashboardFactory.reconstitute(
+                granter,
+                new DashboardId(dashboardDto.id()),
+                new User(dashboardDto.creatorId()),
+                dashboardDto.name(),
+                dashboardDto.charts(),
+                dashboardDto.shares(),
+                dashboardDto.deleted()
+        );
 
         Share share = resolveShare(newGrantee);
 
@@ -238,12 +256,17 @@ public class DashboardApplicationService {
         Identity requestIdentity = identityProvider.provideIdentity();
         User granter = new User(requestIdentity.getId());
 
-        DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier = new DashboardsAccessibilityVerifier(dashboardDataSource, granter);
-        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, granter);
-
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
-        Dashboard dashboard = Dashboard.fromStorage(dashboardDto, dashboardsAccessibilityVerifier, tagsAccessibilityVerifier);
+        Dashboard dashboard = dashboardFactory.reconstitute(
+                granter,
+                new DashboardId(dashboardDto.id()),
+                new User(dashboardDto.creatorId()),
+                dashboardDto.name(),
+                dashboardDto.charts(),
+                dashboardDto.shares(),
+                dashboardDto.deleted()
+        );
 
         dashboard.unshare(granteeName, granter);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
@@ -261,9 +284,6 @@ public class DashboardApplicationService {
         Identity requestIdentity = identityProvider.provideIdentity();
         User generator = new User(requestIdentity.getId());
 
-        DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier = new DashboardsAccessibilityVerifier(dashboardDataSource, generator);
-        TagsAccessibilityVerifier tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, generator);
-
         DashboardGenerationCriteria generationCriteria = new DashboardGenerationCriteria(
                 generateDashboardQuery.dashboardId(),
                 generator,
@@ -275,13 +295,21 @@ public class DashboardApplicationService {
         UUID dashboardId = generationCriteria.dashboardId();
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
+        Dashboard dashboard = dashboardFactory.reconstitute(
+                generator,
+                new DashboardId(dashboardDto.id()),
+                new User(dashboardDto.creatorId()),
+                dashboardDto.name(),
+                dashboardDto.charts(),
+                dashboardDto.shares(),
+                dashboardDto.deleted()
+        );
 
-        Dashboard dashboard = Dashboard.fromStorage(dashboardDto, dashboardsAccessibilityVerifier, tagsAccessibilityVerifier);
         DashboardData dashboardData = dashboardGenerationEngine.generateDashboard(dashboard.forStorage(), generationCriteria);
-
         return toGenerationResult(dashboardData);
     }
 
+    // TODO extract to share resolver service
     private Share resolveShare(String grantee) {
         return tenantDataSource.findByUsername(grantee)
                 .map(tenant -> new Share(
