@@ -30,7 +30,8 @@ class TagSetFactoryTest {
     private static final String TAG_SET_NAME = "tag set name";
     private static final Boolean DELETED = TRUE;
 
-    private final TagSetDataSource tagSetDataSource = null;
+    @Mock
+    private TagSetDataSource tagSetDataSource;
     @Mock
     private TagDataSource tagDataSource;
 

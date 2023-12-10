@@ -1,10 +1,12 @@
 package ovh.equino.actracker.domain.tagset;
 
+import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.tag.TagDataSource;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.user.User;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import static java.lang.Boolean.TRUE;
@@ -29,7 +31,9 @@ public final class TagSetFactory {
 
         var tagSetAccessibilityVerifier = new TagSetsAccessibilityVerifier(tagSetDataSource, creator);
         var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, creator);
-        var validator = new TagSetValidator(tagsAccessibilityVerifier);
+        var validator = new TagSetValidator();
+
+        validateTagsAccessible(tags, tagsAccessibilityVerifier);
 
         var tagSet = new TagSet(
                 new TagSetId(),
@@ -54,7 +58,7 @@ public final class TagSetFactory {
 
         var tagSetAccessibilityVerifier = new TagSetsAccessibilityVerifier(tagSetDataSource, actor);
         var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, actor);
-        var validator = new TagSetValidator(tagsAccessibilityVerifier);
+        var validator = new TagSetValidator();
 
         return new TagSet(
                 id,
@@ -66,5 +70,16 @@ public final class TagSetFactory {
                 tagSetAccessibilityVerifier,
                 tagsAccessibilityVerifier
         );
+    }
+
+    private void validateTagsAccessible(Collection<TagId> tags, TagsAccessibilityVerifier tagsAccessibilityVerifier) {
+        var nonNullTags = requireNonNullElse(tags, new ArrayList<TagId>());
+        tagsAccessibilityVerifier.nonAccessibleOf(nonNullTags)
+                .stream()
+                .findFirst()
+                .ifPresent((inaccessibleTag) -> {
+                    String errorMessage = "Tag with ID %s not found".formatted(inaccessibleTag.id());
+                    throw new EntityInvalidException(TagSet.class, errorMessage);
+                });
     }
 }

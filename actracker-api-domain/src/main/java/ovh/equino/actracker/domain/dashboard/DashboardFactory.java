@@ -74,7 +74,7 @@ public final class DashboardFactory {
                                   boolean deleted) {
 
         var dashboardsAccessibilityVerifier = new DashboardsAccessibilityVerifier(dashboardDataSource, actor);
-        var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, actor );
+        var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, actor);
         var validator = new DashboardValidator();
 
         return new Dashboard(
