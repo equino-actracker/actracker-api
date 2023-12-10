@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import static java.lang.Boolean.TRUE;
-import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNullElse;
 
 public final class TagSetFactory {
@@ -33,13 +32,14 @@ public final class TagSetFactory {
         var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, creator);
         var validator = new TagSetValidator();
 
-        validateTagsAccessible(tags, tagsAccessibilityVerifier);
+        var nonNullTags = requireNonNullElse(tags, new ArrayList<TagId>());
+        validateTagsAccessible(nonNullTags, tagsAccessibilityVerifier);
 
         var tagSet = new TagSet(
                 new TagSetId(),
                 creator,
                 name,
-                requireNonNullElse(tags, emptyList()),
+                nonNullTags,
                 !DELETED,
                 validator,
                 tagSetAccessibilityVerifier,
@@ -73,8 +73,7 @@ public final class TagSetFactory {
     }
 
     private void validateTagsAccessible(Collection<TagId> tags, TagsAccessibilityVerifier tagsAccessibilityVerifier) {
-        var nonNullTags = requireNonNullElse(tags, new ArrayList<TagId>());
-        tagsAccessibilityVerifier.nonAccessibleOf(nonNullTags)
+        tagsAccessibilityVerifier.nonAccessibleOf(tags)
                 .stream()
                 .findFirst()
                 .ifPresent((inaccessibleTag) -> {
