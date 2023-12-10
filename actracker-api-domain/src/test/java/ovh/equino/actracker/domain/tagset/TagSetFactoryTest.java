@@ -99,10 +99,11 @@ class TagSetFactoryTest {
     @Test
     void shouldReconstituteTagSet() {
         // given
+        var actor = new User(randomUUID());
         var assignedTags = List.of(new TagId(), new TagId());
 
         // when
-        var tagSet = tagSetFactory.reconstitute(TAG_SET_ID, CREATOR, TAG_SET_NAME, assignedTags, DELETED);
+        var tagSet = tagSetFactory.reconstitute(actor, TAG_SET_ID, CREATOR, TAG_SET_NAME, assignedTags, DELETED);
 
         // then
         assertThat(tagSet.id()).isEqualTo(TAG_SET_ID);

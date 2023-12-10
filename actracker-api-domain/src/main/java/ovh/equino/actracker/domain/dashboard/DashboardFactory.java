@@ -65,16 +65,16 @@ public final class DashboardFactory {
         return dashboard;
     }
 
-    // TODO should be user in context, not creator!!!
-    public Dashboard reconstitute(DashboardId id,
+    public Dashboard reconstitute(User actor,
+                                  DashboardId id,
                                   User creator,
                                   String name,
                                   Collection<Chart> charts,
                                   Collection<Share> shares,
                                   boolean deleted) {
 
-        var dashboardsAccessibilityVerifier = new DashboardsAccessibilityVerifier(dashboardDataSource, creator);
-        var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, creator);
+        var dashboardsAccessibilityVerifier = new DashboardsAccessibilityVerifier(dashboardDataSource, actor);
+        var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, actor );
         var validator = new DashboardValidator();
 
         return new Dashboard(

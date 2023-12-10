@@ -57,8 +57,8 @@ public final class ActivityFactory {
         return activity;
     }
 
-    // TODO should be user in context, not creator!!!
-    public Activity reconstitute(ActivityId id,
+    public Activity reconstitute(User actor,
+                                 ActivityId id,
                                  User creator,
                                  String title,
                                  Instant startTime,
@@ -68,9 +68,9 @@ public final class ActivityFactory {
                                  Collection<MetricValue> metricValues,
                                  boolean deleted) {
 
-        var activitiesAccessibilityVerifier = new ActivitiesAccessibilityVerifier(activityDataSource, creator);
-        var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, creator);
-        var metricsAccessibilityVerifier = new MetricsAccessibilityVerifier(tagDataSource, creator);
+        var activitiesAccessibilityVerifier = new ActivitiesAccessibilityVerifier(activityDataSource, actor);
+        var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, actor);
+        var metricsAccessibilityVerifier = new MetricsAccessibilityVerifier(tagDataSource, actor);
         var validator = new ActivityValidator(tagsAccessibilityVerifier, metricsAccessibilityVerifier);
 
         return new Activity(

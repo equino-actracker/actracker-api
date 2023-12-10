@@ -44,15 +44,15 @@ public final class TagSetFactory {
         return tagSet;
     }
 
-    // TODO should be user in context, not creator!!!
-    public TagSet reconstitute(TagSetId id,
+    public TagSet reconstitute(User actor,
+                               TagSetId id,
                                User creator,
                                String name,
                                Collection<TagId> tags,
                                boolean deleted) {
 
-        var tagSetAccessibilityVerifier = new TagSetsAccessibilityVerifier(tagSetDataSource, creator);
-        var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, creator);
+        var tagSetAccessibilityVerifier = new TagSetsAccessibilityVerifier(tagSetDataSource, actor);
+        var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, actor);
         var validator = new TagSetValidator(tagsAccessibilityVerifier);
 
         return new TagSet(

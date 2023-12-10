@@ -117,6 +117,7 @@ public class DashboardApplicationService {
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
         Dashboard dashboard = dashboardFactory.reconstitute(
+                updater,
                 new DashboardId(dashboardDto.id()),
                 new User(dashboardDto.creatorId()),
                 dashboardDto.name(),
@@ -144,6 +145,7 @@ public class DashboardApplicationService {
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
         Dashboard dashboard = dashboardFactory.reconstitute(
+                remover,
                 new DashboardId(dashboardDto.id()),
                 new User(dashboardDto.creatorId()),
                 dashboardDto.name(),
@@ -164,6 +166,7 @@ public class DashboardApplicationService {
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
         Dashboard dashboard = dashboardFactory.reconstitute(
+                updater,
                 new DashboardId(dashboardDto.id()),
                 new User(dashboardDto.creatorId()),
                 dashboardDto.name(),
@@ -198,6 +201,7 @@ public class DashboardApplicationService {
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
         Dashboard dashboard = dashboardFactory.reconstitute(
+                updater,
                 new DashboardId(dashboardDto.id()),
                 new User(dashboardDto.creatorId()),
                 dashboardDto.name(),
@@ -225,6 +229,7 @@ public class DashboardApplicationService {
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
         Dashboard dashboard = dashboardFactory.reconstitute(
+                granter,
                 new DashboardId(dashboardDto.id()),
                 new User(dashboardDto.creatorId()),
                 dashboardDto.name(),
@@ -254,6 +259,7 @@ public class DashboardApplicationService {
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
         Dashboard dashboard = dashboardFactory.reconstitute(
+                granter,
                 new DashboardId(dashboardDto.id()),
                 new User(dashboardDto.creatorId()),
                 dashboardDto.name(),
@@ -290,6 +296,7 @@ public class DashboardApplicationService {
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
         Dashboard dashboard = dashboardFactory.reconstitute(
+                generator,
                 new DashboardId(dashboardDto.id()),
                 new User(dashboardDto.creatorId()),
                 dashboardDto.name(),

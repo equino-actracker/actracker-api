@@ -92,6 +92,7 @@ public class TagSetApplicationService {
         TagSetDto tagSetDto = tagSetRepository.findById(tagSetId)
                 .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));
         TagSet tagSet = tagSetFactory.reconstitute(
+                updater,
                 new TagSetId(tagSetDto.id()),
                 new User(tagSetDto.creatorId()),
                 tagSetDto.name(),
@@ -118,6 +119,7 @@ public class TagSetApplicationService {
         TagSetDto tagSetDto = tagSetRepository.findById(tagSetId)
                 .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));
         TagSet tagSet = tagSetFactory.reconstitute(
+                updater,
                 new TagSetId(tagSetDto.id()),
                 new User(tagSetDto.creatorId()),
                 tagSetDto.name(),
@@ -144,6 +146,7 @@ public class TagSetApplicationService {
         TagSetDto tagSetDto = tagSetRepository.findById(tagSetId)
                 .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));
         TagSet tagSet = tagSetFactory.reconstitute(
+                updater,
                 new TagSetId(tagSetDto.id()),
                 new User(tagSetDto.creatorId()),
                 tagSetDto.name(),
@@ -171,6 +174,7 @@ public class TagSetApplicationService {
         TagSetDto tagSetDto = tagSetRepository.findById(tagSetId)
                 .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));
         TagSet tagSet = tagSetFactory.reconstitute(
+                remover,
                 new TagSetId(tagSetDto.id()),
                 new User(tagSetDto.creatorId()),
                 tagSetDto.name(),

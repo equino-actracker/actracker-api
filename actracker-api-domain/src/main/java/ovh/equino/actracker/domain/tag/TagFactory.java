@@ -46,15 +46,15 @@ public final class TagFactory {
         return tag;
     }
 
-    // TODO should be user in context, not creator!!!
-    public Tag reconstitute(TagId id,
+    public Tag reconstitute(User actor,
+                            TagId id,
                             User creator,
                             String name,
                             Collection<Metric> metrics,
                             Collection<Share> shares,
                             boolean deleted) {
 
-        var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, creator);
+        var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, actor);
         var validator = new TagValidator();
 
         return new Tag(

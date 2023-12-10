@@ -141,6 +141,7 @@ class DashboardFactoryTest {
     @Test
     void shouldReconstituteDashboard() {
         // given
+        var actor = new User(randomUUID());
         var shares = List.of(new Share("grantee1"), new Share("grantee2"));
         var charts = List.of(
                 new Chart("c1", GroupBy.SELF, AnalysisMetric.TAG_DURATION, Set.of(randomUUID(), randomUUID())),
@@ -149,6 +150,7 @@ class DashboardFactoryTest {
 
         // when
         Dashboard dashboard = dashboardFactory.reconstitute(
+                actor,
                 DASHBOARD_ID,
                 CREATOR,
                 DASHBOARD_NAME,
