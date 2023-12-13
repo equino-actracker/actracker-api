@@ -8,7 +8,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import static java.util.Collections.emptyList;
@@ -46,6 +45,7 @@ class MetricsAccessibilityVerifierTest {
 
     @Mock
     private TagDataSource tagDataSource;
+
     private MetricsAccessibilityVerifier metricsAccessibilityVerifier;
 
     @BeforeEach

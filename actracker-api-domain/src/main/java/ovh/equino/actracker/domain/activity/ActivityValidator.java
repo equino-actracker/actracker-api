@@ -1,27 +1,13 @@
 package ovh.equino.actracker.domain.activity;
 
 import ovh.equino.actracker.domain.EntityValidator;
-import ovh.equino.actracker.domain.tag.MetricId;
-import ovh.equino.actracker.domain.tag.MetricsAccessibilityVerifier;
-import ovh.equino.actracker.domain.tag.TagId;
-import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 
 import java.time.Instant;
-import java.util.*;
-
-import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 
 class ActivityValidator extends EntityValidator<Activity> {
-
-    // TODO validate dependencies during create and edit before removing from here
-    private final TagsAccessibilityVerifier tagsAccessibilityVerifier;
-    // TODO validate dependencies during create and edit before removing from here
-    private final MetricsAccessibilityVerifier metricsAccessibilityVerifier;
-
-    ActivityValidator(TagsAccessibilityVerifier tagsAccessibilityVerifier, MetricsAccessibilityVerifier metricsAccessibilityVerifier) {
-        this.tagsAccessibilityVerifier = tagsAccessibilityVerifier;
-        this.metricsAccessibilityVerifier = metricsAccessibilityVerifier;
-    }
 
     @Override
     protected Class<Activity> entityType() {
@@ -33,8 +19,6 @@ class ActivityValidator extends EntityValidator<Activity> {
         List<String> validationErrors = new LinkedList<>();
 
         checkEndTimeBeforeStartTime(activity).ifPresent(validationErrors::add);
-        checkContainsNonExistingTags(activity).ifPresent(validationErrors::add);
-        checkContainsValuesOfNonExistingMetrics(activity).ifPresent(validationErrors::add);
 
         return validationErrors;
     }
@@ -54,31 +38,5 @@ class ActivityValidator extends EntityValidator<Activity> {
             return false;
         }
         return activityEndTime.isBefore(activityStartTime);
-    }
-
-    private Optional<String> checkContainsNonExistingTags(Activity activity) {
-        Set<TagId> notExistingTags = tagsAccessibilityVerifier.nonAccessibleOf(activity.tags());
-        if (isEmpty(notExistingTags)) {
-            return Optional.empty();
-        }
-        List<UUID> notExistingTagIds = notExistingTags.stream()
-                .map(TagId::id)
-                .toList();
-        return Optional.of("Selected tags do not exist: %s".formatted(notExistingTagIds));
-    }
-
-    private Optional<String> checkContainsValuesOfNonExistingMetrics(Activity activity) {
-
-        Set<MetricId> notExistingMetrics = metricsAccessibilityVerifier.nonAccessibleOf(
-                activity.selectedMetrics(),
-                activity.tags()
-        );
-        if (isEmpty(notExistingMetrics)) {
-            return Optional.empty();
-        }
-        List<UUID> notExistingMetricIds = notExistingMetrics.stream()
-                .map(MetricId::id)
-                .toList();
-        return Optional.of("Selected metrics do not exist in selected tags: %s".formatted(notExistingMetricIds));
     }
 }

@@ -1,16 +1,14 @@
 package ovh.equino.actracker.domain.activity;
 
-import ovh.equino.actracker.domain.tag.MetricsAccessibilityVerifier;
-import ovh.equino.actracker.domain.tag.TagDataSource;
-import ovh.equino.actracker.domain.tag.TagId;
-import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
+import ovh.equino.actracker.domain.exception.EntityInvalidException;
+import ovh.equino.actracker.domain.tag.*;
 import ovh.equino.actracker.domain.user.User;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import static java.lang.Boolean.TRUE;
-import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNullElse;
 
 public final class ActivityFactory {
@@ -36,7 +34,12 @@ public final class ActivityFactory {
         var activitiesAccessibilityVerifier = new ActivitiesAccessibilityVerifier(activityDataSource, creator);
         var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, creator);
         var metricsAccessibilityVerifier = new MetricsAccessibilityVerifier(tagDataSource, creator);
-        var validator = new ActivityValidator(tagsAccessibilityVerifier, metricsAccessibilityVerifier);
+        var validator = new ActivityValidator();
+
+        var nonNullTags = requireNonNullElse(tags, new ArrayList<TagId>());
+        var nonNullMetricValues = requireNonNullElse(metricValues, new ArrayList<MetricValue>());
+        validateTagsAccessible(nonNullTags, tagsAccessibilityVerifier);
+        validateMetricsAccessible(nonNullMetricValues, nonNullTags, metricsAccessibilityVerifier);
 
         var activity = new Activity(
                 new ActivityId(),
@@ -45,8 +48,8 @@ public final class ActivityFactory {
                 startTime,
                 endTime,
                 comment,
-                requireNonNullElse(tags, emptyList()),
-                requireNonNullElse(metricValues, emptyList()),
+                nonNullTags,
+                nonNullMetricValues,
                 !DELETED,
                 activitiesAccessibilityVerifier,
                 tagsAccessibilityVerifier,
@@ -71,7 +74,7 @@ public final class ActivityFactory {
         var activitiesAccessibilityVerifier = new ActivitiesAccessibilityVerifier(activityDataSource, actor);
         var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, actor);
         var metricsAccessibilityVerifier = new MetricsAccessibilityVerifier(tagDataSource, actor);
-        var validator = new ActivityValidator(tagsAccessibilityVerifier, metricsAccessibilityVerifier);
+        var validator = new ActivityValidator();
 
         return new Activity(
                 id,
@@ -88,5 +91,33 @@ public final class ActivityFactory {
                 metricsAccessibilityVerifier,
                 validator
         );
+    }
+
+    private void validateTagsAccessible(Collection<TagId> tags, TagsAccessibilityVerifier tagsAccessibilityVerifier) {
+        tagsAccessibilityVerifier.nonAccessibleOf(tags)
+                .stream()
+                .findFirst()
+                .ifPresent((inaccessibleTag) -> {
+                    String errorMessage = "Tag with ID %s not found".formatted(inaccessibleTag.id());
+                    throw new EntityInvalidException(Activity.class, errorMessage);
+                });
+    }
+
+    private void validateMetricsAccessible(Collection<MetricValue> metricValues,
+                                           Collection<TagId> tags,
+                                           MetricsAccessibilityVerifier metricsAccessibilityVerifier) {
+
+        var setMetrics = metricValues
+                .stream()
+                .map(MetricValue::metricId)
+                .map(MetricId::new)
+                .toList();
+        metricsAccessibilityVerifier.nonAccessibleOf(setMetrics, tags)
+                .stream()
+                .findFirst()
+                .ifPresent((inaccessibleMetric) -> {
+                    String errorMessage = "Metric with ID %s not found".formatted(inaccessibleMetric.id());
+                    throw new EntityInvalidException(Activity.class, errorMessage);
+                });
     }
 }
