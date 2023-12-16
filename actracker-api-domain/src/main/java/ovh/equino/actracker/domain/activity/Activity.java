@@ -1,6 +1,7 @@
 package ovh.equino.actracker.domain.activity;
 
 import ovh.equino.actracker.domain.Entity;
+import ovh.equino.actracker.domain.exception.EntityEditForbidden;
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.tag.MetricId;
@@ -14,7 +15,8 @@ import java.util.*;
 
 import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableSet;
-import static java.util.Objects.*;
+import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 
 public final class Activity implements Entity {
@@ -65,71 +67,77 @@ public final class Activity implements Entity {
         this.validator = validator;
     }
 
-    private static List<TagId> toTagIds(ActivityDto activity) {
-        return requireNonNullElse(activity.tags(), new HashSet<UUID>()).stream()
-                .map(TagId::new)
-                .toList();
-    }
-
     public void rename(String newTitle, User editor) {
         if (!creator.equals(editor) && !activitiesAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
-        new ActivityEditOperation(editor, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier,
-                () -> this.title = newTitle
-        ).execute();
+        if (!this.isEditableFor(editor)) {
+            throw new EntityEditForbidden(Activity.class);
+        }
+        this.title = newTitle;
+        this.validate();
     }
 
     public void start(Instant startTime, User updater) {
         if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
-        new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier,
-                () -> this.startTime = startTime
-        ).execute();
+        if (!this.isEditableFor(updater)) {
+            throw new EntityEditForbidden(Activity.class);
+        }
+        this.startTime = startTime;
+        this.validate();
     }
 
     public void finish(Instant endTime, User updater) {
         if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
-        new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier,
-                () -> this.endTime = endTime
-        ).execute();
+        if (!this.isEditableFor(updater)) {
+            throw new EntityEditForbidden(Activity.class);
+        }
+        this.endTime = endTime;
+        this.validate();
     }
 
     public void updateComment(String comment, User updater) {
         if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
-        new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier,
-                () -> this.comment = comment
-        ).execute();
+        if (!this.isEditableFor(updater)) {
+            throw new EntityEditForbidden(Activity.class);
+        }
+        this.comment = comment;
+        this.validate();
     }
 
     public void assignTag(TagId tagId, User updater) {
         if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
+        if (!this.isEditableFor(updater)) {
+            throw new EntityEditForbidden(Activity.class);
+        }
         if (!tagsAccessibilityVerifier.isAccessible(tagId)) {
             String errorMessage = "Tag with ID %s does not exist".formatted(tagId.id());
             throw new EntityInvalidException(Activity.class, errorMessage);
         }
-        new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier,
-                () -> this.tags.add(tagId)
-        ).execute();
+        this.tags.add(tagId);
+        this.validate();
     }
 
     public void removeTag(TagId tagId, User updater) {
         if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
+        if (!this.isEditableFor(updater)) {
+            throw new EntityEditForbidden(Activity.class);
+        }
         if (!tagsAccessibilityVerifier.isAccessible(tagId)) {
             return;
         }
-        new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier,
-                () -> this.tags.remove(tagId)
-        ).execute();
+        this.tags.remove(tagId);
+        this.validate();
     }
 
     public void setMetricValue(MetricValue newMetricValue, User updater) {
@@ -137,44 +145,49 @@ public final class Activity implements Entity {
         if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
+        if (!this.isEditableFor(updater)) {
+            throw new EntityEditForbidden(Activity.class);
+        }
         if (!metricsAccessibilityVerifier.isAccessible(metricId, tags)) {
             String errorMessage = "Metric with ID %s does not exist in selected tags".formatted(metricId.id());
             throw new EntityInvalidException(Activity.class, errorMessage);
         }
-        new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier, () -> {
-
-            List<MetricValue> otherValues = metricValues.stream()
-                    .filter(value -> !value.metricId().equals(newMetricValue.metricId()))
-                    .toList();
-            metricValues.clear();
-            metricValues.addAll(otherValues);
-            metricValues.add(newMetricValue);
-
-        }).execute();
+        List<MetricValue> otherValues = metricValues.stream()
+                .filter(value -> !value.metricId().equals(newMetricValue.metricId()))
+                .toList();
+        metricValues.clear();
+        metricValues.addAll(otherValues);
+        metricValues.add(newMetricValue);
+        this.validate();
     }
 
     public void unsetMetricValue(MetricId metricId, User updater) {
         if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
-        new ActivityEditOperation(updater, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier, () -> {
-
-            List<MetricValue> remainingMetricValues = metricValues.stream()
-                    .filter(value -> !value.metricId().equals(metricId.id()))
-                    .toList();
-            metricValues.clear();
-            metricValues.addAll(remainingMetricValues);
-
-        }).execute();
+        if (!this.isEditableFor(updater)) {
+            throw new EntityEditForbidden(Activity.class);
+        }
+        if (!metricsAccessibilityVerifier.isAccessible(metricId, tags)) {
+            return;
+        }
+        List<MetricValue> remainingMetricValues = metricValues.stream()
+                .filter(value -> !value.metricId().equals(metricId.id()))
+                .toList();
+        metricValues.clear();
+        metricValues.addAll(remainingMetricValues);
+        this.validate();
     }
 
     public void delete(User remover) {
         if (!creator.equals(remover) && !activitiesAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
-        new ActivityEditOperation(remover, this, tagsAccessibilityVerifier, metricsAccessibilityVerifier,
-                () -> this.deleted = true
-        ).execute();
+        if (!this.isEditableFor(remover)) {
+            throw new EntityEditForbidden(Activity.class);
+        }
+        this.deleted = true;
+        this.validate();
     }
 
     public ActivityDto forStorage() {
@@ -239,13 +252,6 @@ public final class Activity implements Entity {
 
     String comment() {
         return comment;
-    }
-
-    Set<MetricId> selectedMetrics() {
-        return metricValues.stream()
-                .map(MetricValue::metricId)
-                .map(MetricId::new)
-                .collect(toUnmodifiableSet());
     }
 
     String title() {
