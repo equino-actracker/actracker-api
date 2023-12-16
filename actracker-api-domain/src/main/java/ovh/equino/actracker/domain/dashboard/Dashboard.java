@@ -1,6 +1,7 @@
 package ovh.equino.actracker.domain.dashboard;
 
 import ovh.equino.actracker.domain.Entity;
+import ovh.equino.actracker.domain.exception.EntityEditForbidden;
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.share.Share;
@@ -56,14 +57,19 @@ public final class Dashboard implements Entity {
         if (!creator.equals(editor) && !dashboardsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Dashboard.class, id.id());
         }
-        new DashboardEditOperation(editor, this, () ->
-                this.name = newName
-        ).execute();
+        if (!this.isEditableFor(editor)) {
+            throw new EntityEditForbidden(Dashboard.class);
+        }
+        this.name = newName;
+        this.validate();
     }
 
     public void addChart(Chart newChart, User editor) {
         if (!creator.equals(editor) && !dashboardsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Dashboard.class, id.id());
+        }
+        if (!this.isEditableFor(editor)) {
+            throw new EntityEditForbidden(Dashboard.class);
         }
         Set<TagId> includedTags = newChart.includedTags()
                 .stream()
@@ -76,76 +82,76 @@ public final class Dashboard implements Entity {
                     String errorMessage = "Tag with ID %s not found".formatted(inaccessibleTag.id());
                     throw new EntityInvalidException(Dashboard.class, errorMessage);
                 });
-        new DashboardEditOperation(editor, this, () ->
-                charts.add(newChart)
-        ).execute();
+        charts.add(newChart);
+        this.validate();
     }
 
     public void deleteChart(ChartId chartId, User editor) {
         if (!creator.equals(editor) && !dashboardsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Dashboard.class, id.id());
         }
-        new DashboardEditOperation(editor, this, () -> {
+        if (!this.isEditableFor(editor)) {
+            throw new EntityEditForbidden(Dashboard.class);
+        }
+        List<Chart> matchingDeletedCharts = charts.stream()
+                .filter(chart -> chart.id().equals(chartId))
+                .map(Chart::deleted)
+                .toList();
+        List<Chart> remainingCharts = charts.stream()
+                .filter(chart -> !chart.id().equals(chartId))
+                .toList();
 
-            List<Chart> deletedCharts = charts.stream()
-                    .filter(chart -> chart.id().equals(chartId))
-                    .map(Chart::deleted)
-                    .toList();
-            List<Chart> remainingCharts = charts.stream()
-                    .filter(chart -> !chart.id().equals(chartId))
-                    .toList();
-            charts.clear();
-            charts.addAll(deletedCharts);
-            charts.addAll(remainingCharts);
-
-        }).execute();
+        charts.clear();
+        charts.addAll(matchingDeletedCharts);
+        charts.addAll(remainingCharts);
+        this.validate();
     }
 
     public void delete(User remover) {
         if (!creator.equals(remover) && !dashboardsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Dashboard.class, id.id());
         }
-        new DashboardEditOperation(remover, this, () -> {
-
-            List<Chart> allChartsDeleted = this.charts.stream()
-                    .map(Chart::deleted)
-                    .toList();
-            this.charts.clear();
-            this.charts.addAll(allChartsDeleted);
-            this.deleted = true;
-
-        }).execute();
+        if (!this.isEditableFor(remover)) {
+            throw new EntityEditForbidden(Dashboard.class);
+        }
+        List<Chart> allChartsDeleted = this.charts.stream()
+                .map(Chart::deleted)
+                .toList();
+        this.charts.clear();
+        this.charts.addAll(allChartsDeleted);
+        this.deleted = true;
+        this.validate();
     }
 
     public void share(Share share, User granter) {
         if (!creator.equals(granter) && !dashboardsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Dashboard.class, id.id());
         }
-        new DashboardEditOperation(granter, this, () -> {
-
-            List<String> existingGranteeNames = this.shares.stream()
-                    .map(Share::granteeName)
-                    .toList();
-            if (!existingGranteeNames.contains(share.granteeName())) {
-                this.shares.add(share);
-            }
-
-        }).execute();
+        if (!this.isEditableFor(granter)) {
+            throw new EntityEditForbidden(Dashboard.class);
+        }
+        List<String> existingGranteeNames = this.shares.stream()
+                .map(Share::granteeName)
+                .toList();
+        if (!existingGranteeNames.contains(share.granteeName())) {
+            this.shares.add(share);
+        }
+        this.validate();
     }
 
     public void unshare(String granteeName, User granter) {
         if (!creator.equals(granter) && !dashboardsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Dashboard.class, id.id());
         }
-        new DashboardEditOperation(granter, this, () -> {
-
-            List<Share> sharesWithExclusion = this.shares.stream()
-                    .filter(share -> !share.granteeName().equals(granteeName))
-                    .toList();
-            this.shares.clear();
-            this.shares.addAll(sharesWithExclusion);
-
-        }).execute();
+        if (!this.isEditableFor(granter)) {
+            throw new EntityEditForbidden(Dashboard.class);
+        }
+        List<Share> sharesWithExclusion = this.shares.stream()
+                .filter(share -> !share.granteeName().equals(granteeName))
+                .toList();
+        this.shares.clear();
+        this.shares.addAll(sharesWithExclusion);
+        this.validate();
     }
 
     public DashboardDto forStorage() {
