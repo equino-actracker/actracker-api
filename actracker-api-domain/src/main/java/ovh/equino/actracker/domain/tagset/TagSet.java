@@ -53,7 +53,7 @@ public final class TagSet implements Entity {
         if (!creator.equals(updater) && !tagSetsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(TagSet.class, id.id());
         }
-        if(!this.isEditableFor(updater)) {
+        if (!this.isEditableFor(updater)) {
             throw new EntityEditForbidden(TagSet.class);
         }
         name = newName;
@@ -64,7 +64,7 @@ public final class TagSet implements Entity {
         if (!creator.equals(updater) && !tagSetsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(TagSet.class, id.id());
         }
-        if(!this.isEditableFor(updater)) {
+        if (!this.isEditableFor(updater)) {
             throw new EntityEditForbidden(TagSet.class);
         }
         if (!tagsAccessibilityVerifier.isAccessible(newTag)) {
@@ -79,7 +79,7 @@ public final class TagSet implements Entity {
         if (!creator.equals(updater) && !tagSetsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(TagSet.class, id.id());
         }
-        if(!this.isEditableFor(updater)) {
+        if (!this.isEditableFor(updater)) {
             throw new EntityEditForbidden(TagSet.class);
         }
         if (!tagsAccessibilityVerifier.isAccessible(tag)) {
@@ -93,7 +93,7 @@ public final class TagSet implements Entity {
         if (!creator.equals(remover) && !tagSetsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(TagSet.class, id.id());
         }
-        if(!this.isEditableFor(remover)) {
+        if (!this.isEditableFor(remover)) {
             throw new EntityEditForbidden(TagSet.class);
         }
         this.deleted = true;

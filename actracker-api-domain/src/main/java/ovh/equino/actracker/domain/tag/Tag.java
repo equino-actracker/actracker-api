@@ -1,6 +1,7 @@
 package ovh.equino.actracker.domain.tag;
 
 import ovh.equino.actracker.domain.Entity;
+import ovh.equino.actracker.domain.exception.EntityEditForbidden;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.user.User;
@@ -49,85 +50,95 @@ public final class Tag implements Entity {
         if (!creator.equals(updater) && !tagsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Tag.class, this.id.id());
         }
-        new TagEditOperation(updater, this, () ->
-                this.name = newName
-        ).execute();
+        if (!this.isEditableFor(updater)) {
+            throw new EntityEditForbidden(Tag.class);
+        }
+        this.name = newName;
+        this.validate();
     }
 
     public void addMetric(String name, MetricType type, User updater) {
         if (!creator.equals(updater) && !tagsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Tag.class, this.id.id());
         }
+        if (!this.isEditableFor(updater)) {
+            throw new EntityEditForbidden(Tag.class);
+        }
         // TODO replace with metric factory?
         Metric newMetric = new Metric(new MetricId(randomUUID()), updater, name, type, false);
-        new TagEditOperation(updater, this, () ->
-                this.metrics.add(newMetric)
-        ).execute();
+        this.metrics.add(newMetric);
+        this.validate();
     }
 
     public void deleteMetric(MetricId metricId, User updater) {
         if (!creator.equals(updater) && !tagsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Tag.class, this.id.id());
         }
-        new TagEditOperation(updater, this, () ->
-                this.metrics.stream()
-                        .filter(metric -> metric.id().equals(metricId))
-                        .findFirst()
-                        .ifPresent(Metric::delete)
-        ).execute();
+        if (!this.isEditableFor(updater)) {
+            throw new EntityEditForbidden(Tag.class);
+        }
+        this.metrics.stream()
+                .filter(metric -> metric.id().equals(metricId))
+                .findFirst()
+                .ifPresent(Metric::delete);
+        this.validate();
     }
 
     public void renameMetric(String newName, MetricId metricId, User updater) {
         if (!creator.equals(updater) && !tagsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Tag.class, this.id.id());
         }
-        new TagEditOperation(updater, this, () ->
-                this.metrics.stream()
-                        .filter(metric -> metric.id().equals(metricId))
-                        .findFirst()
-                        .ifPresent(metric -> metric.rename(newName))
-        ).execute();
+        if (!this.isEditableFor(updater)) {
+            throw new EntityEditForbidden(Tag.class);
+        }
+        this.metrics.stream()
+                .filter(metric -> metric.id().equals(metricId))
+                .findFirst()
+                .ifPresent(metric -> metric.rename(newName));
+        this.validate();
     }
 
     public void delete(User remover) {
         if (!creator.equals(remover) && !tagsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Tag.class, this.id.id());
         }
-        new TagEditOperation(remover, this, () -> {
-            this.metrics.forEach(Metric::delete);
-            this.deleted = true;
-        }).execute();
+        if (!this.isEditableFor(remover)) {
+            throw new EntityEditForbidden(Tag.class);
+        }
+        this.metrics.forEach(Metric::delete);
+        this.deleted = true;
+        this.validate();
     }
 
     public void share(Share newShare, User granter) {
         if (!creator.equals(granter) && !tagsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Tag.class, this.id.id());
         }
-        new TagEditOperation(granter, this, () -> {
-
-            List<String> existingGranteeNames = this.shares.stream()
-                    .map(Share::granteeName)
-                    .toList();
-            if (!existingGranteeNames.contains(newShare.granteeName())) {
-                this.shares.add(newShare);
-            }
-
-        }).execute();
+        if (!this.isEditableFor(granter)) {
+            throw new EntityEditForbidden(Tag.class);
+        }
+        List<String> existingGranteeNames = this.shares.stream()
+                .map(Share::granteeName)
+                .toList();
+        if (!existingGranteeNames.contains(newShare.granteeName())) {
+            this.shares.add(newShare);
+        }
+        this.validate();
     }
 
     public void unshare(String granteeName, User granter) {
         if (!creator.equals(granter) && !tagsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(Tag.class, this.id.id());
         }
-        new TagEditOperation(granter, this, () -> {
-
-            List<Share> sharesWithExclusion = this.shares.stream()
-                    .filter(share -> !share.granteeName().equals(granteeName))
-                    .toList();
-            this.shares.clear();
-            this.shares.addAll(sharesWithExclusion);
-
-        }).execute();
+        if (!this.isEditableFor(granter)) {
+            throw new EntityEditForbidden(Tag.class);
+        }
+        List<Share> sharesWithExclusion = this.shares.stream()
+                .filter(share -> !share.granteeName().equals(granteeName))
+                .toList();
+        this.shares.clear();
+        this.shares.addAll(sharesWithExclusion);
+        this.validate();
     }
 
     public TagDto forStorage() {
