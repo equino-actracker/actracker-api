@@ -1,12 +1,15 @@
 plugins {
-    id 'org.eclipse.jkube.kubernetes' version '1.10.1'
-    id 'org.springframework.boot' version '3.0.1'
+    id 'org.eclipse.jkube.kubernetes' version '1.15.0'
+    id 'org.springframework.boot' version '3.1.0'
     id 'ovh.equino.version' version '0.1.1'
 }
 
 allprojects {
     apply plugin: 'java'
     apply plugin: 'maven-publish'
+
+    sourceCompatibility = 17
+    targetCompatibility = 17
 
     repositories {
         mavenCentral()
