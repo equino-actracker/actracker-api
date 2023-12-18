@@ -1,6 +1,7 @@
 package ovh.equino.actracker.domain.tagset;
 
 import ovh.equino.actracker.domain.Entity;
+import ovh.equino.actracker.domain.exception.EntityEditForbidden;
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.tag.TagId;
@@ -52,43 +53,51 @@ public final class TagSet implements Entity {
         if (!creator.equals(updater) && !tagSetsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(TagSet.class, id.id());
         }
-        new TagSetEditOperation(updater, this, tagsAccessibilityVerifier,
-                () -> name = newName
-        ).execute();
+        if (!this.isEditableFor(updater)) {
+            throw new EntityEditForbidden(TagSet.class);
+        }
+        name = newName;
+        this.validate();
     }
 
     public void assignTag(TagId newTag, User updater) {
         if (!creator.equals(updater) && !tagSetsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(TagSet.class, id.id());
         }
+        if (!this.isEditableFor(updater)) {
+            throw new EntityEditForbidden(TagSet.class);
+        }
         if (!tagsAccessibilityVerifier.isAccessible(newTag)) {
             String errorMessage = "Tag with ID %s does not exist".formatted(newTag.id());
             throw new EntityInvalidException(TagSet.class, errorMessage);
         }
-        new TagSetEditOperation(updater, this, tagsAccessibilityVerifier,
-                () -> tags.add(newTag)
-        ).execute();
+        tags.add(newTag);
+        this.validate();
     }
 
     public void removeTag(TagId tag, User updater) {
         if (!creator.equals(updater) && !tagSetsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(TagSet.class, id.id());
         }
+        if (!this.isEditableFor(updater)) {
+            throw new EntityEditForbidden(TagSet.class);
+        }
         if (!tagsAccessibilityVerifier.isAccessible(tag)) {
             return;
         }
-        new TagSetEditOperation(updater, this, tagsAccessibilityVerifier,
-                () -> tags.remove(tag)
-        ).execute();
+        tags.remove(tag);
+        this.validate();
     }
 
     public void delete(User remover) {
         if (!creator.equals(remover) && !tagSetsAccessibilityVerifier.isAccessible(this.id)) {
             throw new EntityNotFoundException(TagSet.class, id.id());
         }
-        new TagSetEditOperation(remover, this, tagsAccessibilityVerifier,
-                () -> deleted = true
-        ).execute();
+        if (!this.isEditableFor(remover)) {
+            throw new EntityEditForbidden(TagSet.class);
+        }
+        this.deleted = true;
+        this.validate();
     }
 
     public TagSetDto forStorage() {

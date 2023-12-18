@@ -733,8 +733,6 @@ class ActivityTest {
         void shouldAssignAnotherTag() {
             // given
             TagId existingTag = new TagId();
-            when(tagsAccessibilityVerifier.accessibleOf(any()))
-                    .thenReturn(singleton(existingTag));
             Activity activity = new Activity(
                     new ActivityId(),
                     CREATOR,
@@ -779,7 +777,6 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
-            when(tagsAccessibilityVerifier.accessibleOf(any())).thenReturn(singleton(existingTag)); // TODO remove
             when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // when
@@ -886,7 +883,6 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
             when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // then
@@ -919,7 +915,6 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
-            when(tagsAccessibilityVerifier.accessibleOf(any())).thenReturn(Set.of(existingTag, tagToRemove)); // TODO remove
             when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // when
@@ -975,7 +970,6 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
-            when(tagsAccessibilityVerifier.accessibleOf(any())).thenReturn(singleton(existingTag)); // TODO remove
             when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // when
@@ -1087,7 +1081,6 @@ class ActivityTest {
             );
             User unauthorizedUser = new User(randomUUID());
             when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(true);
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
 
             // then
             assertThatThrownBy(() -> activity.removeTag(existingTag, unauthorizedUser))
@@ -1232,8 +1225,6 @@ class ActivityTest {
             );
             MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
             when(metricsAccessibilityVerifier.isAccessible(any(), any())).thenReturn(true);
-            when(metricsAccessibilityVerifier.accessibleOf(any(), any())).thenReturn(singleton(EXISTING_METRIC_ID)); // TODO delete
-            when(metricsAccessibilityVerifier.nonAccessibleOf(any(), any())).thenReturn(singleton(NON_EXISTING_METRIC_ID)); // TODO delete
 
             // when
             activity.setMetricValue(newMetricValue, CREATOR);
@@ -1262,8 +1253,6 @@ class ActivityTest {
             );
             MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
             when(metricsAccessibilityVerifier.isAccessible(any(), any())).thenReturn(true);
-            when(metricsAccessibilityVerifier.accessibleOf(any(), any())).thenReturn(singleton(EXISTING_METRIC_ID)); // TODO delete
-            when(metricsAccessibilityVerifier.nonAccessibleOf(any(), any())).thenReturn(singleton(NON_EXISTING_METRIC_ID)); // TODO delete
 
             // when
             activity.setMetricValue(newMetricValue, CREATOR);
@@ -1371,7 +1360,6 @@ class ActivityTest {
                     validator
             );
             when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(true);
-            when(metricsAccessibilityVerifier.isAccessible(any(), any())).thenReturn(true);
             User unauthorizedUser = new User(randomUUID());
             MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
 
@@ -1408,10 +1396,7 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
-            when(metricsAccessibilityVerifier.accessibleOf(any(), any()))
-                    .thenReturn(singleton(EXISTING_METRIC_ID));
-            when(metricsAccessibilityVerifier.nonAccessibleOf(any(), any()))
-                    .thenReturn(singleton(NON_EXISTING_METRIC_ID));
+            when(metricsAccessibilityVerifier.isAccessible(any(), any())).thenReturn(true);
 
             // when
             activity.unsetMetricValue(EXISTING_METRIC_ID, CREATOR);
@@ -1438,10 +1423,6 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
-            when(metricsAccessibilityVerifier.accessibleOf(any(), any()))
-                    .thenReturn(singleton(EXISTING_METRIC_ID));
-            when(metricsAccessibilityVerifier.nonAccessibleOf(any(), any()))
-                    .thenReturn(singleton(NON_EXISTING_METRIC_ID));
 
             // when
             activity.unsetMetricValue(EXISTING_METRIC_ID, CREATOR);
@@ -1468,10 +1449,6 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
-            when(metricsAccessibilityVerifier.accessibleOf(any(), any()))
-                    .thenReturn(singleton(EXISTING_METRIC_ID));
-            when(metricsAccessibilityVerifier.nonAccessibleOf(any(), any()))
-                    .thenReturn(singleton(NON_EXISTING_METRIC_ID));
 
             // when
             activity.unsetMetricValue(NON_EXISTING_METRIC_ID, CREATOR);
@@ -1498,10 +1475,6 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
-            when(metricsAccessibilityVerifier.accessibleOf(any(), any()))
-                    .thenReturn(singleton(EXISTING_METRIC_ID));
-            when(metricsAccessibilityVerifier.nonAccessibleOf(any(), any()))
-                    .thenReturn(singleton(NON_EXISTING_METRIC_ID));
 
             // when
             activity.unsetMetricValue(NON_EXISTING_METRIC_ID, CREATOR);
@@ -1528,6 +1501,7 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
+            when(metricsAccessibilityVerifier.isAccessible(any(), any())).thenReturn(true);
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
