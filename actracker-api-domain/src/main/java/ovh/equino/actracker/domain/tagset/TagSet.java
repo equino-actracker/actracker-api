@@ -22,7 +22,7 @@ public final class TagSet implements Entity {
     private final TagSetId id;
     private final User creator;
     private String name;
-    final Set<TagId> tags;
+    private final Set<TagId> tags;
     private boolean deleted;
 
     private final TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier;
@@ -100,6 +100,7 @@ public final class TagSet implements Entity {
         this.validate();
     }
 
+    // TODO remove
     public TagSetDto forStorage() {
         Set<UUID> tagIds = tags.stream()
                 .map(TagId::id)
@@ -107,6 +108,7 @@ public final class TagSet implements Entity {
         return new TagSetDto(id.id(), creator.id(), name, tagIds, deleted);
     }
 
+    // TODO change
     public TagSetChangedNotification forChangeNotification() {
         Set<UUID> tagIds = tags.stream()
                 .map(TagId::id)
