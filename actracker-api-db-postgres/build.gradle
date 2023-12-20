@@ -1,16 +1,23 @@
+buildscript {
+    dependencies {
+        classpath("org.flywaydb:flyway-database-postgresql:10.3.0")
+    }
+}
+
 plugins {
-    id 'org.flywaydb.flyway' version '9.11.0'
-    id 'com.palantir.docker-compose' version '0.34.0'
+    id 'org.flywaydb.flyway' version '10.3.0'
+    id 'com.palantir.docker-compose' version '0.35.0'
 }
 
 dependencies {
-    runtimeOnly 'org.postgresql:postgresql:42.5.1'
+    runtimeOnly 'org.postgresql:postgresql:42.7.1'
     implementation project(':actracker-api-domain')
-    implementation 'org.flywaydb:flyway-core:9.11.0'
+    implementation 'org.flywaydb:flyway-core:10.3.0'
+    runtimeOnly "org.flywaydb:flyway-database-postgresql:10.3.0"
 
     integrationTestImplementation project(':actracker-api-repository-jpa').sourceSets.integrationTest.compileClasspath
     integrationTestImplementation project(':actracker-api-repository-jpa').sourceSets.integrationTest.runtimeClasspath
-    integrationTestImplementation "org.testcontainers:postgresql:1.19.1"
+    integrationTestImplementation "org.testcontainers:postgresql:1.19.3"
 }
 
 dockerCompose {
