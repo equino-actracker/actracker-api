@@ -9,6 +9,5 @@ public interface TagRepository {
 
     void update(UUID tagId, TagDto tag);
 
-    // TODO delete when data sources proven
     Optional<TagDto> findById(UUID tagId);
 }
