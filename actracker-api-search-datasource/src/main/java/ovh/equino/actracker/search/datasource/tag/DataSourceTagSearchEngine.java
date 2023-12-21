@@ -28,8 +28,7 @@ class DataSourceTagSearchEngine implements TagSearchEngine {
                 searchCriteria.timeRangeStart(),
                 searchCriteria.timeRangeEnd(),
                 searchCriteria.excludeFilter(),
-                searchCriteria.tags(),
-                searchCriteria.sortCriteria()
+                searchCriteria.tags()
         );
 
         List<TagDto> foundTags = tagDataSource.find(forNextPageIdSearchCriteria);

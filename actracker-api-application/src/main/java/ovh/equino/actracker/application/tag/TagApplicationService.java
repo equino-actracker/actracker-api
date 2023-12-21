@@ -101,7 +101,6 @@ public class TagApplicationService {
                 null,
                 null,
                 searchTagsQuery.excludeFilter(),
-                null,
                 null
         );
         EntitySearchResult<TagDto> searchResult = tagSearchEngine.findTags(searchCriteria);

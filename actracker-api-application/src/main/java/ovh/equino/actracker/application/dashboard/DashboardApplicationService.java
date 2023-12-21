@@ -97,7 +97,6 @@ public class DashboardApplicationService {
                 null,
                 null,
                 searchDashboardsQuery.excludeFilter(),
-                null,
                 null
         );
 

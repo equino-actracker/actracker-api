@@ -95,7 +95,6 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
                 null,
                 null,
                 null,
-                null,
                 null
         );
 
@@ -140,7 +139,6 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
                 null,
                 null,
                 null,
-                null,
                 null
         );
         inTransaction(() -> {
@@ -166,7 +164,6 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
                 null,
                 null,
                 excludedDashboards,
-                null,
                 null
         );
         inTransaction(() -> {

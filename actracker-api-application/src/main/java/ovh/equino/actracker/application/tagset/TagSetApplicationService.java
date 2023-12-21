@@ -73,7 +73,6 @@ public class TagSetApplicationService {
                 null,
                 null,
                 searchTagSetsQuery.excludeFilter(),
-                null,
                 null
         );
         EntitySearchResult<TagSetDto> searchResult = tagSetSearchEngine.findTagSets(searchCriteria);

@@ -85,7 +85,6 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
                 null,
                 null,
                 null,
-                null,
                 null
         );
 
@@ -116,7 +115,6 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
                 null,
                 null,
                 null,
-                null,
                 null
         );
 
@@ -141,7 +139,6 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
                 null,
                 null,
                 excludedTagSets,
-                null,
                 null
         );
         inTransaction(() -> {
