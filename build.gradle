@@ -1,12 +1,15 @@
 plugins {
-    id 'org.eclipse.jkube.kubernetes' version '1.10.1'
-    id 'org.springframework.boot' version '3.0.1'
+    id 'org.eclipse.jkube.kubernetes' version '1.15.0'
+    id 'org.springframework.boot' version '3.1.0'
     id 'ovh.equino.version' version '0.1.1'
 }
 
 allprojects {
     apply plugin: 'java'
     apply plugin: 'maven-publish'
+
+    sourceCompatibility = 17
+    targetCompatibility = 17
 
     repositories {
         mavenCentral()
@@ -52,8 +55,8 @@ subprojects {
     }
 
     dependencies {
-        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.3'
-        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.3'
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.1'
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.1'
     }
 
     test {
