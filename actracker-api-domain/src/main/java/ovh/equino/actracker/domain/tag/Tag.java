@@ -19,8 +19,8 @@ public final class Tag implements Entity {
     private final TagId id;
     private final User creator;
     private String name;
-    final List<Metric> metrics;
-    final List<Share> shares;
+    private final List<Metric> metrics;
+    private final List<Share> shares;
     private boolean deleted;
 
     private final TagsAccessibilityVerifier tagsAccessibilityVerifier;

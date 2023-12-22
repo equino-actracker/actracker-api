@@ -27,8 +27,7 @@ class DataSourceActivitySearchEngine implements ActivitySearchEngine {
                 searchCriteria.timeRangeStart(),
                 searchCriteria.timeRangeEnd(),
                 searchCriteria.excludeFilter(),
-                searchCriteria.tags(),
-                searchCriteria.sortCriteria()
+                searchCriteria.tags()
         );
 
         List<ActivityDto> foundActivities = activityDataSource.find(forNextPageIdSearchCriteria);

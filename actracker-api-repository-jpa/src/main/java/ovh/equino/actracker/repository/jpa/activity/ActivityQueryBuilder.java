@@ -5,8 +5,6 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Subquery;
-import ovh.equino.actracker.domain.EntitySortCriteria;
-import ovh.equino.actracker.domain.activity.ActivitySortField;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaQueryBuilder;
 import ovh.equino.actracker.repository.jpa.tag.TagEntity;
@@ -21,15 +19,8 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 class ActivityQueryBuilder extends JpaQueryBuilder<ActivityEntity> {
 
-    private static final Map<EntitySortCriteria.Field, String> SORT_FIELD_TO_ENTITY_FIELD =
-            Map.of(
-                    EntitySortCriteria.CommonSortField.ID, "id",
-                    ActivitySortField.START_TIME, "startTime",
-                    ActivitySortField.END_TIME, "endTime"
-            );
-
     ActivityQueryBuilder(EntityManager entityManager) {
-        super(entityManager, ActivityEntity.class, SORT_FIELD_TO_ENTITY_FIELD);
+        super(entityManager, ActivityEntity.class, Map.of());
     }
 
     Predicate isInTimeRange(Timestamp timeRangeStart, Timestamp timeRangeEnd) {

@@ -29,6 +29,7 @@ public final class Metric implements Entity {
         this.deleted = true;
     }
 
+    // TODO remove
     MetricDto forStorage() {
         return new MetricDto(
                 id.id(),
@@ -41,10 +42,6 @@ public final class Metric implements Entity {
 
     boolean deleted() {
         return deleted;
-    }
-
-    boolean isNotDeleted() {
-        return !deleted();
     }
 
     MetricId id() {

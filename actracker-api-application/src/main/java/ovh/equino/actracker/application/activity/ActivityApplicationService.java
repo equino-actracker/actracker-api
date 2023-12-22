@@ -91,8 +91,7 @@ public class ActivityApplicationService {
                 searchActivitiesQuery.timeRangeStart(),
                 searchActivitiesQuery.timeRangeEnd(),
                 searchActivitiesQuery.excludeFilter(),
-                searchActivitiesQuery.tags(),
-                null
+                searchActivitiesQuery.tags()
         );
 
         EntitySearchResult<ActivityDto> searchResult = activitySearchEngine.findActivities(searchCriteria);

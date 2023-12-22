@@ -1230,7 +1230,7 @@ class ActivityTest {
             activity.setMetricValue(newMetricValue, CREATOR);
 
             // then
-            assertThat(activity.metricValues).containsExactlyInAnyOrder(NON_EXISTING_METRIC_VALUE, newMetricValue);
+            assertThat(activity.metricValues()).containsExactlyInAnyOrder(NON_EXISTING_METRIC_VALUE, newMetricValue);
         }
 
         @Test
@@ -1258,7 +1258,7 @@ class ActivityTest {
             activity.setMetricValue(newMetricValue, CREATOR);
 
             // then
-            assertThat(activity.metricValues).containsExactlyInAnyOrder(NON_EXISTING_METRIC_VALUE, newMetricValue);
+            assertThat(activity.metricValues()).containsExactlyInAnyOrder(NON_EXISTING_METRIC_VALUE, newMetricValue);
         }
 
         @Test
@@ -1402,7 +1402,7 @@ class ActivityTest {
             activity.unsetMetricValue(EXISTING_METRIC_ID, CREATOR);
 
             // then
-            assertThat(activity.metricValues).containsExactlyInAnyOrder(NON_EXISTING_METRIC_VALUE);
+            assertThat(activity.metricValues()).containsExactlyInAnyOrder(NON_EXISTING_METRIC_VALUE);
         }
 
         @Test
@@ -1428,7 +1428,7 @@ class ActivityTest {
             activity.unsetMetricValue(EXISTING_METRIC_ID, CREATOR);
 
             // then
-            assertThat(activity.metricValues).containsExactlyInAnyOrder(NON_EXISTING_METRIC_VALUE);
+            assertThat(activity.metricValues()).containsExactlyInAnyOrder(NON_EXISTING_METRIC_VALUE);
         }
 
         @Test
@@ -1454,7 +1454,7 @@ class ActivityTest {
             activity.unsetMetricValue(NON_EXISTING_METRIC_ID, CREATOR);
 
             // then
-            assertThat(activity.metricValues).containsExactlyInAnyOrder(NON_EXISTING_METRIC_VALUE, EXISTING_METRIC_VALUE);
+            assertThat(activity.metricValues()).containsExactlyInAnyOrder(NON_EXISTING_METRIC_VALUE, EXISTING_METRIC_VALUE);
         }
 
         @Test
@@ -1480,7 +1480,7 @@ class ActivityTest {
             activity.unsetMetricValue(NON_EXISTING_METRIC_ID, CREATOR);
 
             // then
-            assertThat(activity.metricValues).containsExactlyInAnyOrder(EXISTING_METRIC_VALUE);
+            assertThat(activity.metricValues()).containsExactlyInAnyOrder(EXISTING_METRIC_VALUE);
         }
 
         @Test

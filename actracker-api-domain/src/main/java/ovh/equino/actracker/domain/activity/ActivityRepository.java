@@ -9,6 +9,5 @@ public interface ActivityRepository {
 
     void update(UUID activityId, ActivityDto activity);
 
-    // TODO delete when data sources proven
     Optional<ActivityDto> findById(UUID activityId);
 }

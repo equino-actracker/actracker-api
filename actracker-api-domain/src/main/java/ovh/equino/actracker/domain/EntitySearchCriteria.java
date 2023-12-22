@@ -20,8 +20,7 @@ public record EntitySearchCriteria(
         Instant timeRangeStart,
         Instant timeRangeEnd,
         Set<UUID> excludeFilter,
-        Set<UUID> tags,
-        EntitySortCriteria sortCriteria
+        Set<UUID> tags
 
 ) {
 
@@ -34,7 +33,6 @@ public record EntitySearchCriteria(
         pageSize = requireNonNullElse(pageSize, DEFAULT_PAGE_SIZE);
         pageId = requireNonNullElse(pageId, DEFAULT_PAGE_ID);
         term = requireNonNullElse(term, DEFAULT_TERM);
-        sortCriteria = requireNonNullElse(sortCriteria, irrelevant());
         tags = requireNonNullElse(tags, emptySet());
     }
 }

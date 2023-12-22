@@ -150,7 +150,7 @@ class TagTest {
             tag.addMetric(newMetric.name(), newMetric.type(), CREATOR);
 
             // then
-            assertThat(tag.metrics)
+            assertThat(tag.metrics())
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("id")
                     .containsExactly(newMetric);
         }
@@ -175,7 +175,7 @@ class TagTest {
             tag.addMetric(newMetric.name(), newMetric.type(), CREATOR);
 
             // then
-            assertThat(tag.metrics)
+            assertThat(tag.metrics())
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("id")
                     .containsExactlyInAnyOrder(existingMetric, newMetric);
         }
@@ -273,7 +273,7 @@ class TagTest {
             tag.deleteMetric(metricToDelete.id(), CREATOR);
 
             // then
-            assertThat(tag.metrics)
+            assertThat(tag.metrics())
                     .extracting(Metric::id, Metric::deleted)
                     .containsExactlyInAnyOrder(
                             tuple(existingMetric1.id(), !DELETED),
@@ -300,7 +300,7 @@ class TagTest {
             tag.deleteMetric(new MetricId(), CREATOR);
 
             // then
-            assertThat(tag.metrics).isEmpty();
+            assertThat(tag.metrics()).isEmpty();
         }
 
         @Test
@@ -322,7 +322,7 @@ class TagTest {
             tag.deleteMetric(new MetricId(), CREATOR);
 
             // then
-            assertThat(tag.metrics)
+            assertThat(tag.metrics())
                     .extracting(Metric::id, Metric::deleted)
                     .containsExactlyInAnyOrder(
                             tuple(existingMetric.id(), !DELETED)
@@ -349,7 +349,7 @@ class TagTest {
             tag.deleteMetric(deletedMetric.id(), CREATOR);
 
             // then
-            assertThat(tag.metrics)
+            assertThat(tag.metrics())
                     .extracting(Metric::id, Metric::deleted)
                     .containsExactlyInAnyOrder(
                             tuple(existingMetric.id(), !DELETED),
@@ -449,7 +449,7 @@ class TagTest {
             tag.renameMetric(NEW_METRIC_NAME, metricToRename.id(), CREATOR);
 
             // then
-            assertThat(tag.metrics)
+            assertThat(tag.metrics())
                     .extracting(Metric::id, Metric::name)
                     .containsExactlyInAnyOrder(
                             tuple(existingMetric.id(), existingMetric.name()),
@@ -476,7 +476,7 @@ class TagTest {
             tag.renameMetric(NEW_METRIC_NAME, new MetricId(), CREATOR);
 
             // then
-            assertThat(tag.metrics)
+            assertThat(tag.metrics())
                     .extracting(Metric::id, Metric::name)
                     .containsExactlyInAnyOrder(
                             tuple(existingMetric.id(), existingMetric.name())
@@ -503,7 +503,7 @@ class TagTest {
             tag.renameMetric(NEW_METRIC_NAME, deletedMetric.id(), CREATOR);
 
             // then
-            assertThat(tag.metrics)
+            assertThat(tag.metrics())
                     .extracting(Metric::id, Metric::name)
                     .containsExactlyInAnyOrder(
                             tuple(nonDeletedMetric.id(), nonDeletedMetric.name()),
@@ -603,7 +603,7 @@ class TagTest {
 
             // then
             assertThat(tag.deleted()).isTrue();
-            assertThat(tag.metrics)
+            assertThat(tag.metrics())
                     .extracting(Metric::id, Metric::deleted)
                     .containsExactlyInAnyOrder(
                             tuple(metric1.id(), DELETED),
@@ -699,7 +699,7 @@ class TagTest {
             tag.share(newShare, CREATOR);
 
             // then
-            assertThat(tag.shares).containsExactly(newShare);
+            assertThat(tag.shares()).containsExactly(newShare);
         }
 
         @Test
@@ -721,7 +721,7 @@ class TagTest {
             tag.share(newShare, CREATOR);
 
             // then
-            assertThat(tag.shares).containsExactly(newShare);
+            assertThat(tag.shares()).containsExactly(newShare);
         }
 
         @Test
@@ -744,7 +744,7 @@ class TagTest {
             tag.share(newShare, CREATOR);
 
             // then
-            assertThat(tag.shares).containsExactlyInAnyOrder(existingShare);
+            assertThat(tag.shares()).containsExactlyInAnyOrder(existingShare);
         }
 
         @Test
@@ -767,7 +767,7 @@ class TagTest {
             tag.share(newShare, CREATOR);
 
             // then
-            assertThat(tag.shares).containsExactlyInAnyOrder(existingShare);
+            assertThat(tag.shares()).containsExactlyInAnyOrder(existingShare);
         }
 
         @Test
@@ -790,7 +790,7 @@ class TagTest {
             tag.share(newShare, CREATOR);
 
             // then
-            assertThat(tag.shares).containsExactlyInAnyOrder(existingShare);
+            assertThat(tag.shares()).containsExactlyInAnyOrder(existingShare);
         }
 
         @Test
@@ -813,7 +813,7 @@ class TagTest {
             tag.share(newShare, CREATOR);
 
             // then
-            assertThat(tag.shares).containsExactlyInAnyOrder(existingShare);
+            assertThat(tag.shares()).containsExactlyInAnyOrder(existingShare);
         }
 
         @Test
@@ -907,7 +907,7 @@ class TagTest {
             tag.unshare(existingShare.granteeName(), CREATOR);
 
             // then
-            assertThat(tag.shares).isEmpty();
+            assertThat(tag.shares()).isEmpty();
         }
 
         @Test
@@ -929,7 +929,7 @@ class TagTest {
             tag.unshare(existingShare.granteeName(), CREATOR);
 
             // then
-            assertThat(tag.shares).isEmpty();
+            assertThat(tag.shares()).isEmpty();
         }
 
         @Test
@@ -952,7 +952,7 @@ class TagTest {
             tag.unshare(GRANTEE_NAME, CREATOR);
 
             // then
-            assertThat(tag.shares).containsExactlyInAnyOrder(share1, share2);
+            assertThat(tag.shares()).containsExactlyInAnyOrder(share1, share2);
         }
 
         @Test

@@ -9,6 +9,7 @@ import static java.util.Objects.requireNonNullElse;
 import static ovh.equino.actracker.domain.EntitySortCriteria.CommonSortField.ID;
 import static ovh.equino.actracker.domain.EntitySortCriteria.Order.ASC;
 
+// TODO remove after removing JpaQueryBuilder
 public record EntitySortCriteria(
         Deque<Level> levels
 ) {

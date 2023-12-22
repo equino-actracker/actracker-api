@@ -23,8 +23,8 @@ public final class Dashboard implements Entity {
     private final DashboardId id;
     private final User creator;
     private String name;
-    final List<Chart> charts;
-    final List<Share> shares;
+    private final List<Chart> charts;
+    private final List<Share> shares;
     private boolean deleted;
 
     private final DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier;
@@ -154,12 +154,14 @@ public final class Dashboard implements Entity {
         this.validate();
     }
 
+    // TODO remove
     public DashboardDto forStorage() {
         return new DashboardDto(
                 id.id(), creator.id(), name, unmodifiableList(charts), unmodifiableList(shares), deleted
         );
     }
 
+    // TODO change
     public DashboardChangedNotification forChangeNotification() {
         DashboardDto dto = new DashboardDto(
                 id.id(), creator.id(), name, unmodifiableList(charts), unmodifiableList(shares), deleted
@@ -189,7 +191,7 @@ public final class Dashboard implements Entity {
         return creator;
     }
 
-    public boolean deleted() {
+    boolean deleted() {
         return deleted;
     }
 

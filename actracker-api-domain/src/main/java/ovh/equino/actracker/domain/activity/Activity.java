@@ -27,8 +27,8 @@ public final class Activity implements Entity {
     private Instant startTime;
     private Instant endTime;
     private String comment;
-    final Set<TagId> tags;
-    final List<MetricValue> metricValues;
+    private final Set<TagId> tags;
+    private final List<MetricValue> metricValues;
     private boolean deleted;
 
     private final ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier;
@@ -190,6 +190,7 @@ public final class Activity implements Entity {
         this.validate();
     }
 
+    // TODO remove
     public ActivityDto forStorage() {
         Set<UUID> tagIds = tags.stream()
                 .map(TagId::id)
@@ -207,6 +208,7 @@ public final class Activity implements Entity {
         );
     }
 
+    // TODO change
     public ActivityChangedNotification forChangeNotification() {
         Set<UUID> tagIds = tags.stream()
                 .map(TagId::id)

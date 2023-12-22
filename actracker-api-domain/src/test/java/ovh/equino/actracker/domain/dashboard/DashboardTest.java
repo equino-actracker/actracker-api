@@ -170,7 +170,7 @@ class DashboardTest {
 
             // then
             assertThat(dashboard.deleted()).isTrue();
-            assertThat(dashboard.charts).allSatisfy(
+            assertThat(dashboard.charts()).allSatisfy(
                     chart -> assertThat(chart.isDeleted()).isTrue()
             );
         }
@@ -289,7 +289,7 @@ class DashboardTest {
             dashboard.share(newShare, CREATOR);
 
             // then
-            assertThat(dashboard.shares).containsExactly(newShare);
+            assertThat(dashboard.shares()).containsExactly(newShare);
         }
 
         @Test
@@ -312,7 +312,7 @@ class DashboardTest {
             dashboard.share(newShare, CREATOR);
 
             // then
-            assertThat(dashboard.shares).containsExactly(newShare);
+            assertThat(dashboard.shares()).containsExactly(newShare);
         }
 
         @Test
@@ -336,7 +336,7 @@ class DashboardTest {
             dashboard.share(newShare, CREATOR);
 
             // then
-            assertThat(dashboard.shares).containsExactlyInAnyOrder(existingShare);
+            assertThat(dashboard.shares()).containsExactlyInAnyOrder(existingShare);
         }
 
         @Test
@@ -360,7 +360,7 @@ class DashboardTest {
             dashboard.share(newShare, CREATOR);
 
             // then
-            assertThat(dashboard.shares).containsExactlyInAnyOrder(existingShare);
+            assertThat(dashboard.shares()).containsExactlyInAnyOrder(existingShare);
         }
 
         @Test
@@ -384,7 +384,7 @@ class DashboardTest {
             dashboard.share(newShare, CREATOR);
 
             // then
-            assertThat(dashboard.shares).containsExactly(existingShare);
+            assertThat(dashboard.shares()).containsExactly(existingShare);
         }
 
         @Test
@@ -408,7 +408,7 @@ class DashboardTest {
             dashboard.share(newShare, CREATOR);
 
             // then
-            assertThat(dashboard.shares).containsExactly(existingShare);
+            assertThat(dashboard.shares()).containsExactly(existingShare);
         }
 
         @Test
@@ -506,7 +506,7 @@ class DashboardTest {
             dashboard.unshare(existingShare.granteeName(), CREATOR);
 
             // then
-            assertThat(dashboard.shares).isEmpty();
+            assertThat(dashboard.shares()).isEmpty();
         }
 
         @Test
@@ -529,7 +529,7 @@ class DashboardTest {
             dashboard.unshare(existingShare.granteeName(), CREATOR);
 
             // then
-            assertThat(dashboard.shares).isEmpty();
+            assertThat(dashboard.shares()).isEmpty();
 
         }
 
@@ -554,7 +554,7 @@ class DashboardTest {
             dashboard.unshare(GRANTEE_NAME, CREATOR);
 
             // then
-            assertThat(dashboard.shares).containsExactlyInAnyOrder(existingShare1, existingShare2);
+            assertThat(dashboard.shares()).containsExactlyInAnyOrder(existingShare1, existingShare2);
         }
 
         @Test
@@ -653,7 +653,7 @@ class DashboardTest {
             dashboard.addChart(newChart, CREATOR);
 
             // then
-            assertThat(dashboard.charts).containsExactly(newChart);
+            assertThat(dashboard.charts()).containsExactly(newChart);
         }
 
         @Test
@@ -692,7 +692,7 @@ class DashboardTest {
             dashboard.addChart(newChart, CREATOR);
 
             // then
-            assertThat(dashboard.charts)
+            assertThat(dashboard.charts())
                     .containsExactlyInAnyOrder(existingNonDeletedChart, existingDeletedChart, newChart);
         }
 
@@ -834,7 +834,7 @@ class DashboardTest {
             dashboard.deleteChart(chartToDelete.id(), CREATOR);
 
             // then
-            assertThat(dashboard.charts)
+            assertThat(dashboard.charts())
                     .extracting(Chart::id, Chart::isDeleted)
                     .containsExactlyInAnyOrder(
                             tuple(existingNonDeletedChart.id(), !DELETED),
@@ -862,7 +862,7 @@ class DashboardTest {
             dashboard.deleteChart(new ChartId(), CREATOR);
 
             // then
-            assertThat(dashboard.charts).isEmpty();
+            assertThat(dashboard.charts()).isEmpty();
         }
 
         @Test
@@ -885,7 +885,7 @@ class DashboardTest {
             dashboard.deleteChart(new ChartId(), CREATOR);
 
             // then
-            assertThat(dashboard.charts).containsExactly(existingChart);
+            assertThat(dashboard.charts()).containsExactly(existingChart);
         }
 
         @Test
@@ -920,7 +920,7 @@ class DashboardTest {
             dashboard.deleteChart(existingDeletedChart.id(), CREATOR);
 
             // then
-            assertThat(dashboard.charts).containsExactlyInAnyOrder(existingDeletedChart, existingNonDeletedChart);
+            assertThat(dashboard.charts()).containsExactlyInAnyOrder(existingDeletedChart, existingNonDeletedChart);
         }
 
         @Test

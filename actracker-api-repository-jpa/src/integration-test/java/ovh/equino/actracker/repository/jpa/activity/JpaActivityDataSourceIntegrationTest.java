@@ -99,7 +99,6 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                 null,
                 null,
                 null,
-                null,
                 null
         );
 
@@ -133,7 +132,6 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                 null,
                 null,
                 null,
-                null,
                 null
         );
 
@@ -159,7 +157,6 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                 null,
                 timeRangeStart,
                 timeRangeEnd,
-                null,
                 null,
                 null
         );
@@ -187,7 +184,6 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                 null,
                 null,
                 excludedActivities,
-                null,
                 null
         );
 
@@ -216,8 +212,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                 null,
                 null,
                 null,
-                requiredTags,
-                null
+                requiredTags
         );
 
         inTransaction(() -> {
