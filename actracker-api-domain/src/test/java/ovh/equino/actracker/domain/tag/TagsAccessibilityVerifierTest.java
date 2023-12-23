@@ -50,26 +50,6 @@ class TagsAccessibilityVerifierTest {
     }
 
     @Test
-    void shouldFindAccessibleTags() {
-        // given
-        when(tagDataSource.find(any(Set.class), any(User.class)))
-                .thenReturn(List.of(ACCESSIBLE_TAG_1, ACCESSIBLE_TAG_2));
-
-        // when
-        Set<TagId> accessibleTags = tagsAccessibilityVerifier.accessibleOf(
-                List.of(
-                        ACCESSIBLE_TAG_1_ID,
-                        ACCESSIBLE_TAG_2_ID,
-                        INACCESSIBLE_TAG_1_ID,
-                        INACCESSIBLE_TAG_2_ID
-                )
-        );
-
-        // then
-        assertThat(accessibleTags).containsExactlyInAnyOrder(ACCESSIBLE_TAG_1_ID, ACCESSIBLE_TAG_2_ID);
-    }
-
-    @Test
     void shouldFindInaccessibleTags() {
         // given
         when(tagDataSource.find(any(Set.class), any(User.class)))

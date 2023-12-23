@@ -31,7 +31,7 @@ public class TagsAccessibilityVerifier {
                 .collect(toUnmodifiableSet());
     }
 
-    public Set<TagId> accessibleOf(Collection<TagId> tags) {
+    private Set<TagId> accessibleOf(Collection<TagId> tags) {
         Set<TagId> accessibleTags = tagDataSource.find(new HashSet<>(tags), user)
                 .stream()
                 .map(TagDto::id)

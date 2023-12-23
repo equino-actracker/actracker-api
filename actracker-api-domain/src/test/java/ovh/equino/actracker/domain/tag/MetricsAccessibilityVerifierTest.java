@@ -54,32 +54,6 @@ class MetricsAccessibilityVerifierTest {
     }
 
     @Test
-    void shouldFindAccessibleMetrics() {
-        // given
-        when(tagDataSource.find(any(Set.class), any(User.class)))
-                .thenReturn(List.of(ACCESSIBLE_TAG_1, ACCESSIBLE_TAG_2));
-
-        // when
-        Set<MetricId> accessibleMetrics = metricsAccessibilityVerifier.accessibleOf(
-                List.of(
-                        ACCESSIBLE_METRIC_1_ID,
-                        ACCESSIBLE_METRIC_2_ID,
-                        INACCESSIBLE_METRIC_1_ID,
-                        INACCESSIBLE_METRIC_2_ID
-                ),
-                List.of(
-                        ACCESSIBLE_TAG_1_ID,
-                        ACCESSIBLE_TAG_2_ID,
-                        INACCESSIBLE_TAG_1_ID,
-                        INACCESSIBLE_TAG_2_ID
-                )
-        );
-
-        // then
-        assertThat(accessibleMetrics).containsExactlyInAnyOrder(ACCESSIBLE_METRIC_1_ID, ACCESSIBLE_METRIC_2_ID);
-    }
-
-    @Test
     void shouldFindInaccessibleMetrics() {
         // given
         when(tagDataSource.find(any(Set.class), any(User.class)))

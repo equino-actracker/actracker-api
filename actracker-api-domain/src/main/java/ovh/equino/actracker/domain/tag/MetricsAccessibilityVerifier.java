@@ -25,7 +25,14 @@ public class MetricsAccessibilityVerifier {
         return accessibleOf(singleton(metric), tags).contains(metric);
     }
 
-    public Set<MetricId> accessibleOf(Collection<MetricId> metrics, Collection<TagId> tags) {
+    public Set<MetricId> nonAccessibleOf(Collection<MetricId> metrics, Collection<TagId> tags) {
+        Set<MetricId> accessibleMetrics = accessibleOf(metrics, tags);
+        return metrics.stream()
+                .filter(not(accessibleMetrics::contains))
+                .collect(toUnmodifiableSet());
+    }
+
+    private Set<MetricId> accessibleOf(Collection<MetricId> metrics, Collection<TagId> tags) {
         Set<MetricId> accessibleMetrics = tagDataSource.find(new HashSet<>(tags), user)
                 .stream()
                 .flatMap(tag -> tag.metrics().stream())
@@ -34,13 +41,6 @@ public class MetricsAccessibilityVerifier {
                 .collect(toUnmodifiableSet());
         return metrics.stream()
                 .filter(accessibleMetrics::contains)
-                .collect(toUnmodifiableSet());
-    }
-
-    public Set<MetricId> nonAccessibleOf(Collection<MetricId> metrics, Collection<TagId> tags) {
-        Set<MetricId> accessibleMetrics = accessibleOf(metrics, tags);
-        return metrics.stream()
-                .filter(not(accessibleMetrics::contains))
                 .collect(toUnmodifiableSet());
     }
 }
