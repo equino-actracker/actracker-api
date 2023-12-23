@@ -47,7 +47,7 @@ public final class Tag implements Entity {
     }
 
     public void rename(String newName, User updater) {
-        if (!creator.equals(updater) && !tagsAccessibilityVerifier.isAccessible(this.id)) {
+        if (!creator.equals(updater) && !tagsAccessibilityVerifier.isAccessibleFor(updater, this.id)) {
             throw new EntityNotFoundException(Tag.class, this.id.id());
         }
         if (!this.isEditableFor(updater)) {
@@ -58,7 +58,7 @@ public final class Tag implements Entity {
     }
 
     public void addMetric(String name, MetricType type, User updater) {
-        if (!creator.equals(updater) && !tagsAccessibilityVerifier.isAccessible(this.id)) {
+        if (!creator.equals(updater) && !tagsAccessibilityVerifier.isAccessibleFor(updater, this.id)) {
             throw new EntityNotFoundException(Tag.class, this.id.id());
         }
         if (!this.isEditableFor(updater)) {
@@ -71,7 +71,7 @@ public final class Tag implements Entity {
     }
 
     public void deleteMetric(MetricId metricId, User updater) {
-        if (!creator.equals(updater) && !tagsAccessibilityVerifier.isAccessible(this.id)) {
+        if (!creator.equals(updater) && !tagsAccessibilityVerifier.isAccessibleFor(updater, this.id)) {
             throw new EntityNotFoundException(Tag.class, this.id.id());
         }
         if (!this.isEditableFor(updater)) {
@@ -85,7 +85,7 @@ public final class Tag implements Entity {
     }
 
     public void renameMetric(String newName, MetricId metricId, User updater) {
-        if (!creator.equals(updater) && !tagsAccessibilityVerifier.isAccessible(this.id)) {
+        if (!creator.equals(updater) && !tagsAccessibilityVerifier.isAccessibleFor(updater, this.id)) {
             throw new EntityNotFoundException(Tag.class, this.id.id());
         }
         if (!this.isEditableFor(updater)) {
@@ -99,7 +99,7 @@ public final class Tag implements Entity {
     }
 
     public void delete(User remover) {
-        if (!creator.equals(remover) && !tagsAccessibilityVerifier.isAccessible(this.id)) {
+        if (!creator.equals(remover) && !tagsAccessibilityVerifier.isAccessibleFor(remover, this.id)) {
             throw new EntityNotFoundException(Tag.class, this.id.id());
         }
         if (!this.isEditableFor(remover)) {
@@ -111,7 +111,7 @@ public final class Tag implements Entity {
     }
 
     public void share(Share newShare, User granter) {
-        if (!creator.equals(granter) && !tagsAccessibilityVerifier.isAccessible(this.id)) {
+        if (!creator.equals(granter) && !tagsAccessibilityVerifier.isAccessibleFor(granter, this.id)) {
             throw new EntityNotFoundException(Tag.class, this.id.id());
         }
         if (!this.isEditableFor(granter)) {
@@ -127,7 +127,7 @@ public final class Tag implements Entity {
     }
 
     public void unshare(String granteeName, User granter) {
-        if (!creator.equals(granter) && !tagsAccessibilityVerifier.isAccessible(this.id)) {
+        if (!creator.equals(granter) && !tagsAccessibilityVerifier.isAccessibleFor(granter, this.id)) {
             throw new EntityNotFoundException(Tag.class, this.id.id());
         }
         if (!this.isEditableFor(granter)) {

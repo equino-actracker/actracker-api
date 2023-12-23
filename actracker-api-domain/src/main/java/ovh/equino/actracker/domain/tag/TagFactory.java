@@ -24,7 +24,9 @@ public final class TagFactory {
     }
 
     public Tag create(User creator, String name, Collection<Metric> metrics, Collection<Share> shares) {
-        var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, creator);
+
+        // TODO verifiers should be injected
+        var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource);
         var validator = new TagValidator();
 
         var resolvedShares = requireNonNullElse(shares, new ArrayList<Share>())
@@ -46,7 +48,7 @@ public final class TagFactory {
         return tag;
     }
 
-    public Tag reconstitute(User actor,
+    public Tag reconstitute(User actor, // TODO remove
                             TagId id,
                             User creator,
                             String name,
@@ -54,7 +56,8 @@ public final class TagFactory {
                             Collection<Share> shares,
                             boolean deleted) {
 
-        var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, actor);
+        // TODO verifiers should be injected
+        var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource);
         var validator = new TagValidator();
 
         return new Tag(

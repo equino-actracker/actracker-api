@@ -33,7 +33,7 @@ class TagSetsAccessibilityVerifierTest {
 
     @BeforeEach
     void init() {
-        tagSetsAccessibilityVerifier = new TagSetsAccessibilityVerifier(tagSetDataSource, USER);
+        tagSetsAccessibilityVerifier = new TagSetsAccessibilityVerifier(tagSetDataSource);
     }
 
     @Test
@@ -42,7 +42,7 @@ class TagSetsAccessibilityVerifierTest {
         when(tagSetDataSource.find(any(), any())).thenReturn(Optional.of(ACCESSIBLE_TAG_SET));
 
         // when
-        boolean isAccessible = tagSetsAccessibilityVerifier.isAccessible(new TagSetId());
+        boolean isAccessible = tagSetsAccessibilityVerifier.isAccessibleFor(USER, new TagSetId());
 
         // then
         assertThat(isAccessible).isTrue();
@@ -54,7 +54,7 @@ class TagSetsAccessibilityVerifierTest {
         when(tagSetDataSource.find(any(), any())).thenReturn(Optional.empty());
 
         // when
-        boolean isAccessible = tagSetsAccessibilityVerifier.isAccessible(new TagSetId());
+        boolean isAccessible = tagSetsAccessibilityVerifier.isAccessibleFor(USER, new TagSetId());
 
         // then
         assertThat(isAccessible).isFalse();

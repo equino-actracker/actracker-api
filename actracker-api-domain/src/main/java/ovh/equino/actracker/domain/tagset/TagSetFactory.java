@@ -28,12 +28,13 @@ public final class TagSetFactory {
                          String name,
                          Collection<TagId> tags) {
 
-        var tagSetAccessibilityVerifier = new TagSetsAccessibilityVerifier(tagSetDataSource, creator);
-        var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, creator);
+        // TODO verifiers should be injected
+        var tagSetAccessibilityVerifier = new TagSetsAccessibilityVerifier(tagSetDataSource);
+        var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource);
         var validator = new TagSetValidator();
 
         var nonNullTags = requireNonNullElse(tags, new ArrayList<TagId>());
-        validateTagsAccessible(nonNullTags, tagsAccessibilityVerifier);
+        validateTagsAccessible(creator, nonNullTags, tagsAccessibilityVerifier);
 
         var tagSet = new TagSet(
                 new TagSetId(),
@@ -49,15 +50,16 @@ public final class TagSetFactory {
         return tagSet;
     }
 
-    public TagSet reconstitute(User actor,
+    public TagSet reconstitute(User actor,  // TODO remove
                                TagSetId id,
                                User creator,
                                String name,
                                Collection<TagId> tags,
                                boolean deleted) {
 
-        var tagSetAccessibilityVerifier = new TagSetsAccessibilityVerifier(tagSetDataSource, actor);
-        var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, actor);
+        // TODO verifiers should be injected
+        var tagSetAccessibilityVerifier = new TagSetsAccessibilityVerifier(tagSetDataSource);
+        var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource);
         var validator = new TagSetValidator();
 
         return new TagSet(
@@ -72,8 +74,9 @@ public final class TagSetFactory {
         );
     }
 
-    private void validateTagsAccessible(Collection<TagId> tags, TagsAccessibilityVerifier tagsAccessibilityVerifier) {
-        tagsAccessibilityVerifier.nonAccessibleOf(tags)
+    // TODO when verifier will be an injected field, parameter not required
+    private void validateTagsAccessible(User user, Collection<TagId> tags, TagsAccessibilityVerifier tagsAccessibilityVerifier) {
+        tagsAccessibilityVerifier.nonAccessibleFor(user, tags)
                 .stream()
                 .findFirst()
                 .ifPresent((inaccessibleTag) -> {

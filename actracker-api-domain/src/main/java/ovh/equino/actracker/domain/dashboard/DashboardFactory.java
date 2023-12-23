@@ -38,12 +38,13 @@ public final class DashboardFactory {
                             Collection<Chart> charts,
                             Collection<Share> shares) {
 
-        var dashboardsAccessibilityVerifier = new DashboardsAccessibilityVerifier(dashboardDataSource, creator);
-        var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, creator);
+        // TODO verifiers should be injected
+        var dashboardsAccessibilityVerifier = new DashboardsAccessibilityVerifier(dashboardDataSource);
+        var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource);
         var validator = new DashboardValidator();
 
         var nonNullCharts = requireNonNullElse(charts, new ArrayList<Chart>());
-        validateTagsAccessibility(nonNullCharts, tagsAccessibilityVerifier);
+        validateTagsAccessibleFor(creator, nonNullCharts, tagsAccessibilityVerifier);
 
         var resolvedShares = requireNonNullElse(shares, new ArrayList<Share>())
                 .stream()
@@ -65,7 +66,7 @@ public final class DashboardFactory {
         return dashboard;
     }
 
-    public Dashboard reconstitute(User actor,
+    public Dashboard reconstitute(User actor, // TODO remove
                                   DashboardId id,
                                   User creator,
                                   String name,
@@ -73,8 +74,9 @@ public final class DashboardFactory {
                                   Collection<Share> shares,
                                   boolean deleted) {
 
-        var dashboardsAccessibilityVerifier = new DashboardsAccessibilityVerifier(dashboardDataSource, actor);
-        var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, actor);
+        // TODO verifiers should be injected
+        var dashboardsAccessibilityVerifier = new DashboardsAccessibilityVerifier(dashboardDataSource);
+        var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource);
         var validator = new DashboardValidator();
 
         return new Dashboard(
@@ -100,13 +102,17 @@ public final class DashboardFactory {
                 .orElse(new Share(grantee));
     }
 
-    private void validateTagsAccessibility(Collection<Chart> charts, TagsAccessibilityVerifier tagsAccessibilityVerifier) {
+    // TODO when verifier will be an injected field, parameter not required
+    private void validateTagsAccessibleFor(User user,
+                                           Collection<Chart> charts,
+                                           TagsAccessibilityVerifier tagsAccessibilityVerifier) {
+
         Set<TagId> includedTags = charts
                 .stream()
                 .flatMap(chart -> chart.includedTags().stream())
                 .map(TagId::new)
                 .collect(toUnmodifiableSet());
-        tagsAccessibilityVerifier.nonAccessibleOf(includedTags)
+        tagsAccessibilityVerifier.nonAccessibleFor(user, includedTags)
                 .stream()
                 .findFirst()
                 .ifPresent((inaccessibleTag) -> {

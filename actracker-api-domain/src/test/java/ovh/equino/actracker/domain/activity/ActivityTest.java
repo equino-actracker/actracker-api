@@ -177,7 +177,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
-            when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
             assertThatThrownBy(() -> activity.rename(NEW_TITLE, unauthorizedUser))
@@ -203,7 +203,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
-            when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
             assertThatThrownBy(() -> activity.rename(NEW_TITLE, unauthorizedUser))
@@ -339,7 +339,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
-            when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
             assertThatThrownBy(() -> activity.start(NEW_START_TIME, unauthorizedUser))
@@ -365,7 +365,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
-            when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
             assertThatThrownBy(() -> activity.start(NEW_START_TIME, unauthorizedUser))
@@ -501,7 +501,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
-            when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
             assertThatThrownBy(() -> activity.finish(NEW_END_TIME, unauthorizedUser))
@@ -527,7 +527,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
-            when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
             assertThatThrownBy(() -> activity.finish(NEW_END_TIME, unauthorizedUser))
@@ -663,7 +663,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
-            when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
             assertThatThrownBy(() -> activity.updateComment(NEW_COMMENT, unauthorizedUser))
@@ -689,7 +689,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
-            when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
             assertThatThrownBy(() -> activity.updateComment(NEW_COMMENT, unauthorizedUser))
@@ -720,7 +720,7 @@ class ActivityTest {
                     validator
             );
             TagId newTag = new TagId();
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // when
             activity.assignTag(newTag, CREATOR);
@@ -749,7 +749,7 @@ class ActivityTest {
                     validator
             );
             TagId newTag = new TagId();
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // when
             activity.assignTag(newTag, CREATOR);
@@ -777,7 +777,7 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // when
             activity.assignTag(existingTag, CREATOR);
@@ -805,7 +805,7 @@ class ActivityTest {
                     validator
             );
             TagId newTag = new TagId();
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
             assertThatThrownBy(() -> activity.assignTag(newTag, CREATOR))
@@ -830,7 +830,7 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
@@ -857,7 +857,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
-            when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
             assertThatThrownBy(() -> activity.assignTag(new TagId(), unauthorizedUser))
@@ -883,7 +883,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
-            when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
             assertThatThrownBy(() -> activity.assignTag(new TagId(), unauthorizedUser))
@@ -915,7 +915,7 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // when
             activity.removeTag(tagToRemove, CREATOR);
@@ -942,7 +942,7 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // when
             activity.removeTag(new TagId(), CREATOR);
@@ -970,7 +970,7 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // when
             activity.removeTag(new TagId(), CREATOR);
@@ -998,7 +998,7 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // when
             activity.removeTag(tagToRemove, CREATOR);
@@ -1025,7 +1025,7 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
@@ -1053,7 +1053,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
-            when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
             assertThatThrownBy(() -> activity.removeTag(existingTag, unauthorizedUser))
@@ -1080,7 +1080,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
-            when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
             assertThatThrownBy(() -> activity.removeTag(existingTag, unauthorizedUser))
@@ -1162,7 +1162,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
-            when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
             assertThatThrownBy(() -> activity.delete(unauthorizedUser))
@@ -1188,7 +1188,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
-            when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
             assertThatThrownBy(() -> activity.delete(unauthorizedUser))
@@ -1224,7 +1224,7 @@ class ActivityTest {
                     validator
             );
             MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
-            when(metricsAccessibilityVerifier.isAccessible(any(), any())).thenReturn(true);
+            when(metricsAccessibilityVerifier.isAccessibleFor(any(), any(), any())).thenReturn(true);
 
             // when
             activity.setMetricValue(newMetricValue, CREATOR);
@@ -1252,7 +1252,7 @@ class ActivityTest {
                     validator
             );
             MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
-            when(metricsAccessibilityVerifier.isAccessible(any(), any())).thenReturn(true);
+            when(metricsAccessibilityVerifier.isAccessibleFor(any(), any(), any())).thenReturn(true);
 
             // when
             activity.setMetricValue(newMetricValue, CREATOR);
@@ -1280,7 +1280,7 @@ class ActivityTest {
                     validator
             );
             MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
-            when(metricsAccessibilityVerifier.isAccessible(any(), any())).thenReturn(false);
+            when(metricsAccessibilityVerifier.isAccessibleFor(any(), any(), any())).thenReturn(false);
 
             // then
             assertThatThrownBy(() -> activity.setMetricValue(newMetricValue, CREATOR))
@@ -1305,7 +1305,7 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
-            when(metricsAccessibilityVerifier.isAccessible(any(), any())).thenReturn(true);
+            when(metricsAccessibilityVerifier.isAccessibleFor(any(), any(), any())).thenReturn(true);
             doThrow(EntityInvalidException.class).when(validator).validate(any());
             MetricValue newMetricValue = new MetricValue(randomUUID(), TEN);
 
@@ -1333,7 +1333,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
-            when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
             MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
 
             // then
@@ -1359,7 +1359,7 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
-            when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
             User unauthorizedUser = new User(randomUUID());
             MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
 
@@ -1396,7 +1396,7 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
-            when(metricsAccessibilityVerifier.isAccessible(any(), any())).thenReturn(true);
+            when(metricsAccessibilityVerifier.isAccessibleFor(any(), any(), any())).thenReturn(true);
 
             // when
             activity.unsetMetricValue(EXISTING_METRIC_ID, CREATOR);
@@ -1501,7 +1501,7 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
-            when(metricsAccessibilityVerifier.isAccessible(any(), any())).thenReturn(true);
+            when(metricsAccessibilityVerifier.isAccessibleFor(any(), any(), any())).thenReturn(true);
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
@@ -1528,7 +1528,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
-            when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
             assertThatThrownBy(() -> activity.unsetMetricValue(EXISTING_METRIC_ID, unauthorizedUser))
@@ -1554,7 +1554,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
-            when(activitiesAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
             assertThatThrownBy(() -> activity.unsetMetricValue(EXISTING_METRIC_ID, unauthorizedUser))

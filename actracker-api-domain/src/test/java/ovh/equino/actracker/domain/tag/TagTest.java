@@ -96,7 +96,7 @@ class TagTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
             assertThatThrownBy(() -> tag.rename(NEW_NAME, unauthorizedUser))
@@ -117,7 +117,7 @@ class TagTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
             assertThatThrownBy(() -> tag.rename(NEW_NAME, unauthorizedUser))
@@ -215,7 +215,7 @@ class TagTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
             Metric newMetric = new Metric(new MetricId(), unauthorizedUser, METRIC_NAME, NUMERIC, !DELETED);
 
             // then
@@ -237,7 +237,7 @@ class TagTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
             Metric newMetric = new Metric(new MetricId(), unauthorizedUser, METRIC_NAME, NUMERIC, !DELETED);
 
             // then
@@ -392,7 +392,7 @@ class TagTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
             assertThatThrownBy(() -> tag.deleteMetric(existingMetric.id(), unauthorizedUser))
@@ -414,7 +414,7 @@ class TagTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
             assertThatThrownBy(() -> tag.deleteMetric(existingMetric.id(), unauthorizedUser))
@@ -546,7 +546,7 @@ class TagTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
             assertThatThrownBy(() -> tag.renameMetric(NEW_METRIC_NAME, existingMetric.id(), unauthorizedUser))
@@ -568,7 +568,7 @@ class TagTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
             assertThatThrownBy(() -> tag.renameMetric(NEW_METRIC_NAME, existingMetric.id(), unauthorizedUser))
@@ -645,7 +645,7 @@ class TagTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
             assertThatThrownBy(() -> tag.delete(unauthorizedUser))
@@ -666,7 +666,7 @@ class TagTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
             assertThatThrownBy(() -> tag.delete(unauthorizedUser))
@@ -852,7 +852,7 @@ class TagTest {
             );
             Share newShare = new Share(GRANTEE_NAME);
             User unauthorizedUser = new User(randomUUID());
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
             assertThatThrownBy(() -> tag.share(newShare, unauthorizedUser))
@@ -874,7 +874,7 @@ class TagTest {
             );
             Share newShare = new Share(GRANTEE_NAME);
             User unauthorizedUser = new User(randomUUID());
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
             assertThatThrownBy(() -> tag.share(newShare, unauthorizedUser))
@@ -990,7 +990,7 @@ class TagTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
             assertThatThrownBy(() -> tag.unshare(existingShare.granteeName(), unauthorizedUser))
@@ -1012,7 +1012,7 @@ class TagTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
             assertThatThrownBy(() -> tag.unshare(existingShare.granteeName(), unauthorizedUser))
