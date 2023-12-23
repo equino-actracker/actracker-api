@@ -6,8 +6,7 @@ public class ActivitiesAccessibilityVerifier {
 
     private final ActivityDataSource activityDataSource;
 
-    // TODO package-private
-    public ActivitiesAccessibilityVerifier(ActivityDataSource activityDataSource) {
+    ActivitiesAccessibilityVerifier(ActivityDataSource activityDataSource) {
         this.activityDataSource = activityDataSource;
     }
 

@@ -6,8 +6,7 @@ public class DashboardsAccessibilityVerifier {
 
     private final DashboardDataSource dashboardDataSource;
 
-    // TODO package-priv
-    public DashboardsAccessibilityVerifier(DashboardDataSource dashboardDataSource) {
+    DashboardsAccessibilityVerifier(DashboardDataSource dashboardDataSource) {
         this.dashboardDataSource = dashboardDataSource;
     }
 

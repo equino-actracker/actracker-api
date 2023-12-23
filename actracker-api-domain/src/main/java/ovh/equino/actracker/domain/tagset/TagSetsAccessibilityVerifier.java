@@ -6,8 +6,7 @@ public class TagSetsAccessibilityVerifier {
 
     private final TagSetDataSource tagSetDataSource;
 
-    // TODO package-priv
-    public TagSetsAccessibilityVerifier(TagSetDataSource tagSetDataSource) {
+    TagSetsAccessibilityVerifier(TagSetDataSource tagSetDataSource) {
         this.tagSetDataSource = tagSetDataSource;
     }
 

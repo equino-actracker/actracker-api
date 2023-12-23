@@ -14,8 +14,7 @@ public class MetricsAccessibilityVerifier {
 
     private final TagDataSource tagDataSource;
 
-    // TODO package-private
-    public MetricsAccessibilityVerifier(TagDataSource tagDataSource) {
+    MetricsAccessibilityVerifier(TagDataSource tagDataSource) {
         this.tagDataSource = tagDataSource;
     }
 

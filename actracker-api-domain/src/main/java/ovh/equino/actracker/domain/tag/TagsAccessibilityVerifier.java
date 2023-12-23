@@ -13,8 +13,7 @@ public class TagsAccessibilityVerifier {
 
     private final TagDataSource tagDataSource;
 
-    // TODO package-private
-    public TagsAccessibilityVerifier(TagDataSource tagDataSource) {
+    TagsAccessibilityVerifier(TagDataSource tagDataSource) {
         this.tagDataSource = tagDataSource;
     }
 
