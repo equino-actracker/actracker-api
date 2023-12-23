@@ -4,6 +4,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import ovh.equino.actracker.domain.tagset.TagSetFactory;
+import ovh.equino.actracker.domain.tagset.TagSetsAccessibilityVerifier;
 
 @Configuration
 @ComponentScan(
@@ -11,7 +12,8 @@ import ovh.equino.actracker.domain.tagset.TagSetFactory;
         includeFilters = @ComponentScan.Filter(
                 type = FilterType.ASSIGNABLE_TYPE,
                 classes = {
-                        TagSetFactory.class
+                        TagSetFactory.class,
+                        TagSetsAccessibilityVerifier.class,
                 }
         )
 )
