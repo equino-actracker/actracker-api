@@ -1,7 +1,6 @@
 package ovh.equino.actracker.domain.tagset;
 
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
-import ovh.equino.actracker.domain.tag.TagDataSource;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.user.User;
@@ -16,25 +15,24 @@ public final class TagSetFactory {
 
     private static final boolean DELETED = TRUE;
 
-    private final TagSetDataSource tagSetDataSource;
-    private final TagDataSource tagDataSource;
+    private final TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier;
+    private final TagsAccessibilityVerifier tagsAccessibilityVerifier;
 
-    TagSetFactory(TagSetDataSource tagSetDataSource, TagDataSource tagDataSource) {
-        this.tagSetDataSource = tagSetDataSource;
-        this.tagDataSource = tagDataSource;
+    TagSetFactory(TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier,
+                  TagsAccessibilityVerifier tagsAccessibilityVerifier) {
+
+        this.tagSetsAccessibilityVerifier = tagSetsAccessibilityVerifier;
+        this.tagsAccessibilityVerifier = tagsAccessibilityVerifier;
     }
 
     public TagSet create(User creator,
                          String name,
                          Collection<TagId> tags) {
 
-        // TODO verifiers should be injected
-        var tagSetAccessibilityVerifier = new TagSetsAccessibilityVerifier(tagSetDataSource);
-        var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource);
         var validator = new TagSetValidator();
 
         var nonNullTags = requireNonNullElse(tags, new ArrayList<TagId>());
-        validateTagsAccessible(creator, nonNullTags, tagsAccessibilityVerifier);
+        validateTagsAccessibleFor(creator, nonNullTags);
 
         var tagSet = new TagSet(
                 new TagSetId(),
@@ -43,7 +41,7 @@ public final class TagSetFactory {
                 nonNullTags,
                 !DELETED,
                 validator,
-                tagSetAccessibilityVerifier,
+                tagSetsAccessibilityVerifier,
                 tagsAccessibilityVerifier
         );
         tagSet.validate();
@@ -57,9 +55,6 @@ public final class TagSetFactory {
                                Collection<TagId> tags,
                                boolean deleted) {
 
-        // TODO verifiers should be injected
-        var tagSetAccessibilityVerifier = new TagSetsAccessibilityVerifier(tagSetDataSource);
-        var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource);
         var validator = new TagSetValidator();
 
         return new TagSet(
@@ -69,13 +64,12 @@ public final class TagSetFactory {
                 tags,
                 deleted,
                 validator,
-                tagSetAccessibilityVerifier,
+                tagSetsAccessibilityVerifier,
                 tagsAccessibilityVerifier
         );
     }
 
-    // TODO when verifier will be an injected field, parameter not required
-    private void validateTagsAccessible(User user, Collection<TagId> tags, TagsAccessibilityVerifier tagsAccessibilityVerifier) {
+    private void validateTagsAccessibleFor(User user, Collection<TagId> tags) {
         tagsAccessibilityVerifier.nonAccessibleFor(user, tags)
                 .stream()
                 .findFirst()

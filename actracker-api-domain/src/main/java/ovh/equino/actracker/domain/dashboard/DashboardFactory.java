@@ -2,7 +2,6 @@ package ovh.equino.actracker.domain.dashboard;
 
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.share.Share;
-import ovh.equino.actracker.domain.tag.TagDataSource;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.tenant.TenantDataSource;
@@ -20,16 +19,17 @@ public final class DashboardFactory {
 
     private static final Boolean DELETED = TRUE;
 
-    private final DashboardDataSource dashboardDataSource;
-    private final TagDataSource tagDataSource;
     private final TenantDataSource tenantDataSource;
 
-    DashboardFactory(DashboardDataSource dashboardDataSource,
-                     TagDataSource tagDataSource,
+    private final DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier;
+    private final TagsAccessibilityVerifier tagsAccessibilityVerifier;
+
+    DashboardFactory(DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier,
+                     TagsAccessibilityVerifier tagsAccessibilityVerifier,
                      TenantDataSource tenantDataSource) {
 
-        this.dashboardDataSource = dashboardDataSource;
-        this.tagDataSource = tagDataSource;
+        this.dashboardsAccessibilityVerifier = dashboardsAccessibilityVerifier;
+        this.tagsAccessibilityVerifier = tagsAccessibilityVerifier;
         this.tenantDataSource = tenantDataSource;
     }
 
@@ -38,13 +38,10 @@ public final class DashboardFactory {
                             Collection<Chart> charts,
                             Collection<Share> shares) {
 
-        // TODO verifiers should be injected
-        var dashboardsAccessibilityVerifier = new DashboardsAccessibilityVerifier(dashboardDataSource);
-        var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource);
         var validator = new DashboardValidator();
 
         var nonNullCharts = requireNonNullElse(charts, new ArrayList<Chart>());
-        validateTagsAccessibleFor(creator, nonNullCharts, tagsAccessibilityVerifier);
+        validateTagsAccessibleFor(creator, nonNullCharts);
 
         var resolvedShares = requireNonNullElse(shares, new ArrayList<Share>())
                 .stream()
@@ -74,9 +71,6 @@ public final class DashboardFactory {
                                   Collection<Share> shares,
                                   boolean deleted) {
 
-        // TODO verifiers should be injected
-        var dashboardsAccessibilityVerifier = new DashboardsAccessibilityVerifier(dashboardDataSource);
-        var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource);
         var validator = new DashboardValidator();
 
         return new Dashboard(
@@ -102,10 +96,7 @@ public final class DashboardFactory {
                 .orElse(new Share(grantee));
     }
 
-    // TODO when verifier will be an injected field, parameter not required
-    private void validateTagsAccessibleFor(User user,
-                                           Collection<Chart> charts,
-                                           TagsAccessibilityVerifier tagsAccessibilityVerifier) {
+    private void validateTagsAccessibleFor(User user, Collection<Chart> charts) {
 
         Set<TagId> includedTags = charts
                 .stream()

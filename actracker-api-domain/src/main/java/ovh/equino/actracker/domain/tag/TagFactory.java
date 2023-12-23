@@ -15,18 +15,16 @@ public final class TagFactory {
 
     private static final Boolean DELETED = TRUE;
 
-    private final TagDataSource tagDataSource;
+    private final TagsAccessibilityVerifier tagsAccessibilityVerifier;
     private final TenantDataSource tenantDataSource;
 
-    TagFactory(TagDataSource tagDataSource, TenantDataSource tenantDataSource) {
-        this.tagDataSource = tagDataSource;
+    TagFactory(TagsAccessibilityVerifier tagsAccessibilityVerifier, TenantDataSource tenantDataSource) {
+        this.tagsAccessibilityVerifier = tagsAccessibilityVerifier;
         this.tenantDataSource = tenantDataSource;
     }
 
     public Tag create(User creator, String name, Collection<Metric> metrics, Collection<Share> shares) {
 
-        // TODO verifiers should be injected
-        var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource);
         var validator = new TagValidator();
 
         var resolvedShares = requireNonNullElse(shares, new ArrayList<Share>())
@@ -56,8 +54,6 @@ public final class TagFactory {
                             Collection<Share> shares,
                             boolean deleted) {
 
-        // TODO verifiers should be injected
-        var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource);
         var validator = new TagValidator();
 
         return new Tag(

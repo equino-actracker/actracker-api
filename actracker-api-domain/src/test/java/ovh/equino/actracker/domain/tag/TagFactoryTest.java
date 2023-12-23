@@ -29,7 +29,8 @@ class TagFactoryTest {
     private static final String TAG_NAME = "tag name";
     private static final Boolean DELETED = TRUE;
 
-    private final TagDataSource tagDataSource = null;
+    @Mock
+    private TagsAccessibilityVerifier tagsAccessibilityVerifier;
     @Mock
     private TenantDataSource tenantDataSource;
 
@@ -37,7 +38,7 @@ class TagFactoryTest {
 
     @BeforeEach
     void init() {
-        tagFactory = new TagFactory(tagDataSource, tenantDataSource);
+        tagFactory = new TagFactory(tagsAccessibilityVerifier, tenantDataSource);
     }
 
     @Test
