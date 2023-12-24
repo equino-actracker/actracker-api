@@ -1,5 +1,6 @@
 package ovh.equino.actracker.domain.activity;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -52,6 +53,11 @@ class ActivityTest {
     private MetricsAccessibilityVerifier metricsAccessibilityVerifier;
     @Mock
     private ActivityValidator validator;
+
+    @BeforeEach
+    void init() {
+        when(actorExtractor.getActor()).thenReturn(CREATOR);
+    }
 
     @Nested
     @DisplayName("rename")

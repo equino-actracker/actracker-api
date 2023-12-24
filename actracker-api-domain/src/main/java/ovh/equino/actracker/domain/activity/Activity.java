@@ -71,6 +71,7 @@ public final class Activity implements Entity {
     }
 
     public void rename(String newTitle, User editor) {
+        User actor = actorExtractor.getActor();
         if (!creator.equals(editor) && !activitiesAccessibilityVerifier.isAccessibleFor(editor, this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
@@ -82,6 +83,7 @@ public final class Activity implements Entity {
     }
 
     public void start(Instant startTime, User updater) {
+        User actor = actorExtractor.getActor();
         if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessibleFor(updater, this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
@@ -93,6 +95,7 @@ public final class Activity implements Entity {
     }
 
     public void finish(Instant endTime, User updater) {
+        User actor = actorExtractor.getActor();
         if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessibleFor(updater, this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
@@ -104,6 +107,7 @@ public final class Activity implements Entity {
     }
 
     public void updateComment(String comment, User updater) {
+        User actor = actorExtractor.getActor();
         if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessibleFor(updater, this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
@@ -115,6 +119,7 @@ public final class Activity implements Entity {
     }
 
     public void assignTag(TagId tagId, User updater) {
+        User actor = actorExtractor.getActor();
         if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessibleFor(updater, this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
@@ -130,6 +135,7 @@ public final class Activity implements Entity {
     }
 
     public void removeTag(TagId tagId, User updater) {
+        User actor = actorExtractor.getActor();
         if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessibleFor(updater, this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
@@ -144,6 +150,7 @@ public final class Activity implements Entity {
     }
 
     public void setMetricValue(MetricValue newMetricValue, User updater) {
+        User actor = actorExtractor.getActor();
         MetricId metricId = new MetricId(newMetricValue.metricId());
         if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessibleFor(updater, this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
@@ -165,6 +172,7 @@ public final class Activity implements Entity {
     }
 
     public void unsetMetricValue(MetricId metricId, User updater) {
+        User actor = actorExtractor.getActor();
         if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessibleFor(updater, this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
@@ -183,6 +191,7 @@ public final class Activity implements Entity {
     }
 
     public void delete(User remover) {
+        User actor = actorExtractor.getActor();
         if (!creator.equals(remover) && !activitiesAccessibilityVerifier.isAccessibleFor(remover, this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }

@@ -54,6 +54,7 @@ public final class TagSet implements Entity {
     }
 
     public void rename(String newName, User updater) {
+        User actor = actorExtractor.getActor();
         if (!creator.equals(updater) && !tagSetsAccessibilityVerifier.isAccessibleFor(updater, this.id)) {
             throw new EntityNotFoundException(TagSet.class, id.id());
         }
@@ -65,6 +66,7 @@ public final class TagSet implements Entity {
     }
 
     public void assignTag(TagId newTag, User updater) {
+        User actor = actorExtractor.getActor();
         if (!creator.equals(updater) && !tagSetsAccessibilityVerifier.isAccessibleFor(updater, this.id)) {
             throw new EntityNotFoundException(TagSet.class, id.id());
         }
@@ -80,6 +82,7 @@ public final class TagSet implements Entity {
     }
 
     public void removeTag(TagId tag, User updater) {
+        User actor = actorExtractor.getActor();
         if (!creator.equals(updater) && !tagSetsAccessibilityVerifier.isAccessibleFor(updater, this.id)) {
             throw new EntityNotFoundException(TagSet.class, id.id());
         }
@@ -94,6 +97,7 @@ public final class TagSet implements Entity {
     }
 
     public void delete(User remover) {
+        User actor = actorExtractor.getActor();
         if (!creator.equals(remover) && !tagSetsAccessibilityVerifier.isAccessibleFor(remover, this.id)) {
             throw new EntityNotFoundException(TagSet.class, id.id());
         }
