@@ -58,9 +58,9 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     actorExtractor,
-                    validator,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
 
             // when
@@ -80,9 +80,9 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     actorExtractor,
-                    validator,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
@@ -101,9 +101,9 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     actorExtractor,
-                    validator,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             User unauthorizedUser = new User(randomUUID());
             when(tagSetsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
@@ -123,9 +123,9 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     actorExtractor,
-                    validator,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             User unauthorizedUser = new User(randomUUID());
             when(tagSetsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
@@ -150,9 +150,9 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     actorExtractor,
-                    validator,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             TagId newTag = new TagId(randomUUID());
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
@@ -175,9 +175,9 @@ class TagSetTest {
                     singleton(existingTag),
                     !DELETED,
                     actorExtractor,
-                    validator,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
             TagId newTag = new TagId();
@@ -200,9 +200,9 @@ class TagSetTest {
                     singleton(existingTag),
                     !DELETED,
                     actorExtractor,
-                    validator,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
@@ -222,9 +222,9 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     actorExtractor,
-                    validator,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             TagId newTag = new TagId(randomUUID());
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
@@ -245,9 +245,9 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     actorExtractor,
-                    validator,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
             doThrow(EntityInvalidException.class).when(validator).validate(any());
@@ -267,9 +267,9 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     actorExtractor,
-                    validator,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             TagId newTag = new TagId();
             User unauthorizedUser = new User(randomUUID());
@@ -290,9 +290,9 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     actorExtractor,
-                    validator,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             TagId newTag = new TagId();
             User unauthorizedUser = new User(randomUUID());
@@ -320,9 +320,9 @@ class TagSetTest {
                     List.of(tagToPreserve, tagToRemove),
                     !DELETED,
                     actorExtractor,
-                    validator,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
@@ -343,9 +343,9 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     actorExtractor,
-                    validator,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
@@ -367,9 +367,9 @@ class TagSetTest {
                     singleton(existingTag),
                     !DELETED,
                     actorExtractor,
-                    validator,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
@@ -391,9 +391,9 @@ class TagSetTest {
                     List.of(tagToRemove),
                     !DELETED,
                     actorExtractor,
-                    validator,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
@@ -414,9 +414,9 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     actorExtractor,
-                    validator,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
             doThrow(EntityInvalidException.class).when(validator).validate(any());
@@ -437,9 +437,9 @@ class TagSetTest {
                     singleton(existingTag),
                     !DELETED,
                     actorExtractor,
-                    validator,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             User unauthorizedUser = new User(randomUUID());
             when(tagSetsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
@@ -460,9 +460,9 @@ class TagSetTest {
                     singleton(existingTag),
                     !DELETED,
                     actorExtractor,
-                    validator,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             User unauthorizedUser = new User(randomUUID());
             when(tagSetsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
@@ -487,9 +487,9 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     actorExtractor,
-                    validator,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
 
             // when
@@ -509,9 +509,9 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     actorExtractor,
-                    validator,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
@@ -530,9 +530,9 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     actorExtractor,
-                    validator,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             User unauthorizedUser = new User(randomUUID());
             when(tagSetsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
@@ -552,9 +552,9 @@ class TagSetTest {
                     EMPTY_TAGS,
                     !DELETED,
                     actorExtractor,
-                    validator,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             User unauthorizedUser = new User(randomUUID());
             when(tagSetsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);

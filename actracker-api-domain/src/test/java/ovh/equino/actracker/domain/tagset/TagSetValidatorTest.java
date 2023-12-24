@@ -45,9 +45,9 @@ class TagSetValidatorTest {
                 singletonList(new TagId()),
                 !DELETED,
                 actorExtractor,
-                validator,
                 tagSetsAccessibilityVerifier,
-                tagsAccessibilityVerifier
+                tagsAccessibilityVerifier,
+                validator
         );
 
         // then
@@ -64,9 +64,9 @@ class TagSetValidatorTest {
                 singletonList(new TagId()),
                 !DELETED,
                 actorExtractor,
-                validator,
                 tagSetsAccessibilityVerifier,
-                tagsAccessibilityVerifier
+                tagsAccessibilityVerifier,
+                validator
         );
         List<String> validationErrors = List.of(EMPTY_NAME_ERROR);
 
@@ -86,9 +86,9 @@ class TagSetValidatorTest {
                 singletonList(new TagId()),
                 !DELETED,
                 actorExtractor,
-                validator,
                 tagSetsAccessibilityVerifier,
-                tagsAccessibilityVerifier
+                tagsAccessibilityVerifier,
+                validator
         );
         List<String> validationErrors = List.of(EMPTY_NAME_ERROR);
 

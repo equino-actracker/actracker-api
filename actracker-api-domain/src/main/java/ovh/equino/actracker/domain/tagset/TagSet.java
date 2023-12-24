@@ -37,9 +37,9 @@ public final class TagSet implements Entity {
            Collection<TagId> tags,
            boolean deleted,
            ActorExtractor actorExtractor,
-           TagSetValidator validator,
            TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier,
-           TagsAccessibilityVerifier tagsAccessibilityVerifier) {
+           TagsAccessibilityVerifier tagsAccessibilityVerifier,
+           TagSetValidator validator) {
 
         this.id = requireNonNull(id);
         this.creator = requireNonNull(creator);

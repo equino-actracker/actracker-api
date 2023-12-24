@@ -43,9 +43,9 @@ public final class TagSetFactory {
                 nonNullTags,
                 !DELETED,
                 actorExtractor,
-                validator,
                 tagSetsAccessibilityVerifier,
-                tagsAccessibilityVerifier
+                tagsAccessibilityVerifier,
+                validator
         );
         tagSet.validate();
         return tagSet;
@@ -66,9 +66,9 @@ public final class TagSetFactory {
                 tags,
                 deleted,
                 actorExtractor,
-                validator,
                 tagSetsAccessibilityVerifier,
-                tagsAccessibilityVerifier
+                tagsAccessibilityVerifier,
+                validator
         );
     }
 
