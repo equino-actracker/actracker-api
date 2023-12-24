@@ -154,13 +154,11 @@ class ActivityFactoryTest {
     @Test
     void shouldReconstituteActivity() {
         // given
-        var actor = new User(randomUUID());
         var tags = List.of(new TagId(), new TagId());
         var metricValues = List.of(new MetricValue(randomUUID(), TEN), new MetricValue(randomUUID(), ONE));
 
         // when
         var activity = activityFactory.reconstitute(
-                actor,
                 ACTIVITY_ID,
                 CREATOR,
                 ACTIVITY_TITLE,

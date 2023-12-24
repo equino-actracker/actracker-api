@@ -111,7 +111,6 @@ class TagFactoryTest {
     @Test
     void shouldReconstituteTag() {
         // given
-        var actor = new User(randomUUID());
         var shares = List.of(new Share("grantee1"), new Share("grantee2"));
         var metrics = List.of(
                 new Metric(new MetricId(), CREATOR, "metric1", NUMERIC, DELETED),
@@ -119,7 +118,7 @@ class TagFactoryTest {
         );
 
         // when
-        var tag = tagFactory.reconstitute(actor, TAG_ID, CREATOR, TAG_NAME, metrics, shares, DELETED);
+        var tag = tagFactory.reconstitute(TAG_ID, CREATOR, TAG_NAME, metrics, shares, DELETED);
 
         // then
         assertThat(tag.id()).isEqualTo(TAG_ID);

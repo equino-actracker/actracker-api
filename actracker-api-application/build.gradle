@@ -1,4 +1,4 @@
 dependencies {
     implementation project(':actracker-api-domain')
-    implementation 'ovh.equino.security:equino-security:0.3.2'
+    implementation 'ovh.equino.security:equino-security:0.3.2' // TODO delete
 }

@@ -36,20 +36,19 @@ public final class Activity implements Entity {
     private final MetricsAccessibilityVerifier metricsAccessibilityVerifier;
     private final ActivityValidator validator;
 
-    Activity(
-            ActivityId id,
-            User creator,
-            String title,
-            Instant startTime,
-            Instant endTime,
-            String comment,
-            Collection<TagId> tags,
-            Collection<MetricValue> metricValues,
-            boolean deleted,
-            ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier,
-            TagsAccessibilityVerifier tagsAccessibilityVerifier,
-            MetricsAccessibilityVerifier metricsAccessibilityVerifier,
-            ActivityValidator validator) {
+    Activity(ActivityId id,
+             User creator,
+             String title,
+             Instant startTime,
+             Instant endTime,
+             String comment,
+             Collection<TagId> tags,
+             Collection<MetricValue> metricValues,
+             boolean deleted,
+             ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier,
+             TagsAccessibilityVerifier tagsAccessibilityVerifier,
+             MetricsAccessibilityVerifier metricsAccessibilityVerifier,
+             ActivityValidator validator) {
 
         this.id = requireNonNull(id);
         this.creator = requireNonNull(creator);

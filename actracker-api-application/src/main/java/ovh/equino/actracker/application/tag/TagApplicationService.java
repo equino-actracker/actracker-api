@@ -130,7 +130,6 @@ public class TagApplicationService {
                 )
                 .toList();
         Tag tag = tagFactory.reconstitute(
-                updater,
                 new TagId(tagDto.id()),
                 new User(tagDto.creatorId()),
                 tagDto.name(),
@@ -170,7 +169,6 @@ public class TagApplicationService {
                 )
                 .toList();
         Tag tag = tagFactory.reconstitute(
-                remover,
                 new TagId(tagDto.id()),
                 new User(tagDto.creatorId()),
                 tagDto.name(),
@@ -203,7 +201,6 @@ public class TagApplicationService {
                 )
                 .toList();
         Tag tag = tagFactory.reconstitute(
-                updater,
                 new TagId(tagDto.id()),
                 new User(tagDto.creatorId()),
                 tagDto.name(),
@@ -244,7 +241,6 @@ public class TagApplicationService {
                 )
                 .toList();
         Tag tag = tagFactory.reconstitute(
-                updater,
                 new TagId(tagDto.id()),
                 new User(tagDto.creatorId()),
                 tagDto.name(),
@@ -285,7 +281,6 @@ public class TagApplicationService {
                 )
                 .toList();
         Tag tag = tagFactory.reconstitute(
-                updater,
                 new TagId(tagDto.id()),
                 new User(tagDto.creatorId()),
                 tagDto.name(),
@@ -326,7 +321,6 @@ public class TagApplicationService {
                 )
                 .toList();
         Tag tag = tagFactory.reconstitute(
-                granter,
                 new TagId(tagDto.id()),
                 new User(tagDto.creatorId()),
                 tagDto.name(),
@@ -369,7 +363,6 @@ public class TagApplicationService {
                 )
                 .toList();
         Tag tag = tagFactory.reconstitute(
-                granter,
                 new TagId(tagDto.id()),
                 new User(tagDto.creatorId()),
                 tagDto.name(),

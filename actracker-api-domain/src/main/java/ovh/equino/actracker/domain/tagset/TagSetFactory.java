@@ -48,8 +48,7 @@ public final class TagSetFactory {
         return tagSet;
     }
 
-    public TagSet reconstitute(User actor,  // TODO remove
-                               TagSetId id,
+    public TagSet reconstitute(TagSetId id,
                                User creator,
                                String name,
                                Collection<TagId> tags,

@@ -65,8 +65,7 @@ public final class ActivityFactory {
         return activity;
     }
 
-    public Activity reconstitute(User actor,    // TODO remove
-                                 ActivityId id,
+    public Activity reconstitute(ActivityId id,
                                  User creator,
                                  String title,
                                  Instant startTime,

@@ -149,7 +149,7 @@ public class ActivityApplicationService {
 
         for (ActivityId activityId : activitiesToFinish) {
             Activity activityToFinish = activityRepository.findById(activityId.id())
-                    .map(activity -> activityFactory.reconstitute(switcher, activityId, new User(activity.creatorId()), activity.title(), activity.startTime(), activity.endTime(), activity.comment(), activity.tags().stream().map(TagId::new).toList(), activity.metricValues(), activity.deleted()))
+                    .map(activity -> activityFactory.reconstitute(activityId, new User(activity.creatorId()), activity.title(), activity.startTime(), activity.endTime(), activity.comment(), activity.tags().stream().map(TagId::new).toList(), activity.metricValues(), activity.deleted()))
                     .orElseThrow(() -> {
                         String message = "Could not find activity to stop with ID=%s".formatted(activityId.id());
                         return new RuntimeException(message);
@@ -168,7 +168,6 @@ public class ActivityApplicationService {
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
         Activity activity = activityFactory.reconstitute(
-                updater,
                 new ActivityId(activityDto.id()),
                 new User(activityDto.creatorId()),
                 activityDto.title(),
@@ -201,7 +200,6 @@ public class ActivityApplicationService {
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
         Activity activity = activityFactory.reconstitute(
-                updater,
                 new ActivityId(activityDto.id()),
                 new User(activityDto.creatorId()),
                 activityDto.title(),
@@ -234,7 +232,6 @@ public class ActivityApplicationService {
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
         Activity activity = activityFactory.reconstitute(
-                updater,
                 new ActivityId(activityDto.id()),
                 new User(activityDto.creatorId()),
                 activityDto.title(),
@@ -267,7 +264,6 @@ public class ActivityApplicationService {
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
         Activity activity = activityFactory.reconstitute(
-                updater,
                 new ActivityId(activityDto.id()),
                 new User(activityDto.creatorId()),
                 activityDto.title(),
@@ -300,7 +296,6 @@ public class ActivityApplicationService {
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
         Activity activity = activityFactory.reconstitute(
-                updater,
                 new ActivityId(activityDto.id()),
                 new User(activityDto.creatorId()),
                 activityDto.title(),
@@ -333,7 +328,6 @@ public class ActivityApplicationService {
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
         Activity activity = activityFactory.reconstitute(
-                updater,
                 new ActivityId(activityDto.id()),
                 new User(activityDto.creatorId()),
                 activityDto.title(),
@@ -366,7 +360,6 @@ public class ActivityApplicationService {
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
         Activity activity = activityFactory.reconstitute(
-                updater,
                 new ActivityId(activityDto.id()),
                 new User(activityDto.creatorId()),
                 activityDto.title(),
@@ -399,7 +392,6 @@ public class ActivityApplicationService {
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
         Activity activity = activityFactory.reconstitute(
-                updater,
                 new ActivityId(activityDto.id()),
                 new User(activityDto.creatorId()),
                 activityDto.title(),
@@ -432,7 +424,6 @@ public class ActivityApplicationService {
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
         Activity activity = activityFactory.reconstitute(
-                remover,
                 new ActivityId(activityDto.id()),
                 new User(activityDto.creatorId()),
                 activityDto.title(),

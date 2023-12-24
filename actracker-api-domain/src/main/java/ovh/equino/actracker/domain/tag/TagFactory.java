@@ -46,8 +46,7 @@ public final class TagFactory {
         return tag;
     }
 
-    public Tag reconstitute(User actor, // TODO remove
-                            TagId id,
+    public Tag reconstitute(TagId id,
                             User creator,
                             String name,
                             Collection<Metric> metrics,

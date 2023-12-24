@@ -63,8 +63,7 @@ public final class DashboardFactory {
         return dashboard;
     }
 
-    public Dashboard reconstitute(User actor, // TODO remove
-                                  DashboardId id,
+    public Dashboard reconstitute(DashboardId id,
                                   User creator,
                                   String name,
                                   Collection<Chart> charts,
