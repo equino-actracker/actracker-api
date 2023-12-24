@@ -45,6 +45,7 @@ public final class TagFactory {
                 requireNonNullElse(metrics, emptyList()),
                 resolvedShares,
                 !DELETED,
+                actorExtractor,
                 tagsAccessibilityVerifier,
                 validator
         );
@@ -68,6 +69,7 @@ public final class TagFactory {
                 metrics,
                 shares,
                 deleted,
+                actorExtractor,
                 tagsAccessibilityVerifier,
                 validator
         );

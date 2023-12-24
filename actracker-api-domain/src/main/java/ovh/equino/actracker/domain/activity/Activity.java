@@ -8,6 +8,7 @@ import ovh.equino.actracker.domain.tag.MetricId;
 import ovh.equino.actracker.domain.tag.MetricsAccessibilityVerifier;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
+import ovh.equino.actracker.domain.user.ActorExtractor;
 import ovh.equino.actracker.domain.user.User;
 
 import java.time.Instant;
@@ -31,6 +32,7 @@ public final class Activity implements Entity {
     private final List<MetricValue> metricValues;
     private boolean deleted;
 
+    private final ActorExtractor actorExtractor;
     private final ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier;
     private final TagsAccessibilityVerifier tagsAccessibilityVerifier;
     private final MetricsAccessibilityVerifier metricsAccessibilityVerifier;
@@ -45,6 +47,7 @@ public final class Activity implements Entity {
              Collection<TagId> tags,
              Collection<MetricValue> metricValues,
              boolean deleted,
+             ActorExtractor actorExtractor,
              ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier,
              TagsAccessibilityVerifier tagsAccessibilityVerifier,
              MetricsAccessibilityVerifier metricsAccessibilityVerifier,
@@ -60,6 +63,7 @@ public final class Activity implements Entity {
         this.metricValues = new ArrayList<>(metricValues);
         this.deleted = deleted;
 
+        this.actorExtractor = actorExtractor;
         this.activitiesAccessibilityVerifier = activitiesAccessibilityVerifier;
         this.tagsAccessibilityVerifier = tagsAccessibilityVerifier;
         this.metricsAccessibilityVerifier = metricsAccessibilityVerifier;

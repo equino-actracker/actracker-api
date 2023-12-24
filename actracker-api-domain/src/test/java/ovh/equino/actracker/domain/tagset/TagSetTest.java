@@ -11,6 +11,7 @@ import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
+import ovh.equino.actracker.domain.user.ActorExtractor;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
@@ -33,6 +34,8 @@ class TagSetTest {
     private static final boolean DELETED = true;
 
     @Mock
+    private ActorExtractor actorExtractor;
+    @Mock
     private TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier;
     @Mock
     private TagsAccessibilityVerifier tagsAccessibilityVerifier;
@@ -54,6 +57,7 @@ class TagSetTest {
                     TAG_SET_NAME,
                     EMPTY_TAGS,
                     !DELETED,
+                    actorExtractor,
                     validator,
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
@@ -75,6 +79,7 @@ class TagSetTest {
                     TAG_SET_NAME,
                     EMPTY_TAGS,
                     !DELETED,
+                    actorExtractor,
                     validator,
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
@@ -95,6 +100,7 @@ class TagSetTest {
                     TAG_SET_NAME,
                     EMPTY_TAGS,
                     !DELETED,
+                    actorExtractor,
                     validator,
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
@@ -116,6 +122,7 @@ class TagSetTest {
                     TAG_SET_NAME,
                     EMPTY_TAGS,
                     !DELETED,
+                    actorExtractor,
                     validator,
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
@@ -142,6 +149,7 @@ class TagSetTest {
                     TAG_SET_NAME,
                     EMPTY_TAGS,
                     !DELETED,
+                    actorExtractor,
                     validator,
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
@@ -166,6 +174,7 @@ class TagSetTest {
                     TAG_SET_NAME,
                     singleton(existingTag),
                     !DELETED,
+                    actorExtractor,
                     validator,
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
@@ -190,6 +199,7 @@ class TagSetTest {
                     TAG_SET_NAME,
                     singleton(existingTag),
                     !DELETED,
+                    actorExtractor,
                     validator,
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
@@ -211,6 +221,7 @@ class TagSetTest {
                     TAG_SET_NAME,
                     EMPTY_TAGS,
                     !DELETED,
+                    actorExtractor,
                     validator,
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
@@ -233,6 +244,7 @@ class TagSetTest {
                     TAG_SET_NAME,
                     EMPTY_TAGS,
                     !DELETED,
+                    actorExtractor,
                     validator,
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
@@ -254,6 +266,7 @@ class TagSetTest {
                     TAG_SET_NAME,
                     EMPTY_TAGS,
                     !DELETED,
+                    actorExtractor,
                     validator,
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
@@ -276,6 +289,7 @@ class TagSetTest {
                     TAG_SET_NAME,
                     EMPTY_TAGS,
                     !DELETED,
+                    actorExtractor,
                     validator,
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
@@ -305,6 +319,7 @@ class TagSetTest {
                     TAG_SET_NAME,
                     List.of(tagToPreserve, tagToRemove),
                     !DELETED,
+                    actorExtractor,
                     validator,
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
@@ -327,6 +342,7 @@ class TagSetTest {
                     TAG_SET_NAME,
                     EMPTY_TAGS,
                     !DELETED,
+                    actorExtractor,
                     validator,
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
@@ -350,6 +366,7 @@ class TagSetTest {
                     TAG_SET_NAME,
                     singleton(existingTag),
                     !DELETED,
+                    actorExtractor,
                     validator,
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
@@ -373,6 +390,7 @@ class TagSetTest {
                     TAG_SET_NAME,
                     List.of(tagToRemove),
                     !DELETED,
+                    actorExtractor,
                     validator,
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
@@ -395,6 +413,7 @@ class TagSetTest {
                     TAG_SET_NAME,
                     EMPTY_TAGS,
                     !DELETED,
+                    actorExtractor,
                     validator,
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
@@ -417,6 +436,7 @@ class TagSetTest {
                     TAG_SET_NAME,
                     singleton(existingTag),
                     !DELETED,
+                    actorExtractor,
                     validator,
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
@@ -439,6 +459,7 @@ class TagSetTest {
                     TAG_SET_NAME,
                     singleton(existingTag),
                     !DELETED,
+                    actorExtractor,
                     validator,
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
@@ -465,6 +486,7 @@ class TagSetTest {
                     TAG_SET_NAME,
                     EMPTY_TAGS,
                     !DELETED,
+                    actorExtractor,
                     validator,
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
@@ -486,6 +508,7 @@ class TagSetTest {
                     TAG_SET_NAME,
                     EMPTY_TAGS,
                     !DELETED,
+                    actorExtractor,
                     validator,
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
@@ -506,6 +529,7 @@ class TagSetTest {
                     TAG_SET_NAME,
                     EMPTY_TAGS,
                     !DELETED,
+                    actorExtractor,
                     validator,
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
@@ -527,6 +551,7 @@ class TagSetTest {
                     TAG_SET_NAME,
                     EMPTY_TAGS,
                     !DELETED,
+                    actorExtractor,
                     validator,
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier

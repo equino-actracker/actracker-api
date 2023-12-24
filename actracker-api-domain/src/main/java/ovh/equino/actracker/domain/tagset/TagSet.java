@@ -6,6 +6,7 @@ import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
+import ovh.equino.actracker.domain.user.ActorExtractor;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.Collection;
@@ -25,6 +26,7 @@ public final class TagSet implements Entity {
     private final Set<TagId> tags;
     private boolean deleted;
 
+    private final ActorExtractor actorExtractor;
     private final TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier;
     private final TagsAccessibilityVerifier tagsAccessibilityVerifier;
     private final TagSetValidator validator;
@@ -34,6 +36,7 @@ public final class TagSet implements Entity {
            String name,
            Collection<TagId> tags,
            boolean deleted,
+           ActorExtractor actorExtractor,
            TagSetValidator validator,
            TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier,
            TagsAccessibilityVerifier tagsAccessibilityVerifier) {
@@ -44,6 +47,7 @@ public final class TagSet implements Entity {
         this.tags = new HashSet<>(tags);
         this.deleted = deleted;
 
+        this.actorExtractor = actorExtractor;
         this.tagSetsAccessibilityVerifier = tagSetsAccessibilityVerifier;
         this.tagsAccessibilityVerifier = tagsAccessibilityVerifier;
         this.validator = validator;

@@ -10,6 +10,7 @@ import ovh.equino.actracker.domain.exception.EntityEditForbidden;
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.share.Share;
+import ovh.equino.actracker.domain.user.ActorExtractor;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
@@ -32,6 +33,8 @@ class TagTest {
     private static final boolean DELETED = true;
 
     @Mock
+    private ActorExtractor actorExtractor;
+    @Mock
     private TagsAccessibilityVerifier tagsAccessibilityVerifier;
     @Mock
     private TagValidator validator;
@@ -51,6 +54,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -72,6 +76,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -92,6 +97,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -113,6 +119,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -141,6 +148,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -166,6 +174,7 @@ class TagTest {
                     singleton(existingMetric),
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -191,6 +200,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -211,6 +221,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -233,6 +244,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -265,6 +277,7 @@ class TagTest {
                     List.of(existingMetric1, existingMetric2, metricToDelete),
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -292,6 +305,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -314,6 +328,7 @@ class TagTest {
                     singleton(existingMetric),
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -341,6 +356,7 @@ class TagTest {
                     List.of(deletedMetric, existingMetric),
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -367,6 +383,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -388,6 +405,7 @@ class TagTest {
                     singletonList(existingMetric),
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -410,6 +428,7 @@ class TagTest {
                     singletonList(existingMetric),
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -441,6 +460,7 @@ class TagTest {
                     List.of(existingMetric, metricToRename),
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -468,6 +488,7 @@ class TagTest {
                     singleton(existingMetric),
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -495,6 +516,7 @@ class TagTest {
                     List.of(nonDeletedMetric, deletedMetric),
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -521,6 +543,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -542,6 +565,7 @@ class TagTest {
                     singletonList(existingMetric),
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -564,6 +588,7 @@ class TagTest {
                     singletonList(existingMetric),
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -594,6 +619,7 @@ class TagTest {
                     List.of(metric1, metric2),
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -621,6 +647,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -641,6 +668,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -662,6 +690,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -691,6 +720,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -713,6 +743,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -736,6 +767,7 @@ class TagTest {
                     EMPTY_METRICS,
                     singletonList(existingShare),
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -759,6 +791,7 @@ class TagTest {
                     EMPTY_METRICS,
                     singletonList(existingShare),
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -782,6 +815,7 @@ class TagTest {
                     EMPTY_METRICS,
                     singletonList(existingShare),
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -805,6 +839,7 @@ class TagTest {
                     EMPTY_METRICS,
                     singletonList(existingShare),
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -826,6 +861,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -847,6 +883,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -869,6 +906,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -899,6 +937,7 @@ class TagTest {
                     EMPTY_METRICS,
                     singletonList(existingShare),
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -921,6 +960,7 @@ class TagTest {
                     EMPTY_METRICS,
                     singletonList(existingShare),
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -944,6 +984,7 @@ class TagTest {
                     EMPTY_METRICS,
                     List.of(share1, share2),
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -965,6 +1006,7 @@ class TagTest {
                     EMPTY_METRICS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -986,6 +1028,7 @@ class TagTest {
                     EMPTY_METRICS,
                     singletonList(existingShare),
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );
@@ -1008,6 +1051,7 @@ class TagTest {
                     EMPTY_METRICS,
                     singletonList(existingShare),
                     !DELETED,
+                    actorExtractor,
                     tagsAccessibilityVerifier,
                     validator
             );

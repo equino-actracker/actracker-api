@@ -42,6 +42,7 @@ public final class TagSetFactory {
                 name,
                 nonNullTags,
                 !DELETED,
+                actorExtractor,
                 validator,
                 tagSetsAccessibilityVerifier,
                 tagsAccessibilityVerifier
@@ -64,6 +65,7 @@ public final class TagSetFactory {
                 name,
                 tags,
                 deleted,
+                actorExtractor,
                 validator,
                 tagSetsAccessibilityVerifier,
                 tagsAccessibilityVerifier

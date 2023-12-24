@@ -8,6 +8,7 @@ import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.tag.MetricsAccessibilityVerifier;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
+import ovh.equino.actracker.domain.user.ActorExtractor;
 import ovh.equino.actracker.domain.user.User;
 
 import java.time.Instant;
@@ -34,6 +35,8 @@ class ActivityValidatorTest {
     private static final boolean DELETED = true;
 
     @Mock
+    private ActorExtractor actorExtractor;
+    @Mock
     private ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier;
     @Mock
     private TagsAccessibilityVerifier tagsAccessibilityVerifier;
@@ -55,6 +58,7 @@ class ActivityValidatorTest {
                 EMPTY_TAGS,
                 EMPTY_METRIC_VALUES,
                 !DELETED,
+                actorExtractor,
                 activitiesAccessibilityVerifier,
                 tagsAccessibilityVerifier,
                 metricsAccessibilityVerifier,
@@ -80,6 +84,7 @@ class ActivityValidatorTest {
                 EMPTY_TAGS,
                 EMPTY_METRIC_VALUES,
                 !DELETED,
+                actorExtractor,
                 activitiesAccessibilityVerifier,
                 tagsAccessibilityVerifier,
                 metricsAccessibilityVerifier,

@@ -12,6 +12,7 @@ import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
+import ovh.equino.actracker.domain.user.ActorExtractor;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
@@ -35,6 +36,8 @@ class DashboardTest {
     private static final boolean DELETED = true;
 
     @Mock
+    private ActorExtractor actorExtractor;
+    @Mock
     private DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier;
     @Mock
     private TagsAccessibilityVerifier tagsAccessibilityVerifier;
@@ -57,6 +60,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -79,6 +83,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -100,6 +105,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -122,6 +128,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -160,6 +167,7 @@ class DashboardTest {
                     singletonList(existingChart),
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -185,6 +193,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -207,6 +216,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -228,6 +238,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -250,6 +261,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -279,6 +291,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -302,6 +315,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -326,6 +340,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     singletonList(existingShare),
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -350,6 +365,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     singletonList(existingShare),
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -374,6 +390,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     singletonList(existingShare),
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -398,6 +415,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     singletonList(existingShare),
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -421,6 +439,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -443,6 +462,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -466,6 +486,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -497,6 +518,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     singletonList(existingShare),
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -520,6 +542,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     singletonList(existingShare),
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -545,6 +568,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     List.of(existingShare1, existingShare2),
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -567,6 +591,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -589,6 +614,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     singletonList(existingShare),
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -612,6 +638,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     singletonList(existingShare),
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -643,6 +670,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -679,6 +707,7 @@ class DashboardTest {
                     List.of(existingNonDeletedChart, existingDeletedChart),
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -708,6 +737,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -730,6 +760,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -752,6 +783,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -775,6 +807,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -825,6 +858,7 @@ class DashboardTest {
                     List.of(existingNonDeletedChart, existingDeletedChart, chartToDelete),
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -853,6 +887,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -876,6 +911,7 @@ class DashboardTest {
                     singletonList(existingChart),
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -911,6 +947,7 @@ class DashboardTest {
                     List.of(existingNonDeletedChart, existingDeletedChart),
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -933,6 +970,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -961,6 +999,7 @@ class DashboardTest {
                     List.of(existingChart),
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -990,6 +1029,7 @@ class DashboardTest {
                     List.of(existingChart),
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator

@@ -59,6 +59,7 @@ public final class DashboardFactory {
                 nonNullCharts,
                 resolvedShares,
                 !DELETED,
+                actorExtractor,
                 dashboardsAccessibilityVerifier,
                 tagsAccessibilityVerifier,
                 validator
@@ -83,6 +84,7 @@ public final class DashboardFactory {
                 new ArrayList<>(charts),
                 new ArrayList<>(shares),
                 deleted,
+                actorExtractor,
                 dashboardsAccessibilityVerifier,
                 tagsAccessibilityVerifier,
                 validator
