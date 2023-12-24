@@ -9,6 +9,7 @@ import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tenant.TenantDataSource;
 import ovh.equino.actracker.domain.tenant.TenantDto;
+import ovh.equino.actracker.domain.user.ActorExtractor;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
@@ -30,6 +31,8 @@ class TagFactoryTest {
     private static final Boolean DELETED = TRUE;
 
     @Mock
+    private ActorExtractor actorExtractor;
+    @Mock
     private TagsAccessibilityVerifier tagsAccessibilityVerifier;
     @Mock
     private TenantDataSource tenantDataSource;
@@ -38,7 +41,7 @@ class TagFactoryTest {
 
     @BeforeEach
     void init() {
-        tagFactory = new TagFactory(tagsAccessibilityVerifier, tenantDataSource);
+        tagFactory = new TagFactory(actorExtractor, tagsAccessibilityVerifier, tenantDataSource);
     }
 
     @Test

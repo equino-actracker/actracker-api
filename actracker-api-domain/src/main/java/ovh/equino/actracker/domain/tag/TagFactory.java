@@ -2,6 +2,7 @@ package ovh.equino.actracker.domain.tag;
 
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tenant.TenantDataSource;
+import ovh.equino.actracker.domain.user.ActorExtractor;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.ArrayList;
@@ -15,10 +16,15 @@ public final class TagFactory {
 
     private static final Boolean DELETED = TRUE;
 
+    private final ActorExtractor actorExtractor;
     private final TagsAccessibilityVerifier tagsAccessibilityVerifier;
     private final TenantDataSource tenantDataSource;
 
-    TagFactory(TagsAccessibilityVerifier tagsAccessibilityVerifier, TenantDataSource tenantDataSource) {
+    TagFactory(ActorExtractor actorExtractor,
+               TagsAccessibilityVerifier tagsAccessibilityVerifier,
+               TenantDataSource tenantDataSource) {
+
+        this.actorExtractor = actorExtractor;
         this.tagsAccessibilityVerifier = tagsAccessibilityVerifier;
         this.tenantDataSource = tenantDataSource;
     }

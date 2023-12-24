@@ -10,6 +10,7 @@ import ovh.equino.actracker.domain.tag.MetricId;
 import ovh.equino.actracker.domain.tag.MetricsAccessibilityVerifier;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
+import ovh.equino.actracker.domain.user.ActorExtractor;
 import ovh.equino.actracker.domain.user.User;
 
 import java.time.Instant;
@@ -38,6 +39,8 @@ class ActivityFactoryTest {
     private static final Boolean DELETED = TRUE;
 
     @Mock
+    private ActorExtractor actorExtractor;
+    @Mock
     private ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier;
     @Mock
     private TagsAccessibilityVerifier tagsAccessibilityVerifier;
@@ -49,6 +52,7 @@ class ActivityFactoryTest {
     @BeforeEach
     void init() {
         activityFactory = new ActivityFactory(
+                actorExtractor,
                 activitiesAccessibilityVerifier,
                 tagsAccessibilityVerifier,
                 metricsAccessibilityVerifier

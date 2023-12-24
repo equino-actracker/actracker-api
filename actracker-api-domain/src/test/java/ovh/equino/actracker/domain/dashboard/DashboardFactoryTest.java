@@ -11,6 +11,7 @@ import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.tenant.TenantDataSource;
 import ovh.equino.actracker.domain.tenant.TenantDto;
+import ovh.equino.actracker.domain.user.ActorExtractor;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
@@ -35,6 +36,8 @@ class DashboardFactoryTest {
     private static final Boolean DELETED = TRUE;
 
     @Mock
+    private ActorExtractor actorExtractor;
+    @Mock
     private DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier;
     @Mock
     private TagsAccessibilityVerifier tagsAccessibilityVerifier;
@@ -46,6 +49,7 @@ class DashboardFactoryTest {
     @BeforeEach
     void init() {
         dashboardFactory = new DashboardFactory(
+                actorExtractor,
                 dashboardsAccessibilityVerifier,
                 tagsAccessibilityVerifier,
                 tenantDataSource

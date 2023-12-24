@@ -5,6 +5,7 @@ import ovh.equino.actracker.domain.tag.MetricId;
 import ovh.equino.actracker.domain.tag.MetricsAccessibilityVerifier;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
+import ovh.equino.actracker.domain.user.ActorExtractor;
 import ovh.equino.actracker.domain.user.User;
 
 import java.time.Instant;
@@ -18,14 +19,17 @@ public final class ActivityFactory {
 
     private static final Boolean DELETED = TRUE;
 
+    private final ActorExtractor actorExtractor;
     private final ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier;
     private final TagsAccessibilityVerifier tagsAccessibilityVerifier;
     private final MetricsAccessibilityVerifier metricsAccessibilityVerifier;
 
-    ActivityFactory(ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier,
+    ActivityFactory(ActorExtractor actorExtractor,
+                    ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier,
                     TagsAccessibilityVerifier tagsAccessibilityVerifier,
                     MetricsAccessibilityVerifier metricsAccessibilityVerifier) {
 
+        this.actorExtractor = actorExtractor;
         this.activitiesAccessibilityVerifier = activitiesAccessibilityVerifier;
         this.tagsAccessibilityVerifier = tagsAccessibilityVerifier;
         this.metricsAccessibilityVerifier = metricsAccessibilityVerifier;

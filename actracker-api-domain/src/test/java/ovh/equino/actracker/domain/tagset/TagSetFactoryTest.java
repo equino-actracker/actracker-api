@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
+import ovh.equino.actracker.domain.user.ActorExtractor;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
@@ -30,6 +31,8 @@ class TagSetFactoryTest {
     private static final Boolean DELETED = TRUE;
 
     @Mock
+    private ActorExtractor actorExtractor;
+    @Mock
     private TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier;
     @Mock
     private TagsAccessibilityVerifier tagsAccessibilityVerifier;
@@ -38,7 +41,7 @@ class TagSetFactoryTest {
 
     @BeforeEach
     void init() {
-        tagSetFactory = new TagSetFactory(tagSetsAccessibilityVerifier, tagsAccessibilityVerifier);
+        tagSetFactory = new TagSetFactory(actorExtractor, tagSetsAccessibilityVerifier, tagsAccessibilityVerifier);
     }
 
     @Test

@@ -3,6 +3,7 @@ package ovh.equino.actracker.domain.tagset;
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
+import ovh.equino.actracker.domain.user.ActorExtractor;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.ArrayList;
@@ -15,12 +16,15 @@ public final class TagSetFactory {
 
     private static final boolean DELETED = TRUE;
 
+    private final ActorExtractor actorExtractor;
     private final TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier;
     private final TagsAccessibilityVerifier tagsAccessibilityVerifier;
 
-    TagSetFactory(TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier,
+    TagSetFactory(ActorExtractor actorExtractor,
+                  TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier,
                   TagsAccessibilityVerifier tagsAccessibilityVerifier) {
 
+        this.actorExtractor = actorExtractor;
         this.tagSetsAccessibilityVerifier = tagSetsAccessibilityVerifier;
         this.tagsAccessibilityVerifier = tagsAccessibilityVerifier;
     }

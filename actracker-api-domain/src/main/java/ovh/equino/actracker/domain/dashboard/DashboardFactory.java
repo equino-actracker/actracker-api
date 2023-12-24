@@ -5,6 +5,7 @@ import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.tenant.TenantDataSource;
+import ovh.equino.actracker.domain.user.ActorExtractor;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.ArrayList;
@@ -21,13 +22,16 @@ public final class DashboardFactory {
 
     private final TenantDataSource tenantDataSource;
 
+    private final ActorExtractor actorExtractor;
     private final DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier;
     private final TagsAccessibilityVerifier tagsAccessibilityVerifier;
 
-    DashboardFactory(DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier,
+    DashboardFactory(ActorExtractor actorExtractor,
+                     DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier,
                      TagsAccessibilityVerifier tagsAccessibilityVerifier,
                      TenantDataSource tenantDataSource) {
 
+        this.actorExtractor = actorExtractor;
         this.dashboardsAccessibilityVerifier = dashboardsAccessibilityVerifier;
         this.tagsAccessibilityVerifier = tagsAccessibilityVerifier;
         this.tenantDataSource = tenantDataSource;
