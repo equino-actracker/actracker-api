@@ -59,7 +59,6 @@ public class ActivityApplicationService {
                 .toList();
 
         Activity activity = activityFactory.create(
-                creator,
                 createActivityCommand.activityTitle(),
                 createActivityCommand.activityStartTime(),
                 createActivityCommand.activityEndTime(),
@@ -120,7 +119,6 @@ public class ActivityApplicationService {
                 .toList();
 
         Activity newActivity = activityFactory.create(
-                switcher,
                 switchActivityCommand.activityTitle(),
                 switchActivityCommand.activityStartTime(),
                 switchActivityCommand.activityEndTime(),

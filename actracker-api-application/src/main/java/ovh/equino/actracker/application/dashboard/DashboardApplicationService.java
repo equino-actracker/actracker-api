@@ -73,7 +73,7 @@ public class DashboardApplicationService {
                 .stream()
                 .map(Share::new)
                 .toList();
-        Dashboard dashboard = dashboardFactory.create(creator, createDashboardCommand.name(), charts, shares);
+        Dashboard dashboard = dashboardFactory.create(createDashboardCommand.name(), charts, shares);
         dashboardRepository.add(dashboard.forStorage());
         dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
 

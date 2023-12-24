@@ -35,14 +35,14 @@ public final class ActivityFactory {
         this.metricsAccessibilityVerifier = metricsAccessibilityVerifier;
     }
 
-    public Activity create(User creator,
-                           String title,
+    public Activity create(String title,
                            Instant startTime,
                            Instant endTime,
                            String comment,
                            Collection<TagId> tags,
                            Collection<MetricValue> metricValues) {
 
+        var creator = actorExtractor.getActor();
         var validator = new ActivityValidator();
 
         var nonNullTags = requireNonNullElse(tags, new ArrayList<TagId>());

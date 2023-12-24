@@ -37,11 +37,11 @@ public final class DashboardFactory {
         this.tenantDataSource = tenantDataSource;
     }
 
-    public Dashboard create(User creator,
-                            String name,
+    public Dashboard create(String name,
                             Collection<Chart> charts,
                             Collection<Share> shares) {
 
+        var creator = actorExtractor.getActor();
         var validator = new DashboardValidator();
 
         var nonNullCharts = requireNonNullElse(charts, new ArrayList<Chart>());

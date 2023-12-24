@@ -29,8 +29,8 @@ public final class TagFactory {
         this.tenantDataSource = tenantDataSource;
     }
 
-    public Tag create(User creator, String name, Collection<Metric> metrics, Collection<Share> shares) {
-
+    public Tag create(String name, Collection<Metric> metrics, Collection<Share> shares) {
+        var creator = actorExtractor.getActor();
         var validator = new TagValidator();
 
         var resolvedShares = requireNonNullElse(shares, new ArrayList<Share>())

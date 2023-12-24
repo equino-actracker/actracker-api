@@ -46,7 +46,6 @@ public class TagSetApplicationService {
         User creator = new User(requesterIdentity.getId());
 
         TagSet newTagSet = tagSetFactory.create(
-                creator,
                 createTagSetCommand.name(),
                 toTagIds(createTagSetCommand.tags())
         );

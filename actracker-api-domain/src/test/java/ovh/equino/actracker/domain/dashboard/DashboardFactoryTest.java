@@ -1,6 +1,8 @@
 package ovh.equino.actracker.domain.dashboard;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -56,118 +58,131 @@ class DashboardFactoryTest {
         );
     }
 
-    @Test
-    void shouldCreateMinimalDashboard() {
-        // when
-        var dashboard = dashboardFactory.create(CREATOR, DASHBOARD_NAME, null, null);
+    @Nested
+    @DisplayName("create")
+    class CreateTest {
 
-        // then
-        assertThat(dashboard.id()).isNotNull();
-        assertThat(dashboard.name()).isEqualTo(DASHBOARD_NAME);
-        assertThat(dashboard.creator()).isEqualTo(CREATOR);
-        assertThat(dashboard.charts()).isEmpty();
-        assertThat(dashboard.shares()).isEmpty();
+        @BeforeEach
+        void init() {
+            when(actorExtractor.getActor()).thenReturn(CREATOR);
+        }
+
+        @Test
+        void shouldCreateMinimalDashboard() {
+            // when
+            var dashboard = dashboardFactory.create(DASHBOARD_NAME, null, null);
+
+            // then
+            assertThat(dashboard.id()).isNotNull();
+            assertThat(dashboard.name()).isEqualTo(DASHBOARD_NAME);
+            assertThat(dashboard.creator()).isEqualTo(CREATOR);
+            assertThat(dashboard.charts()).isEmpty();
+            assertThat(dashboard.shares()).isEmpty();
+        }
+
+        @Test
+        void shouldCreateFullDashboard() {
+            // given
+            var tag1 = new TagId();
+            var tag2 = new TagId();
+            var chart1 = new Chart("c1", GroupBy.SELF, AnalysisMetric.TAG_DURATION, singleton(tag1.id()));
+            var chart2 = new Chart("c2", GroupBy.SELF, AnalysisMetric.TAG_DURATION, singleton(tag2.id()));
+            var share1 = new Share("grantee1");
+            var share2 = new Share("grantee2");
+            when(tagsAccessibilityVerifier.nonAccessibleFor(any(), any()))
+                    .thenReturn(emptySet());
+
+            // when
+            var dashboard = dashboardFactory.create(
+                    DASHBOARD_NAME,
+                    List.of(chart1, chart2),
+                    List.of(share1, share2)
+            );
+
+            // then
+            assertThat(dashboard.id()).isNotNull();
+            assertThat(dashboard.name()).isEqualTo(DASHBOARD_NAME);
+            assertThat(dashboard.creator()).isEqualTo(CREATOR);
+            assertThat(dashboard.charts()).containsExactlyInAnyOrder(chart1, chart2);
+            assertThat(dashboard.shares()).containsExactlyInAnyOrder(share1, share2);
+            assertThat(dashboard.deleted()).isFalse();
+        }
+
+        @Test
+        void shouldCreateDashboardWithResolvedShares() {
+            // given
+            var grantee1Id = randomUUID();
+            var grantee1 = "grantee1";
+            var grantee2 = "grantee2";
+            var resolvedShare = new Share(new User(grantee1Id), grantee1);
+            var unresolvedShare = new Share(grantee2);
+            when(tenantDataSource.findByUsername(grantee1))
+                    .thenReturn(Optional.of(new TenantDto(grantee1Id, "grantee1", "")));
+
+            // when
+            var tag = dashboardFactory.create(
+                    DASHBOARD_NAME,
+                    null,
+                    List.of(new Share(grantee1), new Share(grantee2))
+            );
+
+            // then
+            assertThat(tag.shares()).containsExactlyInAnyOrder(resolvedShare, unresolvedShare);
+        }
+
+        @Test
+        void shouldCreateFailWhenDashboardInvalid() {
+            // given
+            var invalidDashboardName = "";
+
+            // then
+            assertThatThrownBy(() -> dashboardFactory.create(invalidDashboardName, null, null))
+                    .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldCreateFailWhenTagNonAccessible() {
+            // given
+            var nonAccessibleTag = randomUUID();
+            var chart = new Chart("c1", GroupBy.SELF, AnalysisMetric.TAG_DURATION, singleton(nonAccessibleTag));
+            when(tagsAccessibilityVerifier.nonAccessibleFor(any(), any()))
+                    .thenReturn(Set.of(new TagId(nonAccessibleTag)));
+
+            // then
+            assertThatThrownBy(() -> dashboardFactory.create(DASHBOARD_NAME, singleton(chart), null))
+                    .isInstanceOf(EntityInvalidException.class);
+        }
     }
 
-    @Test
-    void shouldCreateFullDashboard() {
-        // given
-        var tag1 = new TagId();
-        var tag2 = new TagId();
-        var chart1 = new Chart("c1", GroupBy.SELF, AnalysisMetric.TAG_DURATION, singleton(tag1.id()));
-        var chart2 = new Chart("c2", GroupBy.SELF, AnalysisMetric.TAG_DURATION, singleton(tag2.id()));
-        var share1 = new Share("grantee1");
-        var share2 = new Share("grantee2");
-        when(tagsAccessibilityVerifier.nonAccessibleFor(any(), any()))
-                .thenReturn(emptySet());
+    @Nested
+    @DisplayName("reconstitute")
+    class ReconstituteTest {
 
-        // when
-        var dashboard = dashboardFactory.create(
-                CREATOR,
-                DASHBOARD_NAME,
-                List.of(chart1, chart2),
-                List.of(share1, share2)
-        );
+        @Test
+        void shouldReconstituteDashboard() {
+            // given
+            var shares = List.of(new Share("grantee1"), new Share("grantee2"));
+            var charts = List.of(
+                    new Chart("c1", GroupBy.SELF, AnalysisMetric.TAG_DURATION, Set.of(randomUUID(), randomUUID())),
+                    new Chart("c2", GroupBy.SELF, AnalysisMetric.TAG_DURATION, Set.of(randomUUID(), randomUUID())).deleted()
+            );
 
-        // then
-        assertThat(dashboard.id()).isNotNull();
-        assertThat(dashboard.name()).isEqualTo(DASHBOARD_NAME);
-        assertThat(dashboard.creator()).isEqualTo(CREATOR);
-        assertThat(dashboard.charts()).containsExactlyInAnyOrder(chart1, chart2);
-        assertThat(dashboard.shares()).containsExactlyInAnyOrder(share1, share2);
-        assertThat(dashboard.deleted()).isFalse();
-    }
+            // when
+            Dashboard dashboard = dashboardFactory.reconstitute(
+                    DASHBOARD_ID,
+                    CREATOR,
+                    DASHBOARD_NAME,
+                    charts,
+                    shares,
+                    DELETED
+            );
 
-    @Test
-    void shouldCreateDashboardWithResolvedShares() {
-        // given
-        var grantee1Id = randomUUID();
-        var grantee1 = "grantee1";
-        var grantee2 = "grantee2";
-        var resolvedShare = new Share(new User(grantee1Id), grantee1);
-        var unresolvedShare = new Share(grantee2);
-        when(tenantDataSource.findByUsername(grantee1))
-                .thenReturn(Optional.of(new TenantDto(grantee1Id, "grantee1", "")));
-
-        // when
-        var tag = dashboardFactory.create(
-                CREATOR,
-                DASHBOARD_NAME,
-                null,
-                List.of(new Share(grantee1), new Share(grantee2))
-        );
-
-        // then
-        assertThat(tag.shares()).containsExactlyInAnyOrder(resolvedShare, unresolvedShare);
-    }
-
-    @Test
-    void shouldCreateFailWhenDashboardInvalid() {
-        // given
-        var invalidDashboardName = "";
-
-        // then
-        assertThatThrownBy(() -> dashboardFactory.create(CREATOR, invalidDashboardName, null, null))
-                .isInstanceOf(EntityInvalidException.class);
-    }
-
-    @Test
-    void shouldCreateFailWhenTagNonAccessible() {
-        // given
-        var nonAccessibleTag = randomUUID();
-        var chart = new Chart("c1", GroupBy.SELF, AnalysisMetric.TAG_DURATION, singleton(nonAccessibleTag));
-        when(tagsAccessibilityVerifier.nonAccessibleFor(any(), any()))
-                .thenReturn(Set.of(new TagId(nonAccessibleTag)));
-
-        // then
-        assertThatThrownBy(() -> dashboardFactory.create(CREATOR, DASHBOARD_NAME, singleton(chart), null))
-                .isInstanceOf(EntityInvalidException.class);
-    }
-
-    @Test
-    void shouldReconstituteDashboard() {
-        // given
-        var shares = List.of(new Share("grantee1"), new Share("grantee2"));
-        var charts = List.of(
-                new Chart("c1", GroupBy.SELF, AnalysisMetric.TAG_DURATION, Set.of(randomUUID(), randomUUID())),
-                new Chart("c2", GroupBy.SELF, AnalysisMetric.TAG_DURATION, Set.of(randomUUID(), randomUUID())).deleted()
-        );
-
-        // when
-        Dashboard dashboard = dashboardFactory.reconstitute(
-                DASHBOARD_ID,
-                CREATOR,
-                DASHBOARD_NAME,
-                charts,
-                shares,
-                DELETED
-        );
-
-        // then
-        assertThat(dashboard.id()).isEqualTo(DASHBOARD_ID);
-        assertThat(dashboard.name()).isEqualTo(DASHBOARD_NAME);
-        assertThat(dashboard.creator()).isEqualTo(CREATOR);
-        assertThat(dashboard.charts()).containsExactlyInAnyOrderElementsOf(charts);
-        assertThat(dashboard.shares()).containsExactlyInAnyOrderElementsOf(shares);
+            // then
+            assertThat(dashboard.id()).isEqualTo(DASHBOARD_ID);
+            assertThat(dashboard.name()).isEqualTo(DASHBOARD_NAME);
+            assertThat(dashboard.creator()).isEqualTo(CREATOR);
+            assertThat(dashboard.charts()).containsExactlyInAnyOrderElementsOf(charts);
+            assertThat(dashboard.shares()).containsExactlyInAnyOrderElementsOf(shares);
+        }
     }
 }

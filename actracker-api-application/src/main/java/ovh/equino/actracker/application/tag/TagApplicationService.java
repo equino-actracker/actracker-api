@@ -62,7 +62,7 @@ public class TagApplicationService {
                 .map(Share::new)
                 .toList();
 
-        Tag tag = tagFactory.create(creator, createTagCommand.tagName(), metrics, shares);
+        Tag tag = tagFactory.create(createTagCommand.tagName(), metrics, shares);
         tagRepository.add(tag.forStorage());
 
         tagNotifier.notifyChanged(tag.forChangeNotification());

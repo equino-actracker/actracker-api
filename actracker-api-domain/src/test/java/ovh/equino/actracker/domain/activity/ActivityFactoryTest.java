@@ -1,6 +1,8 @@
 package ovh.equino.actracker.domain.activity;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -59,130 +61,144 @@ class ActivityFactoryTest {
         );
     }
 
-    @Test
-    void shouldCreateMinimalActivity() {
-        // when
-        var activity = activityFactory.create(CREATOR, null, null, null, null, null, null);
+    @Nested
+    @DisplayName("create")
+    class CreateTest {
 
-        // then
-        assertThat(activity.id()).isNotNull();
-        assertThat(activity.title()).isNull();
-        assertThat(activity.creator()).isEqualTo(CREATOR);
-        assertThat(activity.startTime()).isNull();
-        assertThat(activity.endTime()).isNull();
-        assertThat(activity.comment()).isNull();
-        assertThat(activity.tags()).isEmpty();
-        assertThat(activity.metricValues()).isEmpty();
-        assertThat(activity.deleted()).isFalse();
+        @BeforeEach
+        void init() {
+            when(actorExtractor.getActor()).thenReturn(CREATOR);
+        }
+
+        @Test
+        void shouldCreateMinimalActivity() {
+            // when
+            var activity = activityFactory.create(null, null, null, null, null, null);
+
+            // then
+            assertThat(activity.id()).isNotNull();
+            assertThat(activity.title()).isNull();
+            assertThat(activity.creator()).isEqualTo(CREATOR);
+            assertThat(activity.startTime()).isNull();
+            assertThat(activity.endTime()).isNull();
+            assertThat(activity.comment()).isNull();
+            assertThat(activity.tags()).isEmpty();
+            assertThat(activity.metricValues()).isEmpty();
+            assertThat(activity.deleted()).isFalse();
+        }
+
+        @Test
+        void shouldCreateFullActivity() {
+            // given
+            var tag1 = new TagId();
+            var tag2 = new TagId();
+            var metricValue1 = new MetricValue(randomUUID(), TEN);
+            var metricValue2 = new MetricValue(randomUUID(), ONE);
+            when(tagsAccessibilityVerifier.nonAccessibleFor(any(), any()))
+                    .thenReturn(emptySet());
+            when(metricsAccessibilityVerifier.nonAccessibleFor(any(), any(), any()))
+                    .thenReturn(emptySet());
+
+            // when
+            var activity = activityFactory.create(
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    COMMENT,
+                    List.of(tag1, tag2),
+                    List.of(metricValue1, metricValue2)
+            );
+
+            // then
+            assertThat(activity.id()).isNotNull();
+            assertThat(activity.title()).isEqualTo(ACTIVITY_TITLE);
+            assertThat(activity.startTime()).isEqualTo(START_TIME);
+            assertThat(activity.endTime()).isEqualTo(END_TIME);
+            assertThat(activity.comment()).isEqualTo(COMMENT);
+            assertThat(activity.tags()).containsExactlyInAnyOrder(tag1, tag2);
+            assertThat(activity.metricValues()).containsExactlyInAnyOrder(metricValue1, metricValue2);
+            assertThat(activity.deleted()).isFalse();
+        }
+
+        @Test
+        void shouldCreateFailWhenActivityInvalid() {
+            // given
+            var invalidStartTime = Instant.ofEpochMilli(2);
+            var invalidEndTime = Instant.ofEpochMilli(1);
+
+            // then
+            assertThatThrownBy(() ->
+                    activityFactory.create(null, invalidStartTime, invalidEndTime, null, null, null)
+            )
+                    .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldCreateFailWhenTagNonAccessible() {
+            // given
+            var nonAccessibleTag = new TagId();
+            when(tagsAccessibilityVerifier.nonAccessibleFor(any(), any()))
+                    .thenReturn(Set.of(nonAccessibleTag));
+
+            // then
+            assertThatThrownBy(() ->
+                    activityFactory.create(null, null, null, null, List.of(nonAccessibleTag), null)
+            )
+                    .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldCreateFailWhenMetricNonAccessible() {
+            // given
+            var tag = new TagId();
+            var nonAccessibleMetric = new MetricId(randomUUID());
+            var nonAccessibleMetricValue = new MetricValue(nonAccessibleMetric.id(), TEN);
+            when(tagsAccessibilityVerifier.nonAccessibleFor(any(), any()))
+                    .thenReturn(emptySet());
+            when(metricsAccessibilityVerifier.nonAccessibleFor(any(), any(), any()))
+                    .thenReturn(Set.of(nonAccessibleMetric));
+
+            // then
+            assertThatThrownBy(() ->
+                    activityFactory.create(null, null, null, null, List.of(tag), List.of(nonAccessibleMetricValue))
+            )
+                    .isInstanceOf(EntityInvalidException.class);
+        }
     }
 
-    @Test
-    void shouldCreateFullActivity() {
-        // given
-        var tag1 = new TagId();
-        var tag2 = new TagId();
-        var metricValue1 = new MetricValue(randomUUID(), TEN);
-        var metricValue2 = new MetricValue(randomUUID(), ONE);
-        when(tagsAccessibilityVerifier.nonAccessibleFor(any(), any()))
-                .thenReturn(emptySet());
-        when(metricsAccessibilityVerifier.nonAccessibleFor(any(), any(), any()))
-                .thenReturn(emptySet());
+    @Nested
+    @DisplayName("reconstitute")
+    class ReconstituteTest {
 
-        // when
-        var activity = activityFactory.create(
-                CREATOR,
-                ACTIVITY_TITLE,
-                START_TIME,
-                END_TIME,
-                COMMENT,
-                List.of(tag1, tag2),
-                List.of(metricValue1, metricValue2)
-        );
+        @Test
+        void shouldReconstituteActivity() {
+            // given
+            var tags = List.of(new TagId(), new TagId());
+            var metricValues = List.of(new MetricValue(randomUUID(), TEN), new MetricValue(randomUUID(), ONE));
 
-        // then
-        assertThat(activity.id()).isNotNull();
-        assertThat(activity.title()).isEqualTo(ACTIVITY_TITLE);
-        assertThat(activity.startTime()).isEqualTo(START_TIME);
-        assertThat(activity.endTime()).isEqualTo(END_TIME);
-        assertThat(activity.comment()).isEqualTo(COMMENT);
-        assertThat(activity.tags()).containsExactlyInAnyOrder(tag1, tag2);
-        assertThat(activity.metricValues()).containsExactlyInAnyOrder(metricValue1, metricValue2);
-        assertThat(activity.deleted()).isFalse();
-    }
+            // when
+            var activity = activityFactory.reconstitute(
+                    ACTIVITY_ID,
+                    CREATOR,
+                    ACTIVITY_TITLE,
+                    START_TIME,
+                    END_TIME,
+                    COMMENT,
+                    tags,
+                    metricValues,
+                    DELETED
+            );
 
-    @Test
-    void shouldCreateFailWhenActivityInvalid() {
-        // given
-        var invalidStartTime = Instant.ofEpochMilli(2);
-        var invalidEndTime = Instant.ofEpochMilli(1);
-
-        // then
-        assertThatThrownBy(() ->
-                activityFactory.create(CREATOR, null, invalidStartTime, invalidEndTime, null, null, null)
-        )
-                .isInstanceOf(EntityInvalidException.class);
-    }
-
-    @Test
-    void shouldCreateFailWhenTagNonAccessible() {
-        // given
-        var nonAccessibleTag = new TagId();
-        when(tagsAccessibilityVerifier.nonAccessibleFor(any(), any()))
-                .thenReturn(Set.of(nonAccessibleTag));
-
-        // then
-        assertThatThrownBy(() ->
-                activityFactory.create(CREATOR, null, null, null, null, List.of(nonAccessibleTag), null)
-        )
-                .isInstanceOf(EntityInvalidException.class);
-    }
-
-    @Test
-    void shouldCreateFailWhenMetricNonAccessible() {
-        // given
-        var tag = new TagId();
-        var nonAccessibleMetric = new MetricId(randomUUID());
-        var nonAccessibleMetricValue = new MetricValue(nonAccessibleMetric.id(), TEN);
-        when(tagsAccessibilityVerifier.nonAccessibleFor(any(), any()))
-                .thenReturn(emptySet());
-        when(metricsAccessibilityVerifier.nonAccessibleFor(any(), any(), any()))
-                .thenReturn(Set.of(nonAccessibleMetric));
-
-        // then
-        assertThatThrownBy(() ->
-                activityFactory.create(CREATOR, null, null, null, null, List.of(tag), List.of(nonAccessibleMetricValue))
-        )
-                .isInstanceOf(EntityInvalidException.class);
-    }
-
-    @Test
-    void shouldReconstituteActivity() {
-        // given
-        var tags = List.of(new TagId(), new TagId());
-        var metricValues = List.of(new MetricValue(randomUUID(), TEN), new MetricValue(randomUUID(), ONE));
-
-        // when
-        var activity = activityFactory.reconstitute(
-                ACTIVITY_ID,
-                CREATOR,
-                ACTIVITY_TITLE,
-                START_TIME,
-                END_TIME,
-                COMMENT,
-                tags,
-                metricValues,
-                DELETED
-        );
-
-        // then
-        assertThat(activity.id()).isEqualTo(ACTIVITY_ID);
-        assertThat(activity.creator()).isEqualTo(CREATOR);
-        assertThat(activity.title()).isEqualTo(ACTIVITY_TITLE);
-        assertThat(activity.startTime()).isEqualTo(START_TIME);
-        assertThat(activity.endTime()).isEqualTo(END_TIME);
-        assertThat(activity.comment()).isEqualTo(COMMENT);
-        assertThat(activity.tags()).containsExactlyInAnyOrderElementsOf(tags);
-        assertThat(activity.metricValues()).containsExactlyInAnyOrderElementsOf(metricValues);
-        assertThat(activity.deleted()).isTrue();
+            // then
+            assertThat(activity.id()).isEqualTo(ACTIVITY_ID);
+            assertThat(activity.creator()).isEqualTo(CREATOR);
+            assertThat(activity.title()).isEqualTo(ACTIVITY_TITLE);
+            assertThat(activity.startTime()).isEqualTo(START_TIME);
+            assertThat(activity.endTime()).isEqualTo(END_TIME);
+            assertThat(activity.comment()).isEqualTo(COMMENT);
+            assertThat(activity.tags()).containsExactlyInAnyOrderElementsOf(tags);
+            assertThat(activity.metricValues()).containsExactlyInAnyOrderElementsOf(metricValues);
+            assertThat(activity.deleted()).isTrue();
+        }
     }
 }

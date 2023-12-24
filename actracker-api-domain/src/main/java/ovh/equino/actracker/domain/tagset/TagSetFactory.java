@@ -29,10 +29,8 @@ public final class TagSetFactory {
         this.tagsAccessibilityVerifier = tagsAccessibilityVerifier;
     }
 
-    public TagSet create(User creator,
-                         String name,
-                         Collection<TagId> tags) {
-
+    public TagSet create(String name, Collection<TagId> tags) {
+        var creator = actorExtractor.getActor();
         var validator = new TagSetValidator();
 
         var nonNullTags = requireNonNullElse(tags, new ArrayList<TagId>());
