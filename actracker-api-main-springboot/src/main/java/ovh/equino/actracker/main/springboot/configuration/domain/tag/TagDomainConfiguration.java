@@ -4,7 +4,9 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import ovh.equino.actracker.domain.tag.MetricFactory;
+import ovh.equino.actracker.domain.tag.MetricsAccessibilityVerifier;
 import ovh.equino.actracker.domain.tag.TagFactory;
+import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 
 @Configuration
 @ComponentScan(
@@ -13,7 +15,9 @@ import ovh.equino.actracker.domain.tag.TagFactory;
                 type = FilterType.ASSIGNABLE_TYPE,
                 classes = {
                         TagFactory.class,
-                        MetricFactory.class
+                        MetricFactory.class,
+                        TagsAccessibilityVerifier.class,
+                        MetricsAccessibilityVerifier.class,
                 }
         )
 )

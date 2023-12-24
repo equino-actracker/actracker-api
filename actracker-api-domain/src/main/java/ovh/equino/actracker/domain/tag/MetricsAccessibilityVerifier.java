@@ -13,19 +13,23 @@ import static java.util.stream.Collectors.toUnmodifiableSet;
 public class MetricsAccessibilityVerifier {
 
     private final TagDataSource tagDataSource;
-    // TODO should have identity provider? Or maybe user provided for each method as argument?
-    private final User user;
 
-    public MetricsAccessibilityVerifier(TagDataSource tagDataSource, User user) {
+    MetricsAccessibilityVerifier(TagDataSource tagDataSource) {
         this.tagDataSource = tagDataSource;
-        this.user = user;
     }
 
-    public boolean isAccessible(MetricId metric, Collection<TagId> tags) {
-        return accessibleOf(singleton(metric), tags).contains(metric);
+    public boolean isAccessibleFor(User user, MetricId metric, Collection<TagId> tags) {
+        return accessibleFor(user, singleton(metric), tags).contains(metric);
     }
 
-    public Set<MetricId> accessibleOf(Collection<MetricId> metrics, Collection<TagId> tags) {
+    public Set<MetricId> nonAccessibleFor(User user, Collection<MetricId> metrics, Collection<TagId> tags) {
+        Set<MetricId> accessibleMetrics = accessibleFor(user, metrics, tags);
+        return metrics.stream()
+                .filter(not(accessibleMetrics::contains))
+                .collect(toUnmodifiableSet());
+    }
+
+    private Set<MetricId> accessibleFor(User user, Collection<MetricId> metrics, Collection<TagId> tags) {
         Set<MetricId> accessibleMetrics = tagDataSource.find(new HashSet<>(tags), user)
                 .stream()
                 .flatMap(tag -> tag.metrics().stream())
@@ -34,13 +38,6 @@ public class MetricsAccessibilityVerifier {
                 .collect(toUnmodifiableSet());
         return metrics.stream()
                 .filter(accessibleMetrics::contains)
-                .collect(toUnmodifiableSet());
-    }
-
-    public Set<MetricId> nonAccessibleOf(Collection<MetricId> metrics, Collection<TagId> tags) {
-        Set<MetricId> accessibleMetrics = accessibleOf(metrics, tags);
-        return metrics.stream()
-                .filter(not(accessibleMetrics::contains))
                 .collect(toUnmodifiableSet());
     }
 }

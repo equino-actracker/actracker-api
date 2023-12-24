@@ -1,7 +1,10 @@
 package ovh.equino.actracker.domain.activity;
 
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
-import ovh.equino.actracker.domain.tag.*;
+import ovh.equino.actracker.domain.tag.MetricId;
+import ovh.equino.actracker.domain.tag.MetricsAccessibilityVerifier;
+import ovh.equino.actracker.domain.tag.TagId;
+import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.user.User;
 
 import java.time.Instant;
@@ -15,12 +18,17 @@ public final class ActivityFactory {
 
     private static final Boolean DELETED = TRUE;
 
-    private final ActivityDataSource activityDataSource;
-    private final TagDataSource tagDataSource;
+    private final ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier;
+    private final TagsAccessibilityVerifier tagsAccessibilityVerifier;
+    private final MetricsAccessibilityVerifier metricsAccessibilityVerifier;
 
-    ActivityFactory(ActivityDataSource activityDataSource, TagDataSource tagDataSource) {
-        this.activityDataSource = activityDataSource;
-        this.tagDataSource = tagDataSource;
+    ActivityFactory(ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier,
+                    TagsAccessibilityVerifier tagsAccessibilityVerifier,
+                    MetricsAccessibilityVerifier metricsAccessibilityVerifier) {
+
+        this.activitiesAccessibilityVerifier = activitiesAccessibilityVerifier;
+        this.tagsAccessibilityVerifier = tagsAccessibilityVerifier;
+        this.metricsAccessibilityVerifier = metricsAccessibilityVerifier;
     }
 
     public Activity create(User creator,
@@ -31,15 +39,12 @@ public final class ActivityFactory {
                            Collection<TagId> tags,
                            Collection<MetricValue> metricValues) {
 
-        var activitiesAccessibilityVerifier = new ActivitiesAccessibilityVerifier(activityDataSource, creator);
-        var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, creator);
-        var metricsAccessibilityVerifier = new MetricsAccessibilityVerifier(tagDataSource, creator);
         var validator = new ActivityValidator();
 
         var nonNullTags = requireNonNullElse(tags, new ArrayList<TagId>());
         var nonNullMetricValues = requireNonNullElse(metricValues, new ArrayList<MetricValue>());
-        validateTagsAccessible(nonNullTags, tagsAccessibilityVerifier);
-        validateMetricsAccessible(nonNullMetricValues, nonNullTags, metricsAccessibilityVerifier);
+        validateTagsAccessibleFor(creator, nonNullTags);
+        validateMetricsAccessibleFor(creator, nonNullMetricValues, nonNullTags);
 
         var activity = new Activity(
                 new ActivityId(),
@@ -60,7 +65,7 @@ public final class ActivityFactory {
         return activity;
     }
 
-    public Activity reconstitute(User actor,
+    public Activity reconstitute(User actor,    // TODO remove
                                  ActivityId id,
                                  User creator,
                                  String title,
@@ -71,9 +76,6 @@ public final class ActivityFactory {
                                  Collection<MetricValue> metricValues,
                                  boolean deleted) {
 
-        var activitiesAccessibilityVerifier = new ActivitiesAccessibilityVerifier(activityDataSource, actor);
-        var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, actor);
-        var metricsAccessibilityVerifier = new MetricsAccessibilityVerifier(tagDataSource, actor);
         var validator = new ActivityValidator();
 
         return new Activity(
@@ -93,8 +95,8 @@ public final class ActivityFactory {
         );
     }
 
-    private void validateTagsAccessible(Collection<TagId> tags, TagsAccessibilityVerifier tagsAccessibilityVerifier) {
-        tagsAccessibilityVerifier.nonAccessibleOf(tags)
+    private void validateTagsAccessibleFor(User user, Collection<TagId> tags) {
+        tagsAccessibilityVerifier.nonAccessibleFor(user, tags)
                 .stream()
                 .findFirst()
                 .ifPresent((inaccessibleTag) -> {
@@ -103,16 +105,14 @@ public final class ActivityFactory {
                 });
     }
 
-    private void validateMetricsAccessible(Collection<MetricValue> metricValues,
-                                           Collection<TagId> tags,
-                                           MetricsAccessibilityVerifier metricsAccessibilityVerifier) {
+    private void validateMetricsAccessibleFor(User user, Collection<MetricValue> metricValues, Collection<TagId> tags) {
 
         var setMetrics = metricValues
                 .stream()
                 .map(MetricValue::metricId)
                 .map(MetricId::new)
                 .toList();
-        metricsAccessibilityVerifier.nonAccessibleOf(setMetrics, tags)
+        metricsAccessibilityVerifier.nonAccessibleFor(user, setMetrics, tags)
                 .stream()
                 .findFirst()
                 .ifPresent((inaccessibleMetric) -> {

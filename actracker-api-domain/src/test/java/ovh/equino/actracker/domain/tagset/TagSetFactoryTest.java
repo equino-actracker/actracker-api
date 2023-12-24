@@ -6,16 +6,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
-import ovh.equino.actracker.domain.tag.TagDataSource;
-import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tag.TagId;
+import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
 import java.util.Set;
 
 import static java.lang.Boolean.TRUE;
-import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -31,15 +30,15 @@ class TagSetFactoryTest {
     private static final Boolean DELETED = TRUE;
 
     @Mock
-    private TagSetDataSource tagSetDataSource;
+    private TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier;
     @Mock
-    private TagDataSource tagDataSource;
+    private TagsAccessibilityVerifier tagsAccessibilityVerifier;
 
     private TagSetFactory tagSetFactory;
 
     @BeforeEach
     void init() {
-        tagSetFactory = new TagSetFactory(tagSetDataSource, tagDataSource);
+        tagSetFactory = new TagSetFactory(tagSetsAccessibilityVerifier, tagsAccessibilityVerifier);
     }
 
     @Test
@@ -60,10 +59,8 @@ class TagSetFactoryTest {
         // given
         var assignedTag1 = new TagId(randomUUID());
         var assignedTag2 = new TagId(randomUUID());
-        when(tagDataSource.find(any(Set.class), any(User.class)))
-                .thenReturn(
-                        List.of(tagDto(assignedTag1), tagDto(assignedTag2))
-                );
+        when(tagsAccessibilityVerifier.nonAccessibleFor(any(), any()))
+                .thenReturn(emptySet());
 
         // when
         var tagSet = tagSetFactory.create(CREATOR, TAG_SET_NAME, List.of(assignedTag1, assignedTag2));
@@ -90,7 +87,8 @@ class TagSetFactoryTest {
     void shouldCreateFailWhenTagNonAccessible() {
         // given
         var nonAccessibleTag = new TagId(randomUUID());
-        when(tagDataSource.find(any(Set.class), any(User.class))).thenReturn(emptyList());
+        when(tagsAccessibilityVerifier.nonAccessibleFor(any(), any()))
+                .thenReturn(Set.of(nonAccessibleTag));
 
         // then
         assertThatThrownBy(() -> tagSetFactory.create(CREATOR, TAG_SET_NAME, List.of(nonAccessibleTag)))
@@ -112,9 +110,5 @@ class TagSetFactoryTest {
         assertThat(tagSet.creator()).isEqualTo(CREATOR);
         assertThat(tagSet.tags()).containsExactlyInAnyOrderElementsOf(assignedTags);
         assertThat(tagSet.deleted()).isTrue();
-    }
-
-    private TagDto tagDto(TagId tagId) {
-        return new TagDto(tagId.id(), randomUUID(), null, null, null, !DELETED);
     }
 }

@@ -21,6 +21,7 @@ import static ovh.equino.actracker.domain.tag.MetricType.NUMERIC;
 @ExtendWith(MockitoExtension.class)
 class MetricsAccessibilityVerifierTest {
 
+    private static final User USER = new User(randomUUID());
     private static final boolean DELETED = true;
 
     private static final MetricDto ACCESSIBLE_METRIC_1 = metric("accessible metric 1");
@@ -50,33 +51,7 @@ class MetricsAccessibilityVerifierTest {
 
     @BeforeEach
     void init() {
-        metricsAccessibilityVerifier = new MetricsAccessibilityVerifier(tagDataSource, new User(randomUUID()));
-    }
-
-    @Test
-    void shouldFindAccessibleMetrics() {
-        // given
-        when(tagDataSource.find(any(Set.class), any(User.class)))
-                .thenReturn(List.of(ACCESSIBLE_TAG_1, ACCESSIBLE_TAG_2));
-
-        // when
-        Set<MetricId> accessibleMetrics = metricsAccessibilityVerifier.accessibleOf(
-                List.of(
-                        ACCESSIBLE_METRIC_1_ID,
-                        ACCESSIBLE_METRIC_2_ID,
-                        INACCESSIBLE_METRIC_1_ID,
-                        INACCESSIBLE_METRIC_2_ID
-                ),
-                List.of(
-                        ACCESSIBLE_TAG_1_ID,
-                        ACCESSIBLE_TAG_2_ID,
-                        INACCESSIBLE_TAG_1_ID,
-                        INACCESSIBLE_TAG_2_ID
-                )
-        );
-
-        // then
-        assertThat(accessibleMetrics).containsExactlyInAnyOrder(ACCESSIBLE_METRIC_1_ID, ACCESSIBLE_METRIC_2_ID);
+        metricsAccessibilityVerifier = new MetricsAccessibilityVerifier(tagDataSource);
     }
 
     @Test
@@ -86,7 +61,8 @@ class MetricsAccessibilityVerifierTest {
                 .thenReturn(List.of(ACCESSIBLE_TAG_1, ACCESSIBLE_TAG_2));
 
         // when
-        Set<MetricId> inaccessibleMetrics = metricsAccessibilityVerifier.nonAccessibleOf(
+        Set<MetricId> inaccessibleMetrics = metricsAccessibilityVerifier.nonAccessibleFor(
+                USER,
                 List.of(
                         ACCESSIBLE_METRIC_1_ID,
                         ACCESSIBLE_METRIC_2_ID,
@@ -115,7 +91,8 @@ class MetricsAccessibilityVerifierTest {
                 .thenReturn(List.of(ACCESSIBLE_TAG_1, ACCESSIBLE_TAG_2));
 
         // when
-        boolean isAccessible = metricsAccessibilityVerifier.isAccessible(
+        boolean isAccessible = metricsAccessibilityVerifier.isAccessibleFor(
+                USER,
                 ACCESSIBLE_METRIC_1_ID,
                 List.of(
                         ACCESSIBLE_TAG_1_ID,
@@ -136,7 +113,8 @@ class MetricsAccessibilityVerifierTest {
                 .thenReturn(emptyList());
 
         // when
-        boolean isAccessible = metricsAccessibilityVerifier.isAccessible(
+        boolean isAccessible = metricsAccessibilityVerifier.isAccessibleFor(
+                USER,
                 INACCESSIBLE_METRIC_1_ID,
                 List.of(
                         ACCESSIBLE_TAG_1_ID,

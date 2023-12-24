@@ -5,14 +5,12 @@ import ovh.equino.actracker.domain.user.User;
 public class TagSetsAccessibilityVerifier {
 
     private final TagSetDataSource tagSetDataSource;
-    private final User user;
 
-    public TagSetsAccessibilityVerifier(TagSetDataSource tagSetDataSource, User user) {
+    TagSetsAccessibilityVerifier(TagSetDataSource tagSetDataSource) {
         this.tagSetDataSource = tagSetDataSource;
-        this.user = user;
     }
 
-    boolean isAccessible(TagSetId tagSetId) {
+    boolean isAccessibleFor(User user, TagSetId tagSetId) {
         return tagSetDataSource.find(tagSetId, user).isPresent();
     }
 }

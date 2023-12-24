@@ -6,28 +6,25 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
-import ovh.equino.actracker.domain.tag.MetricDto;
-import ovh.equino.actracker.domain.tag.TagDataSource;
-import ovh.equino.actracker.domain.tag.TagDto;
+import ovh.equino.actracker.domain.tag.MetricId;
+import ovh.equino.actracker.domain.tag.MetricsAccessibilityVerifier;
 import ovh.equino.actracker.domain.tag.TagId;
+import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.user.User;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import static java.lang.Boolean.TRUE;
 import static java.math.BigDecimal.ONE;
 import static java.math.BigDecimal.TEN;
-import static java.util.Arrays.stream;
-import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static ovh.equino.actracker.domain.tag.MetricType.NUMERIC;
 
 @ExtendWith(MockitoExtension.class)
 class ActivityFactoryTest {
@@ -40,15 +37,22 @@ class ActivityFactoryTest {
     private static final String COMMENT = "comment";
     private static final Boolean DELETED = TRUE;
 
-    private final ActivityDataSource activityDataSource = null;
     @Mock
-    private TagDataSource tagDataSource;
+    private ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier;
+    @Mock
+    private TagsAccessibilityVerifier tagsAccessibilityVerifier;
+    @Mock
+    private MetricsAccessibilityVerifier metricsAccessibilityVerifier;
 
     private ActivityFactory activityFactory;
 
     @BeforeEach
     void init() {
-        activityFactory = new ActivityFactory(activityDataSource, tagDataSource);
+        activityFactory = new ActivityFactory(
+                activitiesAccessibilityVerifier,
+                tagsAccessibilityVerifier,
+                metricsAccessibilityVerifier
+        );
     }
 
     @Test
@@ -75,11 +79,10 @@ class ActivityFactoryTest {
         var tag2 = new TagId();
         var metricValue1 = new MetricValue(randomUUID(), TEN);
         var metricValue2 = new MetricValue(randomUUID(), ONE);
-        when(tagDataSource.find(any(Set.class), any(User.class)))
-                .thenReturn(List.of(
-                        tagDto(tag1, metricValue1.metricId()),
-                        tagDto(tag2, metricValue2.metricId())
-                ));
+        when(tagsAccessibilityVerifier.nonAccessibleFor(any(), any()))
+                .thenReturn(emptySet());
+        when(metricsAccessibilityVerifier.nonAccessibleFor(any(), any(), any()))
+                .thenReturn(emptySet());
 
         // when
         var activity = activityFactory.create(
@@ -120,7 +123,8 @@ class ActivityFactoryTest {
     void shouldCreateFailWhenTagNonAccessible() {
         // given
         var nonAccessibleTag = new TagId();
-        when(tagDataSource.find(any(Set.class), any(User.class))).thenReturn(emptyList());
+        when(tagsAccessibilityVerifier.nonAccessibleFor(any(), any()))
+                .thenReturn(Set.of(nonAccessibleTag));
 
         // then
         assertThatThrownBy(() ->
@@ -133,11 +137,12 @@ class ActivityFactoryTest {
     void shouldCreateFailWhenMetricNonAccessible() {
         // given
         var tag = new TagId();
-        var nonAccessibleMetricValue = new MetricValue(randomUUID(), TEN);
-        when(tagDataSource.find(any(Set.class), any(User.class)))
-                .thenReturn(
-                        List.of(tagDto(tag))
-                );
+        var nonAccessibleMetric = new MetricId(randomUUID());
+        var nonAccessibleMetricValue = new MetricValue(nonAccessibleMetric.id(), TEN);
+        when(tagsAccessibilityVerifier.nonAccessibleFor(any(), any()))
+                .thenReturn(emptySet());
+        when(metricsAccessibilityVerifier.nonAccessibleFor(any(), any(), any()))
+                .thenReturn(Set.of(nonAccessibleMetric));
 
         // then
         assertThatThrownBy(() ->
@@ -177,12 +182,5 @@ class ActivityFactoryTest {
         assertThat(activity.tags()).containsExactlyInAnyOrderElementsOf(tags);
         assertThat(activity.metricValues()).containsExactlyInAnyOrderElementsOf(metricValues);
         assertThat(activity.deleted()).isTrue();
-    }
-
-    private TagDto tagDto(TagId tagId, UUID... metrics) {
-        List<MetricDto> assignedMetrics = stream(metrics)
-                .map(metricId -> new MetricDto(metricId, randomUUID(), randomUUID().toString(), NUMERIC, !DELETED))
-                .toList();
-        return new TagDto(tagId.id(), randomUUID(), null, assignedMetrics, null, !DELETED);
     }
 }

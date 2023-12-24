@@ -46,27 +46,7 @@ class TagsAccessibilityVerifierTest {
 
     @BeforeEach
     void init() {
-        tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, USER);
-    }
-
-    @Test
-    void shouldFindAccessibleTags() {
-        // given
-        when(tagDataSource.find(any(Set.class), any(User.class)))
-                .thenReturn(List.of(ACCESSIBLE_TAG_1, ACCESSIBLE_TAG_2));
-
-        // when
-        Set<TagId> accessibleTags = tagsAccessibilityVerifier.accessibleOf(
-                List.of(
-                        ACCESSIBLE_TAG_1_ID,
-                        ACCESSIBLE_TAG_2_ID,
-                        INACCESSIBLE_TAG_1_ID,
-                        INACCESSIBLE_TAG_2_ID
-                )
-        );
-
-        // then
-        assertThat(accessibleTags).containsExactlyInAnyOrder(ACCESSIBLE_TAG_1_ID, ACCESSIBLE_TAG_2_ID);
+        tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource);
     }
 
     @Test
@@ -76,7 +56,8 @@ class TagsAccessibilityVerifierTest {
                 .thenReturn(List.of(ACCESSIBLE_TAG_1, ACCESSIBLE_TAG_2));
 
         // when
-        Set<TagId> nonAccessibleTags = tagsAccessibilityVerifier.nonAccessibleOf(
+        Set<TagId> nonAccessibleTags = tagsAccessibilityVerifier.nonAccessibleFor(
+                USER,
                 List.of(
                         ACCESSIBLE_TAG_1_ID,
                         ACCESSIBLE_TAG_2_ID,
@@ -96,7 +77,7 @@ class TagsAccessibilityVerifierTest {
                 .thenReturn(Optional.of(ACCESSIBLE_TAG_1));
 
         // when
-        boolean isAccessible = tagsAccessibilityVerifier.isAccessible(ACCESSIBLE_TAG_1_ID);
+        boolean isAccessible = tagsAccessibilityVerifier.isAccessibleFor(USER, ACCESSIBLE_TAG_1_ID);
 
         // then
         assertThat(isAccessible).isTrue();
@@ -109,7 +90,7 @@ class TagsAccessibilityVerifierTest {
                 .thenReturn(Optional.empty());
 
         // when
-        boolean isAccessible = tagsAccessibilityVerifier.isAccessible(INACCESSIBLE_TAG_1_ID);
+        boolean isAccessible = tagsAccessibilityVerifier.isAccessibleFor(USER, INACCESSIBLE_TAG_1_ID);
 
         // then
         assertThat(isAccessible).isFalse();

@@ -2,7 +2,6 @@ package ovh.equino.actracker.domain.dashboard;
 
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.share.Share;
-import ovh.equino.actracker.domain.tag.TagDataSource;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.tenant.TenantDataSource;
@@ -20,16 +19,17 @@ public final class DashboardFactory {
 
     private static final Boolean DELETED = TRUE;
 
-    private final DashboardDataSource dashboardDataSource;
-    private final TagDataSource tagDataSource;
     private final TenantDataSource tenantDataSource;
 
-    DashboardFactory(DashboardDataSource dashboardDataSource,
-                     TagDataSource tagDataSource,
+    private final DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier;
+    private final TagsAccessibilityVerifier tagsAccessibilityVerifier;
+
+    DashboardFactory(DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier,
+                     TagsAccessibilityVerifier tagsAccessibilityVerifier,
                      TenantDataSource tenantDataSource) {
 
-        this.dashboardDataSource = dashboardDataSource;
-        this.tagDataSource = tagDataSource;
+        this.dashboardsAccessibilityVerifier = dashboardsAccessibilityVerifier;
+        this.tagsAccessibilityVerifier = tagsAccessibilityVerifier;
         this.tenantDataSource = tenantDataSource;
     }
 
@@ -38,12 +38,10 @@ public final class DashboardFactory {
                             Collection<Chart> charts,
                             Collection<Share> shares) {
 
-        var dashboardsAccessibilityVerifier = new DashboardsAccessibilityVerifier(dashboardDataSource, creator);
-        var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, creator);
         var validator = new DashboardValidator();
 
         var nonNullCharts = requireNonNullElse(charts, new ArrayList<Chart>());
-        validateTagsAccessibility(nonNullCharts, tagsAccessibilityVerifier);
+        validateTagsAccessibleFor(creator, nonNullCharts);
 
         var resolvedShares = requireNonNullElse(shares, new ArrayList<Share>())
                 .stream()
@@ -65,7 +63,7 @@ public final class DashboardFactory {
         return dashboard;
     }
 
-    public Dashboard reconstitute(User actor,
+    public Dashboard reconstitute(User actor, // TODO remove
                                   DashboardId id,
                                   User creator,
                                   String name,
@@ -73,8 +71,6 @@ public final class DashboardFactory {
                                   Collection<Share> shares,
                                   boolean deleted) {
 
-        var dashboardsAccessibilityVerifier = new DashboardsAccessibilityVerifier(dashboardDataSource, actor);
-        var tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource, actor);
         var validator = new DashboardValidator();
 
         return new Dashboard(
@@ -100,13 +96,14 @@ public final class DashboardFactory {
                 .orElse(new Share(grantee));
     }
 
-    private void validateTagsAccessibility(Collection<Chart> charts, TagsAccessibilityVerifier tagsAccessibilityVerifier) {
+    private void validateTagsAccessibleFor(User user, Collection<Chart> charts) {
+
         Set<TagId> includedTags = charts
                 .stream()
                 .flatMap(chart -> chart.includedTags().stream())
                 .map(TagId::new)
                 .collect(toUnmodifiableSet());
-        tagsAccessibilityVerifier.nonAccessibleOf(includedTags)
+        tagsAccessibilityVerifier.nonAccessibleFor(user, includedTags)
                 .stream()
                 .findFirst()
                 .ifPresent((inaccessibleTag) -> {

@@ -50,7 +50,7 @@ public final class TagSet implements Entity {
     }
 
     public void rename(String newName, User updater) {
-        if (!creator.equals(updater) && !tagSetsAccessibilityVerifier.isAccessible(this.id)) {
+        if (!creator.equals(updater) && !tagSetsAccessibilityVerifier.isAccessibleFor(updater, this.id)) {
             throw new EntityNotFoundException(TagSet.class, id.id());
         }
         if (!this.isEditableFor(updater)) {
@@ -61,13 +61,13 @@ public final class TagSet implements Entity {
     }
 
     public void assignTag(TagId newTag, User updater) {
-        if (!creator.equals(updater) && !tagSetsAccessibilityVerifier.isAccessible(this.id)) {
+        if (!creator.equals(updater) && !tagSetsAccessibilityVerifier.isAccessibleFor(updater, this.id)) {
             throw new EntityNotFoundException(TagSet.class, id.id());
         }
         if (!this.isEditableFor(updater)) {
             throw new EntityEditForbidden(TagSet.class);
         }
-        if (!tagsAccessibilityVerifier.isAccessible(newTag)) {
+        if (!tagsAccessibilityVerifier.isAccessibleFor(updater, newTag)) {
             String errorMessage = "Tag with ID %s does not exist".formatted(newTag.id());
             throw new EntityInvalidException(TagSet.class, errorMessage);
         }
@@ -76,13 +76,13 @@ public final class TagSet implements Entity {
     }
 
     public void removeTag(TagId tag, User updater) {
-        if (!creator.equals(updater) && !tagSetsAccessibilityVerifier.isAccessible(this.id)) {
+        if (!creator.equals(updater) && !tagSetsAccessibilityVerifier.isAccessibleFor(updater, this.id)) {
             throw new EntityNotFoundException(TagSet.class, id.id());
         }
         if (!this.isEditableFor(updater)) {
             throw new EntityEditForbidden(TagSet.class);
         }
-        if (!tagsAccessibilityVerifier.isAccessible(tag)) {
+        if (!tagsAccessibilityVerifier.isAccessibleFor(updater, tag)) {
             return;
         }
         tags.remove(tag);
@@ -90,7 +90,7 @@ public final class TagSet implements Entity {
     }
 
     public void delete(User remover) {
-        if (!creator.equals(remover) && !tagSetsAccessibilityVerifier.isAccessible(this.id)) {
+        if (!creator.equals(remover) && !tagSetsAccessibilityVerifier.isAccessibleFor(remover, this.id)) {
             throw new EntityNotFoundException(TagSet.class, id.id());
         }
         if (!this.isEditableFor(remover)) {

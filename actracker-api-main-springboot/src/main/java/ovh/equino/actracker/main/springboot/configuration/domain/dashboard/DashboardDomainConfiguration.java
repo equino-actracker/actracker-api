@@ -4,6 +4,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import ovh.equino.actracker.domain.dashboard.DashboardFactory;
+import ovh.equino.actracker.domain.dashboard.DashboardsAccessibilityVerifier;
 
 @Configuration
 @ComponentScan(
@@ -11,7 +12,8 @@ import ovh.equino.actracker.domain.dashboard.DashboardFactory;
         includeFilters = @ComponentScan.Filter(
                 type = FilterType.ASSIGNABLE_TYPE,
                 classes = {
-                        DashboardFactory.class
+                        DashboardFactory.class,
+                        DashboardsAccessibilityVerifier.class,
                 }
         )
 )

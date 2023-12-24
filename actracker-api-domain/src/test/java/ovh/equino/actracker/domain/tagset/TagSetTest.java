@@ -14,7 +14,6 @@ import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
-import java.util.Set;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
@@ -101,7 +100,7 @@ class TagSetTest {
                     tagsAccessibilityVerifier
             );
             User unauthorizedUser = new User(randomUUID());
-            when(tagSetsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            when(tagSetsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
             assertThatThrownBy(() -> tagSet.rename(NEW_NAME, unauthorizedUser))
@@ -122,7 +121,7 @@ class TagSetTest {
                     tagsAccessibilityVerifier
             );
             User unauthorizedUser = new User(randomUUID());
-            when(tagSetsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(tagSetsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
             assertThatThrownBy(() -> tagSet.rename(NEW_NAME, unauthorizedUser))
@@ -148,7 +147,7 @@ class TagSetTest {
                     tagsAccessibilityVerifier
             );
             TagId newTag = new TagId(randomUUID());
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // when
             tagSet.assignTag(newTag, CREATOR);
@@ -171,7 +170,7 @@ class TagSetTest {
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
             TagId newTag = new TagId();
 
             // when
@@ -195,7 +194,7 @@ class TagSetTest {
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // when
             tagSet.assignTag(existingTag, CREATOR);
@@ -217,7 +216,7 @@ class TagSetTest {
                     tagsAccessibilityVerifier
             );
             TagId newTag = new TagId(randomUUID());
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
             assertThatThrownBy(() -> tagSet.assignTag(newTag, CREATOR))
@@ -238,7 +237,7 @@ class TagSetTest {
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
@@ -261,7 +260,7 @@ class TagSetTest {
             );
             TagId newTag = new TagId();
             User unauthorizedUser = new User(randomUUID());
-            when(tagSetsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            when(tagSetsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
             assertThatThrownBy(() -> tagSet.assignTag(newTag, unauthorizedUser))
@@ -283,7 +282,7 @@ class TagSetTest {
             );
             TagId newTag = new TagId();
             User unauthorizedUser = new User(randomUUID());
-            when(tagSetsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(tagSetsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
             assertThatThrownBy(() -> tagSet.assignTag(newTag, unauthorizedUser))
@@ -310,7 +309,7 @@ class TagSetTest {
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // when
             tagSet.removeTag(tagToRemove, CREATOR);
@@ -332,7 +331,7 @@ class TagSetTest {
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // when
             tagSet.removeTag(new TagId(), CREATOR);
@@ -355,7 +354,7 @@ class TagSetTest {
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // when
             tagSet.removeTag(new TagId(), CREATOR);
@@ -378,7 +377,7 @@ class TagSetTest {
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // when
             tagSet.removeTag(tagToRemove, CREATOR);
@@ -400,7 +399,7 @@ class TagSetTest {
                     tagSetsAccessibilityVerifier,
                     tagsAccessibilityVerifier
             );
-            when(tagsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
@@ -423,7 +422,7 @@ class TagSetTest {
                     tagsAccessibilityVerifier
             );
             User unauthorizedUser = new User(randomUUID());
-            when(tagSetsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            when(tagSetsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
             assertThatThrownBy(() -> tagSet.removeTag(existingTag, unauthorizedUser))
@@ -445,7 +444,7 @@ class TagSetTest {
                     tagsAccessibilityVerifier
             );
             User unauthorizedUser = new User(randomUUID());
-            when(tagSetsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(tagSetsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
             assertThatThrownBy(() -> tagSet.removeTag(existingTag, unauthorizedUser))
@@ -512,7 +511,7 @@ class TagSetTest {
                     tagsAccessibilityVerifier
             );
             User unauthorizedUser = new User(randomUUID());
-            when(tagSetsAccessibilityVerifier.isAccessible(any())).thenReturn(false);
+            when(tagSetsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
             assertThatThrownBy(() -> tagSet.delete(unauthorizedUser))
@@ -533,7 +532,7 @@ class TagSetTest {
                     tagsAccessibilityVerifier
             );
             User unauthorizedUser = new User(randomUUID());
-            when(tagSetsAccessibilityVerifier.isAccessible(any())).thenReturn(true);
+            when(tagSetsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
             assertThatThrownBy(() -> tagSet.delete(unauthorizedUser))

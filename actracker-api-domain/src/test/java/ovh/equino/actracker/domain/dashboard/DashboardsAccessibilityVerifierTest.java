@@ -34,7 +34,7 @@ class DashboardsAccessibilityVerifierTest {
 
     @BeforeEach
     void init() {
-        dashboardsAccessibilityVerifier = new DashboardsAccessibilityVerifier(dashboardDataSource, USER);
+        dashboardsAccessibilityVerifier = new DashboardsAccessibilityVerifier(dashboardDataSource);
     }
 
     @Test
@@ -43,7 +43,7 @@ class DashboardsAccessibilityVerifierTest {
         when(dashboardDataSource.find(any(), any())).thenReturn(Optional.of(ACCESSIBLE_DASHBOARD));
 
         // when
-        boolean isAccessible = dashboardsAccessibilityVerifier.isAccessible(new DashboardId());
+        boolean isAccessible = dashboardsAccessibilityVerifier.isAccessibleFor(USER, new DashboardId());
 
         // then
         assertThat(isAccessible).isTrue();
@@ -55,7 +55,7 @@ class DashboardsAccessibilityVerifierTest {
         when(dashboardDataSource.find(any(), any())).thenReturn(Optional.empty());
 
         // when
-        boolean isAccessible = dashboardsAccessibilityVerifier.isAccessible(new DashboardId());
+        boolean isAccessible = dashboardsAccessibilityVerifier.isAccessibleFor(USER, new DashboardId());
 
         // then
         assertThat(isAccessible).isFalse();

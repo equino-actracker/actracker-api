@@ -38,7 +38,7 @@ class ActivitiesAccessibilityVerifierTest {
 
     @BeforeEach
     void init() {
-        activitiesAccessibilityVerifier = new ActivitiesAccessibilityVerifier(activityDataSource, USER);
+        activitiesAccessibilityVerifier = new ActivitiesAccessibilityVerifier(activityDataSource);
     }
 
     @Test
@@ -47,7 +47,7 @@ class ActivitiesAccessibilityVerifierTest {
         when(activityDataSource.find(any(), any())).thenReturn(Optional.of(ACCESSIBLE_ACTIVITY));
 
         // when
-        boolean isAccessible = activitiesAccessibilityVerifier.isAccessible(new ActivityId());
+        boolean isAccessible = activitiesAccessibilityVerifier.isAccessibleFor(USER, new ActivityId());
 
         // then
         assertThat(isAccessible).isTrue();
@@ -59,7 +59,7 @@ class ActivitiesAccessibilityVerifierTest {
         when(activityDataSource.find(any(), any())).thenReturn(Optional.empty());
 
         // when
-        boolean isAccessible = activitiesAccessibilityVerifier.isAccessible(new ActivityId());
+        boolean isAccessible = activitiesAccessibilityVerifier.isAccessibleFor(USER, new ActivityId());
 
         // then
         assertThat(isAccessible).isFalse();
