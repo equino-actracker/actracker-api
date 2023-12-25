@@ -9,7 +9,7 @@ import ovh.equino.actracker.application.tag.TagApplicationService;
 import ovh.equino.actracker.application.tag.TagResult;
 import ovh.equino.actracker.domain.tag.*;
 import ovh.equino.actracker.domain.tenant.TenantDataSource;
-import ovh.equino.security.identity.IdentityProvider;
+import ovh.equino.actracker.domain.user.ActorExtractor;
 
 import java.util.List;
 import java.util.Set;
@@ -25,7 +25,7 @@ class TransactionalTagApplicationService extends TagApplicationService {
                                        TagDataSource tagDataSource,
                                        TagSearchEngine tagSearchEngine,
                                        TagNotifier tagNotifier,
-                                       IdentityProvider identityProvider,
+                                       ActorExtractor actorExtractor,
                                        TenantDataSource tenantDataSource) {
 
         super(
@@ -35,7 +35,7 @@ class TransactionalTagApplicationService extends TagApplicationService {
                 tagDataSource,
                 tagSearchEngine,
                 tagNotifier,
-                identityProvider,
+                actorExtractor,
                 tenantDataSource
         );
     }

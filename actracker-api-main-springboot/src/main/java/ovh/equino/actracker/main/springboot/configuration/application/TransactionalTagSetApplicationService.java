@@ -8,7 +8,7 @@ import ovh.equino.actracker.application.tagset.SearchTagSetsQuery;
 import ovh.equino.actracker.application.tagset.TagSetApplicationService;
 import ovh.equino.actracker.application.tagset.TagSetResult;
 import ovh.equino.actracker.domain.tagset.*;
-import ovh.equino.security.identity.IdentityProvider;
+import ovh.equino.actracker.domain.user.ActorExtractor;
 
 import java.util.UUID;
 
@@ -21,9 +21,9 @@ class TransactionalTagSetApplicationService extends TagSetApplicationService {
                                           TagSetDataSource tagSetDataSource,
                                           TagSetSearchEngine tagSetSearchEngine,
                                           TagSetNotifier tagSetNotifier,
-                                          IdentityProvider identityProvider) {
+                                          ActorExtractor actorExtractor) {
 
-        super(tagSetFactory, tagSetRepository, tagSetDataSource, tagSetSearchEngine, tagSetNotifier, identityProvider);
+        super(tagSetFactory, tagSetRepository, tagSetDataSource, tagSetSearchEngine, tagSetNotifier, actorExtractor);
     }
 
     @Override

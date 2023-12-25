@@ -7,9 +7,8 @@ import ovh.equino.actracker.domain.activity.*;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.tag.MetricId;
 import ovh.equino.actracker.domain.tag.TagId;
+import ovh.equino.actracker.domain.user.ActorExtractor;
 import ovh.equino.actracker.domain.user.User;
-import ovh.equino.security.identity.Identity;
-import ovh.equino.security.identity.IdentityProvider;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -25,26 +24,25 @@ public class ActivityApplicationService {
     private final ActivityDataSource activityDataSource;
     private final ActivitySearchEngine activitySearchEngine;
     private final ActivityNotifier activityNotifier;
-    private final IdentityProvider identityProvider;
+    private final ActorExtractor actorExtractor;
 
     public ActivityApplicationService(ActivityFactory activityFactory,
                                       ActivityRepository activityRepository,
                                       ActivityDataSource activityDataSource,
                                       ActivitySearchEngine activitySearchEngine,
                                       ActivityNotifier activityNotifier,
-                                      IdentityProvider identityProvider) {
+                                      ActorExtractor actorExtractor) {
 
         this.activityFactory = activityFactory;
         this.activityRepository = activityRepository;
         this.activityDataSource = activityDataSource;
         this.activitySearchEngine = activitySearchEngine;
         this.activityNotifier = activityNotifier;
-        this.identityProvider = identityProvider;
+        this.actorExtractor = actorExtractor;
     }
 
     public ActivityResult createActivity(CreateActivityCommand createActivityCommand) {
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User creator = new User(requesterIdentity.getId());
+        User creator = actorExtractor.getActor();
 
         List<TagId> tags = createActivityCommand.assignedTags()
                 .stream()
@@ -79,11 +77,9 @@ public class ActivityApplicationService {
     }
 
     public SearchResult<ActivityResult> searchActivities(SearchActivitiesQuery searchActivitiesQuery) {
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User searcher = new User(requesterIdentity.getId());
 
         EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
-                searcher,
+                actorExtractor.getActor(),
                 searchActivitiesQuery.pageSize(),
                 searchActivitiesQuery.pageId(),
                 searchActivitiesQuery.term(),
@@ -103,8 +99,7 @@ public class ActivityApplicationService {
     }
 
     public ActivityResult switchToNewActivity(SwitchActivityCommand switchActivityCommand) {
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User switcher = new User(requesterIdentity.getId());
+        User switcher = actorExtractor.getActor();
 
         List<TagId> tags = switchActivityCommand.assignedTags()
                 .stream()
@@ -159,8 +154,7 @@ public class ActivityApplicationService {
     }
 
     public ActivityResult renameActivity(String newTitle, UUID activityId) {
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User updater = new User(requesterIdentity.getId());
+        User updater = actorExtractor.getActor();
 
         ActivityDto activityDto = activityRepository.findById(activityId)
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
@@ -191,8 +185,7 @@ public class ActivityApplicationService {
     }
 
     public ActivityResult startActivity(Instant startTime, UUID activityId) {
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User updater = new User(requesterIdentity.getId());
+        User updater = actorExtractor.getActor();
 
         ActivityDto activityDto = activityRepository.findById(activityId)
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
@@ -223,8 +216,7 @@ public class ActivityApplicationService {
     }
 
     public ActivityResult finishActivity(Instant endTime, UUID activityId) {
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User updater = new User(requesterIdentity.getId());
+        User updater = actorExtractor.getActor();
 
         ActivityDto activityDto = activityRepository.findById(activityId)
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
@@ -255,8 +247,7 @@ public class ActivityApplicationService {
     }
 
     public ActivityResult updateActivityComment(String newComment, UUID activityId) {
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User updater = new User(requesterIdentity.getId());
+        User updater = actorExtractor.getActor();
 
         ActivityDto activityDto = activityRepository.findById(activityId)
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
@@ -287,8 +278,7 @@ public class ActivityApplicationService {
     }
 
     public ActivityResult addTagToActivity(UUID tagId, UUID activityId) {
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User updater = new User(requesterIdentity.getId());
+        User updater = actorExtractor.getActor();
 
         ActivityDto activityDto = activityRepository.findById(activityId)
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
@@ -319,8 +309,7 @@ public class ActivityApplicationService {
     }
 
     public ActivityResult removeTagFromActivity(UUID tagId, UUID activityId) {
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User updater = new User(requesterIdentity.getId());
+        User updater = actorExtractor.getActor();
 
         ActivityDto activityDto = activityRepository.findById(activityId)
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
@@ -351,8 +340,7 @@ public class ActivityApplicationService {
     }
 
     public ActivityResult setMetricValue(UUID metricId, BigDecimal value, UUID activityId) {
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User updater = new User(requesterIdentity.getId());
+        User updater = actorExtractor.getActor();
 
         ActivityDto activityDto = activityRepository.findById(activityId)
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
@@ -383,8 +371,7 @@ public class ActivityApplicationService {
     }
 
     public ActivityResult unsetMetricValue(UUID metricId, UUID activityId) {
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User updater = new User(requesterIdentity.getId());
+        User updater = actorExtractor.getActor();
 
         ActivityDto activityDto = activityRepository.findById(activityId)
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));

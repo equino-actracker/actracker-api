@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ovh.equino.actracker.application.activity.ActivityApplicationService;
 import ovh.equino.actracker.domain.activity.*;
-import ovh.equino.security.identity.IdentityProvider;
+import ovh.equino.actracker.domain.user.ActorExtractor;
 
 @Transactional
 @Service
@@ -15,7 +15,7 @@ class TransactionalActivityApplicationService extends ActivityApplicationService
                                             ActivityDataSource activityDataSource,
                                             ActivitySearchEngine activitySearchEngine,
                                             ActivityNotifier activityNotifier,
-                                            IdentityProvider identityProvider) {
+                                            ActorExtractor actorExtractor) {
 
         super(
                 activityFactory,
@@ -23,7 +23,7 @@ class TransactionalActivityApplicationService extends ActivityApplicationService
                 activityDataSource,
                 activitySearchEngine,
                 activityNotifier,
-                identityProvider
+                actorExtractor
         );
     }
 }

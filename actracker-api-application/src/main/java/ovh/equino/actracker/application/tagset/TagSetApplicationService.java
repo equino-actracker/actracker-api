@@ -6,9 +6,8 @@ import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tagset.*;
+import ovh.equino.actracker.domain.user.ActorExtractor;
 import ovh.equino.actracker.domain.user.User;
-import ovh.equino.security.identity.Identity;
-import ovh.equino.security.identity.IdentityProvider;
 
 import java.util.Collection;
 import java.util.List;
@@ -24,26 +23,25 @@ public class TagSetApplicationService {
     private final TagSetDataSource tagSetDataSource;
     private final TagSetSearchEngine tagSetSearchEngine;
     private final TagSetNotifier tagSetNotifier;
-    private final IdentityProvider identityProvider;
+    private final ActorExtractor actorExtractor;
 
     public TagSetApplicationService(TagSetFactory tagSetFactory,
                                     TagSetRepository tagSetRepository,
                                     TagSetDataSource tagSetDataSource,
                                     TagSetSearchEngine tagSetSearchEngine,
                                     TagSetNotifier tagSetNotifier,
-                                    IdentityProvider identityProvider) {
+                                    ActorExtractor actorExtractor) {
 
         this.tagSetFactory = tagSetFactory;
         this.tagSetRepository = tagSetRepository;
         this.tagSetDataSource = tagSetDataSource;
         this.tagSetSearchEngine = tagSetSearchEngine;
         this.tagSetNotifier = tagSetNotifier;
-        this.identityProvider = identityProvider;
+        this.actorExtractor = actorExtractor;
     }
 
     public TagSetResult createTagSet(CreateTagSetCommand createTagSetCommand) {
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User creator = new User(requesterIdentity.getId());
+        User creator = actorExtractor.getActor();
 
         TagSet newTagSet = tagSetFactory.create(
                 createTagSetCommand.name(),
@@ -61,11 +59,9 @@ public class TagSetApplicationService {
     }
 
     public SearchResult<TagSetResult> searchTagSets(SearchTagSetsQuery searchTagSetsQuery) {
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User searcher = new User(requesterIdentity.getId());
 
         EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
-                searcher,
+                actorExtractor.getActor(),
                 searchTagSetsQuery.pageSize(),
                 searchTagSetsQuery.pageId(),
                 searchTagSetsQuery.term(),
@@ -84,8 +80,7 @@ public class TagSetApplicationService {
     }
 
     public TagSetResult renameTagSet(String newName, UUID tagSetId) {
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User updater = new User(requesterIdentity.getId());
+        User updater = actorExtractor.getActor();
 
         TagSetDto tagSetDto = tagSetRepository.findById(tagSetId)
                 .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));
@@ -110,8 +105,7 @@ public class TagSetApplicationService {
     }
 
     public TagSetResult addTagToSet(UUID tagId, UUID tagSetId) {
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User updater = new User(requesterIdentity.getId());
+        User updater = actorExtractor.getActor();
 
         TagSetDto tagSetDto = tagSetRepository.findById(tagSetId)
                 .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));
@@ -136,8 +130,7 @@ public class TagSetApplicationService {
     }
 
     public TagSetResult removeTagFromSet(UUID tagId, UUID tagSetId) {
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User updater = new User(requesterIdentity.getId());
+        User updater = actorExtractor.getActor();
 
         TagSetDto tagSetDto = tagSetRepository.findById(tagSetId)
                 .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));
