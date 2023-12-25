@@ -117,6 +117,7 @@ class DashboardTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
@@ -140,6 +141,7 @@ class DashboardTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
@@ -250,6 +252,7 @@ class DashboardTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
@@ -273,6 +276,7 @@ class DashboardTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
@@ -475,6 +479,7 @@ class DashboardTest {
             );
             Share newShare = new Share(GRANTEE_NAME);
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
@@ -498,6 +503,7 @@ class DashboardTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             Share newShare = new Share(GRANTEE_NAME);
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
@@ -626,6 +632,7 @@ class DashboardTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
@@ -650,6 +657,7 @@ class DashboardTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
@@ -780,7 +788,8 @@ class DashboardTest {
         }
 
         @Test
-        void shouldFailWhenNotAccessibleToUser() {
+        void
+        shouldFailWhenNotAccessibleToUser() {
             // given
             Dashboard dashboard = new Dashboard(
                     new DashboardId(),
@@ -796,6 +805,7 @@ class DashboardTest {
             );
             Chart newChart = new Chart(CHART_NAME, GroupBy.SELF, AnalysisMetric.METRIC_VALUE, EMPTY_TAGS);
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
@@ -820,6 +830,7 @@ class DashboardTest {
             );
             Chart newChart = new Chart(CHART_NAME, GroupBy.SELF, AnalysisMetric.METRIC_VALUE, EMPTY_TAGS);
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
@@ -1011,6 +1022,7 @@ class DashboardTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
@@ -1041,6 +1053,7 @@ class DashboardTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
