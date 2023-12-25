@@ -191,6 +191,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
@@ -218,6 +219,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
@@ -359,6 +361,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
@@ -386,6 +389,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
@@ -527,6 +531,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
@@ -554,6 +559,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
@@ -695,6 +701,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
@@ -722,6 +729,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
@@ -896,6 +904,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
@@ -923,6 +932,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
@@ -1099,6 +1109,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
@@ -1127,6 +1138,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
@@ -1212,6 +1224,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
@@ -1239,6 +1252,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
@@ -1389,6 +1403,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
             MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
 
@@ -1416,8 +1431,9 @@ class ActivityTest {
                     metricsAccessibilityVerifier,
                     validator
             );
-            when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
+            when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
             MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
 
             // then
@@ -1591,6 +1607,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
@@ -1618,6 +1635,7 @@ class ActivityTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then

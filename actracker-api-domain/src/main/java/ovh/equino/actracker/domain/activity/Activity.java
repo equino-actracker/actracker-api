@@ -72,10 +72,10 @@ public final class Activity implements Entity {
 
     public void rename(String newTitle, User editor) {
         User actor = actorExtractor.getActor();
-        if (!creator.equals(editor) && !activitiesAccessibilityVerifier.isAccessibleFor(editor, this.id)) {
+        if (!creator.equals(actor) && !activitiesAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
-        if (!this.isEditableFor(editor)) {
+        if (!this.isEditableFor(actor)) {
             throw new EntityEditForbidden(Activity.class);
         }
         this.title = newTitle;
@@ -84,10 +84,10 @@ public final class Activity implements Entity {
 
     public void start(Instant startTime, User updater) {
         User actor = actorExtractor.getActor();
-        if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessibleFor(updater, this.id)) {
+        if (!creator.equals(actor) && !activitiesAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
-        if (!this.isEditableFor(updater)) {
+        if (!this.isEditableFor(actor)) {
             throw new EntityEditForbidden(Activity.class);
         }
         this.startTime = startTime;
@@ -96,10 +96,10 @@ public final class Activity implements Entity {
 
     public void finish(Instant endTime, User updater) {
         User actor = actorExtractor.getActor();
-        if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessibleFor(updater, this.id)) {
+        if (!creator.equals(actor) && !activitiesAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
-        if (!this.isEditableFor(updater)) {
+        if (!this.isEditableFor(actor)) {
             throw new EntityEditForbidden(Activity.class);
         }
         this.endTime = endTime;
@@ -108,10 +108,10 @@ public final class Activity implements Entity {
 
     public void updateComment(String comment, User updater) {
         User actor = actorExtractor.getActor();
-        if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessibleFor(updater, this.id)) {
+        if (!creator.equals(actor) && !activitiesAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
-        if (!this.isEditableFor(updater)) {
+        if (!this.isEditableFor(actor)) {
             throw new EntityEditForbidden(Activity.class);
         }
         this.comment = comment;
@@ -120,13 +120,13 @@ public final class Activity implements Entity {
 
     public void assignTag(TagId tagId, User updater) {
         User actor = actorExtractor.getActor();
-        if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessibleFor(updater, this.id)) {
+        if (!creator.equals(actor) && !activitiesAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
-        if (!this.isEditableFor(updater)) {
+        if (!this.isEditableFor(actor)) {
             throw new EntityEditForbidden(Activity.class);
         }
-        if (!tagsAccessibilityVerifier.isAccessibleFor(updater, tagId)) {
+        if (!tagsAccessibilityVerifier.isAccessibleFor(actor, tagId)) {
             String errorMessage = "Tag with ID %s does not exist".formatted(tagId.id());
             throw new EntityInvalidException(Activity.class, errorMessage);
         }
@@ -136,13 +136,13 @@ public final class Activity implements Entity {
 
     public void removeTag(TagId tagId, User updater) {
         User actor = actorExtractor.getActor();
-        if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessibleFor(updater, this.id)) {
+        if (!creator.equals(actor) && !activitiesAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
-        if (!this.isEditableFor(updater)) {
+        if (!this.isEditableFor(actor)) {
             throw new EntityEditForbidden(Activity.class);
         }
-        if (!tagsAccessibilityVerifier.isAccessibleFor(updater, tagId)) {
+        if (!tagsAccessibilityVerifier.isAccessibleFor(actor, tagId)) {
             return;
         }
         this.tags.remove(tagId);
@@ -152,13 +152,13 @@ public final class Activity implements Entity {
     public void setMetricValue(MetricValue newMetricValue, User updater) {
         User actor = actorExtractor.getActor();
         MetricId metricId = new MetricId(newMetricValue.metricId());
-        if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessibleFor(updater, this.id)) {
+        if (!creator.equals(actor) && !activitiesAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
-        if (!this.isEditableFor(updater)) {
+        if (!this.isEditableFor(actor)) {
             throw new EntityEditForbidden(Activity.class);
         }
-        if (!metricsAccessibilityVerifier.isAccessibleFor(updater, metricId, tags)) {
+        if (!metricsAccessibilityVerifier.isAccessibleFor(actor, metricId, tags)) {
             String errorMessage = "Metric with ID %s does not exist in selected tags".formatted(metricId.id());
             throw new EntityInvalidException(Activity.class, errorMessage);
         }
@@ -173,13 +173,13 @@ public final class Activity implements Entity {
 
     public void unsetMetricValue(MetricId metricId, User updater) {
         User actor = actorExtractor.getActor();
-        if (!creator.equals(updater) && !activitiesAccessibilityVerifier.isAccessibleFor(updater, this.id)) {
+        if (!creator.equals(actor) && !activitiesAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
-        if (!this.isEditableFor(updater)) {
+        if (!this.isEditableFor(actor)) {
             throw new EntityEditForbidden(Activity.class);
         }
-        if (!metricsAccessibilityVerifier.isAccessibleFor(updater, metricId, tags)) {
+        if (!metricsAccessibilityVerifier.isAccessibleFor(actor, metricId, tags)) {
             return;
         }
         List<MetricValue> remainingMetricValues = metricValues.stream()
@@ -192,10 +192,10 @@ public final class Activity implements Entity {
 
     public void delete(User remover) {
         User actor = actorExtractor.getActor();
-        if (!creator.equals(remover) && !activitiesAccessibilityVerifier.isAccessibleFor(remover, this.id)) {
+        if (!creator.equals(actor) && !activitiesAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Activity.class, id.id());
         }
-        if (!this.isEditableFor(remover)) {
+        if (!this.isEditableFor(actor)) {
             throw new EntityEditForbidden(Activity.class);
         }
         this.deleted = true;
