@@ -138,7 +138,7 @@ public class TagApplicationService {
                 tagDto.deleted()
         );
 
-        tag.rename(newName, updater);
+        tag.rename(newName);
         tagRepository.update(tagId, tag.forStorage());
 
         tagNotifier.notifyChanged(tag.forChangeNotification());
@@ -152,8 +152,6 @@ public class TagApplicationService {
     }
 
     public void deleteTag(UUID tagId) {
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User remover = new User(requesterIdentity.getId());
 
         TagDto tagDto = tagRepository.findById(tagId)
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
@@ -177,7 +175,7 @@ public class TagApplicationService {
                 tagDto.deleted()
         );
 
-        tag.delete(remover);
+        tag.delete();
         tagRepository.update(tagId, tag.forStorage());
 
         tagNotifier.notifyChanged(tag.forChangeNotification());
@@ -209,7 +207,7 @@ public class TagApplicationService {
                 tagDto.deleted()
         );
 
-        tag.addMetric(metricName, MetricType.valueOf(metricType), updater);
+        tag.addMetric(metricName, MetricType.valueOf(metricType));
         tagRepository.update(tagId, tag.forStorage());
 
         tagNotifier.notifyChanged(tag.forChangeNotification());
@@ -249,7 +247,7 @@ public class TagApplicationService {
                 tagDto.deleted()
         );
 
-        tag.deleteMetric(new MetricId(metricId), updater);
+        tag.deleteMetric(new MetricId(metricId));
         tagRepository.update(tagId, tag.forStorage());
 
         tagNotifier.notifyChanged(tag.forChangeNotification());
@@ -289,7 +287,7 @@ public class TagApplicationService {
                 tagDto.deleted()
         );
 
-        tag.renameMetric(newName, new MetricId(metricId), updater);
+        tag.renameMetric(newName, new MetricId(metricId));
         tagRepository.update(tagId, tag.forStorage());
 
         tagNotifier.notifyChanged(tag.forChangeNotification());
@@ -331,7 +329,7 @@ public class TagApplicationService {
 
         Share share = resolveShare(newGrantee);
 
-        tag.share(share, granter);
+        tag.share(share);
         tagRepository.update(tagId, tag.forStorage());
 
         tagNotifier.notifyChanged(tag.forChangeNotification());
@@ -371,7 +369,7 @@ public class TagApplicationService {
                 tagDto.deleted()
         );
 
-        tag.unshare(granteeName, granter);
+        tag.unshare(granteeName);
         tagRepository.update(tagId, tag.forStorage());
 
         tagNotifier.notifyChanged(tag.forChangeNotification());

@@ -66,7 +66,7 @@ class TagTest {
             );
 
             // when
-            tag.rename(NEW_NAME, CREATOR);
+            tag.rename(NEW_NAME);
 
             // then
             assertThat(tag.name()).isEqualTo(NEW_NAME);
@@ -89,7 +89,7 @@ class TagTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> tag.rename(NEW_NAME, CREATOR))
+            assertThatThrownBy(() -> tag.rename(NEW_NAME))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -112,7 +112,7 @@ class TagTest {
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> tag.rename(NEW_NAME, unauthorizedUser))
+            assertThatThrownBy(() -> tag.rename(NEW_NAME))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -135,7 +135,7 @@ class TagTest {
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> tag.rename(NEW_NAME, unauthorizedUser))
+            assertThatThrownBy(() -> tag.rename(NEW_NAME))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -163,7 +163,7 @@ class TagTest {
             Metric newMetric = new Metric(new MetricId(), CREATOR, METRIC_NAME + 1, NUMERIC, !DELETED);
 
             // when
-            tag.addMetric(newMetric.name(), newMetric.type(), CREATOR);
+            tag.addMetric(newMetric.name(), newMetric.type());
 
             // then
             assertThat(tag.metrics())
@@ -189,7 +189,7 @@ class TagTest {
             Metric newMetric = new Metric(new MetricId(), CREATOR, METRIC_NAME + 2, NUMERIC, !DELETED);
 
             // when
-            tag.addMetric(newMetric.name(), newMetric.type(), CREATOR);
+            tag.addMetric(newMetric.name(), newMetric.type());
 
             // then
             assertThat(tag.metrics())
@@ -215,7 +215,7 @@ class TagTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> tag.addMetric(newMetric.name(), newMetric.type(), CREATOR))
+            assertThatThrownBy(() -> tag.addMetric(newMetric.name(), newMetric.type()))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -239,7 +239,7 @@ class TagTest {
             Metric newMetric = new Metric(new MetricId(), unauthorizedUser, METRIC_NAME, NUMERIC, !DELETED);
 
             // then
-            assertThatThrownBy(() -> tag.addMetric(newMetric.name(), newMetric.type(), unauthorizedUser))
+            assertThatThrownBy(() -> tag.addMetric(newMetric.name(), newMetric.type()))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -263,7 +263,7 @@ class TagTest {
             Metric newMetric = new Metric(new MetricId(), unauthorizedUser, METRIC_NAME, NUMERIC, !DELETED);
 
             // then
-            assertThatThrownBy(() -> tag.addMetric(newMetric.name(), newMetric.type(), unauthorizedUser))
+            assertThatThrownBy(() -> tag.addMetric(newMetric.name(), newMetric.type()))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -293,7 +293,7 @@ class TagTest {
             );
 
             // when
-            tag.deleteMetric(metricToDelete.id(), CREATOR);
+            tag.deleteMetric(metricToDelete.id());
 
             // then
             assertThat(tag.metrics())
@@ -321,7 +321,7 @@ class TagTest {
             );
 
             // when
-            tag.deleteMetric(new MetricId(), CREATOR);
+            tag.deleteMetric(new MetricId());
 
             // then
             assertThat(tag.metrics()).isEmpty();
@@ -344,7 +344,7 @@ class TagTest {
             );
 
             // when
-            tag.deleteMetric(new MetricId(), CREATOR);
+            tag.deleteMetric(new MetricId());
 
             // then
             assertThat(tag.metrics())
@@ -372,7 +372,7 @@ class TagTest {
             );
 
             // when
-            tag.deleteMetric(deletedMetric.id(), CREATOR);
+            tag.deleteMetric(deletedMetric.id());
 
             // then
             assertThat(tag.metrics())
@@ -400,7 +400,7 @@ class TagTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> tag.deleteMetric(new MetricId(), CREATOR))
+            assertThatThrownBy(() -> tag.deleteMetric(new MetricId()))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -424,7 +424,7 @@ class TagTest {
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> tag.deleteMetric(existingMetric.id(), unauthorizedUser))
+            assertThatThrownBy(() -> tag.deleteMetric(existingMetric.id()))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -448,7 +448,7 @@ class TagTest {
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> tag.deleteMetric(existingMetric.id(), unauthorizedUser))
+            assertThatThrownBy(() -> tag.deleteMetric(existingMetric.id()))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -478,7 +478,7 @@ class TagTest {
             );
 
             // when
-            tag.renameMetric(NEW_METRIC_NAME, metricToRename.id(), CREATOR);
+            tag.renameMetric(NEW_METRIC_NAME, metricToRename.id());
 
             // then
             assertThat(tag.metrics())
@@ -506,7 +506,7 @@ class TagTest {
             );
 
             // when
-            tag.renameMetric(NEW_METRIC_NAME, new MetricId(), CREATOR);
+            tag.renameMetric(NEW_METRIC_NAME, new MetricId());
 
             // then
             assertThat(tag.metrics())
@@ -534,7 +534,7 @@ class TagTest {
             );
 
             // when
-            tag.renameMetric(NEW_METRIC_NAME, deletedMetric.id(), CREATOR);
+            tag.renameMetric(NEW_METRIC_NAME, deletedMetric.id());
 
             // then
             assertThat(tag.metrics())
@@ -562,7 +562,7 @@ class TagTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> tag.renameMetric(NEW_METRIC_NAME, new MetricId(), CREATOR))
+            assertThatThrownBy(() -> tag.renameMetric(NEW_METRIC_NAME, new MetricId()))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -586,7 +586,7 @@ class TagTest {
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> tag.renameMetric(NEW_METRIC_NAME, existingMetric.id(), unauthorizedUser))
+            assertThatThrownBy(() -> tag.renameMetric(NEW_METRIC_NAME, existingMetric.id()))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -610,7 +610,7 @@ class TagTest {
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> tag.renameMetric(NEW_METRIC_NAME, existingMetric.id(), unauthorizedUser))
+            assertThatThrownBy(() -> tag.renameMetric(NEW_METRIC_NAME, existingMetric.id()))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -639,7 +639,7 @@ class TagTest {
             );
 
             // when
-            tag.delete(CREATOR);
+            tag.delete();
 
             // then
             assertThat(tag.deleted()).isTrue();
@@ -668,7 +668,7 @@ class TagTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> tag.delete(CREATOR))
+            assertThatThrownBy(tag::delete)
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -691,7 +691,7 @@ class TagTest {
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> tag.delete(unauthorizedUser))
+            assertThatThrownBy(tag::delete)
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -714,7 +714,7 @@ class TagTest {
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> tag.delete(unauthorizedUser))
+            assertThatThrownBy(tag::delete)
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -742,7 +742,7 @@ class TagTest {
             );
 
             // when
-            tag.share(newShare, CREATOR);
+            tag.share(newShare);
 
             // then
             assertThat(tag.shares()).containsExactly(newShare);
@@ -765,7 +765,7 @@ class TagTest {
             );
 
             // when
-            tag.share(newShare, CREATOR);
+            tag.share(newShare);
 
             // then
             assertThat(tag.shares()).containsExactly(newShare);
@@ -789,7 +789,7 @@ class TagTest {
             );
 
             // when
-            tag.share(newShare, CREATOR);
+            tag.share(newShare);
 
             // then
             assertThat(tag.shares()).containsExactlyInAnyOrder(existingShare);
@@ -813,7 +813,7 @@ class TagTest {
             );
 
             // when
-            tag.share(newShare, CREATOR);
+            tag.share(newShare);
 
             // then
             assertThat(tag.shares()).containsExactlyInAnyOrder(existingShare);
@@ -837,7 +837,7 @@ class TagTest {
             );
 
             // when
-            tag.share(newShare, CREATOR);
+            tag.share(newShare);
 
             // then
             assertThat(tag.shares()).containsExactlyInAnyOrder(existingShare);
@@ -861,7 +861,7 @@ class TagTest {
             );
 
             // when
-            tag.share(newShare, CREATOR);
+            tag.share(newShare);
 
             // then
             assertThat(tag.shares()).containsExactlyInAnyOrder(existingShare);
@@ -885,7 +885,7 @@ class TagTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> tag.share(newShare, CREATOR))
+            assertThatThrownBy(() -> tag.share(newShare))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -909,7 +909,7 @@ class TagTest {
             Share newShare = new Share(GRANTEE_NAME);
 
             // then
-            assertThatThrownBy(() -> tag.share(newShare, unauthorizedUser))
+            assertThatThrownBy(() -> tag.share(newShare))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -933,7 +933,7 @@ class TagTest {
             Share newShare = new Share(GRANTEE_NAME);
 
             // then
-            assertThatThrownBy(() -> tag.share(newShare, unauthorizedUser))
+            assertThatThrownBy(() -> tag.share(newShare))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -961,7 +961,7 @@ class TagTest {
             );
 
             // when
-            tag.unshare(existingShare.granteeName(), CREATOR);
+            tag.unshare(existingShare.granteeName());
 
             // then
             assertThat(tag.shares()).isEmpty();
@@ -984,7 +984,7 @@ class TagTest {
             );
 
             // when
-            tag.unshare(existingShare.granteeName(), CREATOR);
+            tag.unshare(existingShare.granteeName());
 
             // then
             assertThat(tag.shares()).isEmpty();
@@ -1008,7 +1008,7 @@ class TagTest {
             );
 
             // when
-            tag.unshare(GRANTEE_NAME, CREATOR);
+            tag.unshare(GRANTEE_NAME);
 
             // then
             assertThat(tag.shares()).containsExactlyInAnyOrder(share1, share2);
@@ -1031,7 +1031,7 @@ class TagTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> tag.unshare(GRANTEE_NAME, CREATOR))
+            assertThatThrownBy(() -> tag.unshare(GRANTEE_NAME))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -1055,7 +1055,7 @@ class TagTest {
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> tag.unshare(existingShare.granteeName(), unauthorizedUser))
+            assertThatThrownBy(() -> tag.unshare(existingShare.granteeName()))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -1079,7 +1079,7 @@ class TagTest {
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> tag.unshare(existingShare.granteeName(), unauthorizedUser))
+            assertThatThrownBy(() -> tag.unshare(existingShare.granteeName()))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }

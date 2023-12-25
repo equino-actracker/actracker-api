@@ -50,7 +50,7 @@ public final class Tag implements Entity {
         this.validator = validator;
     }
 
-    public void rename(String newName, User updater) {
+    public void rename(String newName) {
         User actor = actorExtractor.getActor();
         if (!creator.equals(actor) && !tagsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Tag.class, this.id.id());
@@ -62,7 +62,7 @@ public final class Tag implements Entity {
         this.validate();
     }
 
-    public void addMetric(String name, MetricType type, User updater) {
+    public void addMetric(String name, MetricType type) {
         User actor = actorExtractor.getActor();
         if (!creator.equals(actor) && !tagsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Tag.class, this.id.id());
@@ -76,7 +76,7 @@ public final class Tag implements Entity {
         this.validate();
     }
 
-    public void deleteMetric(MetricId metricId, User updater) {
+    public void deleteMetric(MetricId metricId) {
         User actor = actorExtractor.getActor();
         if (!creator.equals(actor) && !tagsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Tag.class, this.id.id());
@@ -91,7 +91,7 @@ public final class Tag implements Entity {
         this.validate();
     }
 
-    public void renameMetric(String newName, MetricId metricId, User updater) {
+    public void renameMetric(String newName, MetricId metricId) {
         User actor = actorExtractor.getActor();
         if (!creator.equals(actor) && !tagsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Tag.class, this.id.id());
@@ -106,7 +106,7 @@ public final class Tag implements Entity {
         this.validate();
     }
 
-    public void delete(User remover) {
+    public void delete() {
         User actor = actorExtractor.getActor();
         if (!creator.equals(actor) && !tagsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Tag.class, this.id.id());
@@ -119,7 +119,7 @@ public final class Tag implements Entity {
         this.validate();
     }
 
-    public void share(Share newShare, User granter) {
+    public void share(Share newShare) {
         User actor = actorExtractor.getActor();
         if (!creator.equals(actor) && !tagsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Tag.class, this.id.id());
@@ -136,7 +136,7 @@ public final class Tag implements Entity {
         this.validate();
     }
 
-    public void unshare(String granteeName, User granter) {
+    public void unshare(String granteeName) {
         User actor = actorExtractor.getActor();
         if (!creator.equals(actor) && !tagsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Tag.class, this.id.id());
