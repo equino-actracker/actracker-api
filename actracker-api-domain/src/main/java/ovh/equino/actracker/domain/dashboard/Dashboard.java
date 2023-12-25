@@ -57,7 +57,7 @@ public final class Dashboard implements Entity {
         this.validator = validator;
     }
 
-    public void rename(String newName, User editor) {
+    public void rename(String newName) {
         User actor = actorExtractor.getActor();
         if (!creator.equals(actor) && !dashboardsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Dashboard.class, id.id());
@@ -69,7 +69,7 @@ public final class Dashboard implements Entity {
         this.validate();
     }
 
-    public void addChart(Chart newChart, User editor) {
+    public void addChart(Chart newChart) {
         User actor = actorExtractor.getActor();
         if (!creator.equals(actor) && !dashboardsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Dashboard.class, id.id());
@@ -92,7 +92,7 @@ public final class Dashboard implements Entity {
         this.validate();
     }
 
-    public void deleteChart(ChartId chartId, User editor) {
+    public void deleteChart(ChartId chartId) {
         User actor = actorExtractor.getActor();
         if (!creator.equals(actor) && !dashboardsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Dashboard.class, id.id());
@@ -114,7 +114,7 @@ public final class Dashboard implements Entity {
         this.validate();
     }
 
-    public void delete(User remover) {
+    public void delete() {
         User actor = actorExtractor.getActor();
         if (!creator.equals(actor) && !dashboardsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Dashboard.class, id.id());
@@ -131,7 +131,7 @@ public final class Dashboard implements Entity {
         this.validate();
     }
 
-    public void share(Share share, User granter) {
+    public void share(Share share) {
         User actor = actorExtractor.getActor();
         if (!creator.equals(actor) && !dashboardsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Dashboard.class, id.id());
@@ -148,7 +148,7 @@ public final class Dashboard implements Entity {
         this.validate();
     }
 
-    public void unshare(String granteeName, User granter) {
+    public void unshare(String granteeName) {
         User actor = actorExtractor.getActor();
         if (!creator.equals(actor) && !dashboardsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Dashboard.class, id.id());

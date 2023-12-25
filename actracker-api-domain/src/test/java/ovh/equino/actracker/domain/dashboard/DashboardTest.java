@@ -73,7 +73,7 @@ class DashboardTest {
             );
 
             // when
-            dashboard.rename(NEW_NAME, CREATOR);
+            dashboard.rename(NEW_NAME);
 
             // then
             assertThat(dashboard.name()).isEqualTo(NEW_NAME);
@@ -97,7 +97,7 @@ class DashboardTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> dashboard.rename(NEW_NAME, CREATOR))
+            assertThatThrownBy(() -> dashboard.rename(NEW_NAME))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -121,7 +121,7 @@ class DashboardTest {
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> dashboard.rename(NEW_NAME, unauthorizedUser))
+            assertThatThrownBy(() -> dashboard.rename(NEW_NAME))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -145,7 +145,7 @@ class DashboardTest {
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> dashboard.rename(NEW_NAME, unauthorizedUser))
+            assertThatThrownBy(() -> dashboard.rename(NEW_NAME))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -182,7 +182,7 @@ class DashboardTest {
             );
 
             // when
-            dashboard.delete(CREATOR);
+            dashboard.delete();
 
             // then
             assertThat(dashboard.deleted()).isTrue();
@@ -208,7 +208,7 @@ class DashboardTest {
             );
 
             // when
-            dashboard.delete(CREATOR);
+            dashboard.delete();
 
             // then
             assertThat(dashboard.deleted()).isTrue();
@@ -232,7 +232,7 @@ class DashboardTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> dashboard.delete(CREATOR))
+            assertThatThrownBy(dashboard::delete)
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -256,7 +256,7 @@ class DashboardTest {
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> dashboard.delete(unauthorizedUser))
+            assertThatThrownBy(dashboard::delete)
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -280,7 +280,7 @@ class DashboardTest {
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> dashboard.delete(unauthorizedUser))
+            assertThatThrownBy(dashboard::delete)
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -309,7 +309,7 @@ class DashboardTest {
             Share newShare = new Share(GRANTEE_NAME);
 
             // when
-            dashboard.share(newShare, CREATOR);
+            dashboard.share(newShare);
 
             // then
             assertThat(dashboard.shares()).containsExactly(newShare);
@@ -333,7 +333,7 @@ class DashboardTest {
             Share newShare = new Share(new User(randomUUID()), GRANTEE_NAME);
 
             // when
-            dashboard.share(newShare, CREATOR);
+            dashboard.share(newShare);
 
             // then
             assertThat(dashboard.shares()).containsExactly(newShare);
@@ -358,7 +358,7 @@ class DashboardTest {
             Share newShare = new Share(new User(randomUUID()), GRANTEE_NAME);
 
             // when
-            dashboard.share(newShare, CREATOR);
+            dashboard.share(newShare);
 
             // then
             assertThat(dashboard.shares()).containsExactlyInAnyOrder(existingShare);
@@ -383,7 +383,7 @@ class DashboardTest {
             Share newShare = new Share(new User(randomUUID()), GRANTEE_NAME);
 
             // when
-            dashboard.share(newShare, CREATOR);
+            dashboard.share(newShare);
 
             // then
             assertThat(dashboard.shares()).containsExactlyInAnyOrder(existingShare);
@@ -408,7 +408,7 @@ class DashboardTest {
             Share newShare = new Share(GRANTEE_NAME);
 
             // when
-            dashboard.share(newShare, CREATOR);
+            dashboard.share(newShare);
 
             // then
             assertThat(dashboard.shares()).containsExactly(existingShare);
@@ -433,7 +433,7 @@ class DashboardTest {
             Share newShare = new Share(GRANTEE_NAME);
 
             // when
-            dashboard.share(newShare, CREATOR);
+            dashboard.share(newShare);
 
             // then
             assertThat(dashboard.shares()).containsExactly(existingShare);
@@ -458,7 +458,7 @@ class DashboardTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> dashboard.share(newShare, CREATOR))
+            assertThatThrownBy(() -> dashboard.share(newShare))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -483,7 +483,7 @@ class DashboardTest {
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> dashboard.share(newShare, unauthorizedUser))
+            assertThatThrownBy(() -> dashboard.share(newShare))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -508,7 +508,7 @@ class DashboardTest {
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> dashboard.share(newShare, unauthorizedUser))
+            assertThatThrownBy(() -> dashboard.share(newShare))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -537,7 +537,7 @@ class DashboardTest {
             );
 
             // when
-            dashboard.unshare(existingShare.granteeName(), CREATOR);
+            dashboard.unshare(existingShare.granteeName());
 
             // then
             assertThat(dashboard.shares()).isEmpty();
@@ -561,7 +561,7 @@ class DashboardTest {
             );
 
             // when
-            dashboard.unshare(existingShare.granteeName(), CREATOR);
+            dashboard.unshare(existingShare.granteeName());
 
             // then
             assertThat(dashboard.shares()).isEmpty();
@@ -587,7 +587,7 @@ class DashboardTest {
             );
 
             // when
-            dashboard.unshare(GRANTEE_NAME, CREATOR);
+            dashboard.unshare(GRANTEE_NAME);
 
             // then
             assertThat(dashboard.shares()).containsExactlyInAnyOrder(existingShare1, existingShare2);
@@ -611,7 +611,7 @@ class DashboardTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> dashboard.unshare(GRANTEE_NAME, CREATOR))
+            assertThatThrownBy(() -> dashboard.unshare(GRANTEE_NAME))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -636,7 +636,7 @@ class DashboardTest {
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> dashboard.unshare(existingShare.granteeName(), unauthorizedUser))
+            assertThatThrownBy(() -> dashboard.unshare(existingShare.granteeName()))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -661,7 +661,7 @@ class DashboardTest {
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> dashboard.unshare(existingShare.granteeName(), unauthorizedUser))
+            assertThatThrownBy(() -> dashboard.unshare(existingShare.granteeName()))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -692,7 +692,7 @@ class DashboardTest {
             when(tagsAccessibilityVerifier.nonAccessibleFor(any(), any())).thenReturn(emptySet());
 
             // when
-            dashboard.addChart(newChart, CREATOR);
+            dashboard.addChart(newChart);
 
             // then
             assertThat(dashboard.charts()).containsExactly(newChart);
@@ -732,7 +732,7 @@ class DashboardTest {
             when(tagsAccessibilityVerifier.nonAccessibleFor(any(), any())).thenReturn(emptySet());
 
             // when
-            dashboard.addChart(newChart, CREATOR);
+            dashboard.addChart(newChart);
 
             // then
             assertThat(dashboard.charts())
@@ -759,7 +759,7 @@ class DashboardTest {
             when(tagsAccessibilityVerifier.nonAccessibleFor(any(), any())).thenReturn(Set.of(nonAccessibleTag));
 
             // then
-            assertThatThrownBy(() -> dashboard.addChart(newChart, CREATOR))
+            assertThatThrownBy(() -> dashboard.addChart(newChart))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -783,7 +783,7 @@ class DashboardTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> dashboard.addChart(newChart, CREATOR))
+            assertThatThrownBy(() -> dashboard.addChart(newChart))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -809,7 +809,7 @@ class DashboardTest {
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> dashboard.addChart(newChart, unauthorizedUser))
+            assertThatThrownBy(() -> dashboard.addChart(newChart))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -834,7 +834,7 @@ class DashboardTest {
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> dashboard.addChart(newChart, unauthorizedUser))
+            assertThatThrownBy(() -> dashboard.addChart(newChart))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -882,7 +882,7 @@ class DashboardTest {
             );
 
             // when
-            dashboard.deleteChart(chartToDelete.id(), CREATOR);
+            dashboard.deleteChart(chartToDelete.id());
 
             // then
             assertThat(dashboard.charts())
@@ -911,7 +911,7 @@ class DashboardTest {
             );
 
             // when
-            dashboard.deleteChart(new ChartId(), CREATOR);
+            dashboard.deleteChart(new ChartId());
 
             // then
             assertThat(dashboard.charts()).isEmpty();
@@ -935,7 +935,7 @@ class DashboardTest {
             );
 
             // when
-            dashboard.deleteChart(new ChartId(), CREATOR);
+            dashboard.deleteChart(new ChartId());
 
             // then
             assertThat(dashboard.charts()).containsExactly(existingChart);
@@ -971,7 +971,7 @@ class DashboardTest {
             );
 
             // when
-            dashboard.deleteChart(existingDeletedChart.id(), CREATOR);
+            dashboard.deleteChart(existingDeletedChart.id());
 
             // then
             assertThat(dashboard.charts()).containsExactlyInAnyOrder(existingDeletedChart, existingNonDeletedChart);
@@ -995,7 +995,7 @@ class DashboardTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> dashboard.deleteChart(new ChartId(), CREATOR))
+            assertThatThrownBy(() -> dashboard.deleteChart(new ChartId()))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -1026,7 +1026,7 @@ class DashboardTest {
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> dashboard.deleteChart(existingChart.id(), unauthorizedUser))
+            assertThatThrownBy(() -> dashboard.deleteChart(existingChart.id()))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -1057,7 +1057,7 @@ class DashboardTest {
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> dashboard.deleteChart(existingChart.id(), unauthorizedUser))
+            assertThatThrownBy(() -> dashboard.deleteChart(existingChart.id()))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }

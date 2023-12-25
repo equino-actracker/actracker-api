@@ -124,7 +124,7 @@ public class DashboardApplicationService {
                 dashboardDto.deleted()
         );
 
-        dashboard.rename(newName, updater);
+        dashboard.rename(newName);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
         dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
 
@@ -137,8 +137,6 @@ public class DashboardApplicationService {
     }
 
     public void deleteDashboard(UUID dashboardId) {
-        Identity requestIdentity = identityProvider.provideIdentity();
-        User remover = new User(requestIdentity.getId());
 
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
@@ -151,7 +149,7 @@ public class DashboardApplicationService {
                 dashboardDto.deleted()
         );
 
-        dashboard.delete(remover);
+        dashboard.delete();
         dashboardRepository.update(dashboardId, dashboard.forStorage());
         dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
     }
@@ -178,7 +176,7 @@ public class DashboardApplicationService {
                 newChartAssignment.includedTags()
         );
 
-        dashboard.addChart(newChart, updater);
+        dashboard.addChart(newChart);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
         dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
 
@@ -205,7 +203,7 @@ public class DashboardApplicationService {
                 dashboardDto.deleted()
         );
 
-        dashboard.deleteChart(new ChartId(chartId), updater);
+        dashboard.deleteChart(new ChartId(chartId));
         dashboardRepository.update(dashboardId, dashboard.forStorage());
         dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
 
@@ -234,7 +232,7 @@ public class DashboardApplicationService {
 
         Share share = resolveShare(newGrantee);
 
-        dashboard.share(share, granter);
+        dashboard.share(share);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
         dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
 
@@ -261,7 +259,7 @@ public class DashboardApplicationService {
                 dashboardDto.deleted()
         );
 
-        dashboard.unshare(granteeName, granter);
+        dashboard.unshare(granteeName);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
         dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
 
