@@ -55,10 +55,10 @@ public final class TagSet implements Entity {
 
     public void rename(String newName, User updater) {
         User actor = actorExtractor.getActor();
-        if (!creator.equals(updater) && !tagSetsAccessibilityVerifier.isAccessibleFor(updater, this.id)) {
+        if (!creator.equals(actor) && !tagSetsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(TagSet.class, id.id());
         }
-        if (!this.isEditableFor(updater)) {
+        if (!this.isEditableFor(actor)) {
             throw new EntityEditForbidden(TagSet.class);
         }
         name = newName;
@@ -67,13 +67,13 @@ public final class TagSet implements Entity {
 
     public void assignTag(TagId newTag, User updater) {
         User actor = actorExtractor.getActor();
-        if (!creator.equals(updater) && !tagSetsAccessibilityVerifier.isAccessibleFor(updater, this.id)) {
+        if (!creator.equals(actor) && !tagSetsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(TagSet.class, id.id());
         }
-        if (!this.isEditableFor(updater)) {
+        if (!this.isEditableFor(actor)) {
             throw new EntityEditForbidden(TagSet.class);
         }
-        if (!tagsAccessibilityVerifier.isAccessibleFor(updater, newTag)) {
+        if (!tagsAccessibilityVerifier.isAccessibleFor(actor, newTag)) {
             String errorMessage = "Tag with ID %s does not exist".formatted(newTag.id());
             throw new EntityInvalidException(TagSet.class, errorMessage);
         }
@@ -83,13 +83,13 @@ public final class TagSet implements Entity {
 
     public void removeTag(TagId tag, User updater) {
         User actor = actorExtractor.getActor();
-        if (!creator.equals(updater) && !tagSetsAccessibilityVerifier.isAccessibleFor(updater, this.id)) {
+        if (!creator.equals(actor) && !tagSetsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(TagSet.class, id.id());
         }
-        if (!this.isEditableFor(updater)) {
+        if (!this.isEditableFor(actor)) {
             throw new EntityEditForbidden(TagSet.class);
         }
-        if (!tagsAccessibilityVerifier.isAccessibleFor(updater, tag)) {
+        if (!tagsAccessibilityVerifier.isAccessibleFor(actor, tag)) {
             return;
         }
         tags.remove(tag);
@@ -98,10 +98,10 @@ public final class TagSet implements Entity {
 
     public void delete(User remover) {
         User actor = actorExtractor.getActor();
-        if (!creator.equals(remover) && !tagSetsAccessibilityVerifier.isAccessibleFor(remover, this.id)) {
+        if (!creator.equals(actor) && !tagSetsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(TagSet.class, id.id());
         }
-        if (!this.isEditableFor(remover)) {
+        if (!this.isEditableFor(actor)) {
             throw new EntityEditForbidden(TagSet.class);
         }
         this.deleted = true;

@@ -52,10 +52,10 @@ public final class Tag implements Entity {
 
     public void rename(String newName, User updater) {
         User actor = actorExtractor.getActor();
-        if (!creator.equals(updater) && !tagsAccessibilityVerifier.isAccessibleFor(updater, this.id)) {
+        if (!creator.equals(actor) && !tagsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Tag.class, this.id.id());
         }
-        if (!this.isEditableFor(updater)) {
+        if (!this.isEditableFor(actor)) {
             throw new EntityEditForbidden(Tag.class);
         }
         this.name = newName;
@@ -64,24 +64,24 @@ public final class Tag implements Entity {
 
     public void addMetric(String name, MetricType type, User updater) {
         User actor = actorExtractor.getActor();
-        if (!creator.equals(updater) && !tagsAccessibilityVerifier.isAccessibleFor(updater, this.id)) {
+        if (!creator.equals(actor) && !tagsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Tag.class, this.id.id());
         }
-        if (!this.isEditableFor(updater)) {
+        if (!this.isEditableFor(actor)) {
             throw new EntityEditForbidden(Tag.class);
         }
         // TODO replace with metric factory?
-        Metric newMetric = new Metric(new MetricId(randomUUID()), updater, name, type, false);
+        Metric newMetric = new Metric(new MetricId(randomUUID()), actor, name, type, false);
         this.metrics.add(newMetric);
         this.validate();
     }
 
     public void deleteMetric(MetricId metricId, User updater) {
         User actor = actorExtractor.getActor();
-        if (!creator.equals(updater) && !tagsAccessibilityVerifier.isAccessibleFor(updater, this.id)) {
+        if (!creator.equals(actor) && !tagsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Tag.class, this.id.id());
         }
-        if (!this.isEditableFor(updater)) {
+        if (!this.isEditableFor(actor)) {
             throw new EntityEditForbidden(Tag.class);
         }
         this.metrics.stream()
@@ -93,10 +93,10 @@ public final class Tag implements Entity {
 
     public void renameMetric(String newName, MetricId metricId, User updater) {
         User actor = actorExtractor.getActor();
-        if (!creator.equals(updater) && !tagsAccessibilityVerifier.isAccessibleFor(updater, this.id)) {
+        if (!creator.equals(actor) && !tagsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Tag.class, this.id.id());
         }
-        if (!this.isEditableFor(updater)) {
+        if (!this.isEditableFor(actor)) {
             throw new EntityEditForbidden(Tag.class);
         }
         this.metrics.stream()
@@ -108,10 +108,10 @@ public final class Tag implements Entity {
 
     public void delete(User remover) {
         User actor = actorExtractor.getActor();
-        if (!creator.equals(remover) && !tagsAccessibilityVerifier.isAccessibleFor(remover, this.id)) {
+        if (!creator.equals(actor) && !tagsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Tag.class, this.id.id());
         }
-        if (!this.isEditableFor(remover)) {
+        if (!this.isEditableFor(actor)) {
             throw new EntityEditForbidden(Tag.class);
         }
         this.metrics.forEach(Metric::delete);
@@ -121,10 +121,10 @@ public final class Tag implements Entity {
 
     public void share(Share newShare, User granter) {
         User actor = actorExtractor.getActor();
-        if (!creator.equals(granter) && !tagsAccessibilityVerifier.isAccessibleFor(granter, this.id)) {
+        if (!creator.equals(actor) && !tagsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Tag.class, this.id.id());
         }
-        if (!this.isEditableFor(granter)) {
+        if (!this.isEditableFor(actor)) {
             throw new EntityEditForbidden(Tag.class);
         }
         List<String> existingGranteeNames = this.shares.stream()
@@ -138,10 +138,10 @@ public final class Tag implements Entity {
 
     public void unshare(String granteeName, User granter) {
         User actor = actorExtractor.getActor();
-        if (!creator.equals(granter) && !tagsAccessibilityVerifier.isAccessibleFor(granter, this.id)) {
+        if (!creator.equals(actor) && !tagsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Tag.class, this.id.id());
         }
-        if (!this.isEditableFor(granter)) {
+        if (!this.isEditableFor(actor)) {
             throw new EntityEditForbidden(Tag.class);
         }
         List<Share> sharesWithExclusion = this.shares.stream()

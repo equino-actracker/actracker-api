@@ -112,6 +112,7 @@ class TagSetTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(tagSetsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
@@ -134,6 +135,7 @@ class TagSetTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(tagSetsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
@@ -277,9 +279,10 @@ class TagSetTest {
                     tagsAccessibilityVerifier,
                     validator
             );
-            TagId newTag = new TagId();
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(tagSetsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
+            TagId newTag = new TagId();
 
             // then
             assertThatThrownBy(() -> tagSet.assignTag(newTag, unauthorizedUser))
@@ -300,9 +303,10 @@ class TagSetTest {
                     tagsAccessibilityVerifier,
                     validator
             );
-            TagId newTag = new TagId();
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(tagSetsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
+            TagId newTag = new TagId();
 
             // then
             assertThatThrownBy(() -> tagSet.assignTag(newTag, unauthorizedUser))
@@ -448,6 +452,7 @@ class TagSetTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(tagSetsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
@@ -471,6 +476,7 @@ class TagSetTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(tagSetsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
@@ -541,6 +547,7 @@ class TagSetTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(tagSetsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
@@ -563,6 +570,7 @@ class TagSetTest {
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(tagSetsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
