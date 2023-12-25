@@ -96,7 +96,7 @@ public class TagSetApplicationService {
                 toTagIds(tagSetDto.tags()),
                 tagSetDto.deleted()
         );
-        tagSet.rename(newName, updater);
+        tagSet.rename(newName);
         tagSetRepository.update(tagSetId, tagSet.forStorage());
 
         tagSetNotifier.notifyChanged(tagSet.forChangeNotification());
@@ -122,7 +122,7 @@ public class TagSetApplicationService {
                 toTagIds(tagSetDto.tags()),
                 tagSetDto.deleted()
         );
-        tagSet.assignTag(new TagId(tagId), updater);
+        tagSet.assignTag(new TagId(tagId));
         tagSetRepository.update(tagSetId, tagSet.forStorage());
 
         tagSetNotifier.notifyChanged(tagSet.forChangeNotification());
@@ -149,7 +149,7 @@ public class TagSetApplicationService {
                 tagSetDto.deleted()
         );
 
-        tagSet.removeTag(new TagId(tagId), updater);
+        tagSet.removeTag(new TagId(tagId));
         tagSetRepository.update(tagSetId, tagSet.forStorage());
 
         tagSetNotifier.notifyChanged(tagSet.forChangeNotification());
@@ -163,8 +163,6 @@ public class TagSetApplicationService {
     }
 
     public void deleteTagSet(UUID tagSetId) {
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User remover = new User(requesterIdentity.getId());
 
         TagSetDto tagSetDto = tagSetRepository.findById(tagSetId)
                 .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));
@@ -176,7 +174,7 @@ public class TagSetApplicationService {
                 tagSetDto.deleted()
         );
 
-        tagSet.delete(remover);
+        tagSet.delete();
         tagSetRepository.update(tagSetId, tagSet.forStorage());
 
         tagSetNotifier.notifyChanged(tagSet.forChangeNotification());

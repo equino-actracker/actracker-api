@@ -53,7 +53,7 @@ public final class TagSet implements Entity {
         this.validator = validator;
     }
 
-    public void rename(String newName, User updater) {
+    public void rename(String newName) {
         User actor = actorExtractor.getActor();
         if (!creator.equals(actor) && !tagSetsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(TagSet.class, id.id());
@@ -65,7 +65,7 @@ public final class TagSet implements Entity {
         this.validate();
     }
 
-    public void assignTag(TagId newTag, User updater) {
+    public void assignTag(TagId newTag) {
         User actor = actorExtractor.getActor();
         if (!creator.equals(actor) && !tagSetsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(TagSet.class, id.id());
@@ -81,7 +81,7 @@ public final class TagSet implements Entity {
         this.validate();
     }
 
-    public void removeTag(TagId tag, User updater) {
+    public void removeTag(TagId tag) {
         User actor = actorExtractor.getActor();
         if (!creator.equals(actor) && !tagSetsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(TagSet.class, id.id());
@@ -96,7 +96,7 @@ public final class TagSet implements Entity {
         this.validate();
     }
 
-    public void delete(User remover) {
+    public void delete() {
         User actor = actorExtractor.getActor();
         if (!creator.equals(actor) && !tagSetsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(TagSet.class, id.id());
