@@ -85,7 +85,7 @@ class ActivityTest {
             );
 
             // when
-            activity.rename(NEW_TITLE, CREATOR);
+            activity.rename(NEW_TITLE);
 
             // then
             assertThat(activity.title()).isEqualTo(NEW_TITLE);
@@ -112,7 +112,7 @@ class ActivityTest {
             );
 
             // when
-            activity.rename(null, CREATOR);
+            activity.rename(null);
 
             // then
             assertThat(activity.title()).isEqualTo(null);
@@ -139,7 +139,7 @@ class ActivityTest {
             );
 
             // when
-            activity.rename(" ", CREATOR);
+            activity.rename(" ");
 
             // then
             assertThat(activity.title()).isEqualTo(" ");
@@ -167,7 +167,7 @@ class ActivityTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> activity.rename(NEW_TITLE, CREATOR))
+            assertThatThrownBy(() -> activity.rename(NEW_TITLE))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -195,7 +195,7 @@ class ActivityTest {
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> activity.rename(NEW_TITLE, unauthorizedUser))
+            assertThatThrownBy(() -> activity.rename(NEW_TITLE))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -223,7 +223,7 @@ class ActivityTest {
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> activity.rename(NEW_TITLE, unauthorizedUser))
+            assertThatThrownBy(() -> activity.rename(NEW_TITLE))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -255,7 +255,7 @@ class ActivityTest {
             );
 
             // when
-            activity.start(NEW_START_TIME, CREATOR);
+            activity.start(NEW_START_TIME);
 
             // then
             assertThat(activity.startTime()).isEqualTo(NEW_START_TIME);
@@ -282,7 +282,7 @@ class ActivityTest {
             );
 
             // when
-            activity.start(END_TIME, CREATOR);
+            activity.start(END_TIME);
 
             // then
             assertThat(activity.startTime()).isEqualTo(END_TIME);
@@ -309,7 +309,7 @@ class ActivityTest {
             );
 
             // when
-            activity.start(null, CREATOR);
+            activity.start(null);
 
             // then
             assertThat(activity.startTime()).isNull();
@@ -337,7 +337,7 @@ class ActivityTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> activity.start(NEW_START_TIME, CREATOR))
+            assertThatThrownBy(() -> activity.start(NEW_START_TIME))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -365,7 +365,7 @@ class ActivityTest {
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> activity.start(NEW_START_TIME, unauthorizedUser))
+            assertThatThrownBy(() -> activity.start(NEW_START_TIME))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -393,7 +393,7 @@ class ActivityTest {
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> activity.start(NEW_START_TIME, unauthorizedUser))
+            assertThatThrownBy(() -> activity.start(NEW_START_TIME))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -425,7 +425,7 @@ class ActivityTest {
             );
 
             // when
-            activity.finish(NEW_END_TIME, CREATOR);
+            activity.finish(NEW_END_TIME);
 
             // then
             assertThat(activity.endTime()).isEqualTo(NEW_END_TIME);
@@ -452,7 +452,7 @@ class ActivityTest {
             );
 
             // when
-            activity.finish(START_TIME, CREATOR);
+            activity.finish(START_TIME);
 
             // then
             assertThat(activity.endTime()).isEqualTo(START_TIME);
@@ -479,7 +479,7 @@ class ActivityTest {
             );
 
             // when
-            activity.finish(null, CREATOR);
+            activity.finish(null);
 
             // then
             assertThat(activity.endTime()).isNull();
@@ -507,7 +507,7 @@ class ActivityTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> activity.finish(NEW_END_TIME, CREATOR))
+            assertThatThrownBy(() -> activity.finish(NEW_END_TIME))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -535,7 +535,7 @@ class ActivityTest {
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> activity.finish(NEW_END_TIME, unauthorizedUser))
+            assertThatThrownBy(() -> activity.finish(NEW_END_TIME))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -563,7 +563,7 @@ class ActivityTest {
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> activity.finish(NEW_END_TIME, unauthorizedUser))
+            assertThatThrownBy(() -> activity.finish(NEW_END_TIME))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -595,7 +595,7 @@ class ActivityTest {
             );
 
             // when
-            activity.updateComment(NEW_COMMENT, CREATOR);
+            activity.updateComment(NEW_COMMENT);
 
             // then
             assertThat(activity.comment()).isEqualTo(NEW_COMMENT);
@@ -622,7 +622,7 @@ class ActivityTest {
             );
 
             // when
-            activity.updateComment(null, CREATOR);
+            activity.updateComment(null);
 
             // then
             assertThat(activity.comment()).isNull();
@@ -649,7 +649,7 @@ class ActivityTest {
             );
 
             // when
-            activity.updateComment(" ", CREATOR);
+            activity.updateComment(" ");
 
             // then
             assertThat(activity.comment()).isEqualTo(" ");
@@ -677,7 +677,7 @@ class ActivityTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> activity.updateComment(NEW_COMMENT, CREATOR))
+            assertThatThrownBy(() -> activity.updateComment(NEW_COMMENT))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -705,7 +705,7 @@ class ActivityTest {
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> activity.updateComment(NEW_COMMENT, unauthorizedUser))
+            assertThatThrownBy(() -> activity.updateComment(NEW_COMMENT))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -733,7 +733,7 @@ class ActivityTest {
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> activity.updateComment(NEW_COMMENT, unauthorizedUser))
+            assertThatThrownBy(() -> activity.updateComment(NEW_COMMENT))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -765,7 +765,7 @@ class ActivityTest {
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // when
-            activity.assignTag(newTag, CREATOR);
+            activity.assignTag(newTag);
 
             // then
             assertThat(activity.tags()).containsExactly(newTag);
@@ -795,7 +795,7 @@ class ActivityTest {
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // when
-            activity.assignTag(newTag, CREATOR);
+            activity.assignTag(newTag);
 
             // then
             assertThat(activity.tags()).containsExactlyInAnyOrder(existingTag, newTag);
@@ -824,7 +824,7 @@ class ActivityTest {
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // when
-            activity.assignTag(existingTag, CREATOR);
+            activity.assignTag(existingTag);
 
             // then
             assertThat(activity.tags()).containsExactly(existingTag);
@@ -853,7 +853,7 @@ class ActivityTest {
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> activity.assignTag(newTag, CREATOR))
+            assertThatThrownBy(() -> activity.assignTag(newTag))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -880,7 +880,7 @@ class ActivityTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> activity.assignTag(new TagId(), CREATOR))
+            assertThatThrownBy(() -> activity.assignTag(new TagId()))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -908,7 +908,7 @@ class ActivityTest {
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> activity.assignTag(new TagId(), unauthorizedUser))
+            assertThatThrownBy(() -> activity.assignTag(new TagId()))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -936,7 +936,7 @@ class ActivityTest {
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> activity.assignTag(new TagId(), unauthorizedUser))
+            assertThatThrownBy(() -> activity.assignTag(new TagId()))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -969,7 +969,7 @@ class ActivityTest {
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // when
-            activity.removeTag(tagToRemove, CREATOR);
+            activity.removeTag(tagToRemove);
 
             // then
             assertThat(activity.tags()).containsExactly(existingTag);
@@ -997,7 +997,7 @@ class ActivityTest {
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // when
-            activity.removeTag(new TagId(), CREATOR);
+            activity.removeTag(new TagId());
 
             // then
             assertThat(activity.tags()).isEmpty();
@@ -1026,7 +1026,7 @@ class ActivityTest {
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // when
-            activity.removeTag(new TagId(), CREATOR);
+            activity.removeTag(new TagId());
 
             // then
             assertThat(activity.tags()).containsExactly(existingTag);
@@ -1055,7 +1055,7 @@ class ActivityTest {
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // when
-            activity.removeTag(tagToRemove, CREATOR);
+            activity.removeTag(tagToRemove);
 
             // then
             assertThat(activity.tags()).containsExactly(tagToRemove);
@@ -1084,7 +1084,7 @@ class ActivityTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> activity.removeTag(new TagId(), CREATOR))
+            assertThatThrownBy(() -> activity.removeTag(new TagId()))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -1113,7 +1113,7 @@ class ActivityTest {
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> activity.removeTag(existingTag, unauthorizedUser))
+            assertThatThrownBy(() -> activity.removeTag(existingTag))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -1142,7 +1142,7 @@ class ActivityTest {
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> activity.removeTag(existingTag, unauthorizedUser))
+            assertThatThrownBy(() -> activity.removeTag(existingTag))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -1172,7 +1172,7 @@ class ActivityTest {
             );
 
             // when
-            activity.delete(CREATOR);
+            activity.delete();
 
             // then
             assertThat(activity.deleted()).isTrue();
@@ -1200,7 +1200,7 @@ class ActivityTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> activity.delete(CREATOR))
+            assertThatThrownBy(activity::delete)
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -1228,7 +1228,7 @@ class ActivityTest {
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> activity.delete(unauthorizedUser))
+            assertThatThrownBy(activity::delete)
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -1256,7 +1256,7 @@ class ActivityTest {
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> activity.delete(unauthorizedUser))
+            assertThatThrownBy(activity::delete)
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -1293,7 +1293,7 @@ class ActivityTest {
             when(metricsAccessibilityVerifier.isAccessibleFor(any(), any(), any())).thenReturn(true);
 
             // when
-            activity.setMetricValue(newMetricValue, CREATOR);
+            activity.setMetricValue(newMetricValue);
 
             // then
             assertThat(activity.metricValues()).containsExactlyInAnyOrder(NON_EXISTING_METRIC_VALUE, newMetricValue);
@@ -1322,7 +1322,7 @@ class ActivityTest {
             when(metricsAccessibilityVerifier.isAccessibleFor(any(), any(), any())).thenReturn(true);
 
             // when
-            activity.setMetricValue(newMetricValue, CREATOR);
+            activity.setMetricValue(newMetricValue);
 
             // then
             assertThat(activity.metricValues()).containsExactlyInAnyOrder(NON_EXISTING_METRIC_VALUE, newMetricValue);
@@ -1351,7 +1351,7 @@ class ActivityTest {
             when(metricsAccessibilityVerifier.isAccessibleFor(any(), any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> activity.setMetricValue(newMetricValue, CREATOR))
+            assertThatThrownBy(() -> activity.setMetricValue(newMetricValue))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -1379,7 +1379,7 @@ class ActivityTest {
             MetricValue newMetricValue = new MetricValue(randomUUID(), TEN);
 
             // then
-            assertThatThrownBy(() -> activity.setMetricValue(newMetricValue, CREATOR))
+            assertThatThrownBy(() -> activity.setMetricValue(newMetricValue))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -1408,7 +1408,7 @@ class ActivityTest {
             MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
 
             // then
-            assertThatThrownBy(() -> activity.setMetricValue(newMetricValue, unauthorizedUser))
+            assertThatThrownBy(() -> activity.setMetricValue(newMetricValue))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -1437,7 +1437,7 @@ class ActivityTest {
             MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
 
             // then
-            assertThatThrownBy(() -> activity.setMetricValue(newMetricValue, unauthorizedUser))
+            assertThatThrownBy(() -> activity.setMetricValue(newMetricValue))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -1473,7 +1473,7 @@ class ActivityTest {
             when(metricsAccessibilityVerifier.isAccessibleFor(any(), any(), any())).thenReturn(true);
 
             // when
-            activity.unsetMetricValue(EXISTING_METRIC_ID, CREATOR);
+            activity.unsetMetricValue(EXISTING_METRIC_ID);
 
             // then
             assertThat(activity.metricValues()).containsExactlyInAnyOrder(NON_EXISTING_METRIC_VALUE);
@@ -1500,7 +1500,7 @@ class ActivityTest {
             );
 
             // when
-            activity.unsetMetricValue(EXISTING_METRIC_ID, CREATOR);
+            activity.unsetMetricValue(EXISTING_METRIC_ID);
 
             // then
             assertThat(activity.metricValues()).containsExactlyInAnyOrder(NON_EXISTING_METRIC_VALUE);
@@ -1527,7 +1527,7 @@ class ActivityTest {
             );
 
             // when
-            activity.unsetMetricValue(NON_EXISTING_METRIC_ID, CREATOR);
+            activity.unsetMetricValue(NON_EXISTING_METRIC_ID);
 
             // then
             assertThat(activity.metricValues()).containsExactlyInAnyOrder(NON_EXISTING_METRIC_VALUE, EXISTING_METRIC_VALUE);
@@ -1554,7 +1554,7 @@ class ActivityTest {
             );
 
             // when
-            activity.unsetMetricValue(NON_EXISTING_METRIC_ID, CREATOR);
+            activity.unsetMetricValue(NON_EXISTING_METRIC_ID);
 
             // then
             assertThat(activity.metricValues()).containsExactlyInAnyOrder(EXISTING_METRIC_VALUE);
@@ -1583,7 +1583,7 @@ class ActivityTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> activity.unsetMetricValue(new MetricId(), CREATOR))
+            assertThatThrownBy(() -> activity.unsetMetricValue(new MetricId()))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -1611,7 +1611,7 @@ class ActivityTest {
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> activity.unsetMetricValue(EXISTING_METRIC_ID, unauthorizedUser))
+            assertThatThrownBy(() -> activity.unsetMetricValue(EXISTING_METRIC_ID))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -1639,7 +1639,7 @@ class ActivityTest {
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> activity.unsetMetricValue(EXISTING_METRIC_ID, unauthorizedUser))
+            assertThatThrownBy(() -> activity.unsetMetricValue(EXISTING_METRIC_ID))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }

@@ -127,10 +127,10 @@ public class ActivityApplicationService {
                 metricValues
         );
         Instant switchTime = newActivity.isStarted() ? newActivity.startTime() : now();
-        newActivity.start(switchTime, switcher);
+        newActivity.start(switchTime);
 
         List<ActivityId> activitiesToFinish = activityDataSource.findOwnUnfinishedStartedBefore(switchTime, switcher);
-        finishAllAt(switchTime, activitiesToFinish, switcher);
+        finishAllAt(switchTime, activitiesToFinish);
 
         activityRepository.add(newActivity.forStorage());
         activityNotifier.notifyChanged(newActivity.forChangeNotification());
@@ -143,7 +143,7 @@ public class ActivityApplicationService {
                 });
     }
 
-    private void finishAllAt(Instant switchTime, List<ActivityId> activitiesToFinish, User switcher) {
+    private void finishAllAt(Instant switchTime, List<ActivityId> activitiesToFinish) {
 
         for (ActivityId activityId : activitiesToFinish) {
             Activity activityToFinish = activityRepository.findById(activityId.id())
@@ -152,7 +152,7 @@ public class ActivityApplicationService {
                         String message = "Could not find activity to stop with ID=%s".formatted(activityId.id());
                         return new RuntimeException(message);
                     });
-            activityToFinish.finish(switchTime, switcher);
+            activityToFinish.finish(switchTime);
             activityRepository.update(activityId.id(), activityToFinish.forStorage());
             activityNotifier.notifyChanged(activityToFinish.forChangeNotification());
         }
@@ -176,7 +176,7 @@ public class ActivityApplicationService {
                 activityDto.metricValues(),
                 activityDto.deleted()
         );
-        activity.rename(newTitle, updater);
+        activity.rename(newTitle);
 
         activityRepository.update(activityId, activity.forStorage());
 
@@ -208,7 +208,7 @@ public class ActivityApplicationService {
                 activityDto.metricValues(),
                 activityDto.deleted()
         );
-        activity.start(startTime, updater);
+        activity.start(startTime);
 
         activityRepository.update(activityId, activity.forStorage());
 
@@ -240,7 +240,7 @@ public class ActivityApplicationService {
                 activityDto.metricValues(),
                 activityDto.deleted()
         );
-        activity.finish(endTime, updater);
+        activity.finish(endTime);
 
         activityRepository.update(activityId, activity.forStorage());
 
@@ -272,7 +272,7 @@ public class ActivityApplicationService {
                 activityDto.metricValues(),
                 activityDto.deleted()
         );
-        activity.updateComment(newComment, updater);
+        activity.updateComment(newComment);
 
         activityRepository.update(activityId, activity.forStorage());
 
@@ -304,7 +304,7 @@ public class ActivityApplicationService {
                 activityDto.metricValues(),
                 activityDto.deleted()
         );
-        activity.assignTag(new TagId(tagId), updater);
+        activity.assignTag(new TagId(tagId));
 
         activityRepository.update(activityId, activity.forStorage());
 
@@ -336,7 +336,7 @@ public class ActivityApplicationService {
                 activityDto.metricValues(),
                 activityDto.deleted()
         );
-        activity.removeTag(new TagId(tagId), updater);
+        activity.removeTag(new TagId(tagId));
 
         activityRepository.update(activityId, activity.forStorage());
 
@@ -368,7 +368,7 @@ public class ActivityApplicationService {
                 activityDto.metricValues(),
                 activityDto.deleted()
         );
-        activity.setMetricValue(new MetricValue(metricId, value), updater);
+        activity.setMetricValue(new MetricValue(metricId, value));
 
         activityRepository.update(activityId, activity.forStorage());
 
@@ -400,7 +400,7 @@ public class ActivityApplicationService {
                 activityDto.metricValues(),
                 activityDto.deleted()
         );
-        activity.unsetMetricValue(new MetricId(metricId), updater);
+        activity.unsetMetricValue(new MetricId(metricId));
 
         activityRepository.update(activityId, activity.forStorage());
 
@@ -415,8 +415,6 @@ public class ActivityApplicationService {
     }
 
     public void deleteActivity(UUID activityId) {
-        Identity requesterIdentity = identityProvider.provideIdentity();
-        User remover = new User(requesterIdentity.getId());
 
         ActivityDto activityDto = activityRepository.findById(activityId)
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
@@ -432,7 +430,7 @@ public class ActivityApplicationService {
                 activityDto.metricValues(),
                 activityDto.deleted()
         );
-        activity.delete(remover);
+        activity.delete();
 
         activityNotifier.notifyChanged(activity.forChangeNotification());
 
