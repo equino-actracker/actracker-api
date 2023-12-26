@@ -2,6 +2,7 @@ package ovh.equino.actracker.domain.tag;
 
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tenant.TenantDataSource;
+import ovh.equino.actracker.domain.user.ActorExtractor;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.ArrayList;
@@ -15,16 +16,21 @@ public final class TagFactory {
 
     private static final Boolean DELETED = TRUE;
 
+    private final ActorExtractor actorExtractor;
     private final TagsAccessibilityVerifier tagsAccessibilityVerifier;
     private final TenantDataSource tenantDataSource;
 
-    TagFactory(TagsAccessibilityVerifier tagsAccessibilityVerifier, TenantDataSource tenantDataSource) {
+    TagFactory(ActorExtractor actorExtractor,
+               TagsAccessibilityVerifier tagsAccessibilityVerifier,
+               TenantDataSource tenantDataSource) {
+
+        this.actorExtractor = actorExtractor;
         this.tagsAccessibilityVerifier = tagsAccessibilityVerifier;
         this.tenantDataSource = tenantDataSource;
     }
 
-    public Tag create(User creator, String name, Collection<Metric> metrics, Collection<Share> shares) {
-
+    public Tag create(String name, Collection<Metric> metrics, Collection<Share> shares) {
+        var creator = actorExtractor.getActor();
         var validator = new TagValidator();
 
         var resolvedShares = requireNonNullElse(shares, new ArrayList<Share>())
@@ -39,6 +45,7 @@ public final class TagFactory {
                 requireNonNullElse(metrics, emptyList()),
                 resolvedShares,
                 !DELETED,
+                actorExtractor,
                 tagsAccessibilityVerifier,
                 validator
         );
@@ -46,8 +53,7 @@ public final class TagFactory {
         return tag;
     }
 
-    public Tag reconstitute(User actor, // TODO remove
-                            TagId id,
+    public Tag reconstitute(TagId id,
                             User creator,
                             String name,
                             Collection<Metric> metrics,
@@ -63,6 +69,7 @@ public final class TagFactory {
                 metrics,
                 shares,
                 deleted,
+                actorExtractor,
                 tagsAccessibilityVerifier,
                 validator
         );

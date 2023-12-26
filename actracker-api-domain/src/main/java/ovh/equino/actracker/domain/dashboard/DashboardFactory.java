@@ -5,6 +5,7 @@ import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
 import ovh.equino.actracker.domain.tenant.TenantDataSource;
+import ovh.equino.actracker.domain.user.ActorExtractor;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.ArrayList;
@@ -21,23 +22,26 @@ public final class DashboardFactory {
 
     private final TenantDataSource tenantDataSource;
 
+    private final ActorExtractor actorExtractor;
     private final DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier;
     private final TagsAccessibilityVerifier tagsAccessibilityVerifier;
 
-    DashboardFactory(DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier,
+    DashboardFactory(ActorExtractor actorExtractor,
+                     DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier,
                      TagsAccessibilityVerifier tagsAccessibilityVerifier,
                      TenantDataSource tenantDataSource) {
 
+        this.actorExtractor = actorExtractor;
         this.dashboardsAccessibilityVerifier = dashboardsAccessibilityVerifier;
         this.tagsAccessibilityVerifier = tagsAccessibilityVerifier;
         this.tenantDataSource = tenantDataSource;
     }
 
-    public Dashboard create(User creator,
-                            String name,
+    public Dashboard create(String name,
                             Collection<Chart> charts,
                             Collection<Share> shares) {
 
+        var creator = actorExtractor.getActor();
         var validator = new DashboardValidator();
 
         var nonNullCharts = requireNonNullElse(charts, new ArrayList<Chart>());
@@ -55,6 +59,7 @@ public final class DashboardFactory {
                 nonNullCharts,
                 resolvedShares,
                 !DELETED,
+                actorExtractor,
                 dashboardsAccessibilityVerifier,
                 tagsAccessibilityVerifier,
                 validator
@@ -63,8 +68,7 @@ public final class DashboardFactory {
         return dashboard;
     }
 
-    public Dashboard reconstitute(User actor, // TODO remove
-                                  DashboardId id,
+    public Dashboard reconstitute(DashboardId id,
                                   User creator,
                                   String name,
                                   Collection<Chart> charts,
@@ -80,6 +84,7 @@ public final class DashboardFactory {
                 new ArrayList<>(charts),
                 new ArrayList<>(shares),
                 deleted,
+                actorExtractor,
                 dashboardsAccessibilityVerifier,
                 tagsAccessibilityVerifier,
                 validator

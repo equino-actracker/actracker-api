@@ -7,6 +7,7 @@ import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
+import ovh.equino.actracker.domain.user.ActorExtractor;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ public final class Dashboard implements Entity {
     private final List<Share> shares;
     private boolean deleted;
 
+    private final ActorExtractor actorExtractor;
     private final DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier;
     private final TagsAccessibilityVerifier tagsAccessibilityVerifier;
     private final DashboardValidator validator;
@@ -37,6 +39,7 @@ public final class Dashboard implements Entity {
               Collection<Chart> charts,
               Collection<Share> shares,
               boolean deleted,
+              ActorExtractor actorExtractor,
               DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier,
               TagsAccessibilityVerifier tagsAccessibilityVerifier,
               DashboardValidator validator) {
@@ -48,34 +51,37 @@ public final class Dashboard implements Entity {
         this.shares = new ArrayList<>(shares);
         this.deleted = deleted;
 
+        this.actorExtractor = actorExtractor;
         this.dashboardsAccessibilityVerifier = dashboardsAccessibilityVerifier;
         this.tagsAccessibilityVerifier = tagsAccessibilityVerifier;
         this.validator = validator;
     }
 
-    public void rename(String newName, User editor) {
-        if (!creator.equals(editor) && !dashboardsAccessibilityVerifier.isAccessibleFor(editor, this.id)) {
+    public void rename(String newName) {
+        User actor = actorExtractor.getActor();
+        if (!creator.equals(actor) && !dashboardsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Dashboard.class, id.id());
         }
-        if (!this.isEditableFor(editor)) {
+        if (!this.isEditableFor(actor)) {
             throw new EntityEditForbidden(Dashboard.class);
         }
         this.name = newName;
         this.validate();
     }
 
-    public void addChart(Chart newChart, User editor) {
-        if (!creator.equals(editor) && !dashboardsAccessibilityVerifier.isAccessibleFor(editor, this.id)) {
+    public void addChart(Chart newChart) {
+        User actor = actorExtractor.getActor();
+        if (!creator.equals(actor) && !dashboardsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Dashboard.class, id.id());
         }
-        if (!this.isEditableFor(editor)) {
+        if (!this.isEditableFor(actor)) {
             throw new EntityEditForbidden(Dashboard.class);
         }
         Set<TagId> includedTags = newChart.includedTags()
                 .stream()
                 .map(TagId::new)
                 .collect(toUnmodifiableSet());
-        tagsAccessibilityVerifier.nonAccessibleFor(editor, includedTags)
+        tagsAccessibilityVerifier.nonAccessibleFor(actor, includedTags)
                 .stream()
                 .findFirst()
                 .ifPresent((inaccessibleTag) -> {
@@ -86,11 +92,12 @@ public final class Dashboard implements Entity {
         this.validate();
     }
 
-    public void deleteChart(ChartId chartId, User editor) {
-        if (!creator.equals(editor) && !dashboardsAccessibilityVerifier.isAccessibleFor(editor, this.id)) {
+    public void deleteChart(ChartId chartId) {
+        User actor = actorExtractor.getActor();
+        if (!creator.equals(actor) && !dashboardsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Dashboard.class, id.id());
         }
-        if (!this.isEditableFor(editor)) {
+        if (!this.isEditableFor(actor)) {
             throw new EntityEditForbidden(Dashboard.class);
         }
         List<Chart> matchingDeletedCharts = charts.stream()
@@ -107,11 +114,12 @@ public final class Dashboard implements Entity {
         this.validate();
     }
 
-    public void delete(User remover) {
-        if (!creator.equals(remover) && !dashboardsAccessibilityVerifier.isAccessibleFor(remover, this.id)) {
+    public void delete() {
+        User actor = actorExtractor.getActor();
+        if (!creator.equals(actor) && !dashboardsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Dashboard.class, id.id());
         }
-        if (!this.isEditableFor(remover)) {
+        if (!this.isEditableFor(actor)) {
             throw new EntityEditForbidden(Dashboard.class);
         }
         List<Chart> allChartsDeleted = this.charts.stream()
@@ -123,11 +131,12 @@ public final class Dashboard implements Entity {
         this.validate();
     }
 
-    public void share(Share share, User granter) {
-        if (!creator.equals(granter) && !dashboardsAccessibilityVerifier.isAccessibleFor(granter, this.id)) {
+    public void share(Share share) {
+        User actor = actorExtractor.getActor();
+        if (!creator.equals(actor) && !dashboardsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Dashboard.class, id.id());
         }
-        if (!this.isEditableFor(granter)) {
+        if (!this.isEditableFor(actor)) {
             throw new EntityEditForbidden(Dashboard.class);
         }
         List<String> existingGranteeNames = this.shares.stream()
@@ -139,11 +148,12 @@ public final class Dashboard implements Entity {
         this.validate();
     }
 
-    public void unshare(String granteeName, User granter) {
-        if (!creator.equals(granter) && !dashboardsAccessibilityVerifier.isAccessibleFor(granter, this.id)) {
+    public void unshare(String granteeName) {
+        User actor = actorExtractor.getActor();
+        if (!creator.equals(actor) && !dashboardsAccessibilityVerifier.isAccessibleFor(actor, this.id)) {
             throw new EntityNotFoundException(Dashboard.class, id.id());
         }
-        if (!this.isEditableFor(granter)) {
+        if (!this.isEditableFor(actor)) {
             throw new EntityEditForbidden(Dashboard.class);
         }
         List<Share> sharesWithExclusion = this.shares.stream()

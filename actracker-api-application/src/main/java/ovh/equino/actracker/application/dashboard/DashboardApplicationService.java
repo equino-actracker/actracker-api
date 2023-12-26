@@ -8,9 +8,8 @@ import ovh.equino.actracker.domain.dashboard.generation.*;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tenant.TenantDataSource;
+import ovh.equino.actracker.domain.user.ActorExtractor;
 import ovh.equino.actracker.domain.user.User;
-import ovh.equino.security.identity.Identity;
-import ovh.equino.security.identity.IdentityProvider;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,7 +27,7 @@ public class DashboardApplicationService {
     private final DashboardGenerationEngine dashboardGenerationEngine;
     private final DashboardNotifier dashboardNotifier;
     private final TenantDataSource tenantDataSource;
-    private final IdentityProvider identityProvider;
+    private final ActorExtractor actorExtractor;
 
     public DashboardApplicationService(DashboardFactory dashboardFactory,
                                        DashboardRepository dashboardRepository,
@@ -37,7 +36,7 @@ public class DashboardApplicationService {
                                        DashboardGenerationEngine dashboardGenerationEngine,
                                        DashboardNotifier dashboardNotifier,
                                        TenantDataSource tenantDataSource,
-                                       IdentityProvider identityProvider) {
+                                       ActorExtractor actorExtractor) {
 
         this.dashboardFactory = dashboardFactory;
         this.dashboardRepository = dashboardRepository;
@@ -46,12 +45,11 @@ public class DashboardApplicationService {
         this.dashboardGenerationEngine = dashboardGenerationEngine;
         this.dashboardNotifier = dashboardNotifier;
         this.tenantDataSource = tenantDataSource;
-        this.identityProvider = identityProvider;
+        this.actorExtractor = actorExtractor;
     }
 
     public DashboardResult getDashboard(UUID dashboardId) {
-        Identity requestIdentity = identityProvider.provideIdentity();
-        User searcher = new User(requestIdentity.getId());
+        User searcher = actorExtractor.getActor();
 
         return dashboardDataSource.find(new DashboardId(dashboardId), searcher)
                 .map(this::toDashboardResult)
@@ -59,8 +57,7 @@ public class DashboardApplicationService {
     }
 
     public DashboardResult createDashboard(CreateDashboardCommand createDashboardCommand) {
-        Identity requestIdentity = identityProvider.provideIdentity();
-        User creator = new User(requestIdentity.getId());
+        User creator = actorExtractor.getActor();
 
         List<Chart> charts = createDashboardCommand.chartAssignments().stream()
                 .map(chartAssignment -> new Chart(
@@ -73,7 +70,7 @@ public class DashboardApplicationService {
                 .stream()
                 .map(Share::new)
                 .toList();
-        Dashboard dashboard = dashboardFactory.create(creator, createDashboardCommand.name(), charts, shares);
+        Dashboard dashboard = dashboardFactory.create(createDashboardCommand.name(), charts, shares);
         dashboardRepository.add(dashboard.forStorage());
         dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
 
@@ -86,11 +83,9 @@ public class DashboardApplicationService {
     }
 
     public SearchResult<DashboardResult> searchDashboards(SearchDashboardsQuery searchDashboardsQuery) {
-        Identity requestIdentity = identityProvider.provideIdentity();
-        User searcher = new User(requestIdentity.getId());
 
         EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
-                searcher,
+                actorExtractor.getActor(),
                 searchDashboardsQuery.pageSize(),
                 searchDashboardsQuery.pageId(),
                 searchDashboardsQuery.term(),
@@ -110,13 +105,11 @@ public class DashboardApplicationService {
     }
 
     public DashboardResult renameDashboard(String newName, UUID dashboardId) {
-        Identity requestIdentity = identityProvider.provideIdentity();
-        User updater = new User(requestIdentity.getId());
+        User updater = actorExtractor.getActor();
 
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
         Dashboard dashboard = dashboardFactory.reconstitute(
-                updater,
                 new DashboardId(dashboardDto.id()),
                 new User(dashboardDto.creatorId()),
                 dashboardDto.name(),
@@ -125,7 +118,7 @@ public class DashboardApplicationService {
                 dashboardDto.deleted()
         );
 
-        dashboard.rename(newName, updater);
+        dashboard.rename(newName);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
         dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
 
@@ -138,13 +131,10 @@ public class DashboardApplicationService {
     }
 
     public void deleteDashboard(UUID dashboardId) {
-        Identity requestIdentity = identityProvider.provideIdentity();
-        User remover = new User(requestIdentity.getId());
 
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
         Dashboard dashboard = dashboardFactory.reconstitute(
-                remover,
                 new DashboardId(dashboardDto.id()),
                 new User(dashboardDto.creatorId()),
                 dashboardDto.name(),
@@ -153,19 +143,17 @@ public class DashboardApplicationService {
                 dashboardDto.deleted()
         );
 
-        dashboard.delete(remover);
+        dashboard.delete();
         dashboardRepository.update(dashboardId, dashboard.forStorage());
         dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
     }
 
     public DashboardResult addChart(ChartAssignment newChartAssignment, UUID dashboardId) {
-        Identity requestIdentity = identityProvider.provideIdentity();
-        User updater = new User(requestIdentity.getId());
+        User updater = actorExtractor.getActor();
 
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
         Dashboard dashboard = dashboardFactory.reconstitute(
-                updater,
                 new DashboardId(dashboardDto.id()),
                 new User(dashboardDto.creatorId()),
                 dashboardDto.name(),
@@ -181,7 +169,7 @@ public class DashboardApplicationService {
                 newChartAssignment.includedTags()
         );
 
-        dashboard.addChart(newChart, updater);
+        dashboard.addChart(newChart);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
         dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
 
@@ -194,13 +182,11 @@ public class DashboardApplicationService {
     }
 
     public DashboardResult deleteChart(UUID chartId, UUID dashboardId) {
-        Identity requestIdentity = identityProvider.provideIdentity();
-        User updater = new User(requestIdentity.getId());
+        User updater = actorExtractor.getActor();
 
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
         Dashboard dashboard = dashboardFactory.reconstitute(
-                updater,
                 new DashboardId(dashboardDto.id()),
                 new User(dashboardDto.creatorId()),
                 dashboardDto.name(),
@@ -209,7 +195,7 @@ public class DashboardApplicationService {
                 dashboardDto.deleted()
         );
 
-        dashboard.deleteChart(new ChartId(chartId), updater);
+        dashboard.deleteChart(new ChartId(chartId));
         dashboardRepository.update(dashboardId, dashboard.forStorage());
         dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
 
@@ -222,13 +208,11 @@ public class DashboardApplicationService {
     }
 
     public DashboardResult shareDashboard(String newGrantee, UUID dashboardId) {
-        Identity requestIdentity = identityProvider.provideIdentity();
-        User granter = new User(requestIdentity.getId());
+        User granter = actorExtractor.getActor();
 
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
         Dashboard dashboard = dashboardFactory.reconstitute(
-                granter,
                 new DashboardId(dashboardDto.id()),
                 new User(dashboardDto.creatorId()),
                 dashboardDto.name(),
@@ -239,7 +223,7 @@ public class DashboardApplicationService {
 
         Share share = resolveShare(newGrantee);
 
-        dashboard.share(share, granter);
+        dashboard.share(share);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
         dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
 
@@ -252,13 +236,11 @@ public class DashboardApplicationService {
     }
 
     public DashboardResult unshareDashboard(String granteeName, UUID dashboardId) {
-        Identity requestIdentity = identityProvider.provideIdentity();
-        User granter = new User(requestIdentity.getId());
+        User granter = actorExtractor.getActor();
 
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
         Dashboard dashboard = dashboardFactory.reconstitute(
-                granter,
                 new DashboardId(dashboardDto.id()),
                 new User(dashboardDto.creatorId()),
                 dashboardDto.name(),
@@ -267,7 +249,7 @@ public class DashboardApplicationService {
                 dashboardDto.deleted()
         );
 
-        dashboard.unshare(granteeName, granter);
+        dashboard.unshare(granteeName);
         dashboardRepository.update(dashboardId, dashboard.forStorage());
         dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
 
@@ -280,12 +262,9 @@ public class DashboardApplicationService {
     }
 
     public DashboardGenerationResult generateDashboard(GenerateDashboardQuery generateDashboardQuery) {
-        Identity requestIdentity = identityProvider.provideIdentity();
-        User generator = new User(requestIdentity.getId());
-
         DashboardGenerationCriteria generationCriteria = new DashboardGenerationCriteria(
                 generateDashboardQuery.dashboardId(),
-                generator,
+                actorExtractor.getActor(),
                 generateDashboardQuery.timeRangeStart(),
                 generateDashboardQuery.timeRangeEnd(),
                 generateDashboardQuery.tags()
@@ -295,7 +274,6 @@ public class DashboardApplicationService {
         DashboardDto dashboardDto = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
         Dashboard dashboard = dashboardFactory.reconstitute(
-                generator,
                 new DashboardId(dashboardDto.id()),
                 new User(dashboardDto.creatorId()),
                 dashboardDto.name(),

@@ -1,5 +1,6 @@
 package ovh.equino.actracker.domain.activity;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import ovh.equino.actracker.domain.tag.MetricId;
 import ovh.equino.actracker.domain.tag.MetricsAccessibilityVerifier;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
+import ovh.equino.actracker.domain.user.ActorExtractor;
 import ovh.equino.actracker.domain.user.User;
 
 import java.time.Instant;
@@ -42,6 +44,8 @@ class ActivityTest {
     private static final boolean DELETED = true;
 
     @Mock
+    private ActorExtractor actorExtractor;
+    @Mock
     private ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier;
     @Mock
     private TagsAccessibilityVerifier tagsAccessibilityVerifier;
@@ -49,6 +53,11 @@ class ActivityTest {
     private MetricsAccessibilityVerifier metricsAccessibilityVerifier;
     @Mock
     private ActivityValidator validator;
+
+    @BeforeEach
+    void init() {
+        when(actorExtractor.getActor()).thenReturn(CREATOR);
+    }
 
     @Nested
     @DisplayName("rename")
@@ -68,6 +77,7 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -75,7 +85,7 @@ class ActivityTest {
             );
 
             // when
-            activity.rename(NEW_TITLE, CREATOR);
+            activity.rename(NEW_TITLE);
 
             // then
             assertThat(activity.title()).isEqualTo(NEW_TITLE);
@@ -94,6 +104,7 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -101,7 +112,7 @@ class ActivityTest {
             );
 
             // when
-            activity.rename(null, CREATOR);
+            activity.rename(null);
 
             // then
             assertThat(activity.title()).isEqualTo(null);
@@ -120,6 +131,7 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -127,7 +139,7 @@ class ActivityTest {
             );
 
             // when
-            activity.rename(" ", CREATOR);
+            activity.rename(" ");
 
             // then
             assertThat(activity.title()).isEqualTo(" ");
@@ -146,6 +158,7 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -154,7 +167,7 @@ class ActivityTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> activity.rename(NEW_TITLE, CREATOR))
+            assertThatThrownBy(() -> activity.rename(NEW_TITLE))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -171,16 +184,18 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> activity.rename(NEW_TITLE, unauthorizedUser))
+            assertThatThrownBy(() -> activity.rename(NEW_TITLE))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -197,16 +212,18 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> activity.rename(NEW_TITLE, unauthorizedUser))
+            assertThatThrownBy(() -> activity.rename(NEW_TITLE))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -230,6 +247,7 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -237,7 +255,7 @@ class ActivityTest {
             );
 
             // when
-            activity.start(NEW_START_TIME, CREATOR);
+            activity.start(NEW_START_TIME);
 
             // then
             assertThat(activity.startTime()).isEqualTo(NEW_START_TIME);
@@ -256,6 +274,7 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -263,7 +282,7 @@ class ActivityTest {
             );
 
             // when
-            activity.start(END_TIME, CREATOR);
+            activity.start(END_TIME);
 
             // then
             assertThat(activity.startTime()).isEqualTo(END_TIME);
@@ -282,6 +301,7 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -289,7 +309,7 @@ class ActivityTest {
             );
 
             // when
-            activity.start(null, CREATOR);
+            activity.start(null);
 
             // then
             assertThat(activity.startTime()).isNull();
@@ -308,6 +328,7 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -316,7 +337,7 @@ class ActivityTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> activity.start(NEW_START_TIME, CREATOR))
+            assertThatThrownBy(() -> activity.start(NEW_START_TIME))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -333,16 +354,18 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> activity.start(NEW_START_TIME, unauthorizedUser))
+            assertThatThrownBy(() -> activity.start(NEW_START_TIME))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -359,16 +382,18 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> activity.start(NEW_START_TIME, unauthorizedUser))
+            assertThatThrownBy(() -> activity.start(NEW_START_TIME))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -392,6 +417,7 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -399,7 +425,7 @@ class ActivityTest {
             );
 
             // when
-            activity.finish(NEW_END_TIME, CREATOR);
+            activity.finish(NEW_END_TIME);
 
             // then
             assertThat(activity.endTime()).isEqualTo(NEW_END_TIME);
@@ -418,6 +444,7 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -425,7 +452,7 @@ class ActivityTest {
             );
 
             // when
-            activity.finish(START_TIME, CREATOR);
+            activity.finish(START_TIME);
 
             // then
             assertThat(activity.endTime()).isEqualTo(START_TIME);
@@ -444,6 +471,7 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -451,7 +479,7 @@ class ActivityTest {
             );
 
             // when
-            activity.finish(null, CREATOR);
+            activity.finish(null);
 
             // then
             assertThat(activity.endTime()).isNull();
@@ -470,6 +498,7 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -478,7 +507,7 @@ class ActivityTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> activity.finish(NEW_END_TIME, CREATOR))
+            assertThatThrownBy(() -> activity.finish(NEW_END_TIME))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -495,16 +524,18 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> activity.finish(NEW_END_TIME, unauthorizedUser))
+            assertThatThrownBy(() -> activity.finish(NEW_END_TIME))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -521,16 +552,18 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> activity.finish(NEW_END_TIME, unauthorizedUser))
+            assertThatThrownBy(() -> activity.finish(NEW_END_TIME))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -554,6 +587,7 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -561,7 +595,7 @@ class ActivityTest {
             );
 
             // when
-            activity.updateComment(NEW_COMMENT, CREATOR);
+            activity.updateComment(NEW_COMMENT);
 
             // then
             assertThat(activity.comment()).isEqualTo(NEW_COMMENT);
@@ -580,6 +614,7 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -587,7 +622,7 @@ class ActivityTest {
             );
 
             // when
-            activity.updateComment(null, CREATOR);
+            activity.updateComment(null);
 
             // then
             assertThat(activity.comment()).isNull();
@@ -606,6 +641,7 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -613,7 +649,7 @@ class ActivityTest {
             );
 
             // when
-            activity.updateComment(" ", CREATOR);
+            activity.updateComment(" ");
 
             // then
             assertThat(activity.comment()).isEqualTo(" ");
@@ -632,6 +668,7 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -640,7 +677,7 @@ class ActivityTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> activity.updateComment(NEW_COMMENT, CREATOR))
+            assertThatThrownBy(() -> activity.updateComment(NEW_COMMENT))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -657,16 +694,18 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> activity.updateComment(NEW_COMMENT, unauthorizedUser))
+            assertThatThrownBy(() -> activity.updateComment(NEW_COMMENT))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -683,16 +722,18 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> activity.updateComment(NEW_COMMENT, unauthorizedUser))
+            assertThatThrownBy(() -> activity.updateComment(NEW_COMMENT))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -714,6 +755,7 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -723,7 +765,7 @@ class ActivityTest {
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // when
-            activity.assignTag(newTag, CREATOR);
+            activity.assignTag(newTag);
 
             // then
             assertThat(activity.tags()).containsExactly(newTag);
@@ -743,6 +785,7 @@ class ActivityTest {
                     singleton(existingTag),
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -752,7 +795,7 @@ class ActivityTest {
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // when
-            activity.assignTag(newTag, CREATOR);
+            activity.assignTag(newTag);
 
             // then
             assertThat(activity.tags()).containsExactlyInAnyOrder(existingTag, newTag);
@@ -772,6 +815,7 @@ class ActivityTest {
                     singleton(existingTag),
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -780,7 +824,7 @@ class ActivityTest {
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // when
-            activity.assignTag(existingTag, CREATOR);
+            activity.assignTag(existingTag);
 
             // then
             assertThat(activity.tags()).containsExactly(existingTag);
@@ -799,6 +843,7 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -808,7 +853,7 @@ class ActivityTest {
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> activity.assignTag(newTag, CREATOR))
+            assertThatThrownBy(() -> activity.assignTag(newTag))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -825,6 +870,7 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -834,7 +880,7 @@ class ActivityTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> activity.assignTag(new TagId(), CREATOR))
+            assertThatThrownBy(() -> activity.assignTag(new TagId()))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -851,16 +897,18 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> activity.assignTag(new TagId(), unauthorizedUser))
+            assertThatThrownBy(() -> activity.assignTag(new TagId()))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -877,16 +925,18 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> activity.assignTag(new TagId(), unauthorizedUser))
+            assertThatThrownBy(() -> activity.assignTag(new TagId()))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -910,6 +960,7 @@ class ActivityTest {
                     Set.of(existingTag, tagToRemove),
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -918,7 +969,7 @@ class ActivityTest {
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // when
-            activity.removeTag(tagToRemove, CREATOR);
+            activity.removeTag(tagToRemove);
 
             // then
             assertThat(activity.tags()).containsExactly(existingTag);
@@ -937,6 +988,7 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -945,7 +997,7 @@ class ActivityTest {
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // when
-            activity.removeTag(new TagId(), CREATOR);
+            activity.removeTag(new TagId());
 
             // then
             assertThat(activity.tags()).isEmpty();
@@ -965,6 +1017,7 @@ class ActivityTest {
                     singleton(existingTag),
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -973,7 +1026,7 @@ class ActivityTest {
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // when
-            activity.removeTag(new TagId(), CREATOR);
+            activity.removeTag(new TagId());
 
             // then
             assertThat(activity.tags()).containsExactly(existingTag);
@@ -993,6 +1046,7 @@ class ActivityTest {
                     Set.of(tagToRemove),
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -1001,7 +1055,7 @@ class ActivityTest {
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // when
-            activity.removeTag(tagToRemove, CREATOR);
+            activity.removeTag(tagToRemove);
 
             // then
             assertThat(activity.tags()).containsExactly(tagToRemove);
@@ -1020,6 +1074,7 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -1029,7 +1084,7 @@ class ActivityTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> activity.removeTag(new TagId(), CREATOR))
+            assertThatThrownBy(() -> activity.removeTag(new TagId()))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -1047,16 +1102,18 @@ class ActivityTest {
                     singleton(existingTag),
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> activity.removeTag(existingTag, unauthorizedUser))
+            assertThatThrownBy(() -> activity.removeTag(existingTag))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -1074,16 +1131,18 @@ class ActivityTest {
                     singleton(existingTag),
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> activity.removeTag(existingTag, unauthorizedUser))
+            assertThatThrownBy(() -> activity.removeTag(existingTag))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -1105,6 +1164,7 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -1112,7 +1172,7 @@ class ActivityTest {
             );
 
             // when
-            activity.delete(CREATOR);
+            activity.delete();
 
             // then
             assertThat(activity.deleted()).isTrue();
@@ -1131,6 +1191,7 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -1139,7 +1200,7 @@ class ActivityTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> activity.delete(CREATOR))
+            assertThatThrownBy(activity::delete)
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -1156,16 +1217,18 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> activity.delete(unauthorizedUser))
+            assertThatThrownBy(activity::delete)
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -1182,16 +1245,18 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> activity.delete(unauthorizedUser))
+            assertThatThrownBy(activity::delete)
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -1218,6 +1283,7 @@ class ActivityTest {
                     EMPTY_TAGS,
                     List.of(NON_EXISTING_METRIC_VALUE),
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -1227,7 +1293,7 @@ class ActivityTest {
             when(metricsAccessibilityVerifier.isAccessibleFor(any(), any(), any())).thenReturn(true);
 
             // when
-            activity.setMetricValue(newMetricValue, CREATOR);
+            activity.setMetricValue(newMetricValue);
 
             // then
             assertThat(activity.metricValues()).containsExactlyInAnyOrder(NON_EXISTING_METRIC_VALUE, newMetricValue);
@@ -1246,6 +1312,7 @@ class ActivityTest {
                     EMPTY_TAGS,
                     List.of(EXISTING_METRIC_VALUE, NON_EXISTING_METRIC_VALUE),
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -1255,7 +1322,7 @@ class ActivityTest {
             when(metricsAccessibilityVerifier.isAccessibleFor(any(), any(), any())).thenReturn(true);
 
             // when
-            activity.setMetricValue(newMetricValue, CREATOR);
+            activity.setMetricValue(newMetricValue);
 
             // then
             assertThat(activity.metricValues()).containsExactlyInAnyOrder(NON_EXISTING_METRIC_VALUE, newMetricValue);
@@ -1274,6 +1341,7 @@ class ActivityTest {
                     EMPTY_TAGS,
                     List.of(NON_EXISTING_METRIC_VALUE),
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -1283,7 +1351,7 @@ class ActivityTest {
             when(metricsAccessibilityVerifier.isAccessibleFor(any(), any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> activity.setMetricValue(newMetricValue, CREATOR))
+            assertThatThrownBy(() -> activity.setMetricValue(newMetricValue))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -1300,6 +1368,7 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -1310,7 +1379,7 @@ class ActivityTest {
             MetricValue newMetricValue = new MetricValue(randomUUID(), TEN);
 
             // then
-            assertThatThrownBy(() -> activity.setMetricValue(newMetricValue, CREATOR))
+            assertThatThrownBy(() -> activity.setMetricValue(newMetricValue))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -1327,17 +1396,19 @@ class ActivityTest {
                     EMPTY_TAGS,
                     List.of(EXISTING_METRIC_VALUE),
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
             MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
 
             // then
-            assertThatThrownBy(() -> activity.setMetricValue(newMetricValue, unauthorizedUser))
+            assertThatThrownBy(() -> activity.setMetricValue(newMetricValue))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -1354,17 +1425,19 @@ class ActivityTest {
                     EMPTY_TAGS,
                     List.of(EXISTING_METRIC_VALUE),
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
                     validator
             );
-            when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
+            when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
             MetricValue newMetricValue = new MetricValue(EXISTING_METRIC_ID.id(), TEN);
 
             // then
-            assertThatThrownBy(() -> activity.setMetricValue(newMetricValue, unauthorizedUser))
+            assertThatThrownBy(() -> activity.setMetricValue(newMetricValue))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -1391,6 +1464,7 @@ class ActivityTest {
                     EMPTY_TAGS,
                     List.of(EXISTING_METRIC_VALUE, NON_EXISTING_METRIC_VALUE),
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -1399,7 +1473,7 @@ class ActivityTest {
             when(metricsAccessibilityVerifier.isAccessibleFor(any(), any(), any())).thenReturn(true);
 
             // when
-            activity.unsetMetricValue(EXISTING_METRIC_ID, CREATOR);
+            activity.unsetMetricValue(EXISTING_METRIC_ID);
 
             // then
             assertThat(activity.metricValues()).containsExactlyInAnyOrder(NON_EXISTING_METRIC_VALUE);
@@ -1418,6 +1492,7 @@ class ActivityTest {
                     EMPTY_TAGS,
                     List.of(NON_EXISTING_METRIC_VALUE),
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -1425,7 +1500,7 @@ class ActivityTest {
             );
 
             // when
-            activity.unsetMetricValue(EXISTING_METRIC_ID, CREATOR);
+            activity.unsetMetricValue(EXISTING_METRIC_ID);
 
             // then
             assertThat(activity.metricValues()).containsExactlyInAnyOrder(NON_EXISTING_METRIC_VALUE);
@@ -1444,6 +1519,7 @@ class ActivityTest {
                     EMPTY_TAGS,
                     List.of(EXISTING_METRIC_VALUE, NON_EXISTING_METRIC_VALUE),
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -1451,7 +1527,7 @@ class ActivityTest {
             );
 
             // when
-            activity.unsetMetricValue(NON_EXISTING_METRIC_ID, CREATOR);
+            activity.unsetMetricValue(NON_EXISTING_METRIC_ID);
 
             // then
             assertThat(activity.metricValues()).containsExactlyInAnyOrder(NON_EXISTING_METRIC_VALUE, EXISTING_METRIC_VALUE);
@@ -1470,6 +1546,7 @@ class ActivityTest {
                     EMPTY_TAGS,
                     List.of(EXISTING_METRIC_VALUE),
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -1477,7 +1554,7 @@ class ActivityTest {
             );
 
             // when
-            activity.unsetMetricValue(NON_EXISTING_METRIC_ID, CREATOR);
+            activity.unsetMetricValue(NON_EXISTING_METRIC_ID);
 
             // then
             assertThat(activity.metricValues()).containsExactlyInAnyOrder(EXISTING_METRIC_VALUE);
@@ -1496,6 +1573,7 @@ class ActivityTest {
                     EMPTY_TAGS,
                     EMPTY_METRIC_VALUES,
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
@@ -1505,7 +1583,7 @@ class ActivityTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> activity.unsetMetricValue(new MetricId(), CREATOR))
+            assertThatThrownBy(() -> activity.unsetMetricValue(new MetricId()))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -1522,16 +1600,18 @@ class ActivityTest {
                     EMPTY_TAGS,
                     List.of(EXISTING_METRIC_VALUE, NON_EXISTING_METRIC_VALUE),
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> activity.unsetMetricValue(EXISTING_METRIC_ID, unauthorizedUser))
+            assertThatThrownBy(() -> activity.unsetMetricValue(EXISTING_METRIC_ID))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -1548,16 +1628,18 @@ class ActivityTest {
                     EMPTY_TAGS,
                     List.of(EXISTING_METRIC_VALUE, NON_EXISTING_METRIC_VALUE),
                     !DELETED,
+                    actorExtractor,
                     activitiesAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     metricsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(activitiesAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> activity.unsetMetricValue(EXISTING_METRIC_ID, unauthorizedUser))
+            assertThatThrownBy(() -> activity.unsetMetricValue(EXISTING_METRIC_ID))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }

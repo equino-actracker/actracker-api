@@ -1,6 +1,8 @@
 package ovh.equino.actracker.domain.tag;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -9,6 +11,7 @@ import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tenant.TenantDataSource;
 import ovh.equino.actracker.domain.tenant.TenantDto;
+import ovh.equino.actracker.domain.user.ActorExtractor;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
@@ -30,6 +33,8 @@ class TagFactoryTest {
     private static final Boolean DELETED = TRUE;
 
     @Mock
+    private ActorExtractor actorExtractor;
+    @Mock
     private TagsAccessibilityVerifier tagsAccessibilityVerifier;
     @Mock
     private TenantDataSource tenantDataSource;
@@ -38,94 +43,107 @@ class TagFactoryTest {
 
     @BeforeEach
     void init() {
-        tagFactory = new TagFactory(tagsAccessibilityVerifier, tenantDataSource);
+        tagFactory = new TagFactory(actorExtractor, tagsAccessibilityVerifier, tenantDataSource);
     }
 
-    @Test
-    void shouldCreateMinimalTag() {
-        // when
-        var tag = tagFactory.create(CREATOR, TAG_NAME, null, null);
+    @Nested
+    @DisplayName("create")
+    class CreateTest {
 
-        // then
-        assertThat(tag.id()).isNotNull();
-        assertThat(tag.name()).isEqualTo(TAG_NAME);
-        assertThat(tag.creator()).isEqualTo(CREATOR);
-        assertThat(tag.metrics()).isEmpty();
-        assertThat(tag.shares()).isEmpty();
-        assertThat(tag.deleted()).isFalse();
+        @BeforeEach
+        void init() {
+            when(actorExtractor.getActor()).thenReturn(CREATOR);
+        }
+
+        @Test
+        void shouldCreateMinimalTag() {
+            // when
+            var tag = tagFactory.create(TAG_NAME, null, null);
+
+            // then
+            assertThat(tag.id()).isNotNull();
+            assertThat(tag.name()).isEqualTo(TAG_NAME);
+            assertThat(tag.creator()).isEqualTo(CREATOR);
+            assertThat(tag.metrics()).isEmpty();
+            assertThat(tag.shares()).isEmpty();
+            assertThat(tag.deleted()).isFalse();
+        }
+
+        @Test
+        void shouldCreateFullTag() {
+            // given
+            var metric1 = new Metric(new MetricId(), CREATOR, "metric1", NUMERIC, !DELETED);
+            var metric2 = new Metric(new MetricId(), CREATOR, "metric1", NUMERIC, !DELETED);
+            var share1 = new Share("grantee1");
+            var share2 = new Share("grantee2");
+
+            // when
+            var tag = tagFactory.create(
+                    TAG_NAME,
+                    List.of(metric1, metric2),
+                    List.of(share1, share2)
+            );
+
+            // then
+            assertThat(tag.id()).isNotNull();
+            assertThat(tag.name()).isEqualTo(TAG_NAME);
+            assertThat(tag.creator()).isEqualTo(CREATOR);
+            assertThat(tag.metrics()).containsExactlyInAnyOrder(metric1, metric2);
+            assertThat(tag.shares()).containsExactlyInAnyOrder(share1, share2);
+            assertThat(tag.deleted()).isFalse();
+        }
+
+        @Test
+        void shouldCreateTagWithResolvedShares() {
+            // given
+            var grantee1Id = randomUUID();
+            var grantee1 = "grantee1";
+            var grantee2 = "grantee2";
+            var resolvedShare = new Share(new User(grantee1Id), grantee1);
+            var unresolvedShare = new Share(grantee2);
+            when(tenantDataSource.findByUsername(grantee1))
+                    .thenReturn(Optional.of(new TenantDto(grantee1Id, "grantee1", "")));
+
+            // when
+            var tag = tagFactory.create(TAG_NAME, null, List.of(new Share(grantee1), new Share(grantee2)));
+
+            // then
+            assertThat(tag.shares()).containsExactlyInAnyOrder(resolvedShare, unresolvedShare);
+        }
+
+        @Test
+        void shouldCreateFailWhenTagInvalid() {
+            // given
+            var invalidTagName = "";
+
+            // then
+            assertThatThrownBy(() -> tagFactory.create(invalidTagName, null, null))
+                    .isInstanceOf(EntityInvalidException.class);
+        }
     }
 
-    @Test
-    void shouldCreateFullTag() {
-        // given
-        var metric1 = new Metric(new MetricId(), CREATOR, "metric1", NUMERIC, !DELETED);
-        var metric2 = new Metric(new MetricId(), CREATOR, "metric1", NUMERIC, !DELETED);
-        var share1 = new Share("grantee1");
-        var share2 = new Share("grantee2");
+    @Nested
+    @DisplayName("reconstitute")
+    class ReconstituteTest {
 
-        // when
-        var tag = tagFactory.create(
-                CREATOR,
-                TAG_NAME,
-                List.of(metric1, metric2),
-                List.of(share1, share2)
-        );
+        @Test
+        void shouldReconstituteTag() {
+            // given
+            var shares = List.of(new Share("grantee1"), new Share("grantee2"));
+            var metrics = List.of(
+                    new Metric(new MetricId(), CREATOR, "metric1", NUMERIC, DELETED),
+                    new Metric(new MetricId(), CREATOR, "metric2", NUMERIC, !DELETED)
+            );
 
-        // then
-        assertThat(tag.id()).isNotNull();
-        assertThat(tag.name()).isEqualTo(TAG_NAME);
-        assertThat(tag.creator()).isEqualTo(CREATOR);
-        assertThat(tag.metrics()).containsExactlyInAnyOrder(metric1, metric2);
-        assertThat(tag.shares()).containsExactlyInAnyOrder(share1, share2);
-        assertThat(tag.deleted()).isFalse();
-    }
+            // when
+            var tag = tagFactory.reconstitute(TAG_ID, CREATOR, TAG_NAME, metrics, shares, DELETED);
 
-    @Test
-    void shouldCreateTagWithResolvedShares() {
-        // given
-        var grantee1Id = randomUUID();
-        var grantee1 = "grantee1";
-        var grantee2 = "grantee2";
-        var resolvedShare = new Share(new User(grantee1Id), grantee1);
-        var unresolvedShare = new Share(grantee2);
-        when(tenantDataSource.findByUsername(grantee1))
-                .thenReturn(Optional.of(new TenantDto(grantee1Id, "grantee1", "")));
-
-        // when
-        var tag = tagFactory.create(CREATOR, TAG_NAME, null, List.of(new Share(grantee1), new Share(grantee2)));
-
-        // then
-        assertThat(tag.shares()).containsExactlyInAnyOrder(resolvedShare, unresolvedShare);
-    }
-
-    @Test
-    void shouldCreateFailWhenTagInvalid() {
-        // given
-        var invalidTagName = "";
-
-        // then
-        assertThatThrownBy(() -> tagFactory.create(CREATOR, invalidTagName, null, null))
-                .isInstanceOf(EntityInvalidException.class);
-    }
-
-    @Test
-    void shouldReconstituteTag() {
-        // given
-        var actor = new User(randomUUID());
-        var shares = List.of(new Share("grantee1"), new Share("grantee2"));
-        var metrics = List.of(
-                new Metric(new MetricId(), CREATOR, "metric1", NUMERIC, DELETED),
-                new Metric(new MetricId(), CREATOR, "metric2", NUMERIC, !DELETED)
-        );
-
-        // when
-        var tag = tagFactory.reconstitute(actor, TAG_ID, CREATOR, TAG_NAME, metrics, shares, DELETED);
-
-        // then
-        assertThat(tag.id()).isEqualTo(TAG_ID);
-        assertThat(tag.creator()).isEqualTo(CREATOR);
-        assertThat(tag.name()).isEqualTo(TAG_NAME);
-        assertThat(tag.metrics()).containsExactlyInAnyOrderElementsOf(metrics);
-        assertThat(tag.shares()).containsExactlyInAnyOrderElementsOf(shares);
+            // then
+            assertThat(tag.id()).isEqualTo(TAG_ID);
+            assertThat(tag.creator()).isEqualTo(CREATOR);
+            assertThat(tag.name()).isEqualTo(TAG_NAME);
+            assertThat(tag.metrics()).containsExactlyInAnyOrderElementsOf(metrics);
+            assertThat(tag.shares()).containsExactlyInAnyOrderElementsOf(shares);
+        }
     }
 }

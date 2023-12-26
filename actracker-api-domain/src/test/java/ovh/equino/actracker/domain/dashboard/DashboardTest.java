@@ -1,5 +1,6 @@
 package ovh.equino.actracker.domain.dashboard;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,7 @@ import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
+import ovh.equino.actracker.domain.user.ActorExtractor;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
@@ -35,11 +37,18 @@ class DashboardTest {
     private static final boolean DELETED = true;
 
     @Mock
+    private ActorExtractor actorExtractor;
+    @Mock
     private DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier;
     @Mock
     private TagsAccessibilityVerifier tagsAccessibilityVerifier;
     @Mock
     private DashboardValidator validator;
+
+    @BeforeEach
+    void init() {
+        when(actorExtractor.getActor()).thenReturn(CREATOR);
+    }
 
     @Nested
     @DisplayName("rename")
@@ -57,13 +66,14 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
             );
 
             // when
-            dashboard.rename(NEW_NAME, CREATOR);
+            dashboard.rename(NEW_NAME);
 
             // then
             assertThat(dashboard.name()).isEqualTo(NEW_NAME);
@@ -79,6 +89,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -86,7 +97,7 @@ class DashboardTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> dashboard.rename(NEW_NAME, CREATOR))
+            assertThatThrownBy(() -> dashboard.rename(NEW_NAME))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -100,15 +111,17 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> dashboard.rename(NEW_NAME, unauthorizedUser))
+            assertThatThrownBy(() -> dashboard.rename(NEW_NAME))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -122,15 +135,17 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> dashboard.rename(NEW_NAME, unauthorizedUser))
+            assertThatThrownBy(() -> dashboard.rename(NEW_NAME))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -160,13 +175,14 @@ class DashboardTest {
                     singletonList(existingChart),
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
             );
 
             // when
-            dashboard.delete(CREATOR);
+            dashboard.delete();
 
             // then
             assertThat(dashboard.deleted()).isTrue();
@@ -185,13 +201,14 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
             );
 
             // when
-            dashboard.delete(CREATOR);
+            dashboard.delete();
 
             // then
             assertThat(dashboard.deleted()).isTrue();
@@ -207,6 +224,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -214,7 +232,7 @@ class DashboardTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> dashboard.delete(CREATOR))
+            assertThatThrownBy(dashboard::delete)
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -228,15 +246,17 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> dashboard.delete(unauthorizedUser))
+            assertThatThrownBy(dashboard::delete)
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -250,15 +270,17 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> dashboard.delete(unauthorizedUser))
+            assertThatThrownBy(dashboard::delete)
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -279,6 +301,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -286,7 +309,7 @@ class DashboardTest {
             Share newShare = new Share(GRANTEE_NAME);
 
             // when
-            dashboard.share(newShare, CREATOR);
+            dashboard.share(newShare);
 
             // then
             assertThat(dashboard.shares()).containsExactly(newShare);
@@ -302,6 +325,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -309,7 +333,7 @@ class DashboardTest {
             Share newShare = new Share(new User(randomUUID()), GRANTEE_NAME);
 
             // when
-            dashboard.share(newShare, CREATOR);
+            dashboard.share(newShare);
 
             // then
             assertThat(dashboard.shares()).containsExactly(newShare);
@@ -326,6 +350,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     singletonList(existingShare),
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -333,7 +358,7 @@ class DashboardTest {
             Share newShare = new Share(new User(randomUUID()), GRANTEE_NAME);
 
             // when
-            dashboard.share(newShare, CREATOR);
+            dashboard.share(newShare);
 
             // then
             assertThat(dashboard.shares()).containsExactlyInAnyOrder(existingShare);
@@ -350,6 +375,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     singletonList(existingShare),
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -357,7 +383,7 @@ class DashboardTest {
             Share newShare = new Share(new User(randomUUID()), GRANTEE_NAME);
 
             // when
-            dashboard.share(newShare, CREATOR);
+            dashboard.share(newShare);
 
             // then
             assertThat(dashboard.shares()).containsExactlyInAnyOrder(existingShare);
@@ -374,6 +400,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     singletonList(existingShare),
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -381,7 +408,7 @@ class DashboardTest {
             Share newShare = new Share(GRANTEE_NAME);
 
             // when
-            dashboard.share(newShare, CREATOR);
+            dashboard.share(newShare);
 
             // then
             assertThat(dashboard.shares()).containsExactly(existingShare);
@@ -398,6 +425,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     singletonList(existingShare),
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -405,7 +433,7 @@ class DashboardTest {
             Share newShare = new Share(GRANTEE_NAME);
 
             // when
-            dashboard.share(newShare, CREATOR);
+            dashboard.share(newShare);
 
             // then
             assertThat(dashboard.shares()).containsExactly(existingShare);
@@ -421,6 +449,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -429,7 +458,7 @@ class DashboardTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> dashboard.share(newShare, CREATOR))
+            assertThatThrownBy(() -> dashboard.share(newShare))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -443,16 +472,18 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
             );
             Share newShare = new Share(GRANTEE_NAME);
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> dashboard.share(newShare, unauthorizedUser))
+            assertThatThrownBy(() -> dashboard.share(newShare))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -466,16 +497,18 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             Share newShare = new Share(GRANTEE_NAME);
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> dashboard.share(newShare, unauthorizedUser))
+            assertThatThrownBy(() -> dashboard.share(newShare))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -497,13 +530,14 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     singletonList(existingShare),
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
             );
 
             // when
-            dashboard.unshare(existingShare.granteeName(), CREATOR);
+            dashboard.unshare(existingShare.granteeName());
 
             // then
             assertThat(dashboard.shares()).isEmpty();
@@ -520,13 +554,14 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     singletonList(existingShare),
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
             );
 
             // when
-            dashboard.unshare(existingShare.granteeName(), CREATOR);
+            dashboard.unshare(existingShare.granteeName());
 
             // then
             assertThat(dashboard.shares()).isEmpty();
@@ -545,13 +580,14 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     List.of(existingShare1, existingShare2),
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
             );
 
             // when
-            dashboard.unshare(GRANTEE_NAME, CREATOR);
+            dashboard.unshare(GRANTEE_NAME);
 
             // then
             assertThat(dashboard.shares()).containsExactlyInAnyOrder(existingShare1, existingShare2);
@@ -567,6 +603,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -574,7 +611,7 @@ class DashboardTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> dashboard.unshare(GRANTEE_NAME, CREATOR))
+            assertThatThrownBy(() -> dashboard.unshare(GRANTEE_NAME))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -589,15 +626,17 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     singletonList(existingShare),
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> dashboard.unshare(existingShare.granteeName(), unauthorizedUser))
+            assertThatThrownBy(() -> dashboard.unshare(existingShare.granteeName()))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -612,15 +651,17 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     singletonList(existingShare),
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> dashboard.unshare(existingShare.granteeName(), unauthorizedUser))
+            assertThatThrownBy(() -> dashboard.unshare(existingShare.granteeName()))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -643,6 +684,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -650,7 +692,7 @@ class DashboardTest {
             when(tagsAccessibilityVerifier.nonAccessibleFor(any(), any())).thenReturn(emptySet());
 
             // when
-            dashboard.addChart(newChart, CREATOR);
+            dashboard.addChart(newChart);
 
             // then
             assertThat(dashboard.charts()).containsExactly(newChart);
@@ -679,6 +721,7 @@ class DashboardTest {
                     List.of(existingNonDeletedChart, existingDeletedChart),
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -689,7 +732,7 @@ class DashboardTest {
             when(tagsAccessibilityVerifier.nonAccessibleFor(any(), any())).thenReturn(emptySet());
 
             // when
-            dashboard.addChart(newChart, CREATOR);
+            dashboard.addChart(newChart);
 
             // then
             assertThat(dashboard.charts())
@@ -708,6 +751,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -715,7 +759,7 @@ class DashboardTest {
             when(tagsAccessibilityVerifier.nonAccessibleFor(any(), any())).thenReturn(Set.of(nonAccessibleTag));
 
             // then
-            assertThatThrownBy(() -> dashboard.addChart(newChart, CREATOR))
+            assertThatThrownBy(() -> dashboard.addChart(newChart))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -730,6 +774,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -738,12 +783,13 @@ class DashboardTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> dashboard.addChart(newChart, CREATOR))
+            assertThatThrownBy(() -> dashboard.addChart(newChart))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
         @Test
-        void shouldFailWhenNotAccessibleToUser() {
+        void
+        shouldFailWhenNotAccessibleToUser() {
             // given
             Dashboard dashboard = new Dashboard(
                     new DashboardId(),
@@ -752,16 +798,18 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
             );
             Chart newChart = new Chart(CHART_NAME, GroupBy.SELF, AnalysisMetric.METRIC_VALUE, EMPTY_TAGS);
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> dashboard.addChart(newChart, unauthorizedUser))
+            assertThatThrownBy(() -> dashboard.addChart(newChart))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -775,16 +823,18 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
             );
             Chart newChart = new Chart(CHART_NAME, GroupBy.SELF, AnalysisMetric.METRIC_VALUE, EMPTY_TAGS);
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> dashboard.addChart(newChart, unauthorizedUser))
+            assertThatThrownBy(() -> dashboard.addChart(newChart))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -825,13 +875,14 @@ class DashboardTest {
                     List.of(existingNonDeletedChart, existingDeletedChart, chartToDelete),
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
             );
 
             // when
-            dashboard.deleteChart(chartToDelete.id(), CREATOR);
+            dashboard.deleteChart(chartToDelete.id());
 
             // then
             assertThat(dashboard.charts())
@@ -853,13 +904,14 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
             );
 
             // when
-            dashboard.deleteChart(new ChartId(), CREATOR);
+            dashboard.deleteChart(new ChartId());
 
             // then
             assertThat(dashboard.charts()).isEmpty();
@@ -876,13 +928,14 @@ class DashboardTest {
                     singletonList(existingChart),
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
             );
 
             // when
-            dashboard.deleteChart(new ChartId(), CREATOR);
+            dashboard.deleteChart(new ChartId());
 
             // then
             assertThat(dashboard.charts()).containsExactly(existingChart);
@@ -911,13 +964,14 @@ class DashboardTest {
                     List.of(existingNonDeletedChart, existingDeletedChart),
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
             );
 
             // when
-            dashboard.deleteChart(existingDeletedChart.id(), CREATOR);
+            dashboard.deleteChart(existingDeletedChart.id());
 
             // then
             assertThat(dashboard.charts()).containsExactlyInAnyOrder(existingDeletedChart, existingNonDeletedChart);
@@ -933,6 +987,7 @@ class DashboardTest {
                     EMPTY_CHARTS,
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
@@ -940,7 +995,7 @@ class DashboardTest {
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> dashboard.deleteChart(new ChartId(), CREATOR))
+            assertThatThrownBy(() -> dashboard.deleteChart(new ChartId()))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -961,15 +1016,17 @@ class DashboardTest {
                     List.of(existingChart),
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> dashboard.deleteChart(existingChart.id(), unauthorizedUser))
+            assertThatThrownBy(() -> dashboard.deleteChart(existingChart.id()))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -990,15 +1047,17 @@ class DashboardTest {
                     List.of(existingChart),
                     EMPTY_SHARES,
                     !DELETED,
+                    actorExtractor,
                     dashboardsAccessibilityVerifier,
                     tagsAccessibilityVerifier,
                     validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(dashboardsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> dashboard.deleteChart(existingChart.id(), unauthorizedUser))
+            assertThatThrownBy(() -> dashboard.deleteChart(existingChart.id()))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }

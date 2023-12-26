@@ -3,6 +3,7 @@ package ovh.equino.actracker.domain.tagset;
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
+import ovh.equino.actracker.domain.user.ActorExtractor;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.ArrayList;
@@ -15,20 +16,21 @@ public final class TagSetFactory {
 
     private static final boolean DELETED = TRUE;
 
+    private final ActorExtractor actorExtractor;
     private final TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier;
     private final TagsAccessibilityVerifier tagsAccessibilityVerifier;
 
-    TagSetFactory(TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier,
+    TagSetFactory(ActorExtractor actorExtractor,
+                  TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier,
                   TagsAccessibilityVerifier tagsAccessibilityVerifier) {
 
+        this.actorExtractor = actorExtractor;
         this.tagSetsAccessibilityVerifier = tagSetsAccessibilityVerifier;
         this.tagsAccessibilityVerifier = tagsAccessibilityVerifier;
     }
 
-    public TagSet create(User creator,
-                         String name,
-                         Collection<TagId> tags) {
-
+    public TagSet create(String name, Collection<TagId> tags) {
+        var creator = actorExtractor.getActor();
         var validator = new TagSetValidator();
 
         var nonNullTags = requireNonNullElse(tags, new ArrayList<TagId>());
@@ -40,16 +42,16 @@ public final class TagSetFactory {
                 name,
                 nonNullTags,
                 !DELETED,
-                validator,
+                actorExtractor,
                 tagSetsAccessibilityVerifier,
-                tagsAccessibilityVerifier
+                tagsAccessibilityVerifier,
+                validator
         );
         tagSet.validate();
         return tagSet;
     }
 
-    public TagSet reconstitute(User actor,  // TODO remove
-                               TagSetId id,
+    public TagSet reconstitute(TagSetId id,
                                User creator,
                                String name,
                                Collection<TagId> tags,
@@ -63,9 +65,10 @@ public final class TagSetFactory {
                 name,
                 tags,
                 deleted,
-                validator,
+                actorExtractor,
                 tagSetsAccessibilityVerifier,
-                tagsAccessibilityVerifier
+                tagsAccessibilityVerifier,
+                validator
         );
     }
 

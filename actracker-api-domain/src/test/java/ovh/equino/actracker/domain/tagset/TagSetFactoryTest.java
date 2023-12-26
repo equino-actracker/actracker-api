@@ -1,6 +1,8 @@
 package ovh.equino.actracker.domain.tagset;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -8,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
+import ovh.equino.actracker.domain.user.ActorExtractor;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
@@ -30,6 +33,8 @@ class TagSetFactoryTest {
     private static final Boolean DELETED = TRUE;
 
     @Mock
+    private ActorExtractor actorExtractor;
+    @Mock
     private TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier;
     @Mock
     private TagsAccessibilityVerifier tagsAccessibilityVerifier;
@@ -38,77 +43,91 @@ class TagSetFactoryTest {
 
     @BeforeEach
     void init() {
-        tagSetFactory = new TagSetFactory(tagSetsAccessibilityVerifier, tagsAccessibilityVerifier);
+        tagSetFactory = new TagSetFactory(actorExtractor, tagSetsAccessibilityVerifier, tagsAccessibilityVerifier);
     }
 
-    @Test
-    void shouldCreateMinimalTagSet() {
-        // when
-        var tagSet = tagSetFactory.create(CREATOR, TAG_SET_NAME, null);
+    @Nested
+    @DisplayName("create")
+    class CreateTest {
 
-        // then
-        assertThat(tagSet.id()).isNotNull();
-        assertThat(tagSet.name()).isEqualTo(TAG_SET_NAME);
-        assertThat(tagSet.creator()).isEqualTo(CREATOR);
-        assertThat(tagSet.tags()).isEmpty();
-        assertThat(tagSet.deleted()).isFalse();
+        @BeforeEach
+        void init() {
+            when(actorExtractor.getActor()).thenReturn(CREATOR);
+        }
+
+        @Test
+        void shouldCreateMinimalTagSet() {
+            // when
+            var tagSet = tagSetFactory.create(TAG_SET_NAME, null);
+
+            // then
+            assertThat(tagSet.id()).isNotNull();
+            assertThat(tagSet.name()).isEqualTo(TAG_SET_NAME);
+            assertThat(tagSet.creator()).isEqualTo(CREATOR);
+            assertThat(tagSet.tags()).isEmpty();
+            assertThat(tagSet.deleted()).isFalse();
+        }
+
+        @Test
+        void shouldCreateFullTagSet() {
+            // given
+            var assignedTag1 = new TagId(randomUUID());
+            var assignedTag2 = new TagId(randomUUID());
+            when(tagsAccessibilityVerifier.nonAccessibleFor(any(), any()))
+                    .thenReturn(emptySet());
+
+            // when
+            var tagSet = tagSetFactory.create(TAG_SET_NAME, List.of(assignedTag1, assignedTag2));
+
+            // then
+            assertThat(tagSet.id()).isNotNull();
+            assertThat(tagSet.name()).isEqualTo(TAG_SET_NAME);
+            assertThat(tagSet.creator()).isEqualTo(CREATOR);
+            assertThat(tagSet.tags()).containsExactlyInAnyOrder(assignedTag1, assignedTag2);
+            assertThat(tagSet.deleted()).isFalse();
+        }
+
+        @Test
+        void shouldCreateFailWhenTagSetInvalid() {
+            // given
+            var invalidTagSetName = "";
+
+            // then
+            assertThatThrownBy(() -> tagSetFactory.create(invalidTagSetName, null))
+                    .isInstanceOf(EntityInvalidException.class);
+        }
+
+        @Test
+        void shouldCreateFailWhenTagNonAccessible() {
+            // given
+            var nonAccessibleTag = new TagId(randomUUID());
+            when(tagsAccessibilityVerifier.nonAccessibleFor(any(), any()))
+                    .thenReturn(Set.of(nonAccessibleTag));
+
+            // then
+            assertThatThrownBy(() -> tagSetFactory.create(TAG_SET_NAME, List.of(nonAccessibleTag)))
+                    .isInstanceOf(EntityInvalidException.class);
+        }
     }
 
-    @Test
-    void shouldCreateFullTagSet() {
-        // given
-        var assignedTag1 = new TagId(randomUUID());
-        var assignedTag2 = new TagId(randomUUID());
-        when(tagsAccessibilityVerifier.nonAccessibleFor(any(), any()))
-                .thenReturn(emptySet());
+    @Nested
+    @DisplayName("reconstitute")
+    class ReconstituteTest {
 
-        // when
-        var tagSet = tagSetFactory.create(CREATOR, TAG_SET_NAME, List.of(assignedTag1, assignedTag2));
+        @Test
+        void shouldReconstituteTagSet() {
+            // given
+            var assignedTags = List.of(new TagId(), new TagId());
 
-        // then
-        assertThat(tagSet.id()).isNotNull();
-        assertThat(tagSet.name()).isEqualTo(TAG_SET_NAME);
-        assertThat(tagSet.creator()).isEqualTo(CREATOR);
-        assertThat(tagSet.tags()).containsExactlyInAnyOrder(assignedTag1, assignedTag2);
-        assertThat(tagSet.deleted()).isFalse();
-    }
+            // when
+            var tagSet = tagSetFactory.reconstitute(TAG_SET_ID, CREATOR, TAG_SET_NAME, assignedTags, DELETED);
 
-    @Test
-    void shouldCreateFailWhenTagSetInvalid() {
-        // given
-        var invalidTagSetName = "";
-
-        // then
-        assertThatThrownBy(() -> tagSetFactory.create(CREATOR, invalidTagSetName, null))
-                .isInstanceOf(EntityInvalidException.class);
-    }
-
-    @Test
-    void shouldCreateFailWhenTagNonAccessible() {
-        // given
-        var nonAccessibleTag = new TagId(randomUUID());
-        when(tagsAccessibilityVerifier.nonAccessibleFor(any(), any()))
-                .thenReturn(Set.of(nonAccessibleTag));
-
-        // then
-        assertThatThrownBy(() -> tagSetFactory.create(CREATOR, TAG_SET_NAME, List.of(nonAccessibleTag)))
-                .isInstanceOf(EntityInvalidException.class);
-    }
-
-    @Test
-    void shouldReconstituteTagSet() {
-        // given
-        var actor = new User(randomUUID());
-        var assignedTags = List.of(new TagId(), new TagId());
-
-        // when
-        var tagSet = tagSetFactory.reconstitute(actor, TAG_SET_ID, CREATOR, TAG_SET_NAME, assignedTags, DELETED);
-
-        // then
-        assertThat(tagSet.id()).isEqualTo(TAG_SET_ID);
-        assertThat(tagSet.name()).isEqualTo(TAG_SET_NAME);
-        assertThat(tagSet.creator()).isEqualTo(CREATOR);
-        assertThat(tagSet.tags()).containsExactlyInAnyOrderElementsOf(assignedTags);
-        assertThat(tagSet.deleted()).isTrue();
+            // then
+            assertThat(tagSet.id()).isEqualTo(TAG_SET_ID);
+            assertThat(tagSet.name()).isEqualTo(TAG_SET_NAME);
+            assertThat(tagSet.creator()).isEqualTo(CREATOR);
+            assertThat(tagSet.tags()).containsExactlyInAnyOrderElementsOf(assignedTags);
+            assertThat(tagSet.deleted()).isTrue();
+        }
     }
 }

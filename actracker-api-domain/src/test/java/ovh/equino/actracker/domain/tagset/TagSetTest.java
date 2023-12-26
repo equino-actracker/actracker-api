@@ -1,5 +1,6 @@
 package ovh.equino.actracker.domain.tagset;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -11,6 +12,7 @@ import ovh.equino.actracker.domain.exception.EntityInvalidException;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
+import ovh.equino.actracker.domain.user.ActorExtractor;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
@@ -33,11 +35,18 @@ class TagSetTest {
     private static final boolean DELETED = true;
 
     @Mock
+    private ActorExtractor actorExtractor;
+    @Mock
     private TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier;
     @Mock
     private TagsAccessibilityVerifier tagsAccessibilityVerifier;
     @Mock
     private TagSetValidator validator;
+
+    @BeforeEach
+    void init() {
+        when(actorExtractor.getActor()).thenReturn(CREATOR);
+    }
 
     @Nested
     @DisplayName("rename")
@@ -54,13 +63,14 @@ class TagSetTest {
                     TAG_SET_NAME,
                     EMPTY_TAGS,
                     !DELETED,
-                    validator,
+                    actorExtractor,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
 
             // when
-            tagSet.rename(NEW_NAME, CREATOR);
+            tagSet.rename(NEW_NAME);
 
             // then
             assertThat(tagSet.name()).isEqualTo(NEW_NAME);
@@ -75,14 +85,15 @@ class TagSetTest {
                     TAG_SET_NAME,
                     EMPTY_TAGS,
                     !DELETED,
-                    validator,
+                    actorExtractor,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> tagSet.rename(NEW_NAME, CREATOR))
+            assertThatThrownBy(() -> tagSet.rename(NEW_NAME))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -95,15 +106,17 @@ class TagSetTest {
                     TAG_SET_NAME,
                     EMPTY_TAGS,
                     !DELETED,
-                    validator,
+                    actorExtractor,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(tagSetsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> tagSet.rename(NEW_NAME, unauthorizedUser))
+            assertThatThrownBy(() -> tagSet.rename(NEW_NAME))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -116,15 +129,17 @@ class TagSetTest {
                     TAG_SET_NAME,
                     EMPTY_TAGS,
                     !DELETED,
-                    validator,
+                    actorExtractor,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(tagSetsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> tagSet.rename(NEW_NAME, unauthorizedUser))
+            assertThatThrownBy(() -> tagSet.rename(NEW_NAME))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -142,15 +157,16 @@ class TagSetTest {
                     TAG_SET_NAME,
                     EMPTY_TAGS,
                     !DELETED,
-                    validator,
+                    actorExtractor,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             TagId newTag = new TagId(randomUUID());
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // when
-            tagSet.assignTag(newTag, CREATOR);
+            tagSet.assignTag(newTag);
 
             // then
             assertThat(tagSet.tags()).containsExactly(newTag);
@@ -166,15 +182,16 @@ class TagSetTest {
                     TAG_SET_NAME,
                     singleton(existingTag),
                     !DELETED,
-                    validator,
+                    actorExtractor,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
             TagId newTag = new TagId();
 
             // when
-            tagSet.assignTag(newTag, CREATOR);
+            tagSet.assignTag(newTag);
 
             // then
             assertThat(tagSet.tags()).containsExactlyInAnyOrder(existingTag, newTag);
@@ -190,14 +207,15 @@ class TagSetTest {
                     TAG_SET_NAME,
                     singleton(existingTag),
                     !DELETED,
-                    validator,
+                    actorExtractor,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // when
-            tagSet.assignTag(existingTag, CREATOR);
+            tagSet.assignTag(existingTag);
 
             // then
             assertThat(tagSet.tags()).containsExactly(existingTag);
@@ -211,15 +229,16 @@ class TagSetTest {
                     TAG_SET_NAME,
                     EMPTY_TAGS,
                     !DELETED,
-                    validator,
+                    actorExtractor,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             TagId newTag = new TagId(randomUUID());
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> tagSet.assignTag(newTag, CREATOR))
+            assertThatThrownBy(() -> tagSet.assignTag(newTag))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -233,15 +252,16 @@ class TagSetTest {
                     TAG_SET_NAME,
                     EMPTY_TAGS,
                     !DELETED,
-                    validator,
+                    actorExtractor,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> tagSet.assignTag(newTag, CREATOR))
+            assertThatThrownBy(() -> tagSet.assignTag(newTag))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -254,16 +274,18 @@ class TagSetTest {
                     TAG_SET_NAME,
                     EMPTY_TAGS,
                     !DELETED,
-                    validator,
+                    actorExtractor,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
-            TagId newTag = new TagId();
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(tagSetsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
+            TagId newTag = new TagId();
 
             // then
-            assertThatThrownBy(() -> tagSet.assignTag(newTag, unauthorizedUser))
+            assertThatThrownBy(() -> tagSet.assignTag(newTag))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -276,16 +298,18 @@ class TagSetTest {
                     TAG_SET_NAME,
                     EMPTY_TAGS,
                     !DELETED,
-                    validator,
+                    actorExtractor,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
-            TagId newTag = new TagId();
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(tagSetsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
+            TagId newTag = new TagId();
 
             // then
-            assertThatThrownBy(() -> tagSet.assignTag(newTag, unauthorizedUser))
+            assertThatThrownBy(() -> tagSet.assignTag(newTag))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -305,14 +329,15 @@ class TagSetTest {
                     TAG_SET_NAME,
                     List.of(tagToPreserve, tagToRemove),
                     !DELETED,
-                    validator,
+                    actorExtractor,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // when
-            tagSet.removeTag(tagToRemove, CREATOR);
+            tagSet.removeTag(tagToRemove);
 
             // then
             assertThat(tagSet.tags()).containsExactly(tagToPreserve);
@@ -327,14 +352,15 @@ class TagSetTest {
                     TAG_SET_NAME,
                     EMPTY_TAGS,
                     !DELETED,
-                    validator,
+                    actorExtractor,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // when
-            tagSet.removeTag(new TagId(), CREATOR);
+            tagSet.removeTag(new TagId());
 
             // then
             assertThat(tagSet.tags()).isEmpty();
@@ -350,14 +376,15 @@ class TagSetTest {
                     TAG_SET_NAME,
                     singleton(existingTag),
                     !DELETED,
-                    validator,
+                    actorExtractor,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // when
-            tagSet.removeTag(new TagId(), CREATOR);
+            tagSet.removeTag(new TagId());
 
             // then
             assertThat(tagSet.tags()).containsExactly(existingTag);
@@ -373,14 +400,15 @@ class TagSetTest {
                     TAG_SET_NAME,
                     List.of(tagToRemove),
                     !DELETED,
-                    validator,
+                    actorExtractor,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // when
-            tagSet.removeTag(tagToRemove, CREATOR);
+            tagSet.removeTag(tagToRemove);
 
             // then
             assertThat(tagSet.tags()).containsExactly(tagToRemove);
@@ -395,15 +423,16 @@ class TagSetTest {
                     TAG_SET_NAME,
                     EMPTY_TAGS,
                     !DELETED,
-                    validator,
+                    actorExtractor,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             when(tagsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> tagSet.removeTag(new TagId(), CREATOR))
+            assertThatThrownBy(() -> tagSet.removeTag(new TagId()))
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -417,15 +446,17 @@ class TagSetTest {
                     TAG_SET_NAME,
                     singleton(existingTag),
                     !DELETED,
-                    validator,
+                    actorExtractor,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(tagSetsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> tagSet.removeTag(existingTag, unauthorizedUser))
+            assertThatThrownBy(() -> tagSet.removeTag(existingTag))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -439,15 +470,17 @@ class TagSetTest {
                     TAG_SET_NAME,
                     singleton(existingTag),
                     !DELETED,
-                    validator,
+                    actorExtractor,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(tagSetsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> tagSet.removeTag(existingTag, unauthorizedUser))
+            assertThatThrownBy(() -> tagSet.removeTag(existingTag))
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
@@ -465,13 +498,14 @@ class TagSetTest {
                     TAG_SET_NAME,
                     EMPTY_TAGS,
                     !DELETED,
-                    validator,
+                    actorExtractor,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
 
             // when
-            tagSet.delete(CREATOR);
+            tagSet.delete();
 
             // then
             assertThat(tagSet.deleted()).isTrue();
@@ -486,14 +520,15 @@ class TagSetTest {
                     TAG_SET_NAME,
                     EMPTY_TAGS,
                     !DELETED,
-                    validator,
+                    actorExtractor,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             doThrow(EntityInvalidException.class).when(validator).validate(any());
 
             // then
-            assertThatThrownBy(() -> tagSet.delete(CREATOR))
+            assertThatThrownBy(tagSet::delete)
                     .isInstanceOf(EntityInvalidException.class);
         }
 
@@ -506,15 +541,17 @@ class TagSetTest {
                     TAG_SET_NAME,
                     EMPTY_TAGS,
                     !DELETED,
-                    validator,
+                    actorExtractor,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(tagSetsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(false);
 
             // then
-            assertThatThrownBy(() -> tagSet.delete(unauthorizedUser))
+            assertThatThrownBy(tagSet::delete)
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -527,15 +564,17 @@ class TagSetTest {
                     TAG_SET_NAME,
                     EMPTY_TAGS,
                     !DELETED,
-                    validator,
+                    actorExtractor,
                     tagSetsAccessibilityVerifier,
-                    tagsAccessibilityVerifier
+                    tagsAccessibilityVerifier,
+                    validator
             );
             User unauthorizedUser = new User(randomUUID());
+            when(actorExtractor.getActor()).thenReturn(unauthorizedUser);
             when(tagSetsAccessibilityVerifier.isAccessibleFor(any(), any())).thenReturn(true);
 
             // then
-            assertThatThrownBy(() -> tagSet.delete(unauthorizedUser))
+            assertThatThrownBy(tagSet::delete)
                     .isInstanceOf(EntityEditForbidden.class);
         }
     }
