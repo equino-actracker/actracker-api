@@ -30,7 +30,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class DashboardFactoryTest {
+class DashboardFactoryImplTest {
 
     private static final DashboardId DASHBOARD_ID = new DashboardId();
     private static final User CREATOR = new User(randomUUID());
@@ -46,11 +46,11 @@ class DashboardFactoryTest {
     @Mock
     private TenantDataSource tenantDataSource;
 
-    private DashboardFactory dashboardFactory;
+    private DashboardFactoryImpl dashboardFactory;
 
     @BeforeEach
     void init() {
-        dashboardFactory = new DashboardFactory(
+        dashboardFactory = new DashboardFactoryImpl(
                 actorExtractor,
                 dashboardsAccessibilityVerifier,
                 tagsAccessibilityVerifier,

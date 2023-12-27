@@ -30,7 +30,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ActivityFactoryTest {
+class ActivityFactoryImplTest {
 
     private static final ActivityId ACTIVITY_ID = new ActivityId();
     private static final User CREATOR = new User(randomUUID());
@@ -49,11 +49,11 @@ class ActivityFactoryTest {
     @Mock
     private MetricsAccessibilityVerifier metricsAccessibilityVerifier;
 
-    private ActivityFactory activityFactory;
+    private ActivityFactoryImpl activityFactory;
 
     @BeforeEach
     void init() {
-        activityFactory = new ActivityFactory(
+        activityFactory = new ActivityFactoryImpl(
                 actorExtractor,
                 activitiesAccessibilityVerifier,
                 tagsAccessibilityVerifier,
