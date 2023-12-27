@@ -17,7 +17,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ActivitiesAccessibilityVerifierTest {
+class ActivitiesAccessibilityVerifierImplTest {
 
     private static final User USER = null;
     private static final ActivityDto ACCESSIBLE_ACTIVITY = new ActivityDto(
@@ -34,11 +34,11 @@ class ActivitiesAccessibilityVerifierTest {
 
     @Mock
     private ActivityDataSource activityDataSource;
-    private ActivitiesAccessibilityVerifier activitiesAccessibilityVerifier;
+    private ActivitiesAccessibilityVerifierImpl activitiesAccessibilityVerifier;
 
     @BeforeEach
     void init() {
-        activitiesAccessibilityVerifier = new ActivitiesAccessibilityVerifier(activityDataSource);
+        activitiesAccessibilityVerifier = new ActivitiesAccessibilityVerifierImpl(activityDataSource);
     }
 
     @Test

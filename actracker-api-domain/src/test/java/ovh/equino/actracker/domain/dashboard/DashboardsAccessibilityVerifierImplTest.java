@@ -16,7 +16,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class DashboardsAccessibilityVerifierTest {
+class DashboardsAccessibilityVerifierImplTest {
 
     private static final User USER = null;
     private static final DashboardDto ACCESSIBLE_DASHBOARD = new DashboardDto(
@@ -30,11 +30,11 @@ class DashboardsAccessibilityVerifierTest {
 
     @Mock
     private DashboardDataSource dashboardDataSource;
-    private DashboardsAccessibilityVerifier dashboardsAccessibilityVerifier;
+    private DashboardsAccessibilityVerifierImpl dashboardsAccessibilityVerifier;
 
     @BeforeEach
     void init() {
-        dashboardsAccessibilityVerifier = new DashboardsAccessibilityVerifier(dashboardDataSource);
+        dashboardsAccessibilityVerifier = new DashboardsAccessibilityVerifierImpl(dashboardDataSource);
     }
 
     @Test
