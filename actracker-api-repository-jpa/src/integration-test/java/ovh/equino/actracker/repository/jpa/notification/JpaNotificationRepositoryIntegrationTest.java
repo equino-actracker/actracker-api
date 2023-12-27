@@ -31,7 +31,7 @@ abstract class JpaNotificationRepositoryIntegrationTest extends JpaIntegrationTe
         AtomicLong finalVersion = new AtomicLong();
         inTransaction(() -> {
             repository.save(notification);
-            Optional<Notification<?>> foundNotification = repository.findById(notificationId);
+            Optional<Notification<?>> foundNotification = repository.get(notificationId);
             assertThat(foundNotification).isPresent();
             assertThat(foundNotification.get())
                     .usingRecursiveComparison()
@@ -41,7 +41,7 @@ abstract class JpaNotificationRepositoryIntegrationTest extends JpaIntegrationTe
         });
         inTransaction(() -> {
             repository.save(notification);
-            Optional<Notification<?>> foundNotification = repository.findById(notificationId);
+            Optional<Notification<?>> foundNotification = repository.get(notificationId);
             assertThat(foundNotification).isPresent();
             assertThat(foundNotification.get())
                     .usingRecursiveComparison()
@@ -51,7 +51,7 @@ abstract class JpaNotificationRepositoryIntegrationTest extends JpaIntegrationTe
         });
         assertThat(finalVersion).hasValueGreaterThan(initialVersion.get());
         inTransaction(() -> {
-            Optional<Notification<?>> foundNotification = repository.findById(notificationId);
+            Optional<Notification<?>> foundNotification = repository.get(notificationId);
             assertThat(foundNotification).isPresent();
             assertThat(foundNotification.get())
                     .usingRecursiveComparison()
@@ -64,7 +64,7 @@ abstract class JpaNotificationRepositoryIntegrationTest extends JpaIntegrationTe
     @Test
     void shouldNotFindNonExistingNotification() {
         inTransaction(() -> {
-            Optional<Notification<?>> foundNotification = repository.findById(randomUUID());
+            Optional<Notification<?>> foundNotification = repository.get(randomUUID());
             assertThat(foundNotification).isNotPresent();
         });
     }
@@ -78,11 +78,11 @@ abstract class JpaNotificationRepositoryIntegrationTest extends JpaIntegrationTe
         });
         inTransaction(() -> {
             repository.delete(notificationId);
-            Optional<Notification<?>> foundNotification = repository.findById(notificationId);
+            Optional<Notification<?>> foundNotification = repository.get(notificationId);
             assertThat(foundNotification).isNotPresent();
         });
         inTransaction(() -> {
-            Optional<Notification<?>> foundNotification = repository.findById(notificationId);
+            Optional<Notification<?>> foundNotification = repository.get(notificationId);
             assertThat(foundNotification).isNotPresent();
         });
     }
