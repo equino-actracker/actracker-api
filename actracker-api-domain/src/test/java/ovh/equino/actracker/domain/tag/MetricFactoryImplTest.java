@@ -8,14 +8,14 @@ import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static ovh.equino.actracker.domain.tag.MetricType.NUMERIC;
 
-class MetricFactoryTest {
+class MetricFactoryImplTest {
 
     private static final MetricId METRIC_ID = new MetricId();
     private static final User CREATOR = new User(randomUUID());
     private static final String METRIC_NAME = "metric name";
     private static final Boolean DELETED = TRUE;
 
-    private final MetricFactory metricFactory = new MetricFactory();
+    private final MetricFactoryImpl metricFactory = new MetricFactoryImpl();
 
     @Test
     void shouldCreateMetric() {

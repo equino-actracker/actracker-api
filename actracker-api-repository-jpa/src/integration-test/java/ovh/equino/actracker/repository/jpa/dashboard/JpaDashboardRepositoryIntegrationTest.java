@@ -16,7 +16,7 @@ abstract class JpaDashboardRepositoryIntegrationTest extends JpaIntegrationTest 
     private JpaDashboardRepository repository;
 
     @BeforeEach
-    void setup() {
+    void init() {
         this.repository = new JpaDashboardRepository(entityManager);
     }
 

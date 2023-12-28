@@ -31,7 +31,7 @@ class JpaNotificationRepository extends JpaDAO implements NotificationRepository
     }
 
     @Override
-    public Optional<Notification<?>> findById(UUID notificationId) {
+    public Optional<Notification<?>> get(UUID notificationId) {
         NotificationEntity notificationEntity = entityManager.find(NotificationEntity.class, notificationId.toString());
         if(isNull(notificationEntity)) {
             return Optional.empty();

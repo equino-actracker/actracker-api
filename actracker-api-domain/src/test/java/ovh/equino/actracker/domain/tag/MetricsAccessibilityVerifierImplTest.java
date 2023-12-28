@@ -19,7 +19,7 @@ import static org.mockito.Mockito.when;
 import static ovh.equino.actracker.domain.tag.MetricType.NUMERIC;
 
 @ExtendWith(MockitoExtension.class)
-class MetricsAccessibilityVerifierTest {
+class MetricsAccessibilityVerifierImplTest {
 
     private static final User USER = new User(randomUUID());
     private static final boolean DELETED = true;
@@ -51,7 +51,7 @@ class MetricsAccessibilityVerifierTest {
 
     @BeforeEach
     void init() {
-        metricsAccessibilityVerifier = new MetricsAccessibilityVerifier(tagDataSource);
+        metricsAccessibilityVerifier = new MetricsAccessibilityVerifierImpl(tagDataSource);
     }
 
     @Test

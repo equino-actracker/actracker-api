@@ -25,7 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class TagSetFactoryTest {
+class TagSetFactoryImplTest {
 
     private static final TagSetId TAG_SET_ID = new TagSetId();
     private static final User CREATOR = new User(randomUUID());
@@ -39,11 +39,11 @@ class TagSetFactoryTest {
     @Mock
     private TagsAccessibilityVerifier tagsAccessibilityVerifier;
 
-    private TagSetFactory tagSetFactory;
+    private TagSetFactoryImpl tagSetFactory;
 
     @BeforeEach
     void init() {
-        tagSetFactory = new TagSetFactory(actorExtractor, tagSetsAccessibilityVerifier, tagsAccessibilityVerifier);
+        tagSetFactory = new TagSetFactoryImpl(actorExtractor, tagSetsAccessibilityVerifier, tagsAccessibilityVerifier);
     }
 
     @Nested

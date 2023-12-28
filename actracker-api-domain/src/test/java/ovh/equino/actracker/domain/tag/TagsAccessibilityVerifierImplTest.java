@@ -20,7 +20,7 @@ import static org.mockito.Mockito.when;
 import static ovh.equino.actracker.domain.tag.MetricType.NUMERIC;
 
 @ExtendWith(MockitoExtension.class)
-class TagsAccessibilityVerifierTest {
+class TagsAccessibilityVerifierImplTest {
 
     private static final User USER = new User(randomUUID());
     private static final boolean DELETED = true;
@@ -42,11 +42,11 @@ class TagsAccessibilityVerifierTest {
 
     @Mock
     private TagDataSource tagDataSource;
-    private TagsAccessibilityVerifier tagsAccessibilityVerifier;
+    private TagsAccessibilityVerifierImpl tagsAccessibilityVerifier;
 
     @BeforeEach
     void init() {
-        tagsAccessibilityVerifier = new TagsAccessibilityVerifier(tagDataSource);
+        tagsAccessibilityVerifier = new TagsAccessibilityVerifierImpl(tagDataSource);
     }
 
     @Test

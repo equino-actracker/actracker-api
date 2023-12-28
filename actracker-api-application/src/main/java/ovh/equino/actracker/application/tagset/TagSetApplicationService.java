@@ -47,7 +47,7 @@ public class TagSetApplicationService {
                 createTagSetCommand.name(),
                 toTagIds(createTagSetCommand.tags())
         );
-        tagSetRepository.add(newTagSet.forStorage());
+        tagSetRepository.add(newTagSet);
         tagSetNotifier.notifyChanged(newTagSet.forChangeNotification());
 
         return tagSetDataSource.find(newTagSet.id(), creator)
@@ -81,18 +81,12 @@ public class TagSetApplicationService {
 
     public TagSetResult renameTagSet(String newName, UUID tagSetId) {
         User updater = actorExtractor.getActor();
+        TagSetId id = new TagSetId(tagSetId);
 
-        TagSetDto tagSetDto = tagSetRepository.findById(tagSetId)
+        TagSet tagSet = tagSetRepository.get(id)
                 .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));
-        TagSet tagSet = tagSetFactory.reconstitute(
-                new TagSetId(tagSetDto.id()),
-                new User(tagSetDto.creatorId()),
-                tagSetDto.name(),
-                toTagIds(tagSetDto.tags()),
-                tagSetDto.deleted()
-        );
         tagSet.rename(newName);
-        tagSetRepository.update(tagSetId, tagSet.forStorage());
+        tagSetRepository.save(tagSet);
 
         tagSetNotifier.notifyChanged(tagSet.forChangeNotification());
 
@@ -106,18 +100,12 @@ public class TagSetApplicationService {
 
     public TagSetResult addTagToSet(UUID tagId, UUID tagSetId) {
         User updater = actorExtractor.getActor();
+        TagSetId id = new TagSetId(tagSetId);
 
-        TagSetDto tagSetDto = tagSetRepository.findById(tagSetId)
+        TagSet tagSet = tagSetRepository.get(id)
                 .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));
-        TagSet tagSet = tagSetFactory.reconstitute(
-                new TagSetId(tagSetDto.id()),
-                new User(tagSetDto.creatorId()),
-                tagSetDto.name(),
-                toTagIds(tagSetDto.tags()),
-                tagSetDto.deleted()
-        );
         tagSet.assignTag(new TagId(tagId));
-        tagSetRepository.update(tagSetId, tagSet.forStorage());
+        tagSetRepository.save(tagSet);
 
         tagSetNotifier.notifyChanged(tagSet.forChangeNotification());
 
@@ -131,19 +119,12 @@ public class TagSetApplicationService {
 
     public TagSetResult removeTagFromSet(UUID tagId, UUID tagSetId) {
         User updater = actorExtractor.getActor();
+        TagSetId id = new TagSetId(tagSetId);
 
-        TagSetDto tagSetDto = tagSetRepository.findById(tagSetId)
+        TagSet tagSet = tagSetRepository.get(id)
                 .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));
-        TagSet tagSet = tagSetFactory.reconstitute(
-                new TagSetId(tagSetDto.id()),
-                new User(tagSetDto.creatorId()),
-                tagSetDto.name(),
-                toTagIds(tagSetDto.tags()),
-                tagSetDto.deleted()
-        );
-
         tagSet.removeTag(new TagId(tagId));
-        tagSetRepository.update(tagSetId, tagSet.forStorage());
+        tagSetRepository.save(tagSet);
 
         tagSetNotifier.notifyChanged(tagSet.forChangeNotification());
 
@@ -156,19 +137,11 @@ public class TagSetApplicationService {
     }
 
     public void deleteTagSet(UUID tagSetId) {
-
-        TagSetDto tagSetDto = tagSetRepository.findById(tagSetId)
+        TagSetId id = new TagSetId(tagSetId);
+        TagSet tagSet = tagSetRepository.get(id)
                 .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));
-        TagSet tagSet = tagSetFactory.reconstitute(
-                new TagSetId(tagSetDto.id()),
-                new User(tagSetDto.creatorId()),
-                tagSetDto.name(),
-                toTagIds(tagSetDto.tags()),
-                tagSetDto.deleted()
-        );
-
         tagSet.delete();
-        tagSetRepository.update(tagSetId, tagSet.forStorage());
+        tagSetRepository.save(tagSet);
 
         tagSetNotifier.notifyChanged(tagSet.forChangeNotification());
     }

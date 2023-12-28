@@ -16,7 +16,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class TagSetsAccessibilityVerifierTest {
+class TagSetsAccessibilityVerifierImplTest {
 
     private static final User USER = null;
     private static final TagSetDto ACCESSIBLE_TAG_SET = new TagSetDto(
@@ -29,11 +29,11 @@ class TagSetsAccessibilityVerifierTest {
 
     @Mock
     private TagSetDataSource tagSetDataSource;
-    private TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier;
+    private TagSetsAccessibilityVerifierImpl tagSetsAccessibilityVerifier;
 
     @BeforeEach
     void init() {
-        tagSetsAccessibilityVerifier = new TagSetsAccessibilityVerifier(tagSetDataSource);
+        tagSetsAccessibilityVerifier = new TagSetsAccessibilityVerifierImpl(tagSetDataSource);
     }
 
     @Test

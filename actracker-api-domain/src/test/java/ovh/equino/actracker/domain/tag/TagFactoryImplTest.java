@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 import static ovh.equino.actracker.domain.tag.MetricType.NUMERIC;
 
 @ExtendWith(MockitoExtension.class)
-class TagFactoryTest {
+class TagFactoryImplTest {
 
     private static final TagId TAG_ID = new TagId();
     private static final User CREATOR = new User(randomUUID());
@@ -39,11 +39,11 @@ class TagFactoryTest {
     @Mock
     private TenantDataSource tenantDataSource;
 
-    private TagFactory tagFactory;
+    private TagFactoryImpl tagFactory;
 
     @BeforeEach
     void init() {
-        tagFactory = new TagFactory(actorExtractor, tagsAccessibilityVerifier, tenantDataSource);
+        tagFactory = new TagFactoryImpl(actorExtractor, tagsAccessibilityVerifier, tenantDataSource);
     }
 
     @Nested

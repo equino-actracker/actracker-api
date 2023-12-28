@@ -1,13 +1,13 @@
 package ovh.equino.actracker.domain.tagset;
 
 import java.util.Optional;
-import java.util.UUID;
 
 public interface TagSetRepository {
 
-    void add(TagSetDto tagSet);
+    Optional<TagSet> get(TagSetId tagSetId);
 
-    void update(UUID tagSetId, TagSetDto tagSet);
+    void add(TagSet tagSet);
 
-    Optional<TagSetDto> findById(UUID tagSetId);
+    // TODO remove, replace with domain events
+    void save(TagSet tagSet);
 }
