@@ -14,10 +14,10 @@ public interface TagSetRepository {
     // TODO remove
     Optional<TagSetDto> findById(UUID tagSetId);
 
-//    Optional<TagSet> get(TagSetId tagSetId);
+    Optional<TagSet> get(TagSetId tagSetId);
 
-//    void add(TagSet tagSet);
+    void add(TagSet tagSet);
 
     // TODO remove, replace with domain events
-//    void save(TagSet tagSet);
+    void save(TagSet tagSet);
 }

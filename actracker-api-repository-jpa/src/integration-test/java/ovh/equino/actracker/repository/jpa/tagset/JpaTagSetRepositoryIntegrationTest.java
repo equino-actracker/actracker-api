@@ -2,21 +2,16 @@ package ovh.equino.actracker.repository.jpa.tagset;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ovh.equino.actracker.domain.tagset.TagSet;
-import ovh.equino.actracker.domain.tagset.TagSetDto;
-import ovh.equino.actracker.domain.tagset.TagSetFactory;
-import ovh.equino.actracker.domain.tagset.TagSetTestFactory;
+import ovh.equino.actracker.domain.tagset.*;
 import ovh.equino.actracker.domain.tenant.TenantDto;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
-import ovh.equino.actracker.repository.jpa.TestUtil;
 
 import java.util.Optional;
 
 import static java.util.Collections.emptySet;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static ovh.equino.actracker.repository.jpa.TestUtil.nextUUID;
 
 abstract class JpaTagSetRepositoryIntegrationTest extends JpaIntegrationTest {
@@ -59,15 +54,35 @@ abstract class JpaTagSetRepositoryIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldAddAndGetTagSet() {
-//        TagSet expectedTagSet = tagSetFactory.create("tag set name", emptySet());
-//        inTransaction(() -> {
-//            repository.add(expectedTagSet);
-//            Optional<TagSet> foundTagSet = repository.get(expectedTagSet.id());
-//            assertThat(foundTagSet).usingRecursiveComparison().isEqualTo(expectedTagSet);
-//        });
-//        inTransaction(() -> {
-//            Optional<TagSet> foundTagSet = repository.get(expectedTagSet.id());
-//            assertThat(foundTagSet).usingRecursiveComparison().isEqualTo(expectedTagSet);
-//        });
+        TagSet expectedTagSet = tagSetFactory.create("tag set name", emptySet());
+        inTransaction(() -> repository.add(expectedTagSet));
+        inTransaction(() -> {
+            Optional<TagSet> foundTagSet = repository.get(expectedTagSet.id());
+            assertThat(foundTagSet).get().usingRecursiveComparison().isEqualTo(expectedTagSet);
+        });
+    }
+
+    @Test
+    void shouldNotGetNotExistingTagSet() {
+        inTransaction(() -> {
+            Optional<TagSet> foundTagSet = repository.get(new TagSetId(randomUUID()));
+            assertThat(foundTagSet).isEmpty();
+        });
+    }
+
+    @Test
+    void shouldUpdateTagSet() {
+        TagSet expectedTagSet = tagSetFactory.create("old name", emptySet());
+        inTransaction(() -> repository.add(expectedTagSet));
+        inTransaction(() -> {
+            TagSet tagSet = repository.get(expectedTagSet.id()).get();
+            expectedTagSet.delete();
+            tagSet.delete();
+            repository.save(tagSet);
+        });
+        inTransaction(() -> {
+            Optional<TagSet> foundTagSet = repository.get(expectedTagSet.id());
+            assertThat(foundTagSet).get().usingRecursiveComparison().isEqualTo(expectedTagSet);
+        });
     }
 }

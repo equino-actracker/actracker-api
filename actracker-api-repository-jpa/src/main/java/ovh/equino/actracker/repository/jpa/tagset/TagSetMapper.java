@@ -13,6 +13,7 @@ import static java.util.stream.Collectors.toUnmodifiableSet;
 
 class TagSetMapper {
 
+    // TODO remove
     TagSetDto toDto(TagSetEntity entity) {
 
         Set<UUID> entityTags = requireNonNullElse(entity.tags, new HashSet<TagEntity>()).stream()

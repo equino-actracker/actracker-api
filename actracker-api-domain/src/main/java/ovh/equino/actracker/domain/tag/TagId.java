@@ -13,6 +13,10 @@ public record TagId(UUID id) {
         }
     }
 
+    public TagId(String id) {
+        this(UUID.fromString(id));
+    }
+
     public TagId() {
         this(randomUUID());
     }
