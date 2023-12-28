@@ -16,7 +16,7 @@ abstract class JpaTagRepositoryIntegrationTest extends JpaIntegrationTest {
     private JpaTagRepository repository;
 
     @BeforeEach
-    void setup() {
+    void init() {
         this.repository = new JpaTagRepository(entityManager);
     }
 

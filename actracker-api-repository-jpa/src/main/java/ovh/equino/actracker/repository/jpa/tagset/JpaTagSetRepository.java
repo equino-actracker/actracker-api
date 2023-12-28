@@ -4,6 +4,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaQuery;
 import ovh.equino.actracker.domain.tagset.TagSetDto;
+import ovh.equino.actracker.domain.tagset.TagSetFactory;
 import ovh.equino.actracker.domain.tagset.TagSetRepository;
 import ovh.equino.actracker.repository.jpa.JpaDAO;
 
@@ -12,8 +13,11 @@ import java.util.UUID;
 
 class JpaTagSetRepository extends JpaDAO implements TagSetRepository {
 
-    JpaTagSetRepository(EntityManager entityManager) {
+    private final TagSetFactory tagSetFactory;
+
+    JpaTagSetRepository(EntityManager entityManager, TagSetFactory tagSetFactory) {
         super(entityManager);
+        this.tagSetFactory = tagSetFactory;
     }
 
     private final TagSetMapper mapper = new TagSetMapper();
