@@ -2,8 +2,10 @@ package ovh.equino.actracker.repository.jpa.tagset;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ovh.equino.actracker.domain.tagset.*;
-import ovh.equino.actracker.domain.tenant.TenantDto;
+import ovh.equino.actracker.domain.tagset.TagSet;
+import ovh.equino.actracker.domain.tagset.TagSetFactory;
+import ovh.equino.actracker.domain.tagset.TagSetId;
+import ovh.equino.actracker.domain.tagset.TagSetTestFactory;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
 
@@ -25,31 +27,6 @@ abstract class JpaTagSetRepositoryIntegrationTest extends JpaIntegrationTest {
         this.user = new User(nextUUID());
         this.tagSetFactory = TagSetTestFactory.forUser(user);
         this.repository = new JpaTagSetRepository(entityManager, tagSetFactory);
-    }
-
-    @Test
-    void shouldAddAndFindTagSet() {
-        TenantDto user = newUser().build();
-        TagSetDto newTagSet = newTagSet(user).build();
-
-        inTransaction(() -> {
-            repository.add(newTagSet);
-            Optional<TagSetDto> foundTagSet = repository.findById(newTagSet.id());
-            assertThat(foundTagSet).get().usingRecursiveComparison().isEqualTo(newTagSet);
-        });
-
-        inTransaction(() -> {
-            Optional<TagSetDto> foundTagSet = repository.findById(newTagSet.id());
-            assertThat(foundTagSet).get().usingRecursiveComparison().isEqualTo(newTagSet);
-        });
-    }
-
-    @Test
-    void shouldNotFindNotExistingTagSet() {
-        inTransaction(() -> {
-            Optional<TagSetDto> foundTag = repository.findById(randomUUID());
-            assertThat(foundTag).isEmpty();
-        });
     }
 
     @Test
