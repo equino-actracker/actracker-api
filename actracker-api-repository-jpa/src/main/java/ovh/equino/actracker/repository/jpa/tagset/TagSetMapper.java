@@ -13,23 +13,6 @@ import static java.util.stream.Collectors.toUnmodifiableSet;
 
 class TagSetMapper {
 
-    // TODO remove
-    TagSetDto toDto(TagSetEntity entity) {
-
-        Set<UUID> entityTags = requireNonNullElse(entity.tags, new HashSet<TagEntity>()).stream()
-                .map(tag -> tag.id)
-                .map(UUID::fromString)
-                .collect(toUnmodifiableSet());
-
-        return new TagSetDto(
-                UUID.fromString(entity.id),
-                UUID.fromString(entity.creatorId),
-                entity.name,
-                entityTags,
-                entity.deleted
-        );
-    }
-
     TagSetEntity toEntity(TagSetDto dto) {
 
         Set<TagEntity> dtoTags = requireNonNullElse(dto.tags(), new HashSet<UUID>()).stream()
