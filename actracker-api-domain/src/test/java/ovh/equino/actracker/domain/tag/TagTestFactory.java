@@ -16,7 +16,7 @@ public class TagTestFactory implements TagFactory {
     private final TagsAccessibilityVerifier tagsAccessibilityVerifier;
     private final TagValidator tagValidator;
 
-    private static TagFactory forUser(User user) {
+    public static TagFactory forUser(User user) {
         return new TagTestFactory(user);
     }
 

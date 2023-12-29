@@ -4,6 +4,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaQuery;
 import ovh.equino.actracker.domain.activity.ActivityDto;
+import ovh.equino.actracker.domain.activity.ActivityFactory;
 import ovh.equino.actracker.domain.activity.ActivityRepository;
 import ovh.equino.actracker.repository.jpa.JpaDAO;
 
@@ -12,8 +13,11 @@ import java.util.UUID;
 
 class JpaActivityRepository extends JpaDAO implements ActivityRepository {
 
-    JpaActivityRepository(EntityManager entityManager) {
+    private final ActivityFactory activityFactory;
+
+    JpaActivityRepository(EntityManager entityManager, ActivityFactory activityFactory) {
         super(entityManager);
+        this.activityFactory = activityFactory;
     }
 
     private final ActivityMapper mapper = new ActivityMapper(entityManager);
