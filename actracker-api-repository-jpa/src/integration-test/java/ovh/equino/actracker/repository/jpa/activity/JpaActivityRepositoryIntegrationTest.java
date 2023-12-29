@@ -17,6 +17,7 @@ import java.util.Optional;
 
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static ovh.equino.actracker.repository.jpa.TestUtil.nextUUID;
 import static ovh.equino.actracker.repository.jpa.TestUtil.randomBigDecimal;
 
@@ -67,5 +68,20 @@ abstract class JpaActivityRepositoryIntegrationTest extends JpaIntegrationTest {
             Optional<ActivityDto> foundActivity = repository.findById(randomUUID());
             assertThat(foundActivity).isEmpty();
         });
+    }
+
+    @Test
+    void shouldAddAndGetActivity() {
+        fail();
+    }
+
+    @Test
+    void shouldNotGetNotExistingActivity() {
+        fail();
+    }
+
+    @Test
+    void shouldUpdateActivity() {
+        fail();
     }
 }

@@ -3,9 +3,7 @@ package ovh.equino.actracker.repository.jpa.tag;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaQuery;
-import ovh.equino.actracker.domain.tag.TagDto;
-import ovh.equino.actracker.domain.tag.TagFactory;
-import ovh.equino.actracker.domain.tag.TagRepository;
+import ovh.equino.actracker.domain.tag.*;
 import ovh.equino.actracker.repository.jpa.JpaDAO;
 
 import java.util.Optional;
@@ -56,5 +54,20 @@ class JpaTagRepository extends JpaDAO implements TagRepository {
         return typedQuery.getResultList().stream()
                 .findFirst()
                 .map(mapper::toDto);
+    }
+
+    @Override
+    public Optional<Tag> get(TagId tagId) {
+        return Optional.empty();
+    }
+
+    @Override
+    public void add(Tag tag) {
+
+    }
+
+    @Override
+    public void save(Tag tag) {
+
     }
 }

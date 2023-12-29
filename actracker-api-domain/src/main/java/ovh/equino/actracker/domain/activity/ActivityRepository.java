@@ -14,10 +14,10 @@ public interface ActivityRepository {
     // TODO remove
     Optional<ActivityDto> findById(UUID activityId);
 
-//    Optional<Activity> get(ActivityId activityId);
+    Optional<Activity> get(ActivityId activityId);
 
-//    void add(Activity activity);
+    void add(Activity activity);
 
     // TODO remove, replace with domain events
-//    void save(Activity activity);
+    void save(Activity activity);
 }

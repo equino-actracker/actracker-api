@@ -3,9 +3,7 @@ package ovh.equino.actracker.repository.jpa.activity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaQuery;
-import ovh.equino.actracker.domain.activity.ActivityDto;
-import ovh.equino.actracker.domain.activity.ActivityFactory;
-import ovh.equino.actracker.domain.activity.ActivityRepository;
+import ovh.equino.actracker.domain.activity.*;
 import ovh.equino.actracker.repository.jpa.JpaDAO;
 
 import java.util.Optional;
@@ -57,5 +55,20 @@ class JpaActivityRepository extends JpaDAO implements ActivityRepository {
         return typedQuery.getResultList().stream()
                 .findFirst()
                 .map(mapper::toDto);
+    }
+
+    @Override
+    public Optional<Activity> get(ActivityId activityId) {
+        return Optional.empty();
+    }
+
+    @Override
+    public void add(Activity activity) {
+
+    }
+
+    @Override
+    public void save(Activity activity) {
+
     }
 }

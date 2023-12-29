@@ -13,6 +13,7 @@ import java.util.Optional;
 
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static ovh.equino.actracker.repository.jpa.TestUtil.nextUUID;
 
 abstract class JpaDashboardRepositoryIntegrationTest extends JpaIntegrationTest {
@@ -50,5 +51,20 @@ abstract class JpaDashboardRepositoryIntegrationTest extends JpaIntegrationTest 
             Optional<DashboardDto> foundDashboard = repository.findById(randomUUID());
             assertThat(foundDashboard).isEmpty();
         });
+    }
+
+    @Test
+    void shouldAddAndGetDashboard() {
+        fail();
+    }
+
+    @Test
+    void shouldNotGetNotExistingDashboard() {
+        fail();
+    }
+
+    @Test
+    void shouldUpdateDashboard() {
+        fail();
     }
 }

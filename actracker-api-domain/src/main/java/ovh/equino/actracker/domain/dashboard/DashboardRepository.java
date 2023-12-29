@@ -14,10 +14,10 @@ public interface DashboardRepository {
     // TODO remove
     Optional<DashboardDto> findById(UUID dashboardId);
 
-//    Optional<Dashboard> get(Dashboard dashboardId);
+    Optional<Dashboard> get(Dashboard dashboardId);
 
-//    void add(Dashboard dashboard);
+    void add(Dashboard dashboard);
 
     // TODO remove, replace with domain events
-//    void save(Dashboard dashboard);
+    void save(Dashboard dashboard);
 }

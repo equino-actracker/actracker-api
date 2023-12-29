@@ -13,6 +13,7 @@ import java.util.Optional;
 
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static ovh.equino.actracker.repository.jpa.TestUtil.nextUUID;
 
 abstract class JpaTagRepositoryIntegrationTest extends JpaIntegrationTest {
@@ -50,5 +51,20 @@ abstract class JpaTagRepositoryIntegrationTest extends JpaIntegrationTest {
             Optional<TagDto> foundTag = repository.findById(randomUUID());
             assertThat(foundTag).isEmpty();
         });
+    }
+
+    @Test
+    void shouldAddAndGetTag() {
+        fail();
+    }
+
+    @Test
+    void shouldNotGetNotExistingTag() {
+        fail();
+    }
+
+    @Test
+    void shouldUpdateTag() {
+        fail();
     }
 }
