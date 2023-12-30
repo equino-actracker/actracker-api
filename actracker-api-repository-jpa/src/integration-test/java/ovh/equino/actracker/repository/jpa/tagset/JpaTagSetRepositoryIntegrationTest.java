@@ -52,6 +52,7 @@ abstract class JpaTagSetRepositoryIntegrationTest extends JpaIntegrationTest {
         inTransaction(() -> repository.add(expectedTagSet));
         inTransaction(() -> {
             TagSet tagSet = repository.get(expectedTagSet.id()).get();
+            // TODO extend update with additional fields
             expectedTagSet.delete();
             tagSet.delete();
             repository.save(tagSet);
