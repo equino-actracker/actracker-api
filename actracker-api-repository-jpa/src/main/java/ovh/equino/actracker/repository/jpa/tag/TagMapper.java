@@ -3,8 +3,6 @@ package ovh.equino.actracker.repository.jpa.tag;
 import ovh.equino.actracker.domain.tag.*;
 import ovh.equino.actracker.domain.user.User;
 
-import java.util.UUID;
-
 import static java.util.Objects.isNull;
 
 class TagMapper {
@@ -28,17 +26,6 @@ class TagMapper {
                 new User(entity.creatorId),
                 entity.name,
                 metricMapper.toDomainObjects(entity.metrics),
-                shareMapper.toDomainObjects(entity.shares),
-                entity.deleted
-        );
-    }
-
-    TagDto toDto(TagEntity entity) {
-        return new TagDto(
-                UUID.fromString(entity.id),
-                UUID.fromString(entity.creatorId),
-                entity.name,
-                metricMapper.toDto(entity.metrics),
                 shareMapper.toDomainObjects(entity.shares),
                 entity.deleted
         );

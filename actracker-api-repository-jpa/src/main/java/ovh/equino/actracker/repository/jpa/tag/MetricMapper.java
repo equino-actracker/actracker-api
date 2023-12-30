@@ -6,7 +6,6 @@ import ovh.equino.actracker.domain.user.User;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNullElse;
@@ -33,22 +32,6 @@ class MetricMapper {
         return metricFactory.reconstitute(
                 new MetricId(entity.id),
                 new User(entity.creatorId),
-                entity.name,
-                MetricType.valueOf(entity.type),
-                entity.deleted
-        );
-    }
-
-    List<MetricDto> toDto(Collection<MetricEntity> entities) {
-        return requireNonNullElse(entities, new ArrayList<MetricEntity>()).stream()
-                .map(this::toDto)
-                .toList();
-    }
-
-    MetricDto toDto(MetricEntity entity) {
-        return new MetricDto(
-                UUID.fromString(entity.id),
-                UUID.fromString(entity.creatorId),
                 entity.name,
                 MetricType.valueOf(entity.type),
                 entity.deleted
