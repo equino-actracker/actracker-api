@@ -19,12 +19,11 @@ import static ovh.equino.actracker.repository.jpa.TestUtil.nextUUID;
 abstract class JpaTagSetRepositoryIntegrationTest extends JpaIntegrationTest {
 
     private JpaTagSetRepository repository;
-    private User user;
     private TagSetFactory tagSetFactory;
 
     @BeforeEach
     void init() {
-        this.user = new User(nextUUID());
+        User user = new User(nextUUID());
         this.tagSetFactory = TagSetTestFactory.forUser(user);
         this.repository = new JpaTagSetRepository(entityManager, tagSetFactory);
     }

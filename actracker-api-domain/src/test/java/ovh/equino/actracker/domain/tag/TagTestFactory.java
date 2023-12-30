@@ -1,7 +1,6 @@
-package ovh.equino.actracker.domain.tagset;
+package ovh.equino.actracker.domain.tag;
 
-import ovh.equino.actracker.domain.tag.TagId;
-import ovh.equino.actracker.domain.tag.TagsAccessibilityVerifier;
+import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.user.ActorExtractor;
 import ovh.equino.actracker.domain.user.User;
 
@@ -10,22 +9,20 @@ import java.util.Set;
 
 import static java.util.Collections.emptySet;
 
-public class TagSetTestFactory implements TagSetFactory {
+public class TagTestFactory implements TagFactory {
 
     private final User user;
     private final ActorExtractor actorExtractor;
-    private final TagSetsAccessibilityVerifier tagSetsAccessibilityVerifier;
     private final TagsAccessibilityVerifier tagsAccessibilityVerifier;
-    private final TagSetValidator tagSetValidator;
+    private final TagValidator tagValidator;
 
-    public static TagSetFactory forUser(User user) {
-        return new TagSetTestFactory(user);
+    public static TagFactory forUser(User user) {
+        return new TagTestFactory(user);
     }
 
-    private TagSetTestFactory(User user) {
+    private TagTestFactory(User user) {
         this.user = user;
         this.actorExtractor = () -> user;
-        this.tagSetsAccessibilityVerifier = (user1, tagSetId) -> true;
         this.tagsAccessibilityVerifier = new TagsAccessibilityVerifier() {
             @Override
             public boolean isAccessibleFor(User user, TagId tag) {
@@ -37,36 +34,42 @@ public class TagSetTestFactory implements TagSetFactory {
                 return emptySet();
             }
         };
-        this.tagSetValidator = new TagSetValidator();
+        this.tagValidator = new TagValidator();
     }
 
     @Override
-    public TagSet create(String name, Collection<TagId> tags) {
-        return new TagSet(
-                new TagSetId(),
+    public Tag create(String name, Collection<Metric> metrics, Collection<Share> shares) {
+        return new Tag(
+                new TagId(),
                 user,
                 name,
-                tags,
+                metrics,
+                shares,
                 false,
                 actorExtractor,
-                tagSetsAccessibilityVerifier,
                 tagsAccessibilityVerifier,
-                tagSetValidator
+                tagValidator
         );
     }
 
     @Override
-    public TagSet reconstitute(TagSetId id, User creator, String name, Collection<TagId> tags, boolean deleted) {
-        return new TagSet(
+    public Tag reconstitute(TagId id,
+                            User creator,
+                            String name,
+                            Collection<Metric> metrics,
+                            Collection<Share> shares,
+                            boolean deleted) {
+
+        return new Tag(
                 id,
-                creator,
+                user,
                 name,
-                tags,
+                metrics,
+                shares,
                 deleted,
                 actorExtractor,
-                tagSetsAccessibilityVerifier,
                 tagsAccessibilityVerifier,
-                tagSetValidator
+                tagValidator
         );
     }
 }

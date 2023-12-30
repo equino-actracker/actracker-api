@@ -3,7 +3,9 @@ package ovh.equino.actracker.repository.jpa.dashboard;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaQuery;
+import ovh.equino.actracker.domain.dashboard.Dashboard;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
+import ovh.equino.actracker.domain.dashboard.DashboardFactory;
 import ovh.equino.actracker.domain.dashboard.DashboardRepository;
 import ovh.equino.actracker.repository.jpa.JpaDAO;
 
@@ -12,8 +14,11 @@ import java.util.UUID;
 
 class JpaDashboardRepository extends JpaDAO implements DashboardRepository {
 
-    JpaDashboardRepository(EntityManager entityManager) {
+    private final DashboardFactory dashboardFactory;
+
+    JpaDashboardRepository(EntityManager entityManager, DashboardFactory dashboardFactory) {
         super(entityManager);
+        this.dashboardFactory = dashboardFactory;
     }
 
     private final DashboardMapper mapper = new DashboardMapper();
@@ -48,5 +53,20 @@ class JpaDashboardRepository extends JpaDAO implements DashboardRepository {
         return typedQuery.getResultList().stream()
                 .findFirst()
                 .map(mapper::toDto);
+    }
+
+    @Override
+    public Optional<Dashboard> get(Dashboard dashboardId) {
+        return Optional.empty();
+    }
+
+    @Override
+    public void add(Dashboard dashboard) {
+
+    }
+
+    @Override
+    public void save(Dashboard dashboard) {
+
     }
 }

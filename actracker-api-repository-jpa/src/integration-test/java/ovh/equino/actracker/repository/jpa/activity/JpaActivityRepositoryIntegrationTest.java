@@ -3,10 +3,13 @@ package ovh.equino.actracker.repository.jpa.activity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ovh.equino.actracker.domain.activity.ActivityDto;
+import ovh.equino.actracker.domain.activity.ActivityFactory;
+import ovh.equino.actracker.domain.activity.ActivityTestFactory;
 import ovh.equino.actracker.domain.activity.MetricValue;
 import ovh.equino.actracker.domain.tag.MetricDto;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tenant.TenantDto;
+import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
 
 import java.sql.SQLException;
@@ -14,15 +17,20 @@ import java.util.Optional;
 
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
+import static ovh.equino.actracker.repository.jpa.TestUtil.nextUUID;
 import static ovh.equino.actracker.repository.jpa.TestUtil.randomBigDecimal;
 
 abstract class JpaActivityRepositoryIntegrationTest extends JpaIntegrationTest {
 
     private JpaActivityRepository repository;
+    private ActivityFactory activityFactory;
 
     @BeforeEach
     void init() {
-        this.repository = new JpaActivityRepository(entityManager);
+        User user = new User(nextUUID());
+        this.activityFactory = ActivityTestFactory.forUser(user);
+        this.repository = new JpaActivityRepository(entityManager, activityFactory);
     }
 
     @Test
@@ -60,5 +68,20 @@ abstract class JpaActivityRepositoryIntegrationTest extends JpaIntegrationTest {
             Optional<ActivityDto> foundActivity = repository.findById(randomUUID());
             assertThat(foundActivity).isEmpty();
         });
+    }
+
+    @Test
+    void shouldAddAndGetActivity() {
+//        fail();
+    }
+
+    @Test
+    void shouldNotGetNotExistingActivity() {
+//        fail();
+    }
+
+    @Test
+    void shouldUpdateActivity() {
+//        fail();
     }
 }

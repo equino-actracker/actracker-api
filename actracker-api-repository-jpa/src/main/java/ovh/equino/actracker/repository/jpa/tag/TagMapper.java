@@ -1,23 +1,32 @@
 package ovh.equino.actracker.repository.jpa.tag;
 
-import ovh.equino.actracker.domain.tag.TagDto;
-
-import java.util.UUID;
+import ovh.equino.actracker.domain.tag.*;
+import ovh.equino.actracker.domain.user.User;
 
 import static java.util.Objects.isNull;
 
 class TagMapper {
 
-    private final MetricMapper metricMapper = new MetricMapper();
-    private final TagShareMapper shareMapper = new TagShareMapper();
+    private final TagFactory tagFactory;
+    private final MetricMapper metricMapper;
+    private final TagShareMapper shareMapper;
 
-    TagDto toDto(TagEntity entity) {
-        return new TagDto(
-                UUID.fromString(entity.id),
-                UUID.fromString(entity.creatorId),
+    TagMapper(TagFactory tagFactory, MetricFactory metricFactory) {
+        this.tagFactory = tagFactory;
+        this.metricMapper = new MetricMapper(metricFactory);
+        this.shareMapper = new TagShareMapper();
+    }
+
+    Tag toDomainObject(TagEntity entity) {
+        if (isNull(entity)) {
+            return null;
+        }
+        return tagFactory.reconstitute(
+                new TagId(entity.id),
+                new User(entity.creatorId),
                 entity.name,
-                metricMapper.toDto(entity.metrics),
-                shareMapper.toValueObjects(entity.shares),
+                metricMapper.toDomainObjects(entity.metrics),
+                shareMapper.toDomainObjects(entity.shares),
                 entity.deleted
         );
     }

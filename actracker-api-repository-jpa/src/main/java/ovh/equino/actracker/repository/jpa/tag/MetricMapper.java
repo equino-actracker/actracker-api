@@ -1,27 +1,37 @@
 package ovh.equino.actracker.repository.jpa.tag;
 
-import ovh.equino.actracker.domain.tag.MetricDto;
-import ovh.equino.actracker.domain.tag.MetricType;
+import ovh.equino.actracker.domain.tag.*;
+import ovh.equino.actracker.domain.user.User;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNullElse;
 
 class MetricMapper {
 
-    List<MetricDto> toDto(Collection<MetricEntity> entities) {
-        return requireNonNullElse(entities, new ArrayList<MetricEntity>()).stream()
-                .map(this::toDto)
+    private final MetricFactory metricFactory;
+
+    MetricMapper(MetricFactory metricFactory) {
+        this.metricFactory = metricFactory;
+    }
+
+    List<Metric> toDomainObjects(Collection<MetricEntity> entities) {
+        return requireNonNullElse(entities, new ArrayList<MetricEntity>())
+                .stream()
+                .map(this::toDomainObject)
                 .toList();
     }
 
-    MetricDto toDto(MetricEntity entity) {
-        return new MetricDto(
-                UUID.fromString(entity.id),
-                UUID.fromString(entity.creatorId),
+    Metric toDomainObject(MetricEntity entity) {
+        if (isNull(entity)) {
+            return null;
+        }
+        return metricFactory.reconstitute(
+                new MetricId(entity.id),
+                new User(entity.creatorId),
                 entity.name,
                 MetricType.valueOf(entity.type),
                 entity.deleted

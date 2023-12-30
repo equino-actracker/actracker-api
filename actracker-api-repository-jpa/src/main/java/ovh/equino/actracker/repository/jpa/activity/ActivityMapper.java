@@ -21,6 +21,7 @@ class ActivityMapper {
         this.metricValueMapper = new MetricValueMapper(entityManager);
     }
 
+    // TODO delete
     ActivityDto toDto(ActivityEntity entity) {
 
         Set<UUID> entityTags = requireNonNullElse(entity.tags, new HashSet<TagEntity>()).stream()
@@ -41,6 +42,7 @@ class ActivityMapper {
         );
     }
 
+    // TODO delete after domain events introduction
     ActivityEntity toEntity(ActivityDto dto) {
 
         Set<TagEntity> dtoTags = requireNonNullElse(dto.tags(), new HashSet<UUID>()).stream()

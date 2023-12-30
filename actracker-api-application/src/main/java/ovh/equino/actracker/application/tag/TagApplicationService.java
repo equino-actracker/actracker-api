@@ -61,7 +61,7 @@ public class TagApplicationService {
                 .toList();
 
         Tag tag = tagFactory.create(createTagCommand.tagName(), metrics, shares);
-        tagRepository.add(tag.forStorage());
+        tagRepository.add(tag);
 
         tagNotifier.notifyChanged(tag.forChangeNotification());
 
@@ -108,31 +108,13 @@ public class TagApplicationService {
 
     public TagResult renameTag(String newName, UUID tagId) {
         User updater = actorExtractor.getActor();
+        TagId id = new TagId(tagId);
 
-        TagDto tagDto = tagRepository.findById(tagId)
+        Tag tag = tagRepository.get(id)
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
-        List<Metric> metrics = tagDto.metrics()
-                .stream()
-                .map(metric -> metricFactory.reconstitute(
-                                new MetricId(metric.id()),
-                                new User(metric.creatorId()),
-                                metric.name(),
-                                metric.type(),
-                                metric.deleted()
-                        )
-                )
-                .toList();
-        Tag tag = tagFactory.reconstitute(
-                new TagId(tagDto.id()),
-                new User(tagDto.creatorId()),
-                tagDto.name(),
-                metrics,
-                tagDto.shares(),
-                tagDto.deleted()
-        );
 
         tag.rename(newName);
-        tagRepository.update(tagId, tag.forStorage());
+        tagRepository.save(tag);
 
         tagNotifier.notifyChanged(tag.forChangeNotification());
 
@@ -145,62 +127,25 @@ public class TagApplicationService {
     }
 
     public void deleteTag(UUID tagId) {
+        TagId id = new TagId(tagId);
 
-        TagDto tagDto = tagRepository.findById(tagId)
+        Tag tag = tagRepository.get(id)
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
-        List<Metric> metrics = tagDto.metrics()
-                .stream()
-                .map(metric -> metricFactory.reconstitute(
-                                new MetricId(metric.id()),
-                                new User(metric.creatorId()),
-                                metric.name(),
-                                metric.type(),
-                                metric.deleted()
-                        )
-                )
-                .toList();
-        Tag tag = tagFactory.reconstitute(
-                new TagId(tagDto.id()),
-                new User(tagDto.creatorId()),
-                tagDto.name(),
-                metrics,
-                tagDto.shares(),
-                tagDto.deleted()
-        );
-
         tag.delete();
-        tagRepository.update(tagId, tag.forStorage());
+        tagRepository.save(tag);
 
         tagNotifier.notifyChanged(tag.forChangeNotification());
     }
 
     public TagResult addMetricToTag(String metricName, String metricType, UUID tagId) {
         User updater = actorExtractor.getActor();
+        TagId id = new TagId(tagId);
 
-        TagDto tagDto = tagRepository.findById(tagId)
+        Tag tag = tagRepository.get(id)
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
-        List<Metric> metrics = tagDto.metrics()
-                .stream()
-                .map(metric -> metricFactory.reconstitute(
-                                new MetricId(metric.id()),
-                                new User(metric.creatorId()),
-                                metric.name(),
-                                metric.type(),
-                                metric.deleted()
-                        )
-                )
-                .toList();
-        Tag tag = tagFactory.reconstitute(
-                new TagId(tagDto.id()),
-                new User(tagDto.creatorId()),
-                tagDto.name(),
-                metrics,
-                tagDto.shares(),
-                tagDto.deleted()
-        );
 
         tag.addMetric(metricName, MetricType.valueOf(metricType));
-        tagRepository.update(tagId, tag.forStorage());
+        tagRepository.save(tag);
 
         tagNotifier.notifyChanged(tag.forChangeNotification());
 
@@ -215,31 +160,13 @@ public class TagApplicationService {
 
     public TagResult deleteMetric(UUID metricId, UUID tagId) {
         User updater = actorExtractor.getActor();
+        TagId id = new TagId(tagId);
 
-        TagDto tagDto = tagRepository.findById(tagId)
+        Tag tag = tagRepository.get(id)
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
-        List<Metric> metrics = tagDto.metrics()
-                .stream()
-                .map(metric -> metricFactory.reconstitute(
-                                new MetricId(metric.id()),
-                                new User(metric.creatorId()),
-                                metric.name(),
-                                metric.type(),
-                                metric.deleted()
-                        )
-                )
-                .toList();
-        Tag tag = tagFactory.reconstitute(
-                new TagId(tagDto.id()),
-                new User(tagDto.creatorId()),
-                tagDto.name(),
-                metrics,
-                tagDto.shares(),
-                tagDto.deleted()
-        );
 
         tag.deleteMetric(new MetricId(metricId));
-        tagRepository.update(tagId, tag.forStorage());
+        tagRepository.save(tag);
 
         tagNotifier.notifyChanged(tag.forChangeNotification());
 
@@ -254,31 +181,13 @@ public class TagApplicationService {
 
     public TagResult renameMetric(String newName, UUID metricId, UUID tagId) {
         User updater = actorExtractor.getActor();
+        TagId id = new TagId(tagId);
 
-        TagDto tagDto = tagRepository.findById(tagId)
+        Tag tag = tagRepository.get(id)
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
-        List<Metric> metrics = tagDto.metrics()
-                .stream()
-                .map(metric -> metricFactory.reconstitute(
-                                new MetricId(metric.id()),
-                                new User(metric.creatorId()),
-                                metric.name(),
-                                metric.type(),
-                                metric.deleted()
-                        )
-                )
-                .toList();
-        Tag tag = tagFactory.reconstitute(
-                new TagId(tagDto.id()),
-                new User(tagDto.creatorId()),
-                tagDto.name(),
-                metrics,
-                tagDto.shares(),
-                tagDto.deleted()
-        );
 
         tag.renameMetric(newName, new MetricId(metricId));
-        tagRepository.update(tagId, tag.forStorage());
+        tagRepository.save(tag);
 
         tagNotifier.notifyChanged(tag.forChangeNotification());
 
@@ -293,33 +202,15 @@ public class TagApplicationService {
 
     public TagResult shareTag(String newGrantee, UUID tagId) {
         User granter = actorExtractor.getActor();
+        TagId id = new TagId(tagId);
 
-        TagDto tagDto = tagRepository.findById(tagId)
+        Tag tag = tagRepository.get(id)
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
-        List<Metric> metrics = tagDto.metrics()
-                .stream()
-                .map(metric -> metricFactory.reconstitute(
-                                new MetricId(metric.id()),
-                                new User(metric.creatorId()),
-                                metric.name(),
-                                metric.type(),
-                                metric.deleted()
-                        )
-                )
-                .toList();
-        Tag tag = tagFactory.reconstitute(
-                new TagId(tagDto.id()),
-                new User(tagDto.creatorId()),
-                tagDto.name(),
-                metrics,
-                tagDto.shares(),
-                tagDto.deleted()
-        );
 
         Share share = resolveShare(newGrantee);
 
         tag.share(share);
-        tagRepository.update(tagId, tag.forStorage());
+        tagRepository.save(tag);
 
         tagNotifier.notifyChanged(tag.forChangeNotification());
 
@@ -334,31 +225,13 @@ public class TagApplicationService {
 
     public TagResult unshareTag(String granteeName, UUID tagId) {
         User granter = actorExtractor.getActor();
+        TagId id = new TagId(tagId);
 
-        TagDto tagDto = tagRepository.findById(tagId)
+        Tag tag = tagRepository.get(id)
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
-        List<Metric> metrics = tagDto.metrics()
-                .stream()
-                .map(metric -> metricFactory.reconstitute(
-                                new MetricId(metric.id()),
-                                new User(metric.creatorId()),
-                                metric.name(),
-                                metric.type(),
-                                metric.deleted()
-                        )
-                )
-                .toList();
-        Tag tag = tagFactory.reconstitute(
-                new TagId(tagDto.id()),
-                new User(tagDto.creatorId()),
-                tagDto.name(),
-                metrics,
-                tagDto.shares(),
-                tagDto.deleted()
-        );
 
         tag.unshare(granteeName);
-        tagRepository.update(tagId, tag.forStorage());
+        tagRepository.save(tag);
 
         tagNotifier.notifyChanged(tag.forChangeNotification());
 
