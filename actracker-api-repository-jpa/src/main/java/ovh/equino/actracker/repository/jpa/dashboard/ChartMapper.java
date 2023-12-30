@@ -8,19 +8,22 @@ import ovh.equino.actracker.repository.jpa.tag.TagEntity;
 
 import java.util.*;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNullElse;
-import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 
 class ChartMapper {
 
-    List<Chart> toValueObjects(Collection<ChartEntity> entities) {
+    List<Chart> toDomainObjects(Collection<ChartEntity> entities) {
         return requireNonNullElse(entities, new ArrayList<ChartEntity>()).stream()
-                .map(this::toValueObject)
+                .map(this::toDomainObject)
                 .toList();
     }
 
-    Chart toValueObject(ChartEntity entity) {
+    Chart toDomainObject(ChartEntity entity) {
+        if(isNull(entity)) {
+            return null;
+        }
         Set<UUID> entityTags = requireNonNullElse(entity.tags, new HashSet<TagEntity>()).stream()
                 .map(tag -> tag.id)
                 .map(UUID::fromString)
