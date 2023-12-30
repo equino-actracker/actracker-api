@@ -50,27 +50,6 @@ class ActivityMapper {
         );
     }
 
-    // TODO delete
-    ActivityDto toDto(ActivityEntity entity) {
-
-        Set<UUID> entityTags = requireNonNullElse(entity.tags, new HashSet<TagEntity>()).stream()
-                .map(tag -> tag.id)
-                .map(UUID::fromString)
-                .collect(toUnmodifiableSet());
-
-        return new ActivityDto(
-                UUID.fromString(entity.id),
-                UUID.fromString(entity.creatorId),
-                entity.title,
-                isNull(entity.startTime) ? null : entity.startTime.toInstant(),
-                isNull(entity.endTime) ? null : entity.endTime.toInstant(),
-                entity.comment,
-                entityTags,
-                metricValueMapper.toDomainObjects(entity.metricValues),
-                entity.deleted
-        );
-    }
-
     ActivityEntity toEntity(ActivityDto dto) {
 
         Set<TagEntity> dtoTags = requireNonNullElse(dto.tags(), new HashSet<UUID>()).stream()

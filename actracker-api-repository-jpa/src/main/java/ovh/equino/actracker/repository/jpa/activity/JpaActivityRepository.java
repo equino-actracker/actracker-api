@@ -19,43 +19,6 @@ class JpaActivityRepository extends JpaDAO implements ActivityRepository {
     }
 
     @Override
-    public void add(ActivityDto activity) {
-        ActivityEntity activityEntity = activityMapper.toEntity(activity);
-        entityManager.persist(activityEntity);
-    }
-
-    @Override
-    public void update(UUID activityId, ActivityDto activity) {
-        ActivityEntity activityEntity = activityMapper.toEntity(activity);
-        activityEntity.id = activityId.toString();
-        entityManager.merge(activityEntity);
-    }
-
-    @Override
-    public Optional<ActivityDto> findById(UUID activityId) {
-
-        ActivityQueryBuilder queryBuilder = new ActivityQueryBuilder(entityManager);
-
-        // If Hibernate were used instead of JPA API, filters could be used instead for soft delete:
-        // https://www.baeldung.com/spring-jpa-soft-delete
-        CriteriaQuery<ActivityEntity> query = queryBuilder.select()
-                .where(
-                        queryBuilder.and(
-                                queryBuilder.hasId(activityId),
-                                queryBuilder.isNotDeleted()
-                        )
-                );
-
-        TypedQuery<ActivityEntity> typedQuery = entityManager.createQuery(query);
-
-        // If Hibernate were used instead of JPA API, result transformers could do mapping rather than custom mapper:
-        // https://thorben-janssen.com/object-mapper-dto/
-        return typedQuery.getResultList().stream()
-                .findFirst()
-                .map(activityMapper::toDto);
-    }
-
-    @Override
     public Optional<Activity> get(ActivityId activityId) {
         ActivityEntity entity = entityManager.find(ActivityEntity.class, activityId.id().toString());
         Activity activity = activityMapper.toDomainObject(entity);

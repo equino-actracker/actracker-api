@@ -34,43 +34,6 @@ abstract class JpaActivityRepositoryIntegrationTest extends JpaIntegrationTest {
     }
 
     @Test
-    void shouldAddAndFindActivity() throws SQLException {
-        TenantDto user = newUser().build();
-        MetricDto metric1 = newMetric(user).build();
-        MetricDto metric2 = newMetric(user).build();
-        TagDto tag1 = newTag(user).withMetrics(metric1).build();
-        TagDto tag2 = newTag(user).withMetrics(metric2).build();
-        database().addTags(tag1, tag2);
-
-        ActivityDto newActivity = newActivity(user)
-                .withTags(tag1, tag2)
-                .withMetricValues(
-                        new MetricValue(metric1.id(), randomBigDecimal()),
-                        new MetricValue(metric2.id(), randomBigDecimal())
-                )
-                .build();
-
-        inTransaction(() -> {
-            repository.add(newActivity);
-            Optional<ActivityDto> foundActivity = repository.findById(newActivity.id());
-            assertThat(foundActivity).get().usingRecursiveComparison().isEqualTo(newActivity);
-        });
-
-        inTransaction(() -> {
-            Optional<ActivityDto> foundActivity = repository.findById(newActivity.id());
-            assertThat(foundActivity).get().usingRecursiveComparison().isEqualTo(newActivity);
-        });
-    }
-
-    @Test
-    void shouldNotFindNotExistingActivity() {
-        inTransaction(() -> {
-            Optional<ActivityDto> foundActivity = repository.findById(randomUUID());
-            assertThat(foundActivity).isEmpty();
-        });
-    }
-
-    @Test
     void shouldAddAndGetActivity() throws SQLException {
         TenantDto user = newUser().build();
         MetricDto metric = newMetric(user).build();
@@ -130,8 +93,8 @@ abstract class JpaActivityRepositoryIntegrationTest extends JpaIntegrationTest {
 //        });
 
 //        inTransaction(() -> {
-            Optional<Activity> foundActivity = repository.get(expectedActivity.id());
-            assertThat(foundActivity).get().usingRecursiveComparison().isEqualTo(expectedActivity);
+        Optional<Activity> foundActivity = repository.get(expectedActivity.id());
+        assertThat(foundActivity).get().usingRecursiveComparison().isEqualTo(expectedActivity);
 //        });
     }
 }
