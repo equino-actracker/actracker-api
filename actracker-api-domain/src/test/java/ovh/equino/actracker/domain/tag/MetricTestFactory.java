@@ -2,8 +2,6 @@ package ovh.equino.actracker.domain.tag;
 
 import ovh.equino.actracker.domain.user.User;
 
-import static java.util.UUID.randomUUID;
-
 public class MetricTestFactory implements MetricFactory {
 
     private final User user;
@@ -18,7 +16,7 @@ public class MetricTestFactory implements MetricFactory {
 
     @Override
     public Metric create(User creator, String name, MetricType type) {
-        return new Metric(new MetricId(randomUUID()), user, name, type, false);
+        return new Metric(new MetricId(), user, name, type, false);
     }
 
     @Override
