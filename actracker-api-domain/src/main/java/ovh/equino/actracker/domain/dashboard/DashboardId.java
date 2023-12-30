@@ -13,6 +13,10 @@ public record DashboardId(UUID id) {
         }
     }
 
+    public DashboardId(String id) {
+        this(UUID.fromString(id));
+    }
+
     DashboardId() {
         this(randomUUID());
     }

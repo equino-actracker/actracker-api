@@ -7,20 +7,22 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static java.util.Objects.nonNull;
-import static java.util.Objects.requireNonNullElse;
+import static java.util.Objects.*;
 import static java.util.UUID.randomUUID;
 
 class DashboardShareMapper {
 
-    List<Share> toValueObjects(Collection<DashboardShareEntity> entities) {
+    List<Share> toDomainObjects(Collection<DashboardShareEntity> entities) {
         return requireNonNullElse(entities, new ArrayList<DashboardShareEntity>())
                 .stream()
-                .map(this::toValueObject)
+                .map(this::toDomainObject)
                 .toList();
     }
 
-    Share toValueObject(DashboardShareEntity entity) {
+    Share toDomainObject(DashboardShareEntity entity) {
+        if (isNull(entity)) {
+            return null;
+        }
         User grantee = nonNull(entity.granteeId)
                 ? new User(entity.granteeId)
                 : null;

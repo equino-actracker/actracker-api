@@ -14,7 +14,7 @@ public interface DashboardRepository {
     // TODO remove
     Optional<DashboardDto> findById(UUID dashboardId);
 
-    Optional<Dashboard> get(Dashboard dashboardId);
+    Optional<Dashboard> get(DashboardId dashboardId);
 
     void add(Dashboard dashboard);
 
