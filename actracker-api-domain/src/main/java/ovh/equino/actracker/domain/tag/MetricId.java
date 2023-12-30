@@ -13,6 +13,10 @@ public record MetricId(
         requireNonNull(id);
     }
 
+    public MetricId(String id) {
+        this(UUID.fromString(id));
+    }
+
     public MetricId() {
         this(randomUUID());
     }
