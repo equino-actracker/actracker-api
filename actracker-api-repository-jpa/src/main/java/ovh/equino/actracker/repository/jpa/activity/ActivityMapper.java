@@ -1,7 +1,12 @@
 package ovh.equino.actracker.repository.jpa.activity;
 
 import jakarta.persistence.EntityManager;
+import ovh.equino.actracker.domain.activity.Activity;
 import ovh.equino.actracker.domain.activity.ActivityDto;
+import ovh.equino.actracker.domain.activity.ActivityFactory;
+import ovh.equino.actracker.domain.activity.ActivityId;
+import ovh.equino.actracker.domain.tag.TagId;
+import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.tag.TagEntity;
 
 import java.sql.Timestamp;
@@ -15,10 +20,34 @@ import static java.util.stream.Collectors.toUnmodifiableSet;
 
 class ActivityMapper {
 
+    private final ActivityFactory activityFactory;
     private final MetricValueMapper metricValueMapper;
 
-    public ActivityMapper(EntityManager entityManager) {
+    public ActivityMapper(ActivityFactory activityFactory, EntityManager entityManager) {
         this.metricValueMapper = new MetricValueMapper(entityManager);
+        this.activityFactory = activityFactory;
+    }
+
+    Activity toDomainObject(ActivityEntity entity) {
+        if (isNull(entity)) {
+            return null;
+        }
+        Set<TagId> tags = requireNonNullElse(entity.tags, new HashSet<TagEntity>())
+                .stream()
+                .map(tag -> new TagId(tag.id))
+                .collect(toUnmodifiableSet());
+
+        return activityFactory.reconstitute(
+                new ActivityId(entity.id),
+                new User(entity.creatorId),
+                entity.title,
+                isNull(entity.startTime) ? null : entity.startTime.toInstant(),
+                isNull(entity.endTime) ? null : entity.endTime.toInstant(),
+                entity.comment,
+                tags,
+                metricValueMapper.toDomainObjects(entity.metricValues),
+                entity.deleted
+        );
     }
 
     // TODO delete
@@ -37,12 +66,11 @@ class ActivityMapper {
                 isNull(entity.endTime) ? null : entity.endTime.toInstant(),
                 entity.comment,
                 entityTags,
-                metricValueMapper.toValueObjects(entity.metricValues),
+                metricValueMapper.toDomainObjects(entity.metricValues),
                 entity.deleted
         );
     }
 
-    // TODO delete after domain events introduction
     ActivityEntity toEntity(ActivityDto dto) {
 
         Set<TagEntity> dtoTags = requireNonNullElse(dto.tags(), new HashSet<UUID>()).stream()

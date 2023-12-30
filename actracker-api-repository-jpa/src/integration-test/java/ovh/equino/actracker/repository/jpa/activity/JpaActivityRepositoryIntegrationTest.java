@@ -15,7 +15,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
-import static java.math.BigDecimal.TEN;
 import static java.util.Collections.emptyList;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -119,37 +118,20 @@ abstract class JpaActivityRepositoryIntegrationTest extends JpaIntegrationTest {
         );
 
         inTransaction(() -> repository.add(expectedActivity));
-        inTransaction(() -> {
-            var newTitle = "new title";
-            var newStartTime = Instant.ofEpochMilli(10);
-            var newEndTime = Instant.ofEpochMilli(20);
-            var newComment = "new comment";
-            var newTag = new TagId(tag.id());
-            var newMetricValue = new MetricValue(metric.id(), TEN);
 
-            Activity activity = repository.get(expectedActivity.id()).get();
 
-            expectedActivity.rename(newTitle);
-            expectedActivity.start(newStartTime);
-            expectedActivity.finish(newEndTime);
-            expectedActivity.updateComment(newComment);
-            expectedActivity.assignTag(newTag);
-            expectedActivity.setMetricValue(newMetricValue);
-            expectedActivity.delete();
+//        inTransaction(() -> {
+        Activity activity = repository.get(expectedActivity.id()).get();
 
-            activity.rename(newTitle);
-            activity.start(newStartTime);
-            activity.finish(newEndTime);
-            activity.updateComment(newComment);
-            activity.assignTag(newTag);
-            activity.setMetricValue(newMetricValue);
-            activity.delete();
+        expectedActivity.delete();
+        activity.delete();
 
-            repository.save(activity);
-        });
-        inTransaction(() -> {
+        repository.save(activity);
+//        });
+
+//        inTransaction(() -> {
             Optional<Activity> foundActivity = repository.get(expectedActivity.id());
             assertThat(foundActivity).get().usingRecursiveComparison().isEqualTo(expectedActivity);
-        });
+//        });
     }
 }

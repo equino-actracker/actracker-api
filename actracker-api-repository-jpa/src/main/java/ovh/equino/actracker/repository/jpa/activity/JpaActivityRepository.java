@@ -11,24 +11,22 @@ import java.util.UUID;
 
 class JpaActivityRepository extends JpaDAO implements ActivityRepository {
 
-    private final ActivityFactory activityFactory;
+    private final ActivityMapper activityMapper;
 
     JpaActivityRepository(EntityManager entityManager, ActivityFactory activityFactory) {
         super(entityManager);
-        this.activityFactory = activityFactory;
+        this.activityMapper = new ActivityMapper(activityFactory, entityManager);
     }
-
-    private final ActivityMapper mapper = new ActivityMapper(entityManager);
 
     @Override
     public void add(ActivityDto activity) {
-        ActivityEntity activityEntity = mapper.toEntity(activity);
+        ActivityEntity activityEntity = activityMapper.toEntity(activity);
         entityManager.persist(activityEntity);
     }
 
     @Override
     public void update(UUID activityId, ActivityDto activity) {
-        ActivityEntity activityEntity = mapper.toEntity(activity);
+        ActivityEntity activityEntity = activityMapper.toEntity(activity);
         activityEntity.id = activityId.toString();
         entityManager.merge(activityEntity);
     }
@@ -54,21 +52,27 @@ class JpaActivityRepository extends JpaDAO implements ActivityRepository {
         // https://thorben-janssen.com/object-mapper-dto/
         return typedQuery.getResultList().stream()
                 .findFirst()
-                .map(mapper::toDto);
+                .map(activityMapper::toDto);
     }
 
     @Override
     public Optional<Activity> get(ActivityId activityId) {
-        return Optional.empty();
+        ActivityEntity entity = entityManager.find(ActivityEntity.class, activityId.id().toString());
+        Activity activity = activityMapper.toDomainObject(entity);
+        return Optional.ofNullable(activity);
     }
 
     @Override
     public void add(Activity activity) {
-
+        ActivityDto dto = activity.forStorage();
+        ActivityEntity entity = activityMapper.toEntity(dto);
+        entityManager.persist(entity);
     }
 
     @Override
     public void save(Activity activity) {
-
+        ActivityDto dto = activity.forStorage();
+        ActivityEntity entity = activityMapper.toEntity(dto);
+        entityManager.merge(entity);
     }
 }
