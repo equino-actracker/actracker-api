@@ -2,8 +2,10 @@ package ovh.equino.actracker.repository.jpa.dashboard;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ovh.equino.actracker.domain.dashboard.*;
-import ovh.equino.actracker.domain.tenant.TenantDto;
+import ovh.equino.actracker.domain.dashboard.Dashboard;
+import ovh.equino.actracker.domain.dashboard.DashboardFactory;
+import ovh.equino.actracker.domain.dashboard.DashboardId;
+import ovh.equino.actracker.domain.dashboard.DashboardTestFactory;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
 
@@ -24,31 +26,6 @@ abstract class JpaDashboardRepositoryIntegrationTest extends JpaIntegrationTest 
         User user = new User(nextUUID());
         this.dashboardFactory = DashboardTestFactory.forUser(user);
         this.repository = new JpaDashboardRepository(entityManager, dashboardFactory);
-    }
-
-    @Test
-    void shouldAddAndFindDashboard() {
-        TenantDto user = newUser().build();
-        DashboardDto newDashboard = newDashboard(user).build();
-
-        inTransaction(() -> {
-            repository.add(newDashboard);
-            Optional<DashboardDto> foundDashboard = repository.findById(newDashboard.id());
-            assertThat(foundDashboard).get().usingRecursiveComparison().isEqualTo(newDashboard);
-        });
-
-        inTransaction(() -> {
-            Optional<DashboardDto> foundDashboard = repository.findById(newDashboard.id());
-            assertThat(foundDashboard).get().usingRecursiveComparison().isEqualTo(newDashboard);
-        });
-    }
-
-    @Test
-    void shouldNotFindNotExistingDashboard() {
-        inTransaction(() -> {
-            Optional<DashboardDto> foundDashboard = repository.findById(randomUUID());
-            assertThat(foundDashboard).isEmpty();
-        });
     }
 
     @Test
@@ -74,14 +51,14 @@ abstract class JpaDashboardRepositoryIntegrationTest extends JpaIntegrationTest 
         Dashboard expectedDashboard = dashboardFactory.create("old name", emptyList(), emptyList());
         inTransaction(() -> repository.add(expectedDashboard));
 //        inTransaction(() -> {
-            Dashboard dashboard = repository.get(expectedDashboard.id()).get();
-            expectedDashboard.delete();
-            dashboard.delete();
-            repository.save(dashboard);
+        Dashboard dashboard = repository.get(expectedDashboard.id()).get();
+        expectedDashboard.delete();
+        dashboard.delete();
+        repository.save(dashboard);
 //        });
 //        inTransaction(() -> {
-            Optional<Dashboard> foundDashboard = repository.get(expectedDashboard.id());
-            assertThat(foundDashboard).get().usingRecursiveComparison().isEqualTo(expectedDashboard);
+        Optional<Dashboard> foundDashboard = repository.get(expectedDashboard.id());
+        assertThat(foundDashboard).get().usingRecursiveComparison().isEqualTo(expectedDashboard);
 //        });
     }
 }

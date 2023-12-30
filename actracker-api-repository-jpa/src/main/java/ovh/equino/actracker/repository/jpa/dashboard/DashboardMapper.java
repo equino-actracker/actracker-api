@@ -36,18 +36,6 @@ class DashboardMapper {
         );
     }
 
-    DashboardDto toDto(DashboardEntity entity) {
-
-        return new DashboardDto(
-                UUID.fromString(entity.id),
-                UUID.fromString(entity.creatorId),
-                entity.name,
-                chartMapper.toDomainObjects(entity.charts),
-                shareMapper.toDomainObjects(entity.shares),
-                entity.deleted
-        );
-    }
-
     DashboardEntity toEntity(DashboardDto dto) {
 
         DashboardEntity entity = new DashboardEntity();
