@@ -20,14 +20,14 @@ class MetricValueMapper {
         this.entityManager = entityManager;
     }
 
-    List<MetricValue> toValueObjects(Collection<MetricValueEntity> entities) {
+    List<MetricValue> toDomainObjects(Collection<MetricValueEntity> entities) {
         return requireNonNullElse(entities, new ArrayList<MetricValueEntity>())
                 .stream()
-                .map(this::toValueObject)
+                .map(this::toDomainObject)
                 .toList();
     }
 
-    MetricValue toValueObject(MetricValueEntity entity) {
+    MetricValue toDomainObject(MetricValueEntity entity) {
         return new MetricValue(
                 UUID.fromString(entity.metric.id),
                 entity.value

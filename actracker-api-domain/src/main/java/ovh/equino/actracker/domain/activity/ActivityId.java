@@ -13,6 +13,10 @@ public record ActivityId(UUID id) {
         }
     }
 
+    public ActivityId(String id) {
+        this(UUID.fromString(id));
+    }
+
     ActivityId() {
         this(randomUUID());
     }

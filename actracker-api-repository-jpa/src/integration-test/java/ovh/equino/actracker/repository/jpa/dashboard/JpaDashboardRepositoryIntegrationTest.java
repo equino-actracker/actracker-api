@@ -51,6 +51,7 @@ abstract class JpaDashboardRepositoryIntegrationTest extends JpaIntegrationTest 
         Dashboard expectedDashboard = dashboardFactory.create("old name", emptyList(), emptyList());
         inTransaction(() -> repository.add(expectedDashboard));
 //        inTransaction(() -> {
+        // TODO extend update with additional fields
         Dashboard dashboard = repository.get(expectedDashboard.id()).get();
         expectedDashboard.delete();
         dashboard.delete();

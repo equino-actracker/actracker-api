@@ -50,6 +50,7 @@ abstract class JpaTagRepositoryIntegrationTest extends JpaIntegrationTest {
         Tag expectedTag = tagFactory.create("old name", emptyList(), emptyList());
         inTransaction(() -> repository.add(expectedTag));
 //        inTransaction(() -> {
+        // TODO extend update with additional fields
             Tag tag = repository.get(expectedTag.id()).get();
             expectedTag.delete();
             tag.delete();

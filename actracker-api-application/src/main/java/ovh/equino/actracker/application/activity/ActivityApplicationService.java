@@ -64,7 +64,7 @@ public class ActivityApplicationService {
                 tags,
                 metricValues
         );
-        activityRepository.add(activity.forStorage());
+        activityRepository.add(activity);
 
         activityNotifier.notifyChanged(activity.forChangeNotification());
 
@@ -127,7 +127,7 @@ public class ActivityApplicationService {
         List<ActivityId> activitiesToFinish = activityDataSource.findOwnUnfinishedStartedBefore(switchTime, switcher);
         finishAllAt(switchTime, activitiesToFinish);
 
-        activityRepository.add(newActivity.forStorage());
+        activityRepository.add(newActivity);
         activityNotifier.notifyChanged(newActivity.forChangeNotification());
 
         return activityDataSource.find(newActivity.id(), switcher)
@@ -141,38 +141,27 @@ public class ActivityApplicationService {
     private void finishAllAt(Instant switchTime, List<ActivityId> activitiesToFinish) {
 
         for (ActivityId activityId : activitiesToFinish) {
-            Activity activityToFinish = activityRepository.findById(activityId.id())
-                    .map(activity -> activityFactory.reconstitute(activityId, new User(activity.creatorId()), activity.title(), activity.startTime(), activity.endTime(), activity.comment(), activity.tags().stream().map(TagId::new).toList(), activity.metricValues(), activity.deleted()))
+            Activity activityToFinish = activityRepository.get(activityId)
                     .orElseThrow(() -> {
                         String message = "Could not find activity to stop with ID=%s".formatted(activityId.id());
                         return new RuntimeException(message);
                     });
             activityToFinish.finish(switchTime);
-            activityRepository.update(activityId.id(), activityToFinish.forStorage());
+            activityRepository.save(activityToFinish);
             activityNotifier.notifyChanged(activityToFinish.forChangeNotification());
         }
     }
 
     public ActivityResult renameActivity(String newTitle, UUID activityId) {
         User updater = actorExtractor.getActor();
+        ActivityId id = new ActivityId(activityId);
 
-        ActivityDto activityDto = activityRepository.findById(activityId)
+        Activity activity = activityRepository.get(id)
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
-        Activity activity = activityFactory.reconstitute(
-                new ActivityId(activityDto.id()),
-                new User(activityDto.creatorId()),
-                activityDto.title(),
-                activityDto.startTime(),
-                activityDto.endTime(),
-                activityDto.comment(),
-                activityDto.tags().stream().map(TagId::new).toList(),
-                activityDto.metricValues(),
-                activityDto.deleted()
-        );
         activity.rename(newTitle);
 
-        activityRepository.update(activityId, activity.forStorage());
+        activityRepository.save(activity);
 
         activityNotifier.notifyChanged(activity.forChangeNotification());
 
@@ -186,24 +175,14 @@ public class ActivityApplicationService {
 
     public ActivityResult startActivity(Instant startTime, UUID activityId) {
         User updater = actorExtractor.getActor();
+        ActivityId id = new ActivityId(activityId);
 
-        ActivityDto activityDto = activityRepository.findById(activityId)
+        Activity activity = activityRepository.get(id)
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
-        Activity activity = activityFactory.reconstitute(
-                new ActivityId(activityDto.id()),
-                new User(activityDto.creatorId()),
-                activityDto.title(),
-                activityDto.startTime(),
-                activityDto.endTime(),
-                activityDto.comment(),
-                activityDto.tags().stream().map(TagId::new).toList(),
-                activityDto.metricValues(),
-                activityDto.deleted()
-        );
         activity.start(startTime);
 
-        activityRepository.update(activityId, activity.forStorage());
+        activityRepository.save(activity);
 
         activityNotifier.notifyChanged(activity.forChangeNotification());
 
@@ -217,24 +196,14 @@ public class ActivityApplicationService {
 
     public ActivityResult finishActivity(Instant endTime, UUID activityId) {
         User updater = actorExtractor.getActor();
+        ActivityId id = new ActivityId(activityId);
 
-        ActivityDto activityDto = activityRepository.findById(activityId)
+        Activity activity = activityRepository.get(id)
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
-        Activity activity = activityFactory.reconstitute(
-                new ActivityId(activityDto.id()),
-                new User(activityDto.creatorId()),
-                activityDto.title(),
-                activityDto.startTime(),
-                activityDto.endTime(),
-                activityDto.comment(),
-                activityDto.tags().stream().map(TagId::new).toList(),
-                activityDto.metricValues(),
-                activityDto.deleted()
-        );
         activity.finish(endTime);
 
-        activityRepository.update(activityId, activity.forStorage());
+        activityRepository.save(activity);
 
         activityNotifier.notifyChanged(activity.forChangeNotification());
 
@@ -248,24 +217,14 @@ public class ActivityApplicationService {
 
     public ActivityResult updateActivityComment(String newComment, UUID activityId) {
         User updater = actorExtractor.getActor();
+        ActivityId id = new ActivityId(activityId);
 
-        ActivityDto activityDto = activityRepository.findById(activityId)
+        Activity activity = activityRepository.get(id)
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
-        Activity activity = activityFactory.reconstitute(
-                new ActivityId(activityDto.id()),
-                new User(activityDto.creatorId()),
-                activityDto.title(),
-                activityDto.startTime(),
-                activityDto.endTime(),
-                activityDto.comment(),
-                activityDto.tags().stream().map(TagId::new).toList(),
-                activityDto.metricValues(),
-                activityDto.deleted()
-        );
         activity.updateComment(newComment);
 
-        activityRepository.update(activityId, activity.forStorage());
+        activityRepository.save(activity);
 
         activityNotifier.notifyChanged(activity.forChangeNotification());
 
@@ -279,24 +238,14 @@ public class ActivityApplicationService {
 
     public ActivityResult addTagToActivity(UUID tagId, UUID activityId) {
         User updater = actorExtractor.getActor();
+        ActivityId id = new ActivityId(activityId);
 
-        ActivityDto activityDto = activityRepository.findById(activityId)
+        Activity activity = activityRepository.get(id)
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
-        Activity activity = activityFactory.reconstitute(
-                new ActivityId(activityDto.id()),
-                new User(activityDto.creatorId()),
-                activityDto.title(),
-                activityDto.startTime(),
-                activityDto.endTime(),
-                activityDto.comment(),
-                activityDto.tags().stream().map(TagId::new).toList(),
-                activityDto.metricValues(),
-                activityDto.deleted()
-        );
         activity.assignTag(new TagId(tagId));
 
-        activityRepository.update(activityId, activity.forStorage());
+        activityRepository.save(activity);
 
         activityNotifier.notifyChanged(activity.forChangeNotification());
 
@@ -310,24 +259,14 @@ public class ActivityApplicationService {
 
     public ActivityResult removeTagFromActivity(UUID tagId, UUID activityId) {
         User updater = actorExtractor.getActor();
+        ActivityId id = new ActivityId(activityId);
 
-        ActivityDto activityDto = activityRepository.findById(activityId)
+        Activity activity = activityRepository.get(id)
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
-        Activity activity = activityFactory.reconstitute(
-                new ActivityId(activityDto.id()),
-                new User(activityDto.creatorId()),
-                activityDto.title(),
-                activityDto.startTime(),
-                activityDto.endTime(),
-                activityDto.comment(),
-                activityDto.tags().stream().map(TagId::new).toList(),
-                activityDto.metricValues(),
-                activityDto.deleted()
-        );
         activity.removeTag(new TagId(tagId));
 
-        activityRepository.update(activityId, activity.forStorage());
+        activityRepository.save(activity);
 
         activityNotifier.notifyChanged(activity.forChangeNotification());
 
@@ -341,24 +280,14 @@ public class ActivityApplicationService {
 
     public ActivityResult setMetricValue(UUID metricId, BigDecimal value, UUID activityId) {
         User updater = actorExtractor.getActor();
+        ActivityId id = new ActivityId(activityId);
 
-        ActivityDto activityDto = activityRepository.findById(activityId)
+        Activity activity = activityRepository.get(id)
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
-        Activity activity = activityFactory.reconstitute(
-                new ActivityId(activityDto.id()),
-                new User(activityDto.creatorId()),
-                activityDto.title(),
-                activityDto.startTime(),
-                activityDto.endTime(),
-                activityDto.comment(),
-                activityDto.tags().stream().map(TagId::new).toList(),
-                activityDto.metricValues(),
-                activityDto.deleted()
-        );
         activity.setMetricValue(new MetricValue(metricId, value));
 
-        activityRepository.update(activityId, activity.forStorage());
+        activityRepository.save(activity);
 
         activityNotifier.notifyChanged(activity.forChangeNotification());
 
@@ -372,24 +301,14 @@ public class ActivityApplicationService {
 
     public ActivityResult unsetMetricValue(UUID metricId, UUID activityId) {
         User updater = actorExtractor.getActor();
+        ActivityId id = new ActivityId(activityId);
 
-        ActivityDto activityDto = activityRepository.findById(activityId)
+        Activity activity = activityRepository.get(id)
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
-        Activity activity = activityFactory.reconstitute(
-                new ActivityId(activityDto.id()),
-                new User(activityDto.creatorId()),
-                activityDto.title(),
-                activityDto.startTime(),
-                activityDto.endTime(),
-                activityDto.comment(),
-                activityDto.tags().stream().map(TagId::new).toList(),
-                activityDto.metricValues(),
-                activityDto.deleted()
-        );
         activity.unsetMetricValue(new MetricId(metricId));
 
-        activityRepository.update(activityId, activity.forStorage());
+        activityRepository.save(activity);
 
         activityNotifier.notifyChanged(activity.forChangeNotification());
 
@@ -402,26 +321,16 @@ public class ActivityApplicationService {
     }
 
     public void deleteActivity(UUID activityId) {
+        ActivityId id = new ActivityId(activityId);
 
-        ActivityDto activityDto = activityRepository.findById(activityId)
+        Activity activity = activityRepository.get(id)
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
-        Activity activity = activityFactory.reconstitute(
-                new ActivityId(activityDto.id()),
-                new User(activityDto.creatorId()),
-                activityDto.title(),
-                activityDto.startTime(),
-                activityDto.endTime(),
-                activityDto.comment(),
-                activityDto.tags().stream().map(TagId::new).toList(),
-                activityDto.metricValues(),
-                activityDto.deleted()
-        );
         activity.delete();
 
         activityNotifier.notifyChanged(activity.forChangeNotification());
 
-        activityRepository.update(activityId, activity.forStorage());
+        activityRepository.save(activity);
     }
 
     private ActivityResult toActivityResult(ActivityDto activityDto) {
