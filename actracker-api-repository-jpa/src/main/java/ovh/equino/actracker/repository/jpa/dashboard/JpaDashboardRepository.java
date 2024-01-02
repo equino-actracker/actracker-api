@@ -6,6 +6,8 @@ import ovh.equino.actracker.repository.jpa.JpaDAO;
 
 import java.util.Optional;
 
+import static java.util.Objects.nonNull;
+
 class JpaDashboardRepository extends JpaDAO implements DashboardRepository {
 
     private final DashboardMapper dashboardMapper;
@@ -18,6 +20,9 @@ class JpaDashboardRepository extends JpaDAO implements DashboardRepository {
     @Override
     public Optional<Dashboard> get(DashboardId dashboardId) {
         DashboardEntity entity = entityManager.find(DashboardEntity.class, dashboardId.id().toString());
+        if (nonNull(entity)) {
+            entityManager.detach(entity);
+        }
         Dashboard dashboard = dashboardMapper.toDomainObject(entity);
         return Optional.ofNullable(dashboard);
     }

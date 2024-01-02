@@ -83,18 +83,18 @@ abstract class JpaActivityRepositoryIntegrationTest extends JpaIntegrationTest {
         inTransaction(() -> repository.add(expectedActivity));
 
 
-//        inTransaction(() -> {
-        Activity activity = repository.get(expectedActivity.id()).get();
+        inTransaction(() -> {
+            Activity activity = repository.get(expectedActivity.id()).get();
 
-        expectedActivity.delete();
-        activity.delete();
+            expectedActivity.delete();
+            activity.delete();
 
-        repository.save(activity);
-//        });
+            repository.save(activity);
+        });
 
-//        inTransaction(() -> {
-        Optional<Activity> foundActivity = repository.get(expectedActivity.id());
-        assertThat(foundActivity).get().usingRecursiveComparison().isEqualTo(expectedActivity);
-//        });
+        inTransaction(() -> {
+            Optional<Activity> foundActivity = repository.get(expectedActivity.id());
+            assertThat(foundActivity).get().usingRecursiveComparison().isEqualTo(expectedActivity);
+        });
     }
 }

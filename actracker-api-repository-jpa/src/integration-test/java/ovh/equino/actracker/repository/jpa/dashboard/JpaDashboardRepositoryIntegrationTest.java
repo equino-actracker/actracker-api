@@ -50,16 +50,16 @@ abstract class JpaDashboardRepositoryIntegrationTest extends JpaIntegrationTest 
     void shouldUpdateDashboard() {
         Dashboard expectedDashboard = dashboardFactory.create("old name", emptyList(), emptyList());
         inTransaction(() -> repository.add(expectedDashboard));
-//        inTransaction(() -> {
-        // TODO extend update with additional fields
-        Dashboard dashboard = repository.get(expectedDashboard.id()).get();
-        expectedDashboard.delete();
-        dashboard.delete();
-        repository.save(dashboard);
-//        });
-//        inTransaction(() -> {
-        Optional<Dashboard> foundDashboard = repository.get(expectedDashboard.id());
-        assertThat(foundDashboard).get().usingRecursiveComparison().isEqualTo(expectedDashboard);
-//        });
+        inTransaction(() -> {
+            // TODO extend update with additional fields
+            Dashboard dashboard = repository.get(expectedDashboard.id()).get();
+            expectedDashboard.delete();
+            dashboard.delete();
+            repository.save(dashboard);
+        });
+        inTransaction(() -> {
+            Optional<Dashboard> foundDashboard = repository.get(expectedDashboard.id());
+            assertThat(foundDashboard).get().usingRecursiveComparison().isEqualTo(expectedDashboard);
+        });
     }
 }
