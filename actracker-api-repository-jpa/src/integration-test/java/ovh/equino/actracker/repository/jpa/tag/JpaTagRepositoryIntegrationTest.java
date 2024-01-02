@@ -24,7 +24,7 @@ abstract class JpaTagRepositoryIntegrationTest extends JpaIntegrationTest {
 
     @BeforeEach
     void init() {
-        User user = new User(nextUUID());
+        this.user = new User(nextUUID());
         this.tagFactory = TagTestFactory.forUser(user);
         this.metricFactory = MetricTestFactory.forUser(user);
         this.repository = new JpaTagRepository(entityManager, tagFactory, metricFactory);

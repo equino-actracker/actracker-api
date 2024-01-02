@@ -25,12 +25,11 @@ import static ovh.equino.actracker.repository.jpa.TestUtil.nextUUID;
 abstract class JpaActivityRepositoryIntegrationTest extends JpaIntegrationTest {
 
     private JpaActivityRepository repository;
-    private User user;
     private ActivityFactory activityFactory;
 
     @BeforeEach
     void init() {
-        this.user = new User(nextUUID());
+        User user = new User(nextUUID());
         this.activityFactory = ActivityTestFactory.forUser(user);
         this.repository = new JpaActivityRepository(entityManager, activityFactory);
     }
