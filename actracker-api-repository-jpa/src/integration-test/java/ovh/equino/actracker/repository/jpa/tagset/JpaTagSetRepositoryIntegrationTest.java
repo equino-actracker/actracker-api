@@ -2,6 +2,7 @@ package ovh.equino.actracker.repository.jpa.tagset;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tagset.TagSet;
 import ovh.equino.actracker.domain.tagset.TagSetFactory;
 import ovh.equino.actracker.domain.tagset.TagSetId;
@@ -9,8 +10,10 @@ import ovh.equino.actracker.domain.tagset.TagSetTestFactory;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
 
+import java.util.List;
 import java.util.Optional;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,13 +32,41 @@ abstract class JpaTagSetRepositoryIntegrationTest extends JpaIntegrationTest {
     }
 
     @Test
-    void shouldAddAndGetTagSet() {
-        TagSet expectedTagSet = tagSetFactory.create("tag set name", emptySet());
+    void shouldAddAndGetMinimalTagSet() {
+        TagSet expectedTagSet = tagSetFactory.create("tag set name", emptyList());
         inTransaction(() -> repository.add(expectedTagSet));
         inTransaction(() -> {
             Optional<TagSet> foundTagSet = repository.get(expectedTagSet.id());
             assertThat(foundTagSet).get().usingRecursiveComparison().isEqualTo(expectedTagSet);
         });
+    }
+
+    @Test
+    void shouldAddAndGetFullTagSet() {
+        TagSet expectedTagSet = tagSetFactory.create("tag set name", List.of(new TagId()));
+        inTransaction(() -> repository.add(expectedTagSet));
+        inTransaction(() -> {
+            Optional<TagSet> foundTagSet = repository.get(expectedTagSet.id());
+            assertThat(foundTagSet).get().usingRecursiveComparison().isEqualTo(expectedTagSet);
+        });
+    }
+
+    @Test
+    void shouldAddAndGetMutatedTagSet() {
+        TagId tagToRemove = new TagId();
+        TagSet expectedTagSet = tagSetFactory.create("old tag set name", List.of(tagToRemove));
+
+        expectedTagSet.rename("new tag set name");
+        expectedTagSet.removeTag(tagToRemove);
+        expectedTagSet.assignTag(new TagId());
+        expectedTagSet.delete();
+
+        inTransaction(() -> repository.add(expectedTagSet));
+        inTransaction(() -> {
+            Optional<TagSet> foundTagSet = repository.get(expectedTagSet.id());
+            assertThat(foundTagSet).get().usingRecursiveComparison().isEqualTo(expectedTagSet);
+        });
+
     }
 
     @Test
