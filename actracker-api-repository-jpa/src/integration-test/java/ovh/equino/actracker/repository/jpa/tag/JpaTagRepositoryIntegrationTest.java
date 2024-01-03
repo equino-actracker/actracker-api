@@ -95,18 +95,54 @@ abstract class JpaTagRepositoryIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldUpdateTag() {
-        Tag expectedTag = tagFactory.create("old name", emptyList(), emptyList());
+        Metric metricToDelete = metricFactory.create(user, "metric to delete", NUMERIC);
+        Metric metricToRename = metricFactory.create(user, "metric to rename", NUMERIC);
+        Share notResolvedShareToDelete = new Share("not resolved share to delete");
+        Share resolvedShareToDelete = new Share(new User(nextUUID()), "resolved share to delete");
+
+        Share newNotResolvedShare = new Share("new not resolved share");
+        Share newResolvedShare = new Share(new User(nextUUID()), "new resolved share");
+
+        Tag expectedTag = tagFactory.create(
+                "old tag name",
+                List.of(metricToDelete, metricToRename),
+                List.of(notResolvedShareToDelete, resolvedShareToDelete)
+        );
+
         inTransaction(() -> repository.add(expectedTag));
+
         inTransaction(() -> {
-            // TODO extend update with additional fields
             Tag tag = repository.get(expectedTag.id()).get();
+
+            expectedTag.rename("new tag name");
+            expectedTag.addMetric("new metric", NUMERIC);
+            expectedTag.renameMetric("renamed metric", metricToRename.id());
+            expectedTag.deleteMetric(metricToDelete.id());
+            expectedTag.unshare(notResolvedShareToDelete.granteeName());
+            expectedTag.unshare(resolvedShareToDelete.granteeName());
+            expectedTag.share(newNotResolvedShare);
+            expectedTag.share(newResolvedShare);
             expectedTag.delete();
+
+            tag.rename("new tag name");
+            tag.addMetric("new metric", NUMERIC);
+            tag.renameMetric("renamed metric", metricToRename.id());
+            tag.deleteMetric(metricToDelete.id());
+            tag.unshare(notResolvedShareToDelete.granteeName());
+            tag.unshare(resolvedShareToDelete.granteeName());
+            tag.share(newNotResolvedShare);
+            tag.share(newResolvedShare);
             tag.delete();
+
             repository.save(tag);
         });
+
         inTransaction(() -> {
             Optional<Tag> foundTag = repository.get(expectedTag.id());
-            assertThat(foundTag).get().usingRecursiveComparison().isEqualTo(expectedTag);
+            assertThat(foundTag).get()
+                    .usingRecursiveComparison()
+                    .ignoringFieldsOfTypes(MetricId.class)
+                    .isEqualTo(expectedTag);
         });
     }
 }
