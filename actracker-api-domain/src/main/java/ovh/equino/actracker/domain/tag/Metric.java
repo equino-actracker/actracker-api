@@ -44,7 +44,7 @@ public final class Metric implements Entity {
         return deleted;
     }
 
-    public MetricId id() {
+    MetricId id() {
         return id;
     }
 
