@@ -20,10 +20,10 @@ class JpaTagRepository extends JpaDAO implements TagRepository {
     @Override
     public Optional<Tag> get(TagId tagId) {
         TagEntity entity = entityManager.find(TagEntity.class, tagId.id().toString());
+        Tag tag = tagMapper.toDomainObject(entity);
         if (nonNull(entity)) {
             entityManager.detach(entity);
         }
-        Tag tag = tagMapper.toDomainObject(entity);
         return Optional.ofNullable(tag);
     }
 

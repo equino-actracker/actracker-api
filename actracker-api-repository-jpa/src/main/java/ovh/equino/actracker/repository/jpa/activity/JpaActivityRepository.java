@@ -20,10 +20,10 @@ class JpaActivityRepository extends JpaDAO implements ActivityRepository {
     @Override
     public Optional<Activity> get(ActivityId activityId) {
         ActivityEntity entity = entityManager.find(ActivityEntity.class, activityId.id().toString());
+        Activity activity = activityMapper.toDomainObject(entity);
         if (nonNull(entity)) {
             entityManager.detach(entity);
         }
-        Activity activity = activityMapper.toDomainObject(entity);
         return Optional.ofNullable(activity);
     }
 

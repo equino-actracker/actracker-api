@@ -20,10 +20,10 @@ class JpaTagSetRepository extends JpaDAO implements TagSetRepository {
     @Override
     public Optional<TagSet> get(TagSetId tagSetId) {
         TagSetEntity entity = entityManager.find(TagSetEntity.class, tagSetId.id().toString());
+        TagSet tagSet = tagSetMapper.toDomainObject(entity);
         if (nonNull(entity)) {
             entityManager.detach(entity);
         }
-        TagSet tagSet = tagSetMapper.toDomainObject(entity);
         return Optional.ofNullable(tagSet);
     }
 

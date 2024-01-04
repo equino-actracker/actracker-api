@@ -20,10 +20,10 @@ class JpaDashboardRepository extends JpaDAO implements DashboardRepository {
     @Override
     public Optional<Dashboard> get(DashboardId dashboardId) {
         DashboardEntity entity = entityManager.find(DashboardEntity.class, dashboardId.id().toString());
+        Dashboard dashboard = dashboardMapper.toDomainObject(entity);
         if (nonNull(entity)) {
             entityManager.detach(entity);
         }
-        Dashboard dashboard = dashboardMapper.toDomainObject(entity);
         return Optional.ofNullable(dashboard);
     }
 
