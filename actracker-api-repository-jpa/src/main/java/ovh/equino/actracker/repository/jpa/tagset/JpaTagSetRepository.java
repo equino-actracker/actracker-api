@@ -6,6 +6,8 @@ import ovh.equino.actracker.repository.jpa.JpaDAO;
 
 import java.util.Optional;
 
+import static java.util.Objects.nonNull;
+
 class JpaTagSetRepository extends JpaDAO implements TagSetRepository {
 
     private final TagSetMapper tagSetMapper;
@@ -18,6 +20,9 @@ class JpaTagSetRepository extends JpaDAO implements TagSetRepository {
     @Override
     public Optional<TagSet> get(TagSetId tagSetId) {
         TagSetEntity entity = entityManager.find(TagSetEntity.class, tagSetId.id().toString());
+        if (nonNull(entity)) {
+            entityManager.detach(entity);
+        }
         TagSet tagSet = tagSetMapper.toDomainObject(entity);
         return Optional.ofNullable(tagSet);
     }
