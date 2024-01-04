@@ -40,6 +40,14 @@ public class TagSetApplicationService {
         this.actorExtractor = actorExtractor;
     }
 
+    public TagSetResult getTagSet(UUID tagSetId) {
+        User actor = actorExtractor.getActor();
+
+        return tagSetDataSource.find(new TagSetId(tagSetId), actor)
+                .map(this::toTagSetResult)
+                .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));
+    }
+
     public TagSetResult createTagSet(CreateTagSetCommand createTagSetCommand) {
         User creator = actorExtractor.getActor();
 

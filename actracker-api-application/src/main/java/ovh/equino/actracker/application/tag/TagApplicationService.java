@@ -46,6 +46,14 @@ public class TagApplicationService {
         this.tenantDataSource = tenantDataSource;
     }
 
+    public TagResult getTag(UUID tagId) {
+        User actor = actorExtractor.getActor();
+
+        return tagDataSource.find(new TagId(tagId), actor)
+                .map(this::toTagResult)
+                .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
+    }
+
     public TagResult createTag(CreateTagCommand createTagCommand) {
         User creator = actorExtractor.getActor();
 
@@ -241,7 +249,6 @@ public class TagApplicationService {
                     String message = "Could not find updated tag with ID=%s".formatted(tag.id());
                     return new RuntimeException(message);
                 });
-
     }
 
     // TODO extract to share resolver service

@@ -41,6 +41,14 @@ public class ActivityApplicationService {
         this.actorExtractor = actorExtractor;
     }
 
+    public ActivityResult getActivity(UUID activityId) {
+        User actor = actorExtractor.getActor();
+
+        return activityDataSource.find(new ActivityId(activityId), actor)
+                .map(this::toActivityResult)
+                .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
+    }
+
     public ActivityResult createActivity(CreateActivityCommand createActivityCommand) {
         User creator = actorExtractor.getActor();
 

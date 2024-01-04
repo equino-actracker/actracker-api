@@ -49,9 +49,9 @@ public class DashboardApplicationService {
     }
 
     public DashboardResult getDashboard(UUID dashboardId) {
-        User searcher = actorExtractor.getActor();
+        User actor = actorExtractor.getActor();
 
-        return dashboardDataSource.find(new DashboardId(dashboardId), searcher)
+        return dashboardDataSource.find(new DashboardId(dashboardId), actor)
                 .map(this::toDashboardResult)
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
     }
