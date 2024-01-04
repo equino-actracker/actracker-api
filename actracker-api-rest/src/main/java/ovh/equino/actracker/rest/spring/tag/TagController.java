@@ -27,6 +27,13 @@ class TagController {
         this.tagApplicationService = tagApplicationService;
     }
 
+    @RequestMapping(method = GET, path = "/{tagId}")
+    @ResponseStatus(OK)
+    Tag getTag(@PathVariable("tagId") String tagId) {
+        TagResult foundTag = tagApplicationService.getTag(UUID.fromString(tagId));
+        return toResponse(foundTag);
+    }
+
     @RequestMapping(method = POST)
     @ResponseStatus(OK)
     Tag createTag(@RequestBody Tag tag) {
