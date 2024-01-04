@@ -1,13 +1,12 @@
 package ovh.equino.actracker.repository.jpa.activity;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaQuery;
 import ovh.equino.actracker.domain.activity.*;
 import ovh.equino.actracker.repository.jpa.JpaDAO;
 
 import java.util.Optional;
-import java.util.UUID;
+
+import static java.util.Objects.nonNull;
 
 class JpaActivityRepository extends JpaDAO implements ActivityRepository {
 
@@ -22,6 +21,9 @@ class JpaActivityRepository extends JpaDAO implements ActivityRepository {
     public Optional<Activity> get(ActivityId activityId) {
         ActivityEntity entity = entityManager.find(ActivityEntity.class, activityId.id().toString());
         Activity activity = activityMapper.toDomainObject(entity);
+        if (nonNull(entity)) {
+            entityManager.detach(entity);
+        }
         return Optional.ofNullable(activity);
     }
 

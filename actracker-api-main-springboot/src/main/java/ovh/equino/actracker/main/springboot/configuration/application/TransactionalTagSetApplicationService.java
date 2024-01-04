@@ -12,7 +12,7 @@ import ovh.equino.actracker.domain.user.ActorExtractor;
 
 import java.util.UUID;
 
-@Transactional
+//@Transactional
 @Service
 class TransactionalTagSetApplicationService extends TagSetApplicationService {
 

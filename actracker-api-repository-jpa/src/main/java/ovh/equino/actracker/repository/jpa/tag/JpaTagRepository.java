@@ -1,13 +1,12 @@
 package ovh.equino.actracker.repository.jpa.tag;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaQuery;
 import ovh.equino.actracker.domain.tag.*;
 import ovh.equino.actracker.repository.jpa.JpaDAO;
 
 import java.util.Optional;
-import java.util.UUID;
+
+import static java.util.Objects.nonNull;
 
 class JpaTagRepository extends JpaDAO implements TagRepository {
 
@@ -22,6 +21,9 @@ class JpaTagRepository extends JpaDAO implements TagRepository {
     public Optional<Tag> get(TagId tagId) {
         TagEntity entity = entityManager.find(TagEntity.class, tagId.id().toString());
         Tag tag = tagMapper.toDomainObject(entity);
+        if (nonNull(entity)) {
+            entityManager.detach(entity);
+        }
         return Optional.ofNullable(tag);
     }
 

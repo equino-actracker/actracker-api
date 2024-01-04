@@ -8,7 +8,7 @@ import ovh.equino.actracker.domain.dashboard.generation.DashboardGenerationEngin
 import ovh.equino.actracker.domain.tenant.TenantDataSource;
 import ovh.equino.actracker.domain.user.ActorExtractor;
 
-@Transactional
+//@Transactional
 @Service
 class TransactionalDashboardApplicationService extends DashboardApplicationService {
 

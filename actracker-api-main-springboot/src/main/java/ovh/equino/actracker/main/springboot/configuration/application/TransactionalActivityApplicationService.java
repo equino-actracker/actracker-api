@@ -6,7 +6,7 @@ import ovh.equino.actracker.application.activity.ActivityApplicationService;
 import ovh.equino.actracker.domain.activity.*;
 import ovh.equino.actracker.domain.user.ActorExtractor;
 
-@Transactional
+//@Transactional
 @Service
 class TransactionalActivityApplicationService extends ActivityApplicationService {
 

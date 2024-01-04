@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-@Transactional
+//@Transactional
 @Service
 class TransactionalTagApplicationService extends TagApplicationService {
 
