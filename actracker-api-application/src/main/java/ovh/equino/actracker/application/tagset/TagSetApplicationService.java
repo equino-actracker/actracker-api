@@ -9,10 +9,7 @@ import ovh.equino.actracker.domain.tagset.*;
 import ovh.equino.actracker.domain.user.ActorExtractor;
 import ovh.equino.actracker.domain.user.User;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static java.util.stream.Collectors.toUnmodifiableSet;
 
@@ -41,16 +38,20 @@ public class TagSetApplicationService {
     }
 
     public TagSetResult getTagSet(UUID tagSetId) {
-        User actor = actorExtractor.getActor();
-
-        return tagSetDataSource.find(new TagSetId(tagSetId), actor)
-                .map(this::toTagSetResult)
+        return findTagSetResult(new TagSetId(tagSetId))
                 .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));
     }
 
-    public TagSetResult createTagSet(CreateTagSetCommand createTagSetCommand) {
-        User creator = actorExtractor.getActor();
+    public Optional<TagSetResult> findTagSetResult(TagSetId tagSetId) {
+        User actor = actorExtractor.getActor();
+        return tagSetDataSource.find(tagSetId, actor).map(this::toTagSetResult);
+    }
 
+    private TagSetResult toTagSetResult(TagSetDto tagSetResult) {
+        return new TagSetResult(tagSetResult.id(), tagSetResult.name(), tagSetResult.tags());
+    }
+
+    public TagSetResult createTagSet(CreateTagSetCommand createTagSetCommand) {
         TagSet newTagSet = tagSetFactory.create(
                 createTagSetCommand.name(),
                 toTagIds(createTagSetCommand.tags())
@@ -58,12 +59,16 @@ public class TagSetApplicationService {
         tagSetRepository.add(newTagSet);
         tagSetNotifier.notifyChanged(newTagSet.forChangeNotification());
 
-        return tagSetDataSource.find(newTagSet.id(), creator)
-                .map(this::toTagSetResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find created tag set with ID=%s".formatted(newTagSet.id());
-                    return new RuntimeException(message);
-                });
+        return findTagSetResult(newTagSet.id())
+                .orElseThrow(() -> new RuntimeException(
+                        "Could not find created tag set with ID=%s".formatted(newTagSet.id())
+                ));
+    }
+
+    private Set<TagId> toTagIds(Collection<UUID> uuids) {
+        return uuids.stream()
+                .map(TagId::new)
+                .collect(toUnmodifiableSet());
     }
 
     public SearchResult<TagSetResult> searchTagSets(SearchTagSetsQuery searchTagSetsQuery) {
@@ -88,79 +93,53 @@ public class TagSetApplicationService {
     }
 
     public TagSetResult renameTagSet(String newName, UUID tagSetId) {
-        User updater = actorExtractor.getActor();
-        TagSetId id = new TagSetId(tagSetId);
-
-        TagSet tagSet = tagSetRepository.get(id)
+        TagSet tagSet = tagSetRepository.get(new TagSetId(tagSetId))
                 .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));
+
         tagSet.rename(newName);
         tagSetRepository.save(tagSet);
-
         tagSetNotifier.notifyChanged(tagSet.forChangeNotification());
 
-        return tagSetDataSource.find(tagSet.id(), updater)
-                .map(this::toTagSetResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find updated tag set with ID=%s".formatted(tagSet.id());
-                    return new RuntimeException(message);
-                });
+        return findTagSetResult(tagSet.id())
+                .orElseThrow(() -> new RuntimeException(
+                        "Could not find updated tag set with ID=%s".formatted(tagSet.id())
+                ));
     }
 
     public TagSetResult addTagToSet(UUID tagId, UUID tagSetId) {
-        User updater = actorExtractor.getActor();
-        TagSetId id = new TagSetId(tagSetId);
-
-        TagSet tagSet = tagSetRepository.get(id)
+        TagSet tagSet = tagSetRepository.get(new TagSetId(tagSetId))
                 .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));
+
         tagSet.assignTag(new TagId(tagId));
         tagSetRepository.save(tagSet);
-
         tagSetNotifier.notifyChanged(tagSet.forChangeNotification());
 
-        return tagSetDataSource.find(tagSet.id(), updater)
-                .map(this::toTagSetResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find updated tag set with ID=%s".formatted(tagSet.id());
-                    return new RuntimeException(message);
-                });
+        return findTagSetResult(tagSet.id())
+                .orElseThrow(() -> new RuntimeException(
+                        "Could not find updated tag set with ID=%s".formatted(tagSet.id())
+                ));
     }
 
     public TagSetResult removeTagFromSet(UUID tagId, UUID tagSetId) {
-        User updater = actorExtractor.getActor();
-        TagSetId id = new TagSetId(tagSetId);
-
-        TagSet tagSet = tagSetRepository.get(id)
+        TagSet tagSet = tagSetRepository.get(new TagSetId(tagSetId))
                 .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));
+
         tagSet.removeTag(new TagId(tagId));
         tagSetRepository.save(tagSet);
-
         tagSetNotifier.notifyChanged(tagSet.forChangeNotification());
 
-        return tagSetDataSource.find(tagSet.id(), updater)
-                .map(this::toTagSetResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find updated tag set with ID=%s".formatted(tagSet.id());
-                    return new RuntimeException(message);
-                });
+        return findTagSetResult(tagSet.id())
+                .orElseThrow(() -> new RuntimeException(
+                        "Could not find updated tag set with ID=%s".formatted(tagSet.id())
+                ));
     }
 
     public void deleteTagSet(UUID tagSetId) {
-        TagSetId id = new TagSetId(tagSetId);
-        TagSet tagSet = tagSetRepository.get(id)
+        TagSet tagSet = tagSetRepository.get(new TagSetId(tagSetId))
                 .orElseThrow(() -> new EntityNotFoundException(TagSet.class, tagSetId));
+
         tagSet.delete();
         tagSetRepository.save(tagSet);
-
         tagSetNotifier.notifyChanged(tagSet.forChangeNotification());
-    }
-
-    private TagSetResult toTagSetResult(TagSetDto tagSetResult) {
-        return new TagSetResult(tagSetResult.id(), tagSetResult.name(), tagSetResult.tags());
-    }
-
-    private Set<TagId> toTagIds(Collection<UUID> uuids) {
-        return uuids.stream()
-                .map(TagId::new)
-                .collect(toUnmodifiableSet());
     }
 }

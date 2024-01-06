@@ -11,6 +11,7 @@ import ovh.equino.actracker.domain.user.ActorExtractor;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -47,11 +48,27 @@ public class TagApplicationService {
     }
 
     public TagResult getTag(UUID tagId) {
-        User actor = actorExtractor.getActor();
-
-        return tagDataSource.find(new TagId(tagId), actor)
-                .map(this::toTagResult)
+        return findTagResult(new TagId(tagId))
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
+    }
+
+    private Optional<TagResult> findTagResult(TagId tagId) {
+        User actor = actorExtractor.getActor();
+        return tagDataSource.find(tagId, actor).map(this::toTagResult);
+    }
+
+    private TagResult toTagResult(TagDto tagDto) {
+        List<MetricResult> metricResults = tagDto.metrics().stream()
+                .map(this::toMetricResult)
+                .toList();
+        List<String> shares = tagDto.shares().stream()
+                .map(Share::granteeName)
+                .toList();
+        return new TagResult(tagDto.id(), tagDto.name(), metricResults, shares);
+    }
+
+    private MetricResult toMetricResult(MetricDto metricDto) {
+        return new MetricResult(metricDto.id(), metricDto.name(), metricDto.type().toString());
     }
 
     public TagResult createTag(CreateTagCommand createTagCommand) {
@@ -70,15 +87,12 @@ public class TagApplicationService {
 
         Tag tag = tagFactory.create(createTagCommand.tagName(), metrics, shares);
         tagRepository.add(tag);
-
         tagNotifier.notifyChanged(tag.forChangeNotification());
 
-        return tagDataSource.find(tag.id(), creator)
-                .map(this::toTagResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find created tag with ID=%s".formatted(tag.id());
-                    return new RuntimeException(message);
-                });
+        return findTagResult(tag.id())
+                .orElseThrow(() -> new RuntimeException(
+                        "Could not find created tag with ID=%s".formatted(tag.id())
+                ));
     }
 
     public List<TagResult> resolveTags(Set<UUID> tagIds) {
@@ -89,7 +103,8 @@ public class TagApplicationService {
                 .map(TagId::new)
                 .collect(toUnmodifiableSet());
 
-        return tagDataSource.find(domainTagIds, searcher).stream()
+        return tagDataSource.find(domainTagIds, searcher)
+                .stream()
                 .map(this::toTagResult)
                 .toList();
     }
@@ -115,140 +130,97 @@ public class TagApplicationService {
     }
 
     public TagResult renameTag(String newName, UUID tagId) {
-        User updater = actorExtractor.getActor();
-        TagId id = new TagId(tagId);
-
-        Tag tag = tagRepository.get(id)
+        Tag tag = tagRepository.get(new TagId(tagId))
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
 
         tag.rename(newName);
         tagRepository.save(tag);
-
         tagNotifier.notifyChanged(tag.forChangeNotification());
 
-        return tagDataSource.find(tag.id(), updater)
-                .map(this::toTagResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find updated tag with ID=%s".formatted(tag.id());
-                    return new RuntimeException(message);
-                });
+        return findTagResult(tag.id())
+                .orElseThrow(() -> new RuntimeException(
+                        "Could not find updated tag with ID=%s".formatted(tag.id())
+                ));
     }
 
     public void deleteTag(UUID tagId) {
-        TagId id = new TagId(tagId);
-
-        Tag tag = tagRepository.get(id)
+        Tag tag = tagRepository.get(new TagId(tagId))
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
+
         tag.delete();
         tagRepository.save(tag);
-
         tagNotifier.notifyChanged(tag.forChangeNotification());
     }
 
     public TagResult addMetricToTag(String metricName, String metricType, UUID tagId) {
-        User updater = actorExtractor.getActor();
-        TagId id = new TagId(tagId);
-
-        Tag tag = tagRepository.get(id)
+        Tag tag = tagRepository.get(new TagId(tagId))
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
 
         tag.addMetric(metricName, MetricType.valueOf(metricType));
         tagRepository.save(tag);
-
         tagNotifier.notifyChanged(tag.forChangeNotification());
 
-        return tagDataSource.find(tag.id(), updater)
-                .map(this::toTagResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find updated tag with ID=%s".formatted(tag.id());
-                    return new RuntimeException(message);
-                });
-
+        return findTagResult(tag.id())
+                .orElseThrow(() -> new RuntimeException(
+                        "Could not find updated tag with ID=%s".formatted(tag.id())
+                ));
     }
 
     public TagResult deleteMetric(UUID metricId, UUID tagId) {
-        User updater = actorExtractor.getActor();
-        TagId id = new TagId(tagId);
-
-        Tag tag = tagRepository.get(id)
+        Tag tag = tagRepository.get(new TagId(tagId))
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
 
         tag.deleteMetric(new MetricId(metricId));
         tagRepository.save(tag);
-
         tagNotifier.notifyChanged(tag.forChangeNotification());
 
-        return tagDataSource.find(tag.id(), updater)
-                .map(this::toTagResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find updated tag with ID=%s".formatted(tag.id());
-                    return new RuntimeException(message);
-                });
-
+        return findTagResult(tag.id())
+                .orElseThrow(() -> new RuntimeException(
+                        "Could not find updated tag with ID=%s".formatted(tag.id())
+                ));
     }
 
     public TagResult renameMetric(String newName, UUID metricId, UUID tagId) {
-        User updater = actorExtractor.getActor();
-        TagId id = new TagId(tagId);
-
-        Tag tag = tagRepository.get(id)
+        Tag tag = tagRepository.get(new TagId(tagId))
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
 
         tag.renameMetric(newName, new MetricId(metricId));
         tagRepository.save(tag);
-
         tagNotifier.notifyChanged(tag.forChangeNotification());
 
-        return tagDataSource.find(tag.id(), updater)
-                .map(this::toTagResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find updated tag with ID=%s".formatted(tag.id());
-                    return new RuntimeException(message);
-                });
-
+        return findTagResult(tag.id())
+                .orElseThrow(() -> new RuntimeException(
+                        "Could not find updated tag with ID=%s".formatted(tag.id())
+                ));
     }
 
     public TagResult shareTag(String newGrantee, UUID tagId) {
-        User granter = actorExtractor.getActor();
-        TagId id = new TagId(tagId);
-
-        Tag tag = tagRepository.get(id)
+        Tag tag = tagRepository.get(new TagId(tagId))
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
 
         Share share = resolveShare(newGrantee);
-
         tag.share(share);
         tagRepository.save(tag);
-
         tagNotifier.notifyChanged(tag.forChangeNotification());
 
-        return tagDataSource.find(tag.id(), granter)
-                .map(this::toTagResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find updated tag with ID=%s".formatted(tag.id());
-                    return new RuntimeException(message);
-                });
-
+        return findTagResult(tag.id())
+                .orElseThrow(() -> new RuntimeException(
+                        "Could not find updated tag with ID=%s".formatted(tag.id())
+                ));
     }
 
     public TagResult unshareTag(String granteeName, UUID tagId) {
-        User granter = actorExtractor.getActor();
-        TagId id = new TagId(tagId);
-
-        Tag tag = tagRepository.get(id)
+        Tag tag = tagRepository.get(new TagId(tagId))
                 .orElseThrow(() -> new EntityNotFoundException(Tag.class, tagId));
 
         tag.unshare(granteeName);
         tagRepository.save(tag);
-
         tagNotifier.notifyChanged(tag.forChangeNotification());
 
-        return tagDataSource.find(tag.id(), granter)
-                .map(this::toTagResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find updated tag with ID=%s".formatted(tag.id());
-                    return new RuntimeException(message);
-                });
+        return findTagResult(tag.id())
+                .orElseThrow(() -> new RuntimeException(
+                        "Could not find updated tag with ID=%s".formatted(tag.id())
+                ));
     }
 
     // TODO extract to share resolver service
@@ -259,19 +231,5 @@ public class TagApplicationService {
                         tenant.username()
                 ))
                 .orElse(new Share(grantee));
-    }
-
-    private TagResult toTagResult(TagDto tagDto) {
-        List<MetricResult> metricResults = tagDto.metrics().stream()
-                .map(this::toMetricResult)
-                .toList();
-        List<String> shares = tagDto.shares().stream()
-                .map(Share::granteeName)
-                .toList();
-        return new TagResult(tagDto.id(), tagDto.name(), metricResults, shares);
-    }
-
-    private MetricResult toMetricResult(MetricDto metricDto) {
-        return new MetricResult(metricDto.id(), metricDto.name(), metricDto.type().toString());
     }
 }
