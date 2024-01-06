@@ -260,8 +260,7 @@ public class ActivityApplicationService {
     }
 
     public ActivityResult setMetricValue(UUID metricId, BigDecimal value, UUID activityId) {
-        ActivityId id = new ActivityId(activityId);
-        Activity activity = activityRepository.get(id)
+        Activity activity = activityRepository.get(new ActivityId(activityId))
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
         activity.setMetricValue(new MetricValue(metricId, value));
