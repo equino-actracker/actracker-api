@@ -26,6 +26,13 @@ class TagSetController {
         this.tagSetApplicationService = tagSetApplicationService;
     }
 
+    @RequestMapping(method = GET, path = "/{tagSetId}")
+    @ResponseStatus(OK)
+    TagSet getTagSet(@PathVariable("tagSetId") String tagSetId) {
+        TagSetResult foundTagSet = tagSetApplicationService.getTagSet(UUID.fromString(tagSetId));
+        return toResponse(foundTagSet);
+    }
+
     @RequestMapping(method = POST)
     @ResponseStatus(OK)
     TagSet createTagSet(@RequestBody TagSet tagSet) {

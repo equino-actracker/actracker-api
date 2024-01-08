@@ -13,6 +13,7 @@ import ovh.equino.actracker.domain.user.User;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static java.time.Instant.now;
@@ -41,9 +42,36 @@ public class ActivityApplicationService {
         this.actorExtractor = actorExtractor;
     }
 
-    public ActivityResult createActivity(CreateActivityCommand createActivityCommand) {
-        User creator = actorExtractor.getActor();
+    public ActivityResult getActivity(UUID activityId) {
+        return findActivityResult(new ActivityId(activityId))
+                .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
+    }
 
+    private Optional<ActivityResult> findActivityResult(ActivityId activityId) {
+        User actor = actorExtractor.getActor();
+        return activityDataSource.find(activityId, actor).map(this::toActivityResult);
+    }
+
+    private ActivityResult toActivityResult(ActivityDto activityDto) {
+        List<MetricValueResult> metricValueResults = activityDto.metricValues().stream()
+                .map(this::toMetricValueResult)
+                .toList();
+        return new ActivityResult(
+                activityDto.id(),
+                activityDto.title(),
+                activityDto.startTime(),
+                activityDto.endTime(),
+                activityDto.comment(),
+                activityDto.tags(),
+                metricValueResults
+        );
+    }
+
+    private MetricValueResult toMetricValueResult(MetricValue metricValue) {
+        return new MetricValueResult(metricValue.metricId(), metricValue.value());
+    }
+
+    public ActivityResult createActivity(CreateActivityCommand createActivityCommand) {
         List<TagId> tags = createActivityCommand.assignedTags()
                 .stream()
                 .map(TagId::new)
@@ -65,15 +93,12 @@ public class ActivityApplicationService {
                 metricValues
         );
         activityRepository.add(activity);
-
         activityNotifier.notifyChanged(activity.forChangeNotification());
 
-        return activityDataSource.find(activity.id(), creator)
-                .map(this::toActivityResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find created activity with ID=%s".formatted(activity.id());
-                    return new RuntimeException(message);
-                });
+        return findActivityResult(activity.id())
+                .orElseThrow(() -> new RuntimeException(
+                        "Could not find created activity with ID=%s".formatted(activity.id())
+                ));
     }
 
     public SearchResult<ActivityResult> searchActivities(SearchActivitiesQuery searchActivitiesQuery) {
@@ -98,6 +123,7 @@ public class ActivityApplicationService {
         return new SearchResult<>(searchResult.nextPageId(), resultForClient);
     }
 
+    // TODO do something with that, more than one aggregate modified
     public ActivityResult switchToNewActivity(SwitchActivityCommand switchActivityCommand) {
         User switcher = actorExtractor.getActor();
 
@@ -130,16 +156,13 @@ public class ActivityApplicationService {
         activityRepository.add(newActivity);
         activityNotifier.notifyChanged(newActivity.forChangeNotification());
 
-        return activityDataSource.find(newActivity.id(), switcher)
-                .map(this::toActivityResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find created activity with ID=%s".formatted(newActivity.id());
-                    return new RuntimeException(message);
-                });
+        return findActivityResult(newActivity.id())
+                .orElseThrow(() -> new RuntimeException(
+                        "Could not find created activity with ID=%s".formatted(newActivity.id())
+                ));
     }
 
     private void finishAllAt(Instant switchTime, List<ActivityId> activitiesToFinish) {
-
         for (ActivityId activityId : activitiesToFinish) {
             Activity activityToFinish = activityRepository.get(activityId)
                     .orElseThrow(() -> {
@@ -153,202 +176,123 @@ public class ActivityApplicationService {
     }
 
     public ActivityResult renameActivity(String newTitle, UUID activityId) {
-        User updater = actorExtractor.getActor();
-        ActivityId id = new ActivityId(activityId);
-
-        Activity activity = activityRepository.get(id)
+        Activity activity = activityRepository.get(new ActivityId(activityId))
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
         activity.rename(newTitle);
-
         activityRepository.save(activity);
-
         activityNotifier.notifyChanged(activity.forChangeNotification());
 
-        return activityDataSource.find(activity.id(), updater)
-                .map(this::toActivityResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find updated activity with ID=%s".formatted(activity.id());
-                    return new RuntimeException(message);
-                });
+        return findActivityResult(activity.id())
+                .orElseThrow(() -> new RuntimeException(
+                        "Could not find updated activity with ID=%s".formatted(activity.id())
+                ));
     }
 
     public ActivityResult startActivity(Instant startTime, UUID activityId) {
-        User updater = actorExtractor.getActor();
-        ActivityId id = new ActivityId(activityId);
-
-        Activity activity = activityRepository.get(id)
+        Activity activity = activityRepository.get(new ActivityId(activityId))
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
         activity.start(startTime);
-
         activityRepository.save(activity);
-
         activityNotifier.notifyChanged(activity.forChangeNotification());
 
-        return activityDataSource.find(activity.id(), updater)
-                .map(this::toActivityResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find updated activity with ID=%s".formatted(activity.id());
-                    return new RuntimeException(message);
-                });
+        return findActivityResult(activity.id())
+                .orElseThrow(() -> new RuntimeException(
+                        "Could not find updated activity with ID=%s".formatted(activity.id())
+                ));
     }
 
     public ActivityResult finishActivity(Instant endTime, UUID activityId) {
-        User updater = actorExtractor.getActor();
-        ActivityId id = new ActivityId(activityId);
-
-        Activity activity = activityRepository.get(id)
+        Activity activity = activityRepository.get(new ActivityId(activityId))
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
         activity.finish(endTime);
-
         activityRepository.save(activity);
-
         activityNotifier.notifyChanged(activity.forChangeNotification());
 
-        return activityDataSource.find(activity.id(), updater)
-                .map(this::toActivityResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find updated activity with ID=%s".formatted(activity.id());
-                    return new RuntimeException(message);
-                });
+        return findActivityResult(activity.id())
+                .orElseThrow(() -> new RuntimeException(
+                        "Could not find updated activity with ID=%s".formatted(activity.id())
+                ));
     }
 
     public ActivityResult updateActivityComment(String newComment, UUID activityId) {
-        User updater = actorExtractor.getActor();
-        ActivityId id = new ActivityId(activityId);
-
-        Activity activity = activityRepository.get(id)
+        Activity activity = activityRepository.get(new ActivityId(activityId))
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
         activity.updateComment(newComment);
-
         activityRepository.save(activity);
-
         activityNotifier.notifyChanged(activity.forChangeNotification());
 
-        return activityDataSource.find(activity.id(), updater)
-                .map(this::toActivityResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find updated activity with ID=%s".formatted(activity.id());
-                    return new RuntimeException(message);
-                });
+        return findActivityResult(activity.id())
+                .orElseThrow(() -> new RuntimeException(
+                        "Could not find updated activity with ID=%s".formatted(activity.id())
+                ));
     }
 
     public ActivityResult addTagToActivity(UUID tagId, UUID activityId) {
-        User updater = actorExtractor.getActor();
-        ActivityId id = new ActivityId(activityId);
-
-        Activity activity = activityRepository.get(id)
+        Activity activity = activityRepository.get(new ActivityId(activityId))
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
         activity.assignTag(new TagId(tagId));
-
         activityRepository.save(activity);
-
         activityNotifier.notifyChanged(activity.forChangeNotification());
 
-        return activityDataSource.find(activity.id(), updater)
-                .map(this::toActivityResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find updated activity with ID=%s".formatted(activity.id());
-                    return new RuntimeException(message);
-                });
+        return findActivityResult(activity.id())
+                .orElseThrow(() -> new RuntimeException(
+                        "Could not find updated activity with ID=%s".formatted(activity.id())
+                ));
     }
 
     public ActivityResult removeTagFromActivity(UUID tagId, UUID activityId) {
-        User updater = actorExtractor.getActor();
-        ActivityId id = new ActivityId(activityId);
-
-        Activity activity = activityRepository.get(id)
+        Activity activity = activityRepository.get(new ActivityId(activityId))
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
         activity.removeTag(new TagId(tagId));
-
         activityRepository.save(activity);
-
         activityNotifier.notifyChanged(activity.forChangeNotification());
 
-        return activityDataSource.find(activity.id(), updater)
-                .map(this::toActivityResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find updated activity with ID=%s".formatted(activity.id());
-                    return new RuntimeException(message);
-                });
+        return findActivityResult(activity.id())
+                .orElseThrow(() -> new RuntimeException(
+                        "Could not find updated activity with ID=%s".formatted(activity.id())
+                ));
     }
 
     public ActivityResult setMetricValue(UUID metricId, BigDecimal value, UUID activityId) {
-        User updater = actorExtractor.getActor();
-        ActivityId id = new ActivityId(activityId);
-
-        Activity activity = activityRepository.get(id)
+        Activity activity = activityRepository.get(new ActivityId(activityId))
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
         activity.setMetricValue(new MetricValue(metricId, value));
-
         activityRepository.save(activity);
-
         activityNotifier.notifyChanged(activity.forChangeNotification());
 
-        return activityDataSource.find(activity.id(), updater)
-                .map(this::toActivityResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find updated activity with ID=%s".formatted(activity.id());
-                    return new RuntimeException(message);
-                });
+        return findActivityResult(activity.id())
+                .orElseThrow(() -> new RuntimeException(
+                        "Could not find updated activity with ID=%s".formatted(activity.id())
+                ));
     }
 
     public ActivityResult unsetMetricValue(UUID metricId, UUID activityId) {
-        User updater = actorExtractor.getActor();
-        ActivityId id = new ActivityId(activityId);
-
-        Activity activity = activityRepository.get(id)
+        Activity activity = activityRepository.get(new ActivityId(activityId))
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
         activity.unsetMetricValue(new MetricId(metricId));
-
         activityRepository.save(activity);
-
         activityNotifier.notifyChanged(activity.forChangeNotification());
 
-        return activityDataSource.find(activity.id(), updater)
-                .map(this::toActivityResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find updated activity with ID=%s".formatted(activity.id());
-                    return new RuntimeException(message);
-                });
+        return findActivityResult(activity.id())
+                .orElseThrow(() -> new RuntimeException(
+                        "Could not find updated activity with ID=%s".formatted(activity.id())
+                ));
     }
 
     public void deleteActivity(UUID activityId) {
-        ActivityId id = new ActivityId(activityId);
-
-        Activity activity = activityRepository.get(id)
+        Activity activity = activityRepository.get(new ActivityId(activityId))
                 .orElseThrow(() -> new EntityNotFoundException(Activity.class, activityId));
 
         activity.delete();
-
-        activityNotifier.notifyChanged(activity.forChangeNotification());
-
         activityRepository.save(activity);
-    }
-
-    private ActivityResult toActivityResult(ActivityDto activityDto) {
-        List<MetricValueResult> metricValueResults = activityDto.metricValues().stream()
-                .map(this::toMetricValueResult)
-                .toList();
-        return new ActivityResult(
-                activityDto.id(),
-                activityDto.title(),
-                activityDto.startTime(),
-                activityDto.endTime(),
-                activityDto.comment(),
-                activityDto.tags(),
-                metricValueResults
-        );
-    }
-
-    private MetricValueResult toMetricValueResult(MetricValue metricValue) {
-        return new MetricValueResult(metricValue.metricId(), metricValue.value());
+        activityNotifier.notifyChanged(activity.forChangeNotification());
     }
 }

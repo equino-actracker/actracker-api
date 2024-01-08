@@ -11,10 +11,7 @@ import ovh.equino.actracker.domain.tenant.TenantDataSource;
 import ovh.equino.actracker.domain.user.ActorExtractor;
 import ovh.equino.actracker.domain.user.User;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static java.util.Objects.requireNonNullElse;
 
@@ -49,202 +46,13 @@ public class DashboardApplicationService {
     }
 
     public DashboardResult getDashboard(UUID dashboardId) {
-        User searcher = actorExtractor.getActor();
-
-        return dashboardDataSource.find(new DashboardId(dashboardId), searcher)
-                .map(this::toDashboardResult)
+        return findDashboardResult(new DashboardId(dashboardId))
                 .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
     }
 
-    public DashboardResult createDashboard(CreateDashboardCommand createDashboardCommand) {
-        User creator = actorExtractor.getActor();
-
-        List<Chart> charts = createDashboardCommand.chartAssignments().stream()
-                .map(chartAssignment -> new Chart(
-                        chartAssignment.name(),
-                        GroupBy.valueOf(chartAssignment.groupBy()),
-                        AnalysisMetric.valueOf(chartAssignment.analysisMetric()),
-                        chartAssignment.includedTags()))
-                .toList();
-        List<Share> shares = createDashboardCommand.shares()
-                .stream()
-                .map(Share::new)
-                .toList();
-        Dashboard dashboard = dashboardFactory.create(createDashboardCommand.name(), charts, shares);
-        dashboardRepository.add(dashboard);
-        dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
-
-        return dashboardDataSource.find(dashboard.id(), creator)
-                .map(this::toDashboardResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find created dashboard with ID=%s".formatted(dashboard.id());
-                    return new RuntimeException(message);
-                });
-    }
-
-    public SearchResult<DashboardResult> searchDashboards(SearchDashboardsQuery searchDashboardsQuery) {
-
-        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
-                actorExtractor.getActor(),
-                searchDashboardsQuery.pageSize(),
-                searchDashboardsQuery.pageId(),
-                searchDashboardsQuery.term(),
-                null,
-                null,
-                searchDashboardsQuery.excludeFilter(),
-                null
-        );
-
-        EntitySearchResult<DashboardDto> searchResult = dashboardSearchEngine.findDashboards(searchCriteria);
-        List<DashboardResult> resultForClient = searchResult.results()
-                .stream()
-                .map(this::toDashboardResult)
-                .toList();
-
-        return new SearchResult<>(searchResult.nextPageId(), resultForClient);
-    }
-
-    public DashboardResult renameDashboard(String newName, UUID dashboardId) {
-        User updater = actorExtractor.getActor();
-        DashboardId id = new DashboardId(dashboardId);
-
-        Dashboard dashboard = dashboardRepository.get(id)
-                .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
-
-        dashboard.rename(newName);
-        dashboardRepository.save(dashboard);
-        dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
-
-        return dashboardDataSource.find(dashboard.id(), updater)
-                .map(this::toDashboardResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find updated dashboard with ID=%s".formatted(dashboard.id());
-                    return new RuntimeException(message);
-                });
-    }
-
-    public void deleteDashboard(UUID dashboardId) {
-        DashboardId id = new DashboardId(dashboardId);
-
-        Dashboard dashboard = dashboardRepository.get(id)
-                .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
-
-        dashboard.delete();
-        dashboardRepository.save(dashboard);
-        dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
-    }
-
-    public DashboardResult addChart(ChartAssignment newChartAssignment, UUID dashboardId) {
-        User updater = actorExtractor.getActor();
-        DashboardId id = new DashboardId(dashboardId);
-
-        Dashboard dashboard = dashboardRepository.get(id)
-                .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
-
-        Chart newChart = new Chart(
-                newChartAssignment.name(),
-                GroupBy.valueOf(newChartAssignment.groupBy()),
-                AnalysisMetric.valueOf(newChartAssignment.analysisMetric()),
-                newChartAssignment.includedTags()
-        );
-
-        dashboard.addChart(newChart);
-        dashboardRepository.save(dashboard);
-        dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
-
-        return dashboardDataSource.find(dashboard.id(), updater)
-                .map(this::toDashboardResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find updated dashboard with ID=%s".formatted(dashboard.id());
-                    return new RuntimeException(message);
-                });
-    }
-
-    public DashboardResult deleteChart(UUID chartId, UUID dashboardId) {
-        User updater = actorExtractor.getActor();
-        DashboardId id = new DashboardId(dashboardId);
-
-        Dashboard dashboard = dashboardRepository.get(id)
-                .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
-
-        dashboard.deleteChart(new ChartId(chartId));
-        dashboardRepository.save(dashboard);
-        dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
-
-        return dashboardDataSource.find(dashboard.id(), updater)
-                .map(this::toDashboardResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find updated dashboard with ID=%s".formatted(dashboard.id());
-                    return new RuntimeException(message);
-                });
-    }
-
-    public DashboardResult shareDashboard(String newGrantee, UUID dashboardId) {
-        User granter = actorExtractor.getActor();
-        DashboardId id = new DashboardId(dashboardId);
-
-        Dashboard dashboard = dashboardRepository.get(id)
-                .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
-
-        Share share = resolveShare(newGrantee);
-        dashboard.share(share);
-        dashboardRepository.save(dashboard);
-        dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
-
-        return dashboardDataSource.find(dashboard.id(), granter)
-                .map(this::toDashboardResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find updated dashboard with ID=%s".formatted(dashboard.id());
-                    return new RuntimeException(message);
-                });
-    }
-
-    public DashboardResult unshareDashboard(String granteeName, UUID dashboardId) {
-        User granter = actorExtractor.getActor();
-        DashboardId id = new DashboardId(dashboardId);
-
-        Dashboard dashboard = dashboardRepository.get(id)
-                .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
-
-        dashboard.unshare(granteeName);
-        dashboardRepository.save(dashboard);
-        dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
-
-        return dashboardDataSource.find(dashboard.id(), granter)
-                .map(this::toDashboardResult)
-                .orElseThrow(() -> {
-                    String message = "Could not find updated dashboard with ID=%s".formatted(dashboard.id());
-                    return new RuntimeException(message);
-                });
-    }
-
-    public DashboardGenerationResult generateDashboard(GenerateDashboardQuery generateDashboardQuery) {
-        DashboardGenerationCriteria generationCriteria = new DashboardGenerationCriteria(
-                generateDashboardQuery.dashboardId(),
-                actorExtractor.getActor(),
-                generateDashboardQuery.timeRangeStart(),
-                generateDashboardQuery.timeRangeEnd(),
-                generateDashboardQuery.tags()
-        );
-
-        UUID dashboardId = generationCriteria.dashboardId();
-        DashboardId id = new DashboardId(dashboardId);
-
-        Dashboard dashboard = dashboardRepository.get(id)
-                .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
-
-        DashboardData dashboardData = dashboardGenerationEngine.generateDashboard(dashboard.forStorage(), generationCriteria);
-        return toGenerationResult(dashboardData);
-    }
-
-    // TODO extract to share resolver service
-    private Share resolveShare(String grantee) {
-        return tenantDataSource.findByUsername(grantee)
-                .map(tenant -> new Share(
-                        new User(tenant.id()),
-                        tenant.username()
-                ))
-                .orElse(new Share(grantee));
+    public Optional<DashboardResult> findDashboardResult(DashboardId dashboardId) {
+        User actor = actorExtractor.getActor();
+        return dashboardDataSource.find(dashboardId, actor).map(this::toDashboardResult);
     }
 
     private DashboardResult toDashboardResult(DashboardDto dashboardDto) {
@@ -270,6 +78,166 @@ public class DashboardApplicationService {
                 chart.analysisMetric().toString(),
                 chart.includedTags()
         );
+    }
+
+    public DashboardResult createDashboard(CreateDashboardCommand createDashboardCommand) {
+        List<Chart> charts = createDashboardCommand.chartAssignments().stream()
+                .map(chartAssignment -> new Chart(
+                        chartAssignment.name(),
+                        GroupBy.valueOf(chartAssignment.groupBy()),
+                        AnalysisMetric.valueOf(chartAssignment.analysisMetric()),
+                        chartAssignment.includedTags()))
+                .toList();
+        List<Share> shares = createDashboardCommand.shares()
+                .stream()
+                .map(Share::new)
+                .toList();
+
+        Dashboard dashboard = dashboardFactory.create(createDashboardCommand.name(), charts, shares);
+        dashboardRepository.add(dashboard);
+        dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
+
+        return findDashboardResult(dashboard.id())
+                .orElseThrow(() -> new RuntimeException(
+                        "Could not find created dashboard with ID=%s".formatted(dashboard.id())
+                ));
+    }
+
+    public SearchResult<DashboardResult> searchDashboards(SearchDashboardsQuery searchDashboardsQuery) {
+
+        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
+                actorExtractor.getActor(),
+                searchDashboardsQuery.pageSize(),
+                searchDashboardsQuery.pageId(),
+                searchDashboardsQuery.term(),
+                null,
+                null,
+                searchDashboardsQuery.excludeFilter(),
+                null
+        );
+
+        EntitySearchResult<DashboardDto> searchResult = dashboardSearchEngine.findDashboards(searchCriteria);
+        List<DashboardResult> resultForClient = searchResult.results()
+                .stream()
+                .map(this::toDashboardResult)
+                .toList();
+
+        return new SearchResult<>(searchResult.nextPageId(), resultForClient);
+    }
+
+    public DashboardResult renameDashboard(String newName, UUID dashboardId) {
+        Dashboard dashboard = dashboardRepository.get(new DashboardId(dashboardId))
+                .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
+
+        dashboard.rename(newName);
+        dashboardRepository.save(dashboard);
+        dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
+
+        return findDashboardResult(dashboard.id())
+                .orElseThrow(() -> new RuntimeException(
+                        "Could not find updated dashboard with ID=%s".formatted(dashboard.id())
+                ));
+    }
+
+    public void deleteDashboard(UUID dashboardId) {
+        Dashboard dashboard = dashboardRepository.get(new DashboardId(dashboardId))
+                .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
+
+        dashboard.delete();
+        dashboardRepository.save(dashboard);
+        dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
+    }
+
+    public DashboardResult addChart(ChartAssignment newChartAssignment, UUID dashboardId) {
+        Dashboard dashboard = dashboardRepository.get(new DashboardId(dashboardId))
+                .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
+
+        Chart newChart = new Chart(
+                newChartAssignment.name(),
+                GroupBy.valueOf(newChartAssignment.groupBy()),
+                AnalysisMetric.valueOf(newChartAssignment.analysisMetric()),
+                newChartAssignment.includedTags()
+        );
+
+        dashboard.addChart(newChart);
+        dashboardRepository.save(dashboard);
+        dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
+
+        return findDashboardResult(dashboard.id())
+                .orElseThrow(() -> new RuntimeException(
+                        "Could not find updated dashboard with ID=%s".formatted(dashboard.id())
+                ));
+    }
+
+    public DashboardResult deleteChart(UUID chartId, UUID dashboardId) {
+        Dashboard dashboard = dashboardRepository.get(new DashboardId(dashboardId))
+                .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
+
+        dashboard.deleteChart(new ChartId(chartId));
+        dashboardRepository.save(dashboard);
+        dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
+
+        return findDashboardResult(dashboard.id())
+                .orElseThrow(() -> new RuntimeException(
+                        "Could not find updated dashboard with ID=%s".formatted(dashboard.id())
+                ));
+    }
+
+    public DashboardResult shareDashboard(String newGrantee, UUID dashboardId) {
+        Dashboard dashboard = dashboardRepository.get(new DashboardId(dashboardId))
+                .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
+
+        Share share = resolveShare(newGrantee);
+        dashboard.share(share);
+        dashboardRepository.save(dashboard);
+        dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
+
+        return findDashboardResult(dashboard.id())
+                .orElseThrow(() -> new RuntimeException(
+                        "Could not find updated dashboard with ID=%s".formatted(dashboard.id())
+                ));
+    }
+
+    public DashboardResult unshareDashboard(String granteeName, UUID dashboardId) {
+        Dashboard dashboard = dashboardRepository.get(new DashboardId(dashboardId))
+                .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
+
+        dashboard.unshare(granteeName);
+        dashboardRepository.save(dashboard);
+        dashboardNotifier.notifyChanged(dashboard.forChangeNotification());
+
+        return findDashboardResult(dashboard.id())
+                .orElseThrow(() -> new RuntimeException(
+                        "Could not find updated dashboard with ID=%s".formatted(dashboard.id())
+                ));
+    }
+
+    public DashboardGenerationResult generateDashboard(GenerateDashboardQuery generateDashboardQuery) {
+        DashboardGenerationCriteria generationCriteria = new DashboardGenerationCriteria(
+                generateDashboardQuery.dashboardId(),
+                actorExtractor.getActor(),
+                generateDashboardQuery.timeRangeStart(),
+                generateDashboardQuery.timeRangeEnd(),
+                generateDashboardQuery.tags()
+        );
+
+        UUID dashboardId = generationCriteria.dashboardId();
+
+        Dashboard dashboard = dashboardRepository.get(new DashboardId(dashboardId))
+                .orElseThrow(() -> new EntityNotFoundException(Dashboard.class, dashboardId));
+
+        DashboardData dashboardData = dashboardGenerationEngine.generateDashboard(dashboard.forStorage(), generationCriteria);
+        return toGenerationResult(dashboardData);
+    }
+
+    // TODO extract to share resolver service
+    private Share resolveShare(String grantee) {
+        return tenantDataSource.findByUsername(grantee)
+                .map(tenant -> new Share(
+                        new User(tenant.id()),
+                        tenant.username()
+                ))
+                .orElse(new Share(grantee));
     }
 
     private DashboardGenerationResult toGenerationResult(DashboardData dashboardData) {

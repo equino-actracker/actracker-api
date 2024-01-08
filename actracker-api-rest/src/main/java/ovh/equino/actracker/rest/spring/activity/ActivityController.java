@@ -27,6 +27,13 @@ class ActivityController {
         this.activityApplicationService = activityApplicationService;
     }
 
+    @RequestMapping(method = GET, path = "/{activityId}")
+    @ResponseStatus(OK)
+    Activity getActivity(@PathVariable("activityId") String activityId) {
+        ActivityResult foundActivity = activityApplicationService.getActivity(UUID.fromString(activityId));
+        return toResponse(foundActivity);
+    }
+
     @RequestMapping(method = POST)
     @ResponseStatus(OK)
     Activity createActivity(@RequestBody Activity activity) {
