@@ -1,23 +1,29 @@
-package ovh.equino.actracker.repository.jpa.tagset;
+package ovh.equino.actracker.jpa.tagset;
 
 import jakarta.persistence.*;
-import ovh.equino.actracker.repository.jpa.tag.TagEntity;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import ovh.equino.actracker.jpa.tag.TagEntity;
 
 import java.util.Set;
 
 @Entity
 @Table(name = "tag_set")
-class TagSetEntity {
+@NoArgsConstructor
+@Getter
+@Setter
+public class TagSetEntity {
 
     @Id
     @Column(name = "id")
-    String id;
+    private String id;
 
     @Column(name = "creator_id")
-    String creatorId;
+    private String creatorId;
 
     @Column(name = "name")
-    String name;
+    private String name;
 
     @ManyToMany
     @JoinTable(
@@ -25,8 +31,8 @@ class TagSetEntity {
             joinColumns = @JoinColumn(name = "tag_set_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
-    Set<TagEntity> tags;
+    private Set<TagEntity> tags;
 
     @Column(name = "deleted")
-    boolean deleted;
+    private boolean deleted;
 }

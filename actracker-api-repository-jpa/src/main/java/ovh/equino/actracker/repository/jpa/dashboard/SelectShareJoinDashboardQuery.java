@@ -3,6 +3,8 @@ package ovh.equino.actracker.repository.jpa.dashboard;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
 import ovh.equino.actracker.domain.user.User;
+import ovh.equino.actracker.jpa.dashboard.DashboardEntity;
+import ovh.equino.actracker.jpa.dashboard.DashboardShareEntity;
 import ovh.equino.actracker.repository.jpa.JpaPredicate;
 import ovh.equino.actracker.repository.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.repository.jpa.JpaSortBuilder;

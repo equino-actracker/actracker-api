@@ -2,6 +2,8 @@ package ovh.equino.actracker.repository.jpa.tag;
 
 import ovh.equino.actracker.domain.tag.*;
 import ovh.equino.actracker.domain.user.User;
+import ovh.equino.actracker.jpa.tag.MetricEntity;
+import ovh.equino.actracker.jpa.tag.TagEntity;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,11 +32,11 @@ class MetricMapper {
             return null;
         }
         return metricFactory.reconstitute(
-                new MetricId(entity.id),
-                new User(entity.creatorId),
-                entity.name,
-                MetricType.valueOf(entity.type),
-                entity.deleted
+                new MetricId(entity.getId()),
+                new User(entity.getCreatorId()),
+                entity.getName(),
+                MetricType.valueOf(entity.getType()),
+                entity.isDeleted()
         );
     }
 
@@ -46,12 +48,12 @@ class MetricMapper {
 
     MetricEntity toEntity(MetricDto metric, TagEntity tagEntity) {
         MetricEntity entity = new MetricEntity();
-        entity.id = metric.id().toString();
-        entity.creatorId = metric.creatorId().toString();
-        entity.name = metric.name();
-        entity.tag = tagEntity;
-        entity.type = metric.type().toString();
-        entity.deleted = metric.deleted();
+        entity.setId(metric.id().toString());
+        entity.setCreatorId(metric.creatorId().toString());
+        entity.setName(metric.name());
+        entity.setTag(tagEntity);
+        entity.setType(metric.type().toString());
+        entity.setDeleted(metric.deleted());
         return entity;
     }
 }

@@ -1,6 +1,7 @@
 package ovh.equino.actracker.repository.jpa.tenant;
 
 import jakarta.persistence.EntityManager;
+import ovh.equino.actracker.jpa.tenant.TenantEntity;
 import ovh.equino.actracker.repository.jpa.JpaPredicate;
 import ovh.equino.actracker.repository.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.repository.jpa.SingleResultJpaQuery;

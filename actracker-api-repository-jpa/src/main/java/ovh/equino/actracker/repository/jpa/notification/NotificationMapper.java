@@ -2,6 +2,7 @@ package ovh.equino.actracker.repository.jpa.notification;
 
 import ovh.equino.actracker.domain.Notification;
 import ovh.equino.actracker.domain.exception.ParseException;
+import ovh.equino.actracker.jpa.notification.NotificationEntity;
 
 import java.util.UUID;
 
@@ -10,11 +11,11 @@ class NotificationMapper {
     NotificationMapper() {
     }
 
-    Notification<?> toDto(NotificationEntity entity) {
+    Notification<?> toDomainObject(NotificationEntity entity) {
         try {
-            Class<?> notificationType = Class.forName(entity.dataType);
-            Object data = Notification.fromJsonData(entity.data, notificationType);
-            return new Notification<>(UUID.fromString(entity.id), entity.version, data, notificationType);
+            Class<?> notificationType = Class.forName(entity.getDataType());
+            Object data = Notification.fromJsonData(entity.getData(), notificationType);
+            return new Notification<>(UUID.fromString(entity.getId()), entity.getVersion(), data, notificationType);
         } catch (ParseException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -23,9 +24,9 @@ class NotificationMapper {
     NotificationEntity toEntity(Notification<?> dto) {
         try {
             NotificationEntity entity = new NotificationEntity();
-            entity.id = dto.id().toString();
-            entity.data = dto.toJsonData();
-            entity.dataType = dto.notificationType().getCanonicalName();
+            entity.setId(dto.id().toString());
+            entity.setData(dto.toJsonData());
+            entity.setDataType(dto.notificationType().getCanonicalName());
             return entity;
         } catch (ParseException e) {
             throw new RuntimeException(e);

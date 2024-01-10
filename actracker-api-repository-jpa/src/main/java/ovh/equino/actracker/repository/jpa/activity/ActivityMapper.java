@@ -7,7 +7,8 @@ import ovh.equino.actracker.domain.activity.ActivityFactory;
 import ovh.equino.actracker.domain.activity.ActivityId;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.user.User;
-import ovh.equino.actracker.repository.jpa.tag.TagEntity;
+import ovh.equino.actracker.jpa.activity.ActivityEntity;
+import ovh.equino.actracker.jpa.tag.TagEntity;
 
 import java.sql.Timestamp;
 import java.util.HashSet;
@@ -32,21 +33,21 @@ class ActivityMapper {
         if (isNull(entity)) {
             return null;
         }
-        Set<TagId> tags = requireNonNullElse(entity.tags, new HashSet<TagEntity>())
+        Set<TagId> tags = requireNonNullElse(entity.getTags(), new HashSet<TagEntity>())
                 .stream()
-                .map(tag -> new TagId(tag.id))
+                .map(tag -> new TagId(tag.getId()))
                 .collect(toUnmodifiableSet());
 
         return activityFactory.reconstitute(
-                new ActivityId(entity.id),
-                new User(entity.creatorId),
-                entity.title,
-                isNull(entity.startTime) ? null : entity.startTime.toInstant(),
-                isNull(entity.endTime) ? null : entity.endTime.toInstant(),
-                entity.comment,
+                new ActivityId(entity.getId()),
+                new User(entity.getCreatorId()),
+                entity.getTitle(),
+                isNull(entity.getStartTime()) ? null : entity.getStartTime().toInstant(),
+                isNull(entity.getEndTime()) ? null : entity.getEndTime().toInstant(),
+                entity.getComment(),
                 tags,
-                metricValueMapper.toDomainObjects(entity.metricValues),
-                entity.deleted
+                metricValueMapper.toDomainObjects(entity.getMetricValues()),
+                entity.isDeleted()
         );
     }
 
@@ -58,21 +59,21 @@ class ActivityMapper {
                 .collect(toUnmodifiableSet());
 
         ActivityEntity entity = new ActivityEntity();
-        entity.id = isNull(dto.id()) ? null : dto.id().toString();
-        entity.creatorId = isNull(dto.creatorId()) ? null : dto.creatorId().toString();
-        entity.title = dto.title();
-        entity.startTime = isNull(dto.startTime()) ? null : Timestamp.from(dto.startTime());
-        entity.endTime = isNull(dto.endTime()) ? null : Timestamp.from(dto.endTime());
-        entity.comment = dto.comment();
-        entity.tags = dtoTags;
-        entity.metricValues = metricValueMapper.toEntities(dto.metricValues(), entity);
-        entity.deleted = dto.deleted();
+        entity.setId(isNull(dto.id()) ? null : dto.id().toString());
+        entity.setCreatorId(isNull(dto.creatorId()) ? null : dto.creatorId().toString());
+        entity.setTitle(dto.title());
+        entity.setStartTime(isNull(dto.startTime()) ? null : Timestamp.from(dto.startTime()));
+        entity.setEndTime(isNull(dto.endTime()) ? null : Timestamp.from(dto.endTime()));
+        entity.setComment(dto.comment());
+        entity.setTags(dtoTags);
+        entity.setMetricValues(metricValueMapper.toEntities(dto.metricValues(), entity));
+        entity.setDeleted(dto.deleted());
         return entity;
     }
 
     private TagEntity toTagEntity(String tagId) {
         TagEntity tagEntity = new TagEntity();
-        tagEntity.id = tagId;
+        tagEntity.setId(tagId);
         return tagEntity;
     }
 }

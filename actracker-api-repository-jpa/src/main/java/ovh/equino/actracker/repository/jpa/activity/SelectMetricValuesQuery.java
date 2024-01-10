@@ -3,11 +3,13 @@ package ovh.equino.actracker.repository.jpa.activity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.*;
 import ovh.equino.actracker.domain.user.User;
+import ovh.equino.actracker.jpa.activity.ActivityEntity;
+import ovh.equino.actracker.jpa.activity.MetricValueEntity;
+import ovh.equino.actracker.jpa.tag.TagEntity;
 import ovh.equino.actracker.repository.jpa.JpaPredicate;
 import ovh.equino.actracker.repository.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.repository.jpa.JpaSortBuilder;
 import ovh.equino.actracker.repository.jpa.MultiResultJpaQuery;
-import ovh.equino.actracker.repository.jpa.tag.TagEntity;
 
 import java.util.Collection;
 import java.util.UUID;

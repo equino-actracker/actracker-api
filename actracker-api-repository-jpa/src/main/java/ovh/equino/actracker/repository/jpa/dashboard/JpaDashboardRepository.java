@@ -2,6 +2,7 @@ package ovh.equino.actracker.repository.jpa.dashboard;
 
 import jakarta.persistence.EntityManager;
 import ovh.equino.actracker.domain.dashboard.*;
+import ovh.equino.actracker.jpa.dashboard.DashboardEntity;
 import ovh.equino.actracker.repository.jpa.JpaDAO;
 
 import java.util.Optional;

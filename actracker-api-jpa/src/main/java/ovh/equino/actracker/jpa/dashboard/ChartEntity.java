@@ -1,30 +1,36 @@
-package ovh.equino.actracker.repository.jpa.dashboard;
+package ovh.equino.actracker.jpa.dashboard;
 
 import jakarta.persistence.*;
-import ovh.equino.actracker.repository.jpa.tag.TagEntity;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import ovh.equino.actracker.jpa.tag.TagEntity;
 
 import java.util.Set;
 
 @Entity
 @Table(name = "chart")
-class ChartEntity {
+@NoArgsConstructor
+@Getter
+@Setter
+public class ChartEntity {
 
     @Id
     @Column(name = "id")
-    String id;
+    private String id;
 
     @ManyToOne
     @JoinColumn(name = "dashboard_id")
-    DashboardEntity dashboard;
+    private DashboardEntity dashboard;
 
     @Column(name = "name")
-    String name;
+    private String name;
 
     @Column(name = "group_by")
-    String groupBy;
+    private String groupBy;
 
     @Column(name = "metric")
-    String metric;
+    private String metric;
 
     @ManyToMany
     @JoinTable(
@@ -32,8 +38,8 @@ class ChartEntity {
             joinColumns = @JoinColumn(name = "chart_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
-    Set<TagEntity> tags;
+    private Set<TagEntity> tags;
 
     @Column(name = "deleted")
-    boolean deleted;
+    private boolean deleted;
 }

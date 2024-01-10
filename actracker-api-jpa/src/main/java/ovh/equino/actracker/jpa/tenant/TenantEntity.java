@@ -1,21 +1,27 @@
-package ovh.equino.actracker.repository.jpa.tenant;
+package ovh.equino.actracker.jpa.tenant;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "tenant")
-class TenantEntity {
+@NoArgsConstructor
+@Getter
+@Setter
+public class TenantEntity {
 
     @Id
     @Column(name = "id")
-    String id;
+    private String id;
 
     @Column(name = "username")
-    String username;
+    private String username;
 
     @Column(name = "password")
-    String password;
+    private String password;
 }

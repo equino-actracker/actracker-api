@@ -2,6 +2,7 @@ package ovh.equino.actracker.repository.jpa.tag;
 
 import jakarta.persistence.EntityManager;
 import ovh.equino.actracker.domain.tag.*;
+import ovh.equino.actracker.jpa.tag.TagEntity;
 import ovh.equino.actracker.repository.jpa.JpaDAO;
 
 import java.util.Optional;

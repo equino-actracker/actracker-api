@@ -6,7 +6,8 @@ import ovh.equino.actracker.domain.tagset.TagSetDto;
 import ovh.equino.actracker.domain.tagset.TagSetFactory;
 import ovh.equino.actracker.domain.tagset.TagSetId;
 import ovh.equino.actracker.domain.user.User;
-import ovh.equino.actracker.repository.jpa.tag.TagEntity;
+import ovh.equino.actracker.jpa.tag.TagEntity;
+import ovh.equino.actracker.jpa.tagset.TagSetEntity;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -26,20 +27,20 @@ class TagSetMapper {
     }
 
     TagSet toDomainObject(TagSetEntity entity) {
-        if(isNull(entity)) {
+        if (isNull(entity)) {
             return null;
         }
-        Set<TagId> tags = requireNonNullElse(entity.tags, new ArrayList<TagEntity>())
+        Set<TagId> tags = requireNonNullElse(entity.getTags(), new ArrayList<TagEntity>())
                 .stream()
-                .map(tag -> new TagId(tag.id))
+                .map(tag -> new TagId(tag.getId()))
                 .collect(toUnmodifiableSet());
 
         return tagSetFactory.reconstitute(
-                new TagSetId(entity.id),
-                new User(entity.creatorId),
-                entity.name,
+                new TagSetId(entity.getId()),
+                new User(entity.getCreatorId()),
+                entity.getName(),
                 tags,
-                entity.deleted
+                entity.isDeleted()
         );
     }
 
@@ -51,17 +52,17 @@ class TagSetMapper {
                 .collect(toUnmodifiableSet());
 
         TagSetEntity entity = new TagSetEntity();
-        entity.id = isNull(dto.id()) ? null : dto.id().toString();
-        entity.creatorId = isNull(dto.creatorId()) ? null : dto.creatorId().toString();
-        entity.name = dto.name();
-        entity.tags = dtoTags;
-        entity.deleted = dto.deleted();
+        entity.setId(isNull(dto.id()) ? null : dto.id().toString());
+        entity.setCreatorId(isNull(dto.creatorId()) ? null : dto.creatorId().toString());
+        entity.setName(dto.name());
+        entity.setTags(dtoTags);
+        entity.setDeleted(dto.deleted());
         return entity;
     }
 
     private TagEntity toTagEntity(String tagId) {
         TagEntity tagEntity = new TagEntity();
-        tagEntity.id = tagId;
+        tagEntity.setId(tagId);
         return tagEntity;
     }
 }

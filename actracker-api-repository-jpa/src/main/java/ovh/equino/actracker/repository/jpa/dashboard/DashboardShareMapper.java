@@ -2,6 +2,8 @@ package ovh.equino.actracker.repository.jpa.dashboard;
 
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.user.User;
+import ovh.equino.actracker.jpa.dashboard.DashboardEntity;
+import ovh.equino.actracker.jpa.dashboard.DashboardShareEntity;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,7 +14,8 @@ import static java.util.UUID.randomUUID;
 
 class DashboardShareMapper {
 
-    List<Share> toDomainObjects(Collection<DashboardShareEntity> entities) {
+    List<Share> toDomainObjects(Collection<
+            DashboardShareEntity> entities) {
         return requireNonNullElse(entities, new ArrayList<DashboardShareEntity>())
                 .stream()
                 .map(this::toDomainObject)
@@ -23,10 +26,10 @@ class DashboardShareMapper {
         if (isNull(entity)) {
             return null;
         }
-        User grantee = nonNull(entity.granteeId)
-                ? new User(entity.granteeId)
+        User grantee = nonNull(entity.getGranteeId())
+                ? new User(entity.getGranteeId())
                 : null;
-        return new Share(grantee, entity.granteeName);
+        return new Share(grantee, entity.getGranteeName());
     }
 
     List<DashboardShareEntity> toEntities(Collection<Share> shares, DashboardEntity dashboard) {
@@ -38,12 +41,10 @@ class DashboardShareMapper {
 
     DashboardShareEntity toEntity(Share share, DashboardEntity dashboard) {
         DashboardShareEntity entity = new DashboardShareEntity();
-        entity.id = randomUUID().toString();
-        entity.granteeId = nonNull(share.grantee())
-                ? share.grantee().id().toString()
-                : null;
-        entity.granteeName = share.granteeName();
-        entity.dashboard = dashboard;
+        entity.setId(randomUUID().toString());
+        entity.setGranteeId(nonNull(share.grantee()) ? share.grantee().id().toString() : null);
+        entity.setGranteeName(share.granteeName());
+        entity.setDashboard(dashboard);
         return entity;
     }
 }

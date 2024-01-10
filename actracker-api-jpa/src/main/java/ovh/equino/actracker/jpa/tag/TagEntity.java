@@ -1,6 +1,9 @@
-package ovh.equino.actracker.repository.jpa.tag;
+package ovh.equino.actracker.jpa.tag;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
 
@@ -8,24 +11,27 @@ import static jakarta.persistence.CascadeType.ALL;
 
 @Entity
 @Table(name = "tag")
+@NoArgsConstructor
+@Getter
+@Setter
 public class TagEntity {
 
     @Id
     @Column(name = "id")
-    public String id;
+    private String id;
 
     @Column(name = "creator_id")
-    String creatorId;
+    private String creatorId;
 
     @Column(name = "name")
-    String name;
+    private String name;
 
     @OneToMany(mappedBy = "tag", cascade = ALL, orphanRemoval = true)
-    List<MetricEntity> metrics;
+    private List<MetricEntity> metrics;
 
     @OneToMany(mappedBy = "tag", cascade = ALL, orphanRemoval = true)
-    List<TagShareEntity> shares;
+    private List<TagShareEntity> shares;
 
     @Column(name = "deleted")
-    boolean deleted;
+    private boolean deleted;
 }

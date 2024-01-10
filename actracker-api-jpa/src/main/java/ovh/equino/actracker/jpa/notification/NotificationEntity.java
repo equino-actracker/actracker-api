@@ -1,25 +1,34 @@
-package ovh.equino.actracker.repository.jpa.notification;
+package ovh.equino.actracker.jpa.notification;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import static lombok.AccessLevel.PRIVATE;
 
 @Entity
 @Table(name = "outbox_notification")
-class NotificationEntity {
+@NoArgsConstructor
+@Getter
+@Setter
+public class NotificationEntity {
 
     @Id
     @Column(name = "id")
-    String id;
+    private String id;
 
     @Column(name = "version"/*, updatable = false, insertable = false*/)
     // TODO UPDATE WITH TRIGGER BEFORE INSERT
-    long version;
+    private long version;
 
     @Column(name = "entity")
-    String data;
+    private String data;
 
     @Column(name = "entity_type")
-    String dataType;
+    private String dataType;
 }

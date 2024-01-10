@@ -5,11 +5,12 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Subquery;
 import ovh.equino.actracker.domain.user.User;
+import ovh.equino.actracker.jpa.activity.ActivityEntity;
+import ovh.equino.actracker.jpa.tag.TagEntity;
 import ovh.equino.actracker.repository.jpa.JpaPredicate;
 import ovh.equino.actracker.repository.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.repository.jpa.JpaSortBuilder;
 import ovh.equino.actracker.repository.jpa.MultiResultJpaQuery;
-import ovh.equino.actracker.repository.jpa.tag.TagEntity;
 
 import java.util.Collection;
 import java.util.UUID;

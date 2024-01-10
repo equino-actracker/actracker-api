@@ -52,7 +52,7 @@ class RepositoryConfiguration {
 
         LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
         sessionFactory.setDataSource(dataSource);
-        sessionFactory.setPackagesToScan("ovh.equino.actracker.repository.jpa");
+        sessionFactory.setPackagesToScan("ovh.equino.actracker.jpa");
         sessionFactory.setHibernateProperties(hibernateProperties);
         return sessionFactory;
     }
