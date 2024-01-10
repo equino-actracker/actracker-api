@@ -6,8 +6,6 @@ import ovh.equino.actracker.domain.dashboard.DashboardFactory;
 import ovh.equino.actracker.domain.dashboard.DashboardId;
 import ovh.equino.actracker.domain.user.User;
 
-import java.util.UUID;
-
 import static java.util.Objects.isNull;
 
 class DashboardMapper {
