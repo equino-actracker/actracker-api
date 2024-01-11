@@ -1,4 +1,4 @@
-package ovh.equino.actracker.repository.jpa;
+package ovh.equino.actracker.jpa;
 
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;

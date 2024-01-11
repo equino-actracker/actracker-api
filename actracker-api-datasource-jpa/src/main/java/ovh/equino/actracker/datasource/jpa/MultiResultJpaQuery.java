@@ -1,13 +1,13 @@
-package ovh.equino.actracker.repository.jpa;
+package ovh.equino.actracker.datasource.jpa;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.Order;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.List;
 
 import static java.util.Arrays.stream;
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 public abstract class MultiResultJpaQuery<E, P> extends JpaQuery<E, P, List<P>> {
 
@@ -41,7 +41,7 @@ public abstract class MultiResultJpaQuery<E, P> extends JpaQuery<E, P, List<P>> 
         if (predicate != null) {
             query.where(predicate.toRawPredicate());
         }
-        if (isNotEmpty(sortCriteria)) {
+        if (CollectionUtils.isNotEmpty(sortCriteria)) {
             List<Order> order = sortCriteria
                     .stream()
                     .map(JpaSortCriteria::toRawSort)

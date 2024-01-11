@@ -4,10 +4,10 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
 import ovh.equino.actracker.jpa.dashboard.ChartEntity;
 import ovh.equino.actracker.jpa.dashboard.DashboardEntity;
-import ovh.equino.actracker.repository.jpa.JpaPredicate;
-import ovh.equino.actracker.repository.jpa.JpaPredicateBuilder;
-import ovh.equino.actracker.repository.jpa.JpaSortBuilder;
-import ovh.equino.actracker.repository.jpa.MultiResultJpaQuery;
+import ovh.equino.actracker.datasource.jpa.JpaPredicate;
+import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
+import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
+import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
 
 import java.util.Collection;
 import java.util.Set;

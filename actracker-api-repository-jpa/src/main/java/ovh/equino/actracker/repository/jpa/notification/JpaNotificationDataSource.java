@@ -3,7 +3,7 @@ package ovh.equino.actracker.repository.jpa.notification;
 import jakarta.persistence.EntityManager;
 import ovh.equino.actracker.domain.Notification;
 import ovh.equino.actracker.notification.outbox.NotificationDataSource;
-import ovh.equino.actracker.repository.jpa.JpaDAO;
+import ovh.equino.actracker.jpa.JpaDAO;
 
 import java.util.List;
 

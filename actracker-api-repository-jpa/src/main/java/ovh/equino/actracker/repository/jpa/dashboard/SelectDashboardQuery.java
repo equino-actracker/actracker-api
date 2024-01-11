@@ -7,9 +7,9 @@ import jakarta.persistence.criteria.Subquery;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.dashboard.DashboardEntity;
 import ovh.equino.actracker.jpa.dashboard.DashboardShareEntity;
-import ovh.equino.actracker.repository.jpa.JpaPredicate;
-import ovh.equino.actracker.repository.jpa.JpaPredicateBuilder;
-import ovh.equino.actracker.repository.jpa.SingleResultJpaQuery;
+import ovh.equino.actracker.datasource.jpa.JpaPredicate;
+import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
+import ovh.equino.actracker.datasource.jpa.SingleResultJpaQuery;
 
 final class SelectDashboardQuery extends SingleResultJpaQuery<DashboardEntity, DashboardProjection> {
 

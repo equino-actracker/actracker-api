@@ -20,4 +20,5 @@ include 'actracker-api-publisher-rabbitmq'
 include 'actracker-api-publisher-memory'
 include 'actracker-api-search-datasource'
 include 'actracker-api-dashboard-generator-repository'
+include 'actracker-api-datasource-jpa'
 

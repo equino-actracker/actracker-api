@@ -8,7 +8,7 @@ import ovh.equino.actracker.domain.dashboard.DashboardDto;
 import ovh.equino.actracker.domain.dashboard.DashboardId;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.user.User;
-import ovh.equino.actracker.repository.jpa.JpaDAO;
+import ovh.equino.actracker.jpa.JpaDAO;
 
 import java.util.*;
 import java.util.stream.Collectors;

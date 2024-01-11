@@ -4,7 +4,7 @@ import jakarta.persistence.EntityManager;
 import ovh.equino.actracker.domain.Notification;
 import ovh.equino.actracker.jpa.notification.NotificationEntity;
 import ovh.equino.actracker.notification.outbox.NotificationRepository;
-import ovh.equino.actracker.repository.jpa.JpaDAO;
+import ovh.equino.actracker.jpa.JpaDAO;
 
 import java.util.Optional;
 import java.util.UUID;

@@ -2,10 +2,10 @@ package ovh.equino.actracker.repository.jpa.tagset;
 
 import jakarta.persistence.EntityManager;
 import ovh.equino.actracker.jpa.tagset.TagSetEntity;
-import ovh.equino.actracker.repository.jpa.JpaPredicate;
-import ovh.equino.actracker.repository.jpa.JpaPredicateBuilder;
-import ovh.equino.actracker.repository.jpa.JpaSortBuilder;
-import ovh.equino.actracker.repository.jpa.MultiResultJpaQuery;
+import ovh.equino.actracker.datasource.jpa.JpaPredicate;
+import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
+import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
+import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
 
 final class SelectTagSetsQuery extends MultiResultJpaQuery<TagSetEntity, TagSetProjection> {
 

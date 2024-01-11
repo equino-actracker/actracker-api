@@ -2,9 +2,9 @@ package ovh.equino.actracker.repository.jpa.notification;
 
 import jakarta.persistence.EntityManager;
 import ovh.equino.actracker.jpa.notification.NotificationEntity;
-import ovh.equino.actracker.repository.jpa.JpaPredicateBuilder;
-import ovh.equino.actracker.repository.jpa.JpaSortBuilder;
-import ovh.equino.actracker.repository.jpa.MultiResultJpaQuery;
+import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
+import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
+import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
 
 final class SelectNotificationsQuery extends MultiResultJpaQuery<NotificationEntity, NotificationProjection> {
 

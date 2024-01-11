@@ -7,10 +7,10 @@ import jakarta.persistence.criteria.Subquery;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.activity.ActivityEntity;
 import ovh.equino.actracker.jpa.tag.TagEntity;
-import ovh.equino.actracker.repository.jpa.JpaPredicate;
-import ovh.equino.actracker.repository.jpa.JpaPredicateBuilder;
-import ovh.equino.actracker.repository.jpa.JpaSortBuilder;
-import ovh.equino.actracker.repository.jpa.MultiResultJpaQuery;
+import ovh.equino.actracker.datasource.jpa.JpaPredicate;
+import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
+import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
+import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
 
 import java.sql.Timestamp;
 import java.util.Set;

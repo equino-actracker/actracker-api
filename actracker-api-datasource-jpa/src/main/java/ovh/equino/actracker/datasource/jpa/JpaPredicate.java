@@ -1,4 +1,4 @@
-package ovh.equino.actracker.repository.jpa;
+package ovh.equino.actracker.datasource.jpa;
 
 import jakarta.persistence.criteria.Predicate;
 

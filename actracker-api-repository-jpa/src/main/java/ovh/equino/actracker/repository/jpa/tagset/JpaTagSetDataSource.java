@@ -6,7 +6,7 @@ import ovh.equino.actracker.domain.tagset.TagSetDataSource;
 import ovh.equino.actracker.domain.tagset.TagSetDto;
 import ovh.equino.actracker.domain.tagset.TagSetId;
 import ovh.equino.actracker.domain.user.User;
-import ovh.equino.actracker.repository.jpa.JpaDAO;
+import ovh.equino.actracker.jpa.JpaDAO;
 
 import java.util.*;
 

@@ -7,7 +7,7 @@ import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivityId;
 import ovh.equino.actracker.domain.activity.MetricValue;
 import ovh.equino.actracker.domain.user.User;
-import ovh.equino.actracker.repository.jpa.JpaDAO;
+import ovh.equino.actracker.jpa.JpaDAO;
 
 import java.sql.Timestamp;
 import java.time.Instant;

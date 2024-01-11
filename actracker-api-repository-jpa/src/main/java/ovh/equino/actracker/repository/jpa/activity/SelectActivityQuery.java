@@ -6,9 +6,9 @@ import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Subquery;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.activity.ActivityEntity;
-import ovh.equino.actracker.repository.jpa.JpaPredicate;
-import ovh.equino.actracker.repository.jpa.JpaPredicateBuilder;
-import ovh.equino.actracker.repository.jpa.SingleResultJpaQuery;
+import ovh.equino.actracker.datasource.jpa.JpaPredicate;
+import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
+import ovh.equino.actracker.datasource.jpa.SingleResultJpaQuery;
 
 final class SelectActivityQuery extends SingleResultJpaQuery<ActivityEntity, ActivityProjection> {
 

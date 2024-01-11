@@ -1,0 +1,6 @@
+dependencies {
+    compileOnly 'jakarta.persistence:jakarta.persistence-api:3.1.0'
+    implementation project(':actracker-api-domain')
+    implementation 'org.apache.commons:commons-collections4:4.4'
+    implementation 'org.apache.commons:commons-lang3:3.14.0'
+}

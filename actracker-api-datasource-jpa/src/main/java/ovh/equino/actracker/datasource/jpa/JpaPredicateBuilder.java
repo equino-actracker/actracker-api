@@ -1,9 +1,11 @@
-package ovh.equino.actracker.repository.jpa;
+package ovh.equino.actracker.datasource.jpa;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.Collection;
@@ -12,8 +14,6 @@ import java.util.UUID;
 
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toUnmodifiableSet;
-import static org.apache.commons.collections4.CollectionUtils.isEmpty;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public abstract class JpaPredicateBuilder<E> {
 
@@ -38,7 +38,7 @@ public abstract class JpaPredicateBuilder<E> {
     }
 
     protected <T> JpaPredicate in(Collection<T> values, Path<T> field) {
-        if (isEmpty(values)) {
+        if (CollectionUtils.isEmpty(values)) {
             return noneMatch();
         }
         CriteriaBuilder.In<Object> in = criteriaBuilder.in(field);
@@ -64,7 +64,7 @@ public abstract class JpaPredicateBuilder<E> {
     }
 
     public JpaPredicate isNotExcluded(Collection<UUID> excludedIds) {
-        if (isEmpty(excludedIds)) {
+        if (CollectionUtils.isEmpty(excludedIds)) {
             return allMatch();
         }
         Path<Object> id = root.get("id");
@@ -77,7 +77,7 @@ public abstract class JpaPredicateBuilder<E> {
     }
 
     public JpaPredicate isInPage(String pageId) {
-        if (isBlank(pageId)) {
+        if (StringUtils.isBlank(pageId)) {
             return allMatch();
         }
         return () -> criteriaBuilder.greaterThanOrEqualTo(
@@ -87,7 +87,7 @@ public abstract class JpaPredicateBuilder<E> {
     }
 
     protected JpaPredicate matchesTerm(String term, String searchFieldName) {
-        if (isBlank(term)) {
+        if (StringUtils.isBlank(term)) {
             return allMatch();
         }
         return () -> criteriaBuilder.like(

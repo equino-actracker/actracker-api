@@ -2,11 +2,12 @@ dependencies {
     implementation project(':actracker-api-domain')
     implementation project(':actracker-api-notification-outbox')
     implementation project(':actracker-api-jpa')
+    implementation project(':actracker-api-datasource-jpa') // remove immediately
     implementation 'org.hibernate:hibernate-core:6.4.1.Final'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.0'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.0'
-    implementation 'org.apache.commons:commons-collections4:4.4'
-    implementation 'org.apache.commons:commons-lang3:3.14.0'
+    implementation 'org.apache.commons:commons-collections4:4.4' // remove immediately
+    implementation 'org.apache.commons:commons-lang3:3.14.0' // remove immediately
 
     integrationTestImplementation project(':actracker-api-domain').sourceSets.test.output
     integrationTestImplementation project(':actracker-api-jpa').sourceSets.main.output
