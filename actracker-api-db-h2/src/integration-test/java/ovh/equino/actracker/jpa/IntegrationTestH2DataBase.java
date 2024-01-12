@@ -1,7 +1,6 @@
-package ovh.equino.actracker.repository.jpa;
+package ovh.equino.actracker.jpa;
 
 import org.h2.jdbcx.JdbcDataSource;
-import ovh.equino.actracker.jpa.IntegrationTestRelationalDataBase;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

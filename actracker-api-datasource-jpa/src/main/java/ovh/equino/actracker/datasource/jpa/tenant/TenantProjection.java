@@ -1,4 +1,4 @@
-package ovh.equino.actracker.repository.jpa.tenant;
+package ovh.equino.actracker.datasource.jpa.tenant;
 
 import ovh.equino.actracker.domain.tenant.TenantDto;
 

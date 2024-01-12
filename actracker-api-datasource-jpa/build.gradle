@@ -1,6 +1,10 @@
 dependencies {
     compileOnly 'jakarta.persistence:jakarta.persistence-api:3.1.0'
     implementation project(':actracker-api-domain')
+    implementation project(':actracker-api-jpa')
     implementation 'org.apache.commons:commons-collections4:4.4'
     implementation 'org.apache.commons:commons-lang3:3.14.0'
+
+    integrationTestImplementation project(':actracker-api-jpa').sourceSets.integrationTest.output
+    integrationTestImplementation 'org.hibernate:hibernate-core:6.4.1.Final'
 }

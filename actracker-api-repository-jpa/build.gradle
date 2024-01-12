@@ -12,6 +12,4 @@ dependencies {
     integrationTestImplementation project(':actracker-api-domain').sourceSets.test.output
     integrationTestImplementation project(':actracker-api-jpa').sourceSets.main.output
     integrationTestImplementation project(':actracker-api-jpa').sourceSets.integrationTest.output
-    integrationTestImplementation 'org.assertj:assertj-core:3.24.2' // should be move to parent project?
-    integrationTestImplementation 'org.junit.jupiter:junit-jupiter-params:5.10.1' // should be moved to parent project?
 }

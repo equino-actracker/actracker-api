@@ -1,7 +1,6 @@
-package ovh.equino.actracker.repository.jpa;
+package ovh.equino.actracker.jpa;
 
 import org.testcontainers.containers.PostgreSQLContainer;
-import ovh.equino.actracker.jpa.IntegrationTestRelationalDataBase;
 import ovh.equino.actracker.postgres.SchemaMigrator;
 
 import java.sql.Connection;

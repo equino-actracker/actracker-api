@@ -1,6 +1,6 @@
-package ovh.equino.actracker.repository.jpa.tenant;
+package ovh.equino.actracker.datasource.jpa.tenant;
 
-import ovh.equino.actracker.repository.jpa.IntegrationTestPostgresDataBase;
+import ovh.equino.actracker.jpa.IntegrationTestPostgresDataBase;
 import ovh.equino.actracker.jpa.IntegrationTestRelationalDataBase;
 
 class PostgresJpaTenantDataSourceIntegrationTest extends JpaTenantDataSourceIntegrationTest {
