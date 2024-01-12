@@ -1,21 +1,17 @@
-package ovh.equino.actracker.repository.jpa;
+package ovh.equino.actracker.jpa;
 
-import ovh.equino.actracker.domain.dashboard.Chart;
-import ovh.equino.actracker.domain.dashboard.ChartId;
-import ovh.equino.actracker.domain.dashboard.DashboardDto;
-import ovh.equino.actracker.domain.dashboard.GroupBy;
+import ovh.equino.actracker.domain.dashboard.*;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tenant.TenantDto;
 import ovh.equino.actracker.domain.user.User;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
 import static java.util.Arrays.stream;
-import static ovh.equino.actracker.domain.dashboard.AnalysisMetric.TAG_DURATION;
-import static ovh.equino.actracker.domain.dashboard.AnalysisMetric.TAG_PERCENTAGE;
-import static ovh.equino.actracker.repository.jpa.TestUtil.nextUUID;
-import static ovh.equino.actracker.repository.jpa.TestUtil.randomString;
+import static ovh.equino.actracker.jpa.TestUtil.nextUUID;
+import static ovh.equino.actracker.jpa.TestUtil.randomString;
 
 public final class DashboardBuilder {
 
@@ -26,7 +22,7 @@ public final class DashboardBuilder {
                 new ChartId(nextUUID()),
                 randomString(),
                 GroupBy.SELF,
-                TAG_PERCENTAGE,
+                AnalysisMetric.TAG_PERCENTAGE,
                 Set.of(nextUUID(), nextUUID(), nextUUID()),
                 false
         );
@@ -34,7 +30,7 @@ public final class DashboardBuilder {
                 new ChartId(nextUUID()),
                 randomString(),
                 GroupBy.DAY,
-                TAG_DURATION,
+                AnalysisMetric.TAG_DURATION,
                 Set.of(nextUUID(), nextUUID(), nextUUID()),
                 false
         );
@@ -71,7 +67,7 @@ public final class DashboardBuilder {
                 newDashboard.id(),
                 newDashboard.creatorId(),
                 newDashboard.name(),
-                stream(charts).toList(),
+                Arrays.stream(charts).toList(),
                 newDashboard.shares(),
                 newDashboard.deleted()
         );
@@ -84,7 +80,7 @@ public final class DashboardBuilder {
                 newDashboard.creatorId(),
                 newDashboard.name(),
                 newDashboard.charts(),
-                stream(grantees)
+                Arrays.stream(grantees)
                         .map(grantee -> new Share(
                                         new User(grantee.id()),
                                         grantee.username()

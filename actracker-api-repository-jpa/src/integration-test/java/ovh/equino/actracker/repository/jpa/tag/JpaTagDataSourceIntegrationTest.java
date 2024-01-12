@@ -11,8 +11,8 @@ import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tenant.TenantDto;
 import ovh.equino.actracker.domain.user.User;
-import ovh.equino.actracker.repository.jpa.IntegrationTestConfiguration;
-import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
+import ovh.equino.actracker.jpa.IntegrationTestConfiguration;
+import ovh.equino.actracker.jpa.JpaIntegrationTest;
 
 import java.sql.SQLException;
 import java.util.*;

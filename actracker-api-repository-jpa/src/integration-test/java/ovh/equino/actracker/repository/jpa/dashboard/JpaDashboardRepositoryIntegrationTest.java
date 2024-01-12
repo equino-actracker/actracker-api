@@ -7,7 +7,7 @@ import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tenant.TenantDto;
 import ovh.equino.actracker.domain.user.User;
-import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
+import ovh.equino.actracker.jpa.JpaIntegrationTest;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -19,7 +19,7 @@ import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static ovh.equino.actracker.domain.dashboard.AnalysisMetric.TAG_DURATION;
 import static ovh.equino.actracker.domain.dashboard.GroupBy.SELF;
-import static ovh.equino.actracker.repository.jpa.TestUtil.nextUUID;
+import static ovh.equino.actracker.jpa.TestUtil.nextUUID;
 
 abstract class JpaDashboardRepositoryIntegrationTest extends JpaIntegrationTest {
 

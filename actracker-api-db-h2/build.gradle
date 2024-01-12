@@ -1,6 +1,6 @@
 dependencies {
     implementation 'com.h2database:h2:2.2.224'
 
-    integrationTestImplementation project(':actracker-api-repository-jpa').sourceSets.integrationTest.compileClasspath
+    integrationTestImplementation project(':actracker-api-repository-jpa').sourceSets.integrationTest.compileClasspath // output?
     integrationTestImplementation project(':actracker-api-repository-jpa').sourceSets.integrationTest.runtimeClasspath
 }

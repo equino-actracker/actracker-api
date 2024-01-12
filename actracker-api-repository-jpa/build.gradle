@@ -3,7 +3,7 @@ dependencies {
     implementation project(':actracker-api-notification-outbox')
     implementation project(':actracker-api-jpa')
     implementation project(':actracker-api-datasource-jpa') // remove immediately
-    implementation 'org.hibernate:hibernate-core:6.4.1.Final'
+    implementation 'org.hibernate:hibernate-core:6.4.1.Final' // can be removed?
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.0'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.0'
     implementation 'org.apache.commons:commons-collections4:4.4' // remove immediately
@@ -11,6 +11,7 @@ dependencies {
 
     integrationTestImplementation project(':actracker-api-domain').sourceSets.test.output
     integrationTestImplementation project(':actracker-api-jpa').sourceSets.main.output
-    integrationTestImplementation 'org.assertj:assertj-core:3.24.2'
-    integrationTestImplementation 'org.junit.jupiter:junit-jupiter-params:5.10.1'
+    integrationTestImplementation project(':actracker-api-jpa').sourceSets.integrationTest.output
+    integrationTestImplementation 'org.assertj:assertj-core:3.24.2' // should be move to parent project?
+    integrationTestImplementation 'org.junit.jupiter:junit-jupiter-params:5.10.1' // should be moved to parent project?
 }

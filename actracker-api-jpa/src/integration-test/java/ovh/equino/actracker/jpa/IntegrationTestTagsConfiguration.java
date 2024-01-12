@@ -1,4 +1,4 @@
-package ovh.equino.actracker.repository.jpa;
+package ovh.equino.actracker.jpa;
 
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tag.MetricDto;
@@ -11,7 +11,6 @@ import java.util.*;
 import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparing;
 import static java.util.function.Predicate.not;
-import static java.util.stream.Collectors.toUnmodifiableSet;
 import static java.util.stream.Stream.concat;
 
 public final class IntegrationTestTagsConfiguration {

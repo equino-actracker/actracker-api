@@ -14,8 +14,8 @@ import ovh.equino.actracker.domain.tag.MetricDto;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tenant.TenantDto;
 import ovh.equino.actracker.domain.user.User;
-import ovh.equino.actracker.repository.jpa.IntegrationTestConfiguration;
-import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
+import ovh.equino.actracker.jpa.IntegrationTestConfiguration;
+import ovh.equino.actracker.jpa.JpaIntegrationTest;
 
 import java.sql.SQLException;
 import java.time.Instant;
@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.assertj.core.api.Assertions.assertThat;
-import static ovh.equino.actracker.repository.jpa.TestUtil.randomBigDecimal;
+import static ovh.equino.actracker.jpa.TestUtil.randomBigDecimal;
 
 abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
 

@@ -3,7 +3,7 @@ package ovh.equino.actracker.repository.jpa.notification;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ovh.equino.actracker.domain.Notification;
-import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
+import ovh.equino.actracker.jpa.JpaIntegrationTest;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -11,8 +11,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
-import static ovh.equino.actracker.repository.jpa.TestUtil.nextUUID;
+import static ovh.equino.actracker.jpa.TestUtil.nextUUID;
 
 abstract class JpaNotificationRepositoryIntegrationTest extends JpaIntegrationTest {
 

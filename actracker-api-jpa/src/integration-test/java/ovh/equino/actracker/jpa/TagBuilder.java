@@ -1,4 +1,4 @@
-package ovh.equino.actracker.repository.jpa;
+package ovh.equino.actracker.jpa;
 
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tag.MetricDto;
@@ -7,11 +7,12 @@ import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tenant.TenantDto;
 import ovh.equino.actracker.domain.user.User;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static java.util.Arrays.stream;
-import static ovh.equino.actracker.repository.jpa.TestUtil.nextUUID;
-import static ovh.equino.actracker.repository.jpa.TestUtil.randomString;
+import static ovh.equino.actracker.jpa.TestUtil.nextUUID;
+import static ovh.equino.actracker.jpa.TestUtil.randomString;
 
 public final class TagBuilder {
 
@@ -52,7 +53,7 @@ public final class TagBuilder {
                 newTag.id(),
                 newTag.creatorId(),
                 newTag.name(),
-                stream(metrics).toList(),
+                Arrays.stream(metrics).toList(),
                 newTag.shares(),
                 newTag.deleted()
         );
@@ -65,7 +66,7 @@ public final class TagBuilder {
                 newTag.creatorId(),
                 newTag.name(),
                 newTag.metrics(),
-                stream(grantees)
+                Arrays.stream(grantees)
                         .map(grantee -> new Share(
                                         new User(grantee.id()),
                                         grantee.username()

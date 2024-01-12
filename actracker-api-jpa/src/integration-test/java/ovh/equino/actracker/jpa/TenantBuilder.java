@@ -1,9 +1,9 @@
-package ovh.equino.actracker.repository.jpa;
+package ovh.equino.actracker.jpa;
 
 import ovh.equino.actracker.domain.tenant.TenantDto;
 
-import static ovh.equino.actracker.repository.jpa.TestUtil.nextUUID;
-import static ovh.equino.actracker.repository.jpa.TestUtil.randomString;
+import static ovh.equino.actracker.jpa.TestUtil.nextUUID;
+import static ovh.equino.actracker.jpa.TestUtil.randomString;
 
 public final class TenantBuilder {
 

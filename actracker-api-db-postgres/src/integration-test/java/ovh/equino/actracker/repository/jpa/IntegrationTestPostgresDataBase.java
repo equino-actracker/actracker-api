@@ -1,6 +1,7 @@
 package ovh.equino.actracker.repository.jpa;
 
 import org.testcontainers.containers.PostgreSQLContainer;
+import ovh.equino.actracker.jpa.IntegrationTestRelationalDataBase;
 import ovh.equino.actracker.postgres.SchemaMigrator;
 
 import java.sql.Connection;
@@ -52,6 +53,8 @@ public final class IntegrationTestPostgresDataBase extends IntegrationTestRelati
     public String driverClassName() {
         return driverClassName;
     }
+
+
 
     private void migrateSchema() {
         SchemaMigrator migrator = new SchemaMigrator(

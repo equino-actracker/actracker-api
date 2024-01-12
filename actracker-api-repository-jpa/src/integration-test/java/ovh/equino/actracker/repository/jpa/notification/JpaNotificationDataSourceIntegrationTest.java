@@ -4,14 +4,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ovh.equino.actracker.domain.Notification;
 import ovh.equino.actracker.domain.exception.ParseException;
-import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
+import ovh.equino.actracker.jpa.JpaIntegrationTest;
 
 import java.sql.SQLException;
 import java.util.List;
 
 import static java.util.List.of;
 import static org.assertj.core.api.Assertions.assertThat;
-import static ovh.equino.actracker.repository.jpa.TestUtil.nextUUID;
+import static ovh.equino.actracker.jpa.TestUtil.nextUUID;
 
 abstract class JpaNotificationDataSourceIntegrationTest extends JpaIntegrationTest {
 

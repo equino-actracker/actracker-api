@@ -1,4 +1,4 @@
-package ovh.equino.actracker.repository.jpa;
+package ovh.equino.actracker.jpa;
 
 import ovh.equino.actracker.domain.Notification;
 import ovh.equino.actracker.domain.activity.ActivityDto;
@@ -16,12 +16,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
-import static java.util.Arrays.stream;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.UUID.randomUUID;
@@ -30,18 +26,18 @@ public abstract class IntegrationTestRelationalDataBase {
 
     private final Set<UUID> addedEntityIds = new HashSet<>();
 
-    abstract String jdbcUrl();
+    protected abstract String jdbcUrl();
 
-    abstract String username();
+    protected abstract String username();
 
-    abstract String password();
+    protected abstract String password();
 
-    abstract String driverClassName();
+    protected abstract String driverClassName();
 
     protected abstract Connection getConnection() throws SQLException;
 
     public synchronized void addUsers(TenantDto... users) throws SQLException {
-        List<TenantDto> notAddedUsers = stream(users)
+        List<TenantDto> notAddedUsers = Arrays.stream(users)
                 .filter(user -> !addedEntityIds.contains(user.id()))
                 .toList();
         Connection connection = getConnection();
@@ -58,7 +54,7 @@ public abstract class IntegrationTestRelationalDataBase {
     }
 
     public synchronized void addActivities(ActivityDto... activities) throws SQLException {
-        List<ActivityDto> notAddedActivities = stream(activities)
+        List<ActivityDto> notAddedActivities = Arrays.stream(activities)
                 .filter(activity -> !addedEntityIds.contains(activity.id()))
                 .toList();
         Connection connection = getConnection();
@@ -107,7 +103,7 @@ public abstract class IntegrationTestRelationalDataBase {
     }
 
     public synchronized void addTags(TagDto... tags) throws SQLException {
-        List<TagDto> notAddedTags = stream(tags)
+        List<TagDto> notAddedTags = Arrays.stream(tags)
                 .filter(tag -> !addedEntityIds.contains(tag.id()))
                 .toList();
         Connection connection = getConnection();
@@ -157,7 +153,7 @@ public abstract class IntegrationTestRelationalDataBase {
     }
 
     public synchronized void addTagSets(TagSetDto... tagSets) throws SQLException {
-        List<TagSetDto> notAddedTagSets = stream(tagSets)
+        List<TagSetDto> notAddedTagSets = Arrays.stream(tagSets)
                 .filter(tagSet -> !addedEntityIds.contains(tagSet.id()))
                 .toList();
         Connection connection = getConnection();
@@ -188,7 +184,7 @@ public abstract class IntegrationTestRelationalDataBase {
     }
 
     public synchronized void addDashboards(DashboardDto... dashboards) throws SQLException {
-        List<DashboardDto> notAddedDashboards = stream(dashboards)
+        List<DashboardDto> notAddedDashboards = Arrays.stream(dashboards)
                 .filter(dashboard -> !addedEntityIds.contains(dashboard.id()))
                 .toList();
         Connection connection = getConnection();
@@ -251,7 +247,7 @@ public abstract class IntegrationTestRelationalDataBase {
     }
 
     public synchronized void addNotifications(Notification<?>... notifications) throws SQLException, ParseException {
-        List<Notification<?>> notAddedNotifications = stream(notifications)
+        List<Notification<?>> notAddedNotifications = Arrays.stream(notifications)
                 .filter(notification -> !addedEntityIds.contains(notification.id()))
                 .toList();
         Connection connection = getConnection();

@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tag.*;
 import ovh.equino.actracker.domain.user.User;
-import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
+import ovh.equino.actracker.jpa.JpaIntegrationTest;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,7 +13,7 @@ import java.util.Optional;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static ovh.equino.actracker.domain.tag.MetricType.NUMERIC;
-import static ovh.equino.actracker.repository.jpa.TestUtil.nextUUID;
+import static ovh.equino.actracker.jpa.TestUtil.nextUUID;
 
 abstract class JpaTagRepositoryIntegrationTest extends JpaIntegrationTest {
 

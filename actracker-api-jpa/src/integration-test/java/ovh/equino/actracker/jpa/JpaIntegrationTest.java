@@ -1,13 +1,11 @@
-package ovh.equino.actracker.repository.jpa;
+package ovh.equino.actracker.jpa;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.hibernate.jpa.HibernatePersistenceProvider;
-import ovh.equino.actracker.domain.activity.MetricValue;
 import ovh.equino.actracker.domain.tenant.TenantDto;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public abstract class JpaIntegrationTest {

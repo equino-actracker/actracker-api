@@ -1,4 +1,4 @@
-package ovh.equino.actracker.repository.jpa;
+package ovh.equino.actracker.jpa;
 
 import ovh.equino.actracker.domain.dashboard.AnalysisMetric;
 import ovh.equino.actracker.domain.dashboard.Chart;
@@ -7,12 +7,12 @@ import ovh.equino.actracker.domain.dashboard.GroupBy;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tenant.TenantDto;
 
+import java.util.Arrays;
 import java.util.Set;
 
-import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toUnmodifiableSet;
-import static ovh.equino.actracker.repository.jpa.TestUtil.nextUUID;
-import static ovh.equino.actracker.repository.jpa.TestUtil.randomString;
+import static ovh.equino.actracker.jpa.TestUtil.nextUUID;
+import static ovh.equino.actracker.jpa.TestUtil.randomString;
 
 public final class ChartBuilder {
 
@@ -35,7 +35,7 @@ public final class ChartBuilder {
                 newChart.name(),
                 newChart.groupBy(),
                 newChart.analysisMetric(),
-                stream(tags).map(TagDto::id).collect(toUnmodifiableSet()),
+                Arrays.stream(tags).map(TagDto::id).collect(toUnmodifiableSet()),
                 newChart.isDeleted()
         );
         return this;

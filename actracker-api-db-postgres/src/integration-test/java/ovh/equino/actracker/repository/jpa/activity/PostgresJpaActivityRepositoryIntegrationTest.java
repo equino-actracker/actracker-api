@@ -1,7 +1,7 @@
 package ovh.equino.actracker.repository.jpa.activity;
 
 import ovh.equino.actracker.repository.jpa.IntegrationTestPostgresDataBase;
-import ovh.equino.actracker.repository.jpa.IntegrationTestRelationalDataBase;
+import ovh.equino.actracker.jpa.IntegrationTestRelationalDataBase;
 
 class PostgresJpaActivityRepositoryIntegrationTest extends JpaActivityRepositoryIntegrationTest {
 

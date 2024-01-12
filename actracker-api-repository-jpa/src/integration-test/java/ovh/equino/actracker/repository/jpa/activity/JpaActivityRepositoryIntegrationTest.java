@@ -9,7 +9,7 @@ import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tenant.TenantDto;
 import ovh.equino.actracker.domain.user.User;
-import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
+import ovh.equino.actracker.jpa.JpaIntegrationTest;
 
 import java.sql.SQLException;
 import java.time.Instant;
@@ -20,7 +20,7 @@ import static java.math.BigDecimal.*;
 import static java.util.Collections.emptyList;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
-import static ovh.equino.actracker.repository.jpa.TestUtil.nextUUID;
+import static ovh.equino.actracker.jpa.TestUtil.nextUUID;
 
 abstract class JpaActivityRepositoryIntegrationTest extends JpaIntegrationTest {
 

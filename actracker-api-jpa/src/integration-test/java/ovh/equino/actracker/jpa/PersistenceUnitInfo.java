@@ -1,4 +1,4 @@
-package ovh.equino.actracker.repository.jpa;
+package ovh.equino.actracker.jpa;
 
 import jakarta.persistence.SharedCacheMode;
 import jakarta.persistence.ValidationMode;
