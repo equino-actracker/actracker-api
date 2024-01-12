@@ -6,6 +6,7 @@ import ovh.equino.actracker.domain.Notification;
 import ovh.equino.actracker.domain.exception.ParseException;
 import ovh.equino.actracker.jpa.JpaIntegrationTest;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -15,9 +16,9 @@ import static ovh.equino.actracker.jpa.TestUtil.nextUUID;
 
 abstract class JpaNotificationDataSourceIntegrationTest extends JpaIntegrationTest {
 
-    private static final Notification<?> NOTIFICATION_1 = new Notification<>(nextUUID(), new NotificationData(1));
-    private static final Notification<?> NOTIFICATION_2 = new Notification<>(nextUUID(), new NotificationData(2));
-    private static final Notification<?> NOTIFICATION_3 = new Notification<>(nextUUID(), new NotificationData(3));
+    private static final Notification<?> NOTIFICATION_1 = new Notification<>(nextUUID(), BigDecimal.ZERO);
+    private static final Notification<?> NOTIFICATION_2 = new Notification<>(nextUUID(), BigDecimal.ONE);
+    private static final Notification<?> NOTIFICATION_3 = new Notification<>(nextUUID(), BigDecimal.TEN);
 
     private JpaNotificationDataSource dataSource;
 
