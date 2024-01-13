@@ -1,4 +1,4 @@
-package ovh.equino.actracker.repository.jpa.tagset;
+package ovh.equino.actracker.datasource.jpa.tagset;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;

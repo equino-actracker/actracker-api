@@ -1,19 +1,21 @@
-package ovh.equino.actracker.repository.jpa.tagset;
+package ovh.equino.actracker.datasource.jpa.tagset;
 
 import jakarta.persistence.EntityManager;
 import ovh.equino.actracker.jpa.tagset.TagSetEntity;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
-import ovh.equino.actracker.datasource.jpa.SingleResultJpaQuery;
+import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
+import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
 
-final class SelectTagSetQuery extends SingleResultJpaQuery<
-        TagSetEntity, TagSetProjection> {
+final class SelectTagSetsQuery extends MultiResultJpaQuery<TagSetEntity, TagSetProjection> {
 
     private final PredicateBuilder predicateBuilder;
+    private final SortBuilder sortBuilder;
 
-    SelectTagSetQuery(EntityManager entityManager) {
+    SelectTagSetsQuery(EntityManager entityManager) {
         super(entityManager);
         this.predicateBuilder = new PredicateBuilder();
+        this.sortBuilder = new SortBuilder();
     }
 
     @Override
@@ -35,7 +37,12 @@ final class SelectTagSetQuery extends SingleResultJpaQuery<
     }
 
     @Override
-    public SelectTagSetQuery where(JpaPredicate predicate) {
+    public JpaSortBuilder<TagSetEntity> sort() {
+        return sortBuilder;
+    }
+
+    @Override
+    public SelectTagSetsQuery where(JpaPredicate predicate) {
         super.where(predicate);
         return this;
     }
@@ -51,8 +58,13 @@ final class SelectTagSetQuery extends SingleResultJpaQuery<
     }
 
     public class PredicateBuilder extends JpaPredicateBuilder<TagSetEntity> {
-
         private PredicateBuilder() {
+            super(criteriaBuilder, root);
+        }
+    }
+
+    public class SortBuilder extends JpaSortBuilder<TagSetEntity> {
+        private SortBuilder() {
             super(criteriaBuilder, root);
         }
     }

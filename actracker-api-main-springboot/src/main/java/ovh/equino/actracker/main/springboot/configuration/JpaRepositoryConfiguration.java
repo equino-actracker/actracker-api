@@ -11,6 +11,7 @@ import ovh.equino.actracker.domain.tag.TagDataSource;
 import ovh.equino.actracker.domain.tag.TagRepository;
 import ovh.equino.actracker.domain.tagset.TagSetDataSource;
 import ovh.equino.actracker.domain.tagset.TagSetRepository;
+import ovh.equino.actracker.domain.tenant.TenantDataSource;
 import ovh.equino.actracker.notification.outbox.NotificationDataSource;
 import ovh.equino.actracker.notification.outbox.NotificationRepository;
 
@@ -26,7 +27,8 @@ import ovh.equino.actracker.notification.outbox.NotificationRepository;
                         TagSetRepository.class,
                         DashboardRepository.class,
 
-//                        TenantDataSource.class,
+                        // TODO remove data sources
+                        TenantDataSource.class,
                         ActivityDataSource.class,
                         TagDataSource.class,
                         TagSetDataSource.class,
