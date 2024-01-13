@@ -1,4 +1,4 @@
-package ovh.equino.actracker.repository.jpa.tag;
+package ovh.equino.actracker.datasource.jpa.tag;
 
 import ovh.equino.actracker.jpa.IntegrationTestH2DataBase;
 import ovh.equino.actracker.jpa.IntegrationTestRelationalDataBase;

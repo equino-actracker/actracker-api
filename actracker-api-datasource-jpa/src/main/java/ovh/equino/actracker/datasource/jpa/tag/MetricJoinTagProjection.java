@@ -1,4 +1,4 @@
-package ovh.equino.actracker.repository.jpa.tag;
+package ovh.equino.actracker.datasource.jpa.tag;
 
 import ovh.equino.actracker.domain.tag.MetricDto;
 import ovh.equino.actracker.domain.tag.MetricType;
