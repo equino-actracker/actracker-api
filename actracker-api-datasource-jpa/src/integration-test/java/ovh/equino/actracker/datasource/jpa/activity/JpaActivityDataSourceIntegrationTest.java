@@ -1,4 +1,4 @@
-package ovh.equino.actracker.repository.jpa.activity;
+package ovh.equino.actracker.datasource.jpa.activity;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;

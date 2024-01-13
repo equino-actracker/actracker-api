@@ -1,4 +1,4 @@
-package ovh.equino.actracker.repository.jpa.activity;
+package ovh.equino.actracker.datasource.jpa.activity;
 
 import jakarta.persistence.EntityManager;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
