@@ -1,4 +1,4 @@
-package ovh.equino.actracker.repository.jpa.dashboard;
+package ovh.equino.actracker.datasource.jpa.dashboard;
 
 import ovh.equino.actracker.domain.dashboard.Chart;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;

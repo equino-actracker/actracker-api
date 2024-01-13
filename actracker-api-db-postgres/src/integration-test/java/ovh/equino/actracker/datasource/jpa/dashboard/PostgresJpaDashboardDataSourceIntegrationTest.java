@@ -1,4 +1,4 @@
-package ovh.equino.actracker.repository.jpa.dashboard;
+package ovh.equino.actracker.datasource.jpa.dashboard;
 
 import ovh.equino.actracker.jpa.IntegrationTestPostgresDataBase;
 import ovh.equino.actracker.jpa.IntegrationTestRelationalDataBase;

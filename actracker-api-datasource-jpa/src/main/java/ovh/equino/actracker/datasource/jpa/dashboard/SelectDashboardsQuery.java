@@ -1,4 +1,4 @@
-package ovh.equino.actracker.repository.jpa.dashboard;
+package ovh.equino.actracker.datasource.jpa.dashboard;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
@@ -9,28 +9,32 @@ import ovh.equino.actracker.jpa.dashboard.DashboardEntity;
 import ovh.equino.actracker.jpa.dashboard.DashboardShareEntity;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
-import ovh.equino.actracker.datasource.jpa.SingleResultJpaQuery;
+import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
+import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
 
-final class SelectDashboardQuery extends SingleResultJpaQuery<DashboardEntity, DashboardProjection> {
+final class SelectDashboardsQuery extends MultiResultJpaQuery<DashboardEntity, DashboardProjection> {
 
     private final PredicateBuilder predicate;
+    private final SortBuilder sort;
 
-    SelectDashboardQuery(EntityManager entityManager) {
+    SelectDashboardsQuery(EntityManager entityManager) {
         super(entityManager);
         this.predicate = new PredicateBuilder();
+        this.sort = new SortBuilder();
     }
 
     @Override
     protected void initProjection() {
         query.select(
-                criteriaBuilder.construct(
-                        DashboardProjection.class,
-                        root.get("id"),
-                        root.get("creatorId"),
-                        root.get("name"),
-                        root.get("deleted")
+                        criteriaBuilder.construct(
+                                DashboardProjection.class,
+                                root.get("id"),
+                                root.get("creatorId"),
+                                root.get("name"),
+                                root.get("deleted")
+                        )
                 )
-        );
+                .distinct(true);
     }
 
     @Override
@@ -39,9 +43,14 @@ final class SelectDashboardQuery extends SingleResultJpaQuery<DashboardEntity, D
     }
 
     @Override
-    public SelectDashboardQuery where(JpaPredicate predicate) {
+    public SelectDashboardsQuery where(JpaPredicate predicate) {
         super.where(predicate);
         return this;
+    }
+
+    @Override
+    public SortBuilder sort() {
+        return sort;
     }
 
     @Override
@@ -68,16 +77,18 @@ final class SelectDashboardQuery extends SingleResultJpaQuery<DashboardEntity, D
         }
 
         private JpaPredicate isGrantee(User user) {
-            Join<DashboardEntity, DashboardShareEntity> shares = root.join("shares", JoinType.LEFT);
+            Join<DashboardEntity, DashboardShareEntity> sharedDashboard = root.join("shares", JoinType.LEFT);
             Subquery<Long> subQuery = query.subquery(Long.class);
             subQuery.select(criteriaBuilder.literal(1L))
-                    .where(
-                            criteriaBuilder.and(
-                                    criteriaBuilder.equal(shares.get("granteeId"), user.id().toString())
-                            )
-                    )
+                    .where(criteriaBuilder.equal(sharedDashboard.get("granteeId"), user.id().toString()))
                     .from(DashboardEntity.class);
             return () -> criteriaBuilder.exists(subQuery);
+        }
+    }
+
+    public final class SortBuilder extends JpaSortBuilder<DashboardEntity> {
+        private SortBuilder() {
+            super(criteriaBuilder, root);
         }
     }
 }
