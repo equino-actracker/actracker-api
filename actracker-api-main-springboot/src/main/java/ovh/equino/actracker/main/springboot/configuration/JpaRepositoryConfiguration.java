@@ -26,14 +26,6 @@ import ovh.equino.actracker.notification.outbox.NotificationRepository;
                         NotificationRepository.class,
                         TagSetRepository.class,
                         DashboardRepository.class,
-
-                        // TODO remove data sources
-                        TenantDataSource.class,
-                        ActivityDataSource.class,
-                        TagDataSource.class,
-                        TagSetDataSource.class,
-                        DashboardDataSource.class,
-                        NotificationDataSource.class,
                 }
         )
 )
