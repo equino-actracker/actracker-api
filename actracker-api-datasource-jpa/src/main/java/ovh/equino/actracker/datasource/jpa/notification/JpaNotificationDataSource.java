@@ -1,4 +1,4 @@
-package ovh.equino.actracker.repository.jpa.notification;
+package ovh.equino.actracker.datasource.jpa.notification;
 
 import jakarta.persistence.EntityManager;
 import ovh.equino.actracker.domain.Notification;

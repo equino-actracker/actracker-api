@@ -1,4 +1,4 @@
-package ovh.equino.actracker.repository.jpa.notification;
+package ovh.equino.actracker.datasource.jpa.notification;
 
 import ovh.equino.actracker.jpa.IntegrationTestH2DataBase;
 import ovh.equino.actracker.jpa.IntegrationTestRelationalDataBase;

@@ -1,4 +1,4 @@
-package ovh.equino.actracker.repository.jpa.notification;
+package ovh.equino.actracker.datasource.jpa.notification;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
