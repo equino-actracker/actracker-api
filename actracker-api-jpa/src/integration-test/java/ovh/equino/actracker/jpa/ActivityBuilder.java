@@ -6,10 +6,10 @@ import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tenant.TenantDto;
 
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static ovh.equino.actracker.jpa.TestUtil.*;
 
@@ -103,7 +103,7 @@ public final class ActivityBuilder {
                 newActivity.startTime(),
                 newActivity.endTime(),
                 newActivity.comment(),
-                Arrays.stream(tags).map(TagDto::id).collect(toUnmodifiableSet()),
+                stream(tags).map(TagDto::id).collect(toUnmodifiableSet()),
                 newActivity.metricValues(),
                 newActivity.deleted()
         );
@@ -119,7 +119,7 @@ public final class ActivityBuilder {
                 newActivity.endTime(),
                 newActivity.comment(),
                 newActivity.tags(),
-                Arrays.stream(values).toList(),
+                stream(values).toList(),
                 newActivity.deleted()
         );
         return this;

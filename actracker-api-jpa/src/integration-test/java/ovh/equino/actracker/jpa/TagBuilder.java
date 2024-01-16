@@ -7,7 +7,6 @@ import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tenant.TenantDto;
 import ovh.equino.actracker.domain.user.User;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static java.util.Arrays.stream;
@@ -53,7 +52,7 @@ public final class TagBuilder {
                 newTag.id(),
                 newTag.creatorId(),
                 newTag.name(),
-                Arrays.stream(metrics).toList(),
+                stream(metrics).toList(),
                 newTag.shares(),
                 newTag.deleted()
         );
@@ -66,7 +65,7 @@ public final class TagBuilder {
                 newTag.creatorId(),
                 newTag.name(),
                 newTag.metrics(),
-                Arrays.stream(grantees)
+                stream(grantees)
                         .map(grantee -> new Share(
                                         new User(grantee.id()),
                                         grantee.username()

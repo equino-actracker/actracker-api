@@ -1,6 +1,5 @@
 package ovh.equino.actracker.datasource.jpa.tenant;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -13,6 +12,8 @@ import ovh.equino.actracker.jpa.JpaIntegrationTest;
 import java.sql.SQLException;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 abstract class JpaTenantDataSourceIntegrationTest extends JpaIntegrationTest {
 
@@ -30,8 +31,8 @@ abstract class JpaTenantDataSourceIntegrationTest extends JpaIntegrationTest {
     void shouldFindExistingTenantByUsername(String username, TenantDto expectedUser) {
         inTransaction(() -> {
             Optional<TenantDto> foundUser = dataSource.findByUsername(username);
-            Assertions.assertThat(foundUser).isPresent();
-            Assertions.assertThat(foundUser.get()).usingRecursiveComparison().isEqualTo(expectedUser);
+            assertThat(foundUser).isPresent();
+            assertThat(foundUser.get()).usingRecursiveComparison().isEqualTo(expectedUser);
         });
     }
 
@@ -46,7 +47,7 @@ abstract class JpaTenantDataSourceIntegrationTest extends JpaIntegrationTest {
     void shouldNotFindNonExistingTenantByUsername(String username) {
         inTransaction(() -> {
             Optional<TenantDto> foundUser = dataSource.findByUsername(username);
-            Assertions.assertThat(foundUser).isNotPresent();
+            assertThat(foundUser).isNotPresent();
         });
     }
 
@@ -58,8 +59,8 @@ abstract class JpaTenantDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @BeforeAll
     static void setUp() {
-        testConfiguration.addUser(JpaIntegrationTest.newUser().named("existingUser1").build());
-        testConfiguration.addUser(JpaIntegrationTest.newUser().named("existingUser2").build());
-        testConfiguration.addTransientUser(JpaIntegrationTest.newUser().named("nonExistingUser").build());
+        testConfiguration.addUser(newUser().named("existingUser1").build());
+        testConfiguration.addUser(newUser().named("existingUser2").build());
+        testConfiguration.addTransientUser(newUser().named("nonExistingUser").build());
     }
 }

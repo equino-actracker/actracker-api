@@ -53,8 +53,6 @@ public final class IntegrationTestPostgresDataBase extends IntegrationTestRelati
         return driverClassName;
     }
 
-
-
     private void migrateSchema() {
         SchemaMigrator migrator = new SchemaMigrator(
                 container.getJdbcUrl(),

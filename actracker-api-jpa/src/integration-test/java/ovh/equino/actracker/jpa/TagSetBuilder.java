@@ -4,9 +4,9 @@ import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tagset.TagSetDto;
 import ovh.equino.actracker.domain.tenant.TenantDto;
 
-import java.util.Arrays;
 import java.util.Set;
 
+import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static ovh.equino.actracker.jpa.TestUtil.nextUUID;
 import static ovh.equino.actracker.jpa.TestUtil.randomString;
@@ -53,7 +53,7 @@ public final class TagSetBuilder {
                 newTagSet.id(),
                 newTagSet.creatorId(),
                 newTagSet.name(),
-                Arrays.stream(tags).map(TagDto::id).collect(toUnmodifiableSet()),
+                stream(tags).map(TagDto::id).collect(toUnmodifiableSet()),
                 newTagSet.deleted()
         );
 
