@@ -14,8 +14,7 @@ import static java.util.UUID.randomUUID;
 
 class DashboardShareMapper {
 
-    List<Share> toDomainObjects(Collection<
-            DashboardShareEntity> entities) {
+    List<Share> toDomainObjects(Collection<DashboardShareEntity> entities) {
         return requireNonNullElse(entities, new ArrayList<DashboardShareEntity>())
                 .stream()
                 .map(this::toDomainObject)
