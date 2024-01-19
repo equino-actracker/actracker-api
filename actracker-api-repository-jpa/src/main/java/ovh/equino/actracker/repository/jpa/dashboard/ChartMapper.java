@@ -4,7 +4,9 @@ import ovh.equino.actracker.domain.dashboard.AnalysisMetric;
 import ovh.equino.actracker.domain.dashboard.Chart;
 import ovh.equino.actracker.domain.dashboard.ChartId;
 import ovh.equino.actracker.domain.dashboard.GroupBy;
-import ovh.equino.actracker.repository.jpa.tag.TagEntity;
+import ovh.equino.actracker.jpa.dashboard.ChartEntity;
+import ovh.equino.actracker.jpa.dashboard.DashboardEntity;
+import ovh.equino.actracker.jpa.tag.TagEntity;
 
 import java.util.*;
 
@@ -24,17 +26,17 @@ class ChartMapper {
         if(isNull(entity)) {
             return null;
         }
-        Set<UUID> entityTags = requireNonNullElse(entity.tags, new HashSet<TagEntity>()).stream()
-                .map(tag -> tag.id)
+        Set<UUID> entityTags = requireNonNullElse(entity.getTags(), new HashSet<TagEntity>()).stream()
+                .map(TagEntity::getId)
                 .map(UUID::fromString)
                 .collect(toUnmodifiableSet());
         return new Chart(
-                new ChartId(entity.id),
-                entity.name,
-                GroupBy.valueOf(entity.groupBy),
-                AnalysisMetric.valueOf(entity.metric),
+                new ChartId(entity.getId()),
+                entity.getName(),
+                GroupBy.valueOf(entity.getGroupBy()),
+                AnalysisMetric.valueOf(entity.getMetric()),
                 entityTags,
-                entity.deleted
+                entity.isDeleted()
         );
     }
 
@@ -51,19 +53,19 @@ class ChartMapper {
                 .collect(toUnmodifiableSet());
 
         ChartEntity entity = new ChartEntity();
-        entity.id = chart.id().toString();
-        entity.name = chart.name();
-        entity.dashboard = dashboard;
-        entity.groupBy = chart.groupBy().toString();
-        entity.metric = chart.analysisMetric().toString();
-        entity.tags = dtoTags;
-        entity.deleted = chart.isDeleted();
+        entity.setId(chart.id().toString());
+        entity.setName(chart.name());
+        entity.setDashboard(dashboard);
+        entity.setGroupBy(chart.groupBy().toString());
+        entity.setMetric(chart.analysisMetric().toString());
+        entity.setTags(dtoTags);
+        entity.setDeleted(chart.isDeleted());
         return entity;
     }
 
     private TagEntity toTagEntity(String tagId) {
         TagEntity tagEntity = new TagEntity();
-        tagEntity.id = tagId;
+        tagEntity.setId(tagId);
         return tagEntity;
     }
 }

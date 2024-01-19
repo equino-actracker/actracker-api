@@ -1,13 +1,11 @@
 dependencies {
+    compileOnly 'jakarta.persistence:jakarta.persistence-api:3.1.0'
     implementation project(':actracker-api-domain')
     implementation project(':actracker-api-notification-outbox')
-    implementation 'org.hibernate:hibernate-core:6.4.1.Final'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.0'
-    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.0'
-    implementation 'org.apache.commons:commons-collections4:4.4'
-    implementation 'org.apache.commons:commons-lang3:3.14.0'
+    implementation project(':actracker-api-jpa')
 
     integrationTestImplementation project(':actracker-api-domain').sourceSets.test.output
-    integrationTestImplementation 'org.assertj:assertj-core:3.24.2'
-    integrationTestImplementation 'org.junit.jupiter:junit-jupiter-params:5.10.1'
+    integrationTestImplementation project(':actracker-api-jpa').sourceSets.main.output
+    integrationTestImplementation project(':actracker-api-jpa').sourceSets.integrationTest.output
+    integrationTestImplementation 'org.hibernate:hibernate-core:6.4.1.Final'
 }

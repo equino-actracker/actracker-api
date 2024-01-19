@@ -3,16 +3,16 @@ package ovh.equino.actracker.repository.jpa.notification;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ovh.equino.actracker.domain.Notification;
-import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
+import ovh.equino.actracker.jpa.JpaIntegrationTest;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
-import static ovh.equino.actracker.repository.jpa.TestUtil.nextUUID;
+import static ovh.equino.actracker.jpa.TestUtil.nextUUID;
 
 abstract class JpaNotificationRepositoryIntegrationTest extends JpaIntegrationTest {
 
@@ -26,7 +26,7 @@ abstract class JpaNotificationRepositoryIntegrationTest extends JpaIntegrationTe
     @Test
     void shouldSaveAndGetNotification() {
         UUID notificationId = nextUUID();
-        Notification<NotificationData> notification = new Notification<>(notificationId, new NotificationData(1L));
+        Notification<?> notification = new Notification<>(notificationId, BigDecimal.ONE);
         AtomicLong initialVersion = new AtomicLong();
         AtomicLong finalVersion = new AtomicLong();
         inTransaction(() -> {
@@ -72,15 +72,16 @@ abstract class JpaNotificationRepositoryIntegrationTest extends JpaIntegrationTe
     @Test
     void shouldDeleteNotification() {
         UUID notificationId = nextUUID();
-        Notification<NotificationData> notification = new Notification<>(notificationId, new NotificationData(1L));
-        inTransaction(() -> {
-            repository.save(notification);
-        });
+        Notification<?> notification = new Notification<>(notificationId, BigDecimal.ONE);
+
+        inTransaction(() -> repository.save(notification));
+
         inTransaction(() -> {
             repository.delete(notificationId);
             Optional<Notification<?>> foundNotification = repository.get(notificationId);
             assertThat(foundNotification).isNotPresent();
         });
+
         inTransaction(() -> {
             Optional<Notification<?>> foundNotification = repository.get(notificationId);
             assertThat(foundNotification).isNotPresent();

@@ -2,7 +2,9 @@ package ovh.equino.actracker.repository.jpa.activity;
 
 import jakarta.persistence.EntityManager;
 import ovh.equino.actracker.domain.activity.MetricValue;
-import ovh.equino.actracker.repository.jpa.tag.MetricEntity;
+import ovh.equino.actracker.jpa.activity.ActivityEntity;
+import ovh.equino.actracker.jpa.activity.MetricValueEntity;
+import ovh.equino.actracker.jpa.tag.MetricEntity;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,8 +31,8 @@ class MetricValueMapper {
 
     MetricValue toDomainObject(MetricValueEntity entity) {
         return new MetricValue(
-                UUID.fromString(entity.metric.id),
-                entity.value
+                UUID.fromString(entity.getMetric().getId()),
+                entity.getValue()
         );
     }
 
@@ -43,10 +45,10 @@ class MetricValueMapper {
 
     MetricValueEntity toEntity(MetricValue metricValue, ActivityEntity activity) {
         MetricValueEntity entity = new MetricValueEntity();
-        entity.id = randomUUID().toString();
-        entity.activity = activity;
-        entity.metric = findMetric(metricValue.metricId());
-        entity.value = metricValue.value();
+        entity.setId(randomUUID().toString());
+        entity.setActivity(activity);
+        entity.setMetric(findMetric(metricValue.metricId()));
+        entity.setValue(metricValue.value());
         return entity;
     }
 

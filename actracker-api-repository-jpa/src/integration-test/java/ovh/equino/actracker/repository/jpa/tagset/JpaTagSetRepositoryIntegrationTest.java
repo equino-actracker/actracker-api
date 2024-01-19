@@ -10,7 +10,7 @@ import ovh.equino.actracker.domain.tagset.TagSetId;
 import ovh.equino.actracker.domain.tagset.TagSetTestFactory;
 import ovh.equino.actracker.domain.tenant.TenantDto;
 import ovh.equino.actracker.domain.user.User;
-import ovh.equino.actracker.repository.jpa.JpaIntegrationTest;
+import ovh.equino.actracker.jpa.JpaIntegrationTest;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -19,7 +19,7 @@ import java.util.Optional;
 import static java.util.Collections.emptyList;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
-import static ovh.equino.actracker.repository.jpa.TestUtil.nextUUID;
+import static ovh.equino.actracker.jpa.TestUtil.nextUUID;
 
 abstract class JpaTagSetRepositoryIntegrationTest extends JpaIntegrationTest {
 

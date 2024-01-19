@@ -55,8 +55,11 @@ subprojects {
     }
 
     dependencies {
+        // TODO should be also provided for integration test?
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.1'
         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.1'
+        integrationTestImplementation 'org.assertj:assertj-core:3.24.2'
+        integrationTestImplementation 'org.junit.jupiter:junit-jupiter-params:5.10.1'
     }
 
     test {

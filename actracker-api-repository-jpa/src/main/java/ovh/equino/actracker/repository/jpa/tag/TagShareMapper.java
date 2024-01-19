@@ -2,6 +2,8 @@ package ovh.equino.actracker.repository.jpa.tag;
 
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.user.User;
+import ovh.equino.actracker.jpa.tag.TagEntity;
+import ovh.equino.actracker.jpa.tag.TagShareEntity;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,10 +25,10 @@ class TagShareMapper {
         if (isNull(entity)) {
             return null;
         }
-        User grantee = nonNull(entity.granteeId)
-                ? new User(entity.granteeId)
+        User grantee = nonNull(entity.getGranteeId())
+                ? new User(entity.getGranteeId())
                 : null;
-        return new Share(grantee, entity.granteeName);
+        return new Share(grantee, entity.getGranteeName());
     }
 
     List<TagShareEntity> toEntities(Collection<Share> shares, TagEntity tag) {
@@ -38,12 +40,10 @@ class TagShareMapper {
 
     TagShareEntity toEntity(Share share, TagEntity tag) {
         TagShareEntity entity = new TagShareEntity();
-        entity.id = randomUUID().toString();
-        entity.granteeId = nonNull(share.grantee())
-                ? share.grantee().id().toString()
-                : null;
-        entity.granteeName = share.granteeName();
-        entity.tag = tag;
+        entity.setId(randomUUID().toString());
+        entity.setGranteeId(nonNull(share.grantee()) ? share.grantee().id().toString() : null);
+        entity.setGranteeName(share.granteeName());
+        entity.setTag(tag);
         return entity;
     }
 }

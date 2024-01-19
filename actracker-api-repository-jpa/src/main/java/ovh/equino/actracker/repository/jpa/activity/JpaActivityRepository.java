@@ -2,7 +2,8 @@ package ovh.equino.actracker.repository.jpa.activity;
 
 import jakarta.persistence.EntityManager;
 import ovh.equino.actracker.domain.activity.*;
-import ovh.equino.actracker.repository.jpa.JpaDAO;
+import ovh.equino.actracker.jpa.activity.ActivityEntity;
+import ovh.equino.actracker.jpa.JpaDAO;
 
 import java.util.Optional;
 

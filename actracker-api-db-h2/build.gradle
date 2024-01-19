@@ -3,4 +3,6 @@ dependencies {
 
     integrationTestImplementation project(':actracker-api-repository-jpa').sourceSets.integrationTest.compileClasspath
     integrationTestImplementation project(':actracker-api-repository-jpa').sourceSets.integrationTest.runtimeClasspath
+    integrationTestImplementation project(':actracker-api-datasource-jpa').sourceSets.integrationTest.compileClasspath
+    integrationTestImplementation project(':actracker-api-datasource-jpa').sourceSets.integrationTest.runtimeClasspath
 }
