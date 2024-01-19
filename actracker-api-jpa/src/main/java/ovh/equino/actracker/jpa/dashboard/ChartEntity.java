@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ovh.equino.actracker.jpa.JpaEntity;
 import ovh.equino.actracker.jpa.tag.TagEntity;
 
 import java.util.Set;
@@ -13,11 +14,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-public class ChartEntity {
-
-    @Id
-    @Column(name = "id")
-    private String id;
+public class ChartEntity extends JpaEntity {
 
     @ManyToOne
     @JoinColumn(name = "dashboard_id")

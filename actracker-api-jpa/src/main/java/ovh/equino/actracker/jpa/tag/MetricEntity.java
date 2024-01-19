@@ -4,17 +4,14 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ovh.equino.actracker.jpa.JpaEntity;
 
 @Entity
 @Table(name = "metric")
 @NoArgsConstructor
 @Getter
 @Setter
-public class MetricEntity {
-
-    @Id
-    @Column(name = "id")
-    private String id;
+public class MetricEntity extends JpaEntity {
 
     @Column(name = "creator_id", insertable = false, updatable = false)
     private String creatorId;
