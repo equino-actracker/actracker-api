@@ -77,6 +77,10 @@ final class SelectChartJoinDashboardQuery extends MultiResultJpaQuery<ChartEntit
             super(criteriaBuilder, root);
         }
 
+        public JpaPredicate isNotDeleted() {
+            return () -> criteriaBuilder.isFalse(root.get("deleted"));
+        }
+
         public JpaPredicate hasDashboardId(UUID dashboardId) {
             return () -> criteriaBuilder.equal(dashboard.get("id"), dashboardId.toString());
         }

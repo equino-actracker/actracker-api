@@ -77,6 +77,10 @@ final class SelectMetricJoinTagQuery extends MultiResultJpaQuery<MetricEntity, M
             super(criteriaBuilder, root);
         }
 
+        public JpaPredicate isNotDeleted() {
+            return () -> criteriaBuilder.isFalse(root.get("deleted"));
+        }
+
         public JpaPredicate hasTagId(UUID tagId) {
             return () -> criteriaBuilder.equal(tag.get("id"), tagId.toString());
         }

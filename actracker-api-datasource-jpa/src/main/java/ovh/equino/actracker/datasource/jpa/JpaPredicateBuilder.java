@@ -5,6 +5,8 @@ import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import ovh.equino.actracker.domain.user.User;
+import ovh.equino.actracker.jpa.JpaEntity;
+import ovh.equino.actracker.jpa.JpaEntity_;
 
 import java.util.Collection;
 import java.util.Set;
@@ -15,7 +17,7 @@ import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public abstract class JpaPredicateBuilder<E> {
+public abstract class JpaPredicateBuilder<E extends JpaEntity> {
 
     private final CriteriaBuilder criteriaBuilder;
     private final Root<E> root;
@@ -26,7 +28,7 @@ public abstract class JpaPredicateBuilder<E> {
     }
 
     public JpaPredicate hasId(UUID id) {
-        return () -> criteriaBuilder.equal(root.get("id"), id.toString());
+        return () -> criteriaBuilder.equal(root.get(JpaEntity_.id), id.toString());
     }
 
     public JpaPredicate hasIdIn(Collection<UUID> ids) {
@@ -34,7 +36,7 @@ public abstract class JpaPredicateBuilder<E> {
                 .stream()
                 .map(UUID::toString)
                 .collect(toUnmodifiableSet());
-        return in(idsAsStrings, root.get("id"));
+        return in(idsAsStrings, root.get(JpaEntity_.id));
     }
 
     protected <T> JpaPredicate in(Collection<T> values, Path<T> field) {
@@ -59,21 +61,15 @@ public abstract class JpaPredicateBuilder<E> {
         );
     }
 
-    public JpaPredicate isNotDeleted() {
-        return () -> criteriaBuilder.isFalse(root.get("deleted"));
-    }
-
     public JpaPredicate isNotExcluded(Collection<UUID> excludedIds) {
         if (isEmpty(excludedIds)) {
             return allMatch();
         }
-        Path<Object> id = root.get("id");
-        CriteriaBuilder.In<Object> idIn = criteriaBuilder.in(id);
-        excludedIds.stream()
+        Set<String> ids = excludedIds.stream()
                 .map(UUID::toString)
-                .collect(toUnmodifiableSet())
-                .forEach(idIn::value);
-        return () -> criteriaBuilder.not(idIn);
+                .collect(toUnmodifiableSet());
+
+        return not(in(ids, root.get(JpaEntity_.id)));
     }
 
     public JpaPredicate isInPage(String pageId) {
@@ -81,19 +77,17 @@ public abstract class JpaPredicateBuilder<E> {
             return allMatch();
         }
         return () -> criteriaBuilder.greaterThanOrEqualTo(
-                root.get("id"),
+                root.get(JpaEntity_.id),
                 pageId
         );
     }
 
-    protected JpaPredicate matchesTerm(String term, String searchFieldName) {
+    protected JpaPredicate matchesTerm(String term, Path<String> field) {
         if (isBlank(term)) {
             return allMatch();
         }
-        return () -> criteriaBuilder.like(
-                root.get(searchFieldName),
-                term + "%"
-        );
+        String matchingValue = term + "%";
+        return () -> criteriaBuilder.like(field, matchingValue);
     }
 
     public JpaPredicate not(JpaPredicate predicate) {

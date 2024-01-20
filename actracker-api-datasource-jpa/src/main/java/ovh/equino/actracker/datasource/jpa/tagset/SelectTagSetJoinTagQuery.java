@@ -74,10 +74,9 @@ final class SelectTagSetJoinTagQuery extends MultiResultJpaQuery<TagSetEntity, T
             super(criteriaBuilder, root);
         }
 
-        @Override
         public JpaPredicate isNotDeleted() {
             return and(
-                    super.isNotDeleted(),
+                    () -> criteriaBuilder.isFalse(root.get("deleted")),
                     () -> criteriaBuilder.isFalse(tag.get("deleted"))
             );
         }

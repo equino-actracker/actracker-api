@@ -4,11 +4,11 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Subquery;
-import ovh.equino.actracker.domain.user.User;
-import ovh.equino.actracker.jpa.activity.ActivityEntity;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.SingleResultJpaQuery;
+import ovh.equino.actracker.domain.user.User;
+import ovh.equino.actracker.jpa.activity.ActivityEntity;
 
 final class SelectActivityQuery extends SingleResultJpaQuery<ActivityEntity, ActivityProjection> {
 
@@ -37,7 +37,7 @@ final class SelectActivityQuery extends SingleResultJpaQuery<ActivityEntity, Act
     }
 
     @Override
-    public JpaPredicateBuilder<ActivityEntity> predicate() {
+    public PredicateBuilder predicate() {
         return predicateBuilder;
     }
 
@@ -60,6 +60,10 @@ final class SelectActivityQuery extends SingleResultJpaQuery<ActivityEntity, Act
     public class PredicateBuilder extends JpaPredicateBuilder<ActivityEntity> {
         private PredicateBuilder() {
             super(criteriaBuilder, root);
+        }
+
+        public JpaPredicate isNotDeleted() {
+            return () -> criteriaBuilder.isFalse(root.get("deleted"));
         }
 
         @Override

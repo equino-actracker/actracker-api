@@ -59,6 +59,10 @@ class SelectTagQuery extends SingleResultJpaQuery<TagEntity, TagProjection> {
             super(criteriaBuilder, root);
         }
 
+        public JpaPredicate isNotDeleted() {
+            return () -> criteriaBuilder.isFalse(root.get("deleted"));
+        }
+
         @Override
         public JpaPredicate isAccessibleFor(User searcher) {
             return or(

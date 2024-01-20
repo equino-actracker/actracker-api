@@ -78,6 +78,10 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
             super(criteriaBuilder, root);
         }
 
+        public JpaPredicate isNotDeleted() {
+            return () -> criteriaBuilder.isFalse(root.get("deleted"));
+        }
+
         public JpaPredicate isInTimeRange(Timestamp timeRangeStart, Timestamp timeRangeEnd) {
             JpaPredicate endTimeInRange = timeRangeStart != null
                     ? or(not(isFinished()), not(isFinishedBefore(timeRangeStart)))

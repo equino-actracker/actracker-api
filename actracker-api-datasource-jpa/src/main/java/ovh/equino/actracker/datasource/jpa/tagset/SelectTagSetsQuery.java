@@ -61,6 +61,10 @@ final class SelectTagSetsQuery extends MultiResultJpaQuery<TagSetEntity, TagSetP
         private PredicateBuilder() {
             super(criteriaBuilder, root);
         }
+
+        public JpaPredicate isNotDeleted() {
+            return () -> criteriaBuilder.isFalse(root.get("deleted"));
+        }
     }
 
     public class SortBuilder extends JpaSortBuilder<TagSetEntity> {

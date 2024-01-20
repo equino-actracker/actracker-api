@@ -74,10 +74,9 @@ final class SelectChartJoinTagQuery extends MultiResultJpaQuery<ChartEntity, Cha
             super(criteriaBuilder, root);
         }
 
-        @Override
         public JpaPredicate isNotDeleted() {
             return and(
-                    super.isNotDeleted(),
+                    () -> criteriaBuilder.isFalse(root.get("deleted")),
                     () -> criteriaBuilder.isFalse(tags.get("deleted"))
             );
         }

@@ -54,5 +54,9 @@ final class SelectTagSetQuery extends SingleResultJpaQuery<TagSetEntity, TagSetP
         private PredicateBuilder() {
             super(criteriaBuilder, root);
         }
+
+        public JpaPredicate isNotDeleted() {
+            return () -> criteriaBuilder.isFalse(root.get("deleted"));
+        }
     }
 }

@@ -4,13 +4,14 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Subquery;
-import ovh.equino.actracker.domain.user.User;
-import ovh.equino.actracker.jpa.tag.TagEntity;
-import ovh.equino.actracker.jpa.tag.TagShareEntity;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
 import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
+import ovh.equino.actracker.domain.user.User;
+import ovh.equino.actracker.jpa.tag.TagEntity;
+import ovh.equino.actracker.jpa.tag.TagEntity_;
+import ovh.equino.actracker.jpa.tag.TagShareEntity;
 
 final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection> {
 
@@ -68,8 +69,12 @@ final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection
             super(criteriaBuilder, root);
         }
 
+        public JpaPredicate isNotDeleted() {
+            return () -> criteriaBuilder.isFalse(root.get("deleted"));
+        }
+
         JpaPredicate matchesTerm(String term) {
-            return super.matchesTerm(term, "name");
+            return super.matchesTerm(term, root.get(TagEntity_.name));
         }
 
         @Override

@@ -75,7 +75,6 @@ final class SelectShareJoinTagQuery extends MultiResultJpaQuery<TagShareEntity, 
             super(criteriaBuilder, root);
         }
 
-        @Override
         public JpaPredicate isNotDeleted() {
             return () -> criteriaBuilder.isFalse(tag.get("deleted"));
         }

@@ -75,12 +75,6 @@ final class SelectShareJoinDashboardQuery extends MultiResultJpaQuery<DashboardS
             super(criteriaBuilder, root);
         }
 
-
-        @Override
-        public JpaPredicate isNotDeleted() {
-            return () -> criteriaBuilder.isFalse(dashboard.get("deleted"));
-        }
-
         public JpaPredicate hasDashboardId(UUID dashboardId) {
             return () -> criteriaBuilder.equal(dashboard.get("id"), dashboardId.toString());
         }

@@ -120,7 +120,6 @@ final class SelectMetricValuesQuery extends MultiResultJpaQuery<MetricValueEntit
             return () -> criteriaBuilder.exists(subQuery);
         }
 
-        @Override
         public JpaPredicate isNotDeleted() {
             return and(
                     () -> criteriaBuilder.isFalse(metric.get("deleted")),

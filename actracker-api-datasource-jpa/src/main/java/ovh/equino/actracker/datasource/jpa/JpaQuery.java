@@ -4,8 +4,9 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
+import ovh.equino.actracker.jpa.JpaEntity;
 
-abstract class JpaQuery<E, P, R> {
+abstract class JpaQuery<E extends JpaEntity, P, R> {
 
     protected final EntityManager entityManager;
     protected final CriteriaBuilder criteriaBuilder;
