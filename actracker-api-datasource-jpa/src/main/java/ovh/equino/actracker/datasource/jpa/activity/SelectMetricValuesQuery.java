@@ -2,14 +2,16 @@ package ovh.equino.actracker.datasource.jpa.activity;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.*;
-import ovh.equino.actracker.domain.user.User;
-import ovh.equino.actracker.jpa.activity.ActivityEntity;
-import ovh.equino.actracker.jpa.activity.MetricValueEntity;
-import ovh.equino.actracker.jpa.tag.TagEntity;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
 import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
+import ovh.equino.actracker.domain.user.User;
+import ovh.equino.actracker.jpa.activity.ActivityEntity;
+import ovh.equino.actracker.jpa.activity.ActivityEntity_;
+import ovh.equino.actracker.jpa.activity.MetricValueEntity;
+import ovh.equino.actracker.jpa.activity.MetricValueEntity_;
+import ovh.equino.actracker.jpa.tag.*;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -22,14 +24,14 @@ final class SelectMetricValuesQuery extends MultiResultJpaQuery<MetricValueEntit
 
     private final PredicateBuilder predicate;
     private final Join<MetricValueEntity, ActivityEntity> activity;
-    private final Join<MetricValueEntity, ?> metric;
-    private final Join<?, ?> tag;
+    private final Join<MetricValueEntity, MetricEntity> metric;
+    private final Join<MetricEntity, TagEntity> tag;
 
     SelectMetricValuesQuery(EntityManager entityManager) {
         super(entityManager);
-        this.activity = root.join("activity", INNER);
-        this.metric = root.join("metric", INNER);
-        this.tag = metric.join("tag", INNER);
+        this.activity = root.join(MetricValueEntity_.activity, INNER);
+        this.metric = root.join(MetricValueEntity_.metric, INNER);
+        this.tag = metric.join(MetricEntity_.tag, INNER);
         this.predicate = new PredicateBuilder();
     }
 
@@ -38,10 +40,10 @@ final class SelectMetricValuesQuery extends MultiResultJpaQuery<MetricValueEntit
         query.select(
                         criteriaBuilder.construct(
                                 MetricValueProjection.class,
-                                root.get("id"),
-                                activity.get("id"),
-                                metric.get("id"),
-                                root.get("value")
+                                root.get(MetricValueEntity_.id),
+                                activity.get(ActivityEntity_.id),
+                                metric.get(MetricEntity_.id),
+                                root.get(MetricValueEntity_.value)
                         )
                 )
                 .distinct(true);
@@ -83,15 +85,15 @@ final class SelectMetricValuesQuery extends MultiResultJpaQuery<MetricValueEntit
         }
 
         public JpaPredicate hasActivityId(UUID activityId) {
-            return () -> criteriaBuilder.equal(activity.get("id"), activityId.toString());
+            return () -> criteriaBuilder.equal(activity.get(ActivityEntity_.id), activityId.toString());
         }
 
         public JpaPredicate hasActivityIdIn(Collection<UUID> activityIds) {
             if (isEmpty(activityIds)) {
                 return noneMatch();
             }
-            Path<Object> activityId = activity.get("id");
-            CriteriaBuilder.In<Object> activityIdIn = criteriaBuilder.in(activityId);
+            Path<String> activityId = activity.get(ActivityEntity_.id);
+            CriteriaBuilder.In<String> activityIdIn = criteriaBuilder.in(activityId);
             activityIds.stream()
                     .map(UUID::toString)
                     .collect(toUnmodifiableSet())
@@ -105,24 +107,24 @@ final class SelectMetricValuesQuery extends MultiResultJpaQuery<MetricValueEntit
 
         private JpaPredicate isTagAccessibleFor(User user) {
             return or(
-                    () -> criteriaBuilder.equal(tag.get("creatorId"), user.id().toString()),
+                    () -> criteriaBuilder.equal(tag.get(TagEntity_.creatorId), user.id().toString()),
                     isTagSharedWith(user)
             );
         }
 
         private JpaPredicate isTagSharedWith(User user) {
-            Join<?, ?> shares = tag.join("shares", JoinType.LEFT);
+            Join<TagEntity, TagShareEntity> shares = tag.join(TagEntity_.shares, JoinType.LEFT);
             Subquery<Long> subQuery = query.subquery(Long.class);
             subQuery.select(criteriaBuilder.literal(1L))
-                    .where(criteriaBuilder.equal(shares.get("granteeId"), user.id().toString()))
+                    .where(criteriaBuilder.equal(shares.get(TagShareEntity_.granteeId), user.id().toString()))
                     .from(TagEntity.class);
             return () -> criteriaBuilder.exists(subQuery);
         }
 
         public JpaPredicate isNotDeleted() {
             return and(
-                    () -> criteriaBuilder.isFalse(metric.get("deleted")),
-                    () -> criteriaBuilder.isFalse(tag.get("deleted"))
+                    () -> criteriaBuilder.isFalse(metric.get(MetricEntity_.deleted)),
+                    () -> criteriaBuilder.isFalse(tag.get(TagEntity_.deleted))
             );
         }
     }

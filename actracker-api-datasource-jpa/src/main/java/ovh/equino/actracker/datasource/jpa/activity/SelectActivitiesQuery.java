@@ -10,7 +10,11 @@ import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
 import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.activity.ActivityEntity;
+import ovh.equino.actracker.jpa.activity.ActivityEntity_;
 import ovh.equino.actracker.jpa.tag.TagEntity;
+import ovh.equino.actracker.jpa.tag.TagEntity_;
+import ovh.equino.actracker.jpa.tag.TagShareEntity;
+import ovh.equino.actracker.jpa.tag.TagShareEntity_;
 
 import java.sql.Timestamp;
 import java.util.Set;
@@ -35,13 +39,13 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
                 .select(
                         this.criteriaBuilder.construct(
                                 ActivityProjection.class,
-                                root.get("id"),
-                                root.get("creatorId"),
-                                root.get("title"),
-                                root.get("startTime"),
-                                root.get("endTime"),
-                                root.get("comment"),
-                                root.get("deleted")
+                                root.get(ActivityEntity_.id),
+                                root.get(ActivityEntity_.creatorId),
+                                root.get(ActivityEntity_.title),
+                                root.get(ActivityEntity_.startTime),
+                                root.get(ActivityEntity_.endTime),
+                                root.get(ActivityEntity_.comment),
+                                root.get(ActivityEntity_.deleted)
                         )
                 )
                 .distinct(true);
@@ -79,7 +83,7 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
         }
 
         public JpaPredicate isNotDeleted() {
-            return () -> criteriaBuilder.isFalse(root.get("deleted"));
+            return () -> criteriaBuilder.isFalse(root.get(ActivityEntity_.deleted));
         }
 
         public JpaPredicate isInTimeRange(Timestamp timeRangeStart, Timestamp timeRangeEnd) {
@@ -93,23 +97,23 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
         }
 
         JpaPredicate isStartedBeforeOrAt(Timestamp startTime) {
-            return () -> criteriaBuilder.lessThanOrEqualTo(root.get("startTime"), startTime);
+            return () -> criteriaBuilder.lessThanOrEqualTo(root.get(ActivityEntity_.startTime), startTime);
         }
 
         private JpaPredicate isStartedAfter(Timestamp startTime) {
-            return () -> criteriaBuilder.greaterThan(root.get("startTime"), startTime);
+            return () -> criteriaBuilder.greaterThan(root.get(ActivityEntity_.startTime), startTime);
         }
 
         private JpaPredicate isFinishedBefore(Timestamp endTime) {
-            return () -> criteriaBuilder.lessThan(root.get("endTime"), endTime);
+            return () -> criteriaBuilder.lessThan(root.get(ActivityEntity_.endTime), endTime);
         }
 
         private JpaPredicate isFinished() {
-            return () -> criteriaBuilder.isNotNull(root.get("endTime"));
+            return () -> criteriaBuilder.isNotNull(root.get(ActivityEntity_.endTime));
         }
 
         JpaPredicate isStarted() {
-            return () -> criteriaBuilder.isNotNull(root.get("startTime"));
+            return () -> criteriaBuilder.isNotNull(root.get(ActivityEntity_.startTime));
         }
 
         JpaPredicate isNotFinished() {
@@ -125,20 +129,20 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
 
         public JpaPredicate isOwner(User searcher) {
             return () -> criteriaBuilder.equal(
-                    root.get("creatorId"),
+                    root.get(ActivityEntity_.creatorId),
                     searcher.id().toString()
             );
         }
 
         private JpaPredicate isGrantee(User user) {
-            Join<ActivityEntity, ?> tags = root.join("tags", JoinType.LEFT);
-            Join<?, ?> shares = tags.join("shares", JoinType.LEFT);
+            Join<ActivityEntity, TagEntity> tags = root.join(ActivityEntity_.tags, JoinType.LEFT);
+            Join<TagEntity, TagShareEntity> shares = tags.join(TagEntity_.shares, JoinType.LEFT);
             Subquery<Long> subQuery = query.subquery(Long.class);
             subQuery.select(criteriaBuilder.literal(1L))
                     .where(
                             criteriaBuilder.and(
-                                    criteriaBuilder.equal(shares.get("granteeId"), user.id().toString()),
-                                    criteriaBuilder.isFalse(tags.get("deleted"))
+                                    criteriaBuilder.equal(shares.get(TagShareEntity_.granteeId), user.id().toString()),
+                                    criteriaBuilder.isFalse(tags.get(TagEntity_.deleted))
                             )
                     )
                     .from(ActivityEntity.class);
@@ -150,7 +154,7 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
                 return allMatch();
             }
 
-            Join<ActivityEntity, TagEntity> tags = root.join("tags");
+            Join<ActivityEntity, TagEntity> tags = root.join(ActivityEntity_.tags);
 
             JpaPredicate[] predicatesForTags = requiredTags.stream()
                     .map(tagId -> hasTag(tagId, tags))
@@ -164,8 +168,8 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
             subQuery.select(criteriaBuilder.literal(1L))
                     .where(
                             criteriaBuilder.and(
-                                    criteriaBuilder.equal(tags.get("id"), tagId.toString()),
-                                    criteriaBuilder.isFalse(tags.get("deleted"))
+                                    criteriaBuilder.equal(tags.get(TagEntity_.id), tagId.toString()),
+                                    criteriaBuilder.isFalse(tags.get(TagEntity_.deleted))
                             )
                     )
                     .from(ActivityEntity.class);

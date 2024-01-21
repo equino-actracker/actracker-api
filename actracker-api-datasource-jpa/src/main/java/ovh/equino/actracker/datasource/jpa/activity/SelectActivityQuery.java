@@ -9,6 +9,11 @@ import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.SingleResultJpaQuery;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.activity.ActivityEntity;
+import ovh.equino.actracker.jpa.activity.ActivityEntity_;
+import ovh.equino.actracker.jpa.tag.TagEntity;
+import ovh.equino.actracker.jpa.tag.TagEntity_;
+import ovh.equino.actracker.jpa.tag.TagShareEntity;
+import ovh.equino.actracker.jpa.tag.TagShareEntity_;
 
 final class SelectActivityQuery extends SingleResultJpaQuery<ActivityEntity, ActivityProjection> {
 
@@ -25,13 +30,13 @@ final class SelectActivityQuery extends SingleResultJpaQuery<ActivityEntity, Act
                 .select(
                         this.criteriaBuilder.construct(
                                 ActivityProjection.class,
-                                root.get("id"),
-                                root.get("creatorId"),
-                                root.get("title"),
-                                root.get("startTime"),
-                                root.get("endTime"),
-                                root.get("comment"),
-                                root.get("deleted")
+                                root.get(ActivityEntity_.id),
+                                root.get(ActivityEntity_.creatorId),
+                                root.get(ActivityEntity_.title),
+                                root.get(ActivityEntity_.startTime),
+                                root.get(ActivityEntity_.endTime),
+                                root.get(ActivityEntity_.comment),
+                                root.get(ActivityEntity_.deleted)
                         )
                 );
     }
@@ -63,7 +68,7 @@ final class SelectActivityQuery extends SingleResultJpaQuery<ActivityEntity, Act
         }
 
         public JpaPredicate isNotDeleted() {
-            return () -> criteriaBuilder.isFalse(root.get("deleted"));
+            return () -> criteriaBuilder.isFalse(root.get(ActivityEntity_.deleted));
         }
 
         public JpaPredicate isAccessibleFor(User searcher) {
@@ -75,20 +80,20 @@ final class SelectActivityQuery extends SingleResultJpaQuery<ActivityEntity, Act
 
         private JpaPredicate isOwner(User searcher) {
             return () -> criteriaBuilder.equal(
-                    root.get("creatorId"),
+                    root.get(ActivityEntity_.creatorId),
                     searcher.id().toString()
             );
         }
 
         private JpaPredicate isGrantee(User user) {
-            Join<ActivityEntity, ?> tags = root.join("tags", JoinType.LEFT);
-            Join<?, ?> shares = tags.join("shares", JoinType.LEFT);
+            Join<ActivityEntity, TagEntity> tags = root.join(ActivityEntity_.tags, JoinType.LEFT);
+            Join<TagEntity, TagShareEntity> shares = tags.join(TagEntity_.shares, JoinType.LEFT);
             Subquery<Long> subQuery = query.subquery(Long.class);
             subQuery.select(criteriaBuilder.literal(1L))
                     .where(
                             criteriaBuilder.and(
-                                    criteriaBuilder.equal(shares.get("granteeId"), user.id().toString()),
-                                    criteriaBuilder.isFalse(tags.get("deleted"))
+                                    criteriaBuilder.equal(shares.get(TagShareEntity_.granteeId), user.id().toString()),
+                                    criteriaBuilder.isFalse(tags.get(TagEntity_.deleted))
                             )
                     )
                     .from(ActivityEntity.class);
