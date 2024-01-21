@@ -99,7 +99,6 @@ final class SelectMetricValuesQuery extends MultiResultJpaQuery<MetricValueEntit
             return () -> activityIdIn;
         }
 
-        @Override
         public JpaPredicate isAccessibleFor(User user) {
             return isTagAccessibleFor(user);
         }

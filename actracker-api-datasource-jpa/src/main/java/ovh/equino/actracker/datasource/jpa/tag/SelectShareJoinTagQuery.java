@@ -91,7 +91,6 @@ final class SelectShareJoinTagQuery extends MultiResultJpaQuery<TagShareEntity, 
             return in(tagIdsAsStrings, tag.get("id"));
         }
 
-        @Override
         public JpaPredicate isAccessibleFor(User searcher) {
             return () -> criteriaBuilder.equal(tag.get("creatorId"), searcher.id().toString());
         }

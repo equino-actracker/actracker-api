@@ -50,26 +50,16 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
         return () -> in;
     }
 
-    public JpaPredicate isAccessibleFor(User searcher) {
-        return isOwner(searcher);
-    }
-
-    public JpaPredicate isOwner(User searcher) {
-        return () -> criteriaBuilder.equal(
-                root.get("creatorId"),
-                searcher.id().toString()
-        );
-    }
-
     public JpaPredicate isNotExcluded(Collection<UUID> excludedIds) {
         if (isEmpty(excludedIds)) {
             return allMatch();
         }
-        Set<String> ids = excludedIds.stream()
+        Set<String> idsAsStrings = excludedIds
+                .stream()
                 .map(UUID::toString)
                 .collect(toUnmodifiableSet());
 
-        return not(in(ids, root.get(JpaEntity_.id)));
+        return not(in(idsAsStrings, root.get(JpaEntity_.id)));
     }
 
     public JpaPredicate isInPage(String pageId) {

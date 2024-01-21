@@ -63,11 +63,17 @@ final class SelectDashboardQuery extends SingleResultJpaQuery<DashboardEntity, D
             return () -> criteriaBuilder.isFalse(root.get("deleted"));
         }
 
-        @Override
         public JpaPredicate isAccessibleFor(User searcher) {
             return or(
-                    super.isAccessibleFor(searcher),
+                    isOwner(searcher),
                     isGrantee(searcher)
+            );
+        }
+
+        private JpaPredicate isOwner(User searcher) {
+            return () -> criteriaBuilder.equal(
+                    root.get("creatorId"),
+                    searcher.id().toString()
             );
         }
 

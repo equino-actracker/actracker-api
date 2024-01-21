@@ -4,6 +4,7 @@ import jakarta.persistence.EntityManager;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.SingleResultJpaQuery;
+import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.tagset.TagSetEntity;
 
 final class SelectTagSetQuery extends SingleResultJpaQuery<TagSetEntity, TagSetProjection> {
@@ -57,6 +58,18 @@ final class SelectTagSetQuery extends SingleResultJpaQuery<TagSetEntity, TagSetP
 
         public JpaPredicate isNotDeleted() {
             return () -> criteriaBuilder.isFalse(root.get("deleted"));
+        }
+
+
+        public JpaPredicate isAccessibleFor(User searcher) {
+            return isOwner(searcher);
+        }
+
+        private JpaPredicate isOwner(User searcher) {
+            return () -> criteriaBuilder.equal(
+                    root.get("creatorId"),
+                    searcher.id().toString()
+            );
         }
     }
 }

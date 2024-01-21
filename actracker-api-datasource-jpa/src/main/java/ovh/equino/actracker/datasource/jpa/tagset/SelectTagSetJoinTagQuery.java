@@ -81,11 +81,17 @@ final class SelectTagSetJoinTagQuery extends MultiResultJpaQuery<TagSetEntity, T
             );
         }
 
-        @Override
         public JpaPredicate isAccessibleFor(User user) {
             return and(
-                    super.isAccessibleFor(user),
+                    isOwner(user),
                     isTagAccessibleFor(user)
+            );
+        }
+
+        private JpaPredicate isOwner(User searcher) {
+            return () -> criteriaBuilder.equal(
+                    root.get("creatorId"),
+                    searcher.id().toString()
             );
         }
 

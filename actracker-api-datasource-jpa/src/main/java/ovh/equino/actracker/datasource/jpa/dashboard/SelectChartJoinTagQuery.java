@@ -81,7 +81,6 @@ final class SelectChartJoinTagQuery extends MultiResultJpaQuery<ChartEntity, Cha
             );
         }
 
-        @Override
         public JpaPredicate isAccessibleFor(User searcher) {
             return isTagAccessibleFor(searcher);
         }

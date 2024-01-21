@@ -77,11 +77,17 @@ final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection
             return super.matchesTerm(term, root.get(TagEntity_.name));
         }
 
-        @Override
         public JpaPredicate isAccessibleFor(User searcher) {
             return or(
-                    super.isAccessibleFor(searcher),
+                    isOwner(searcher),
                     isGrantee(searcher)
+            );
+        }
+
+        private JpaPredicate isOwner(User searcher) {
+            return () -> criteriaBuilder.equal(
+                    root.get("creatorId"),
+                    searcher.id().toString()
             );
         }
 

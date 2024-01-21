@@ -89,11 +89,17 @@ final class SelectActivityJoinTagQuery extends MultiResultJpaQuery<ActivityEntit
             return super.hasIdIn(activityIds);
         }
 
-        @Override
         public JpaPredicate isAccessibleFor(User user) {
             return or(
-                    super.isAccessibleFor(user),
+                    isOwner(user),
                     isTagAccessibleFor(user)
+            );
+        }
+
+        private JpaPredicate isOwner(User searcher) {
+            return () -> criteriaBuilder.equal(
+                    root.get("creatorId"),
+                    searcher.id().toString()
             );
         }
 

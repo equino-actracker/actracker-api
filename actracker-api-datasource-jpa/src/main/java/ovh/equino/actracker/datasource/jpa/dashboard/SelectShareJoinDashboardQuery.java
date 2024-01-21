@@ -87,7 +87,6 @@ final class SelectShareJoinDashboardQuery extends MultiResultJpaQuery<DashboardS
             return in(dashboardIdsAsStrings, dashboard.get("id"));
         }
 
-        @Override
         public JpaPredicate isAccessibleFor(User searcher) {
             return () -> criteriaBuilder.equal(dashboard.get("creatorId"), searcher.id().toString());
         }

@@ -4,13 +4,13 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Subquery;
-import ovh.equino.actracker.domain.user.User;
-import ovh.equino.actracker.jpa.activity.ActivityEntity;
-import ovh.equino.actracker.jpa.tag.TagEntity;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
 import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
+import ovh.equino.actracker.domain.user.User;
+import ovh.equino.actracker.jpa.activity.ActivityEntity;
+import ovh.equino.actracker.jpa.tag.TagEntity;
 
 import java.sql.Timestamp;
 import java.util.Set;
@@ -116,11 +116,17 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
             return not(isFinished());
         }
 
-        @Override
         public JpaPredicate isAccessibleFor(User searcher) {
             return or(
-                    super.isAccessibleFor(searcher),
+                    isOwner(searcher),
                     isGrantee(searcher)
+            );
+        }
+
+        public JpaPredicate isOwner(User searcher) {
+            return () -> criteriaBuilder.equal(
+                    root.get("creatorId"),
+                    searcher.id().toString()
             );
         }
 
