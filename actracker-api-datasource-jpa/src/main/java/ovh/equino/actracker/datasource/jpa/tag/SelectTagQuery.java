@@ -4,12 +4,14 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Subquery;
-import ovh.equino.actracker.domain.user.User;
-import ovh.equino.actracker.jpa.tag.TagEntity;
-import ovh.equino.actracker.jpa.tag.TagShareEntity;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.SingleResultJpaQuery;
+import ovh.equino.actracker.domain.user.User;
+import ovh.equino.actracker.jpa.tag.TagEntity;
+import ovh.equino.actracker.jpa.tag.TagEntity_;
+import ovh.equino.actracker.jpa.tag.TagShareEntity;
+import ovh.equino.actracker.jpa.tag.TagShareEntity_;
 
 class SelectTagQuery extends SingleResultJpaQuery<TagEntity, TagProjection> {
 
@@ -25,10 +27,10 @@ class SelectTagQuery extends SingleResultJpaQuery<TagEntity, TagProjection> {
         query.select(
                 this.criteriaBuilder.construct(
                         TagProjection.class,
-                        root.get("id"),
-                        root.get("creatorId"),
-                        root.get("name"),
-                        root.get("deleted")
+                        root.get(TagEntity_.id),
+                        root.get(TagEntity_.creatorId),
+                        root.get(TagEntity_.name),
+                        root.get(TagEntity_.deleted)
                 )
         );
     }
@@ -60,7 +62,7 @@ class SelectTagQuery extends SingleResultJpaQuery<TagEntity, TagProjection> {
         }
 
         public JpaPredicate isNotDeleted() {
-            return () -> criteriaBuilder.isFalse(root.get("deleted"));
+            return () -> criteriaBuilder.isFalse(root.get(TagEntity_.deleted));
         }
 
         public JpaPredicate isAccessibleFor(User searcher) {
@@ -72,18 +74,18 @@ class SelectTagQuery extends SingleResultJpaQuery<TagEntity, TagProjection> {
 
         public JpaPredicate isOwner(User searcher) {
             return () -> criteriaBuilder.equal(
-                    root.get("creatorId"),
+                    root.get(TagEntity_.creatorId),
                     searcher.id().toString()
             );
         }
 
         private JpaPredicate isGrantee(User user) {
-            Join<TagEntity, TagShareEntity> shares = root.join("shares", JoinType.LEFT);
+            Join<TagEntity, TagShareEntity> shares = root.join(TagEntity_.shares, JoinType.LEFT);
             Subquery<Long> subQuery = query.subquery(Long.class);
             subQuery.select(criteriaBuilder.literal(1L))
                     .where(
                             criteriaBuilder.and(
-                                    criteriaBuilder.equal(shares.get("granteeId"), user.id().toString())
+                                    criteriaBuilder.equal(shares.get(TagShareEntity_.granteeId), user.id().toString())
                             )
                     )
                     .from(TagEntity.class);

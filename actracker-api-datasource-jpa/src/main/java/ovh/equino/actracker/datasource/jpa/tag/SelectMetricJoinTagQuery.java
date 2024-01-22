@@ -3,11 +3,13 @@ package ovh.equino.actracker.datasource.jpa.tag;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
 import ovh.equino.actracker.jpa.tag.MetricEntity;
+import ovh.equino.actracker.jpa.tag.MetricEntity_;
 import ovh.equino.actracker.jpa.tag.TagEntity;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
 import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
+import ovh.equino.actracker.jpa.tag.TagEntity_;
 
 import java.util.Collection;
 import java.util.Set;
@@ -24,7 +26,7 @@ final class SelectMetricJoinTagQuery extends MultiResultJpaQuery<MetricEntity, M
     SelectMetricJoinTagQuery(EntityManager entityManager) {
         super(entityManager);
         this.predicate = new PredicateBuilder();
-        this.tag = root.join("tag", INNER);
+        this.tag = root.join(MetricEntity_.tag, INNER);
     }
 
     @Override
@@ -32,12 +34,12 @@ final class SelectMetricJoinTagQuery extends MultiResultJpaQuery<MetricEntity, M
         query.select(
                 criteriaBuilder.construct(
                         MetricJoinTagProjection.class,
-                        root.get("id"),
-                        root.get("creatorId"),
-                        root.get("name"),
-                        root.get("type"),
-                        tag.get("id"),
-                        root.get("deleted")
+                        root.get(MetricEntity_.id),
+                        root.get(MetricEntity_.creatorId),
+                        root.get(MetricEntity_.name),
+                        root.get(MetricEntity_.type),
+                        tag.get(TagEntity_.id),
+                        root.get(MetricEntity_.deleted)
                 )
         );
     }
@@ -78,11 +80,11 @@ final class SelectMetricJoinTagQuery extends MultiResultJpaQuery<MetricEntity, M
         }
 
         public JpaPredicate isNotDeleted() {
-            return () -> criteriaBuilder.isFalse(root.get("deleted"));
+            return () -> criteriaBuilder.isFalse(root.get(MetricEntity_.deleted));
         }
 
         public JpaPredicate hasTagId(UUID tagId) {
-            return () -> criteriaBuilder.equal(tag.get("id"), tagId.toString());
+            return () -> criteriaBuilder.equal(tag.get(TagEntity_.id), tagId.toString());
         }
 
         public JpaPredicate hasTagIdIn(Collection<UUID> tagIds) {
@@ -90,7 +92,7 @@ final class SelectMetricJoinTagQuery extends MultiResultJpaQuery<MetricEntity, M
                     .stream()
                     .map(UUID::toString)
                     .collect(toUnmodifiableSet());
-            return in(tagIdsAsStrings, tag.get("id"));
+            return in(tagIdsAsStrings, tag.get(TagEntity_.id));
         }
     }
 }
