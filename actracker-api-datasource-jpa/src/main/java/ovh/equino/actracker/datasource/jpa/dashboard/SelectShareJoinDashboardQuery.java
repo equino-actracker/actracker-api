@@ -4,11 +4,13 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.dashboard.DashboardEntity;
+import ovh.equino.actracker.jpa.dashboard.DashboardEntity_;
 import ovh.equino.actracker.jpa.dashboard.DashboardShareEntity;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
 import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
+import ovh.equino.actracker.jpa.dashboard.DashboardShareEntity_;
 
 import java.util.Collection;
 import java.util.Set;
@@ -23,7 +25,7 @@ final class SelectShareJoinDashboardQuery extends MultiResultJpaQuery<DashboardS
 
     SelectShareJoinDashboardQuery(EntityManager entityManager) {
         super(entityManager);
-        this.dashboard = root.join("dashboard");
+        this.dashboard = root.join(DashboardShareEntity_.dashboard);
         this.predicate = new PredicateBuilder();
     }
 
@@ -32,9 +34,9 @@ final class SelectShareJoinDashboardQuery extends MultiResultJpaQuery<DashboardS
         query.select(
                 criteriaBuilder.construct(
                         ShareJoinDashboardProjection.class,
-                        root.get("granteeId"),
-                        dashboard.get("id"),
-                        root.get("granteeName")
+                        root.get(DashboardShareEntity_.granteeId),
+                        dashboard.get(DashboardEntity_.id),
+                        root.get(DashboardShareEntity_.granteeName)
                 )
         );
     }
@@ -76,7 +78,7 @@ final class SelectShareJoinDashboardQuery extends MultiResultJpaQuery<DashboardS
         }
 
         public JpaPredicate hasDashboardId(UUID dashboardId) {
-            return () -> criteriaBuilder.equal(dashboard.get("id"), dashboardId.toString());
+            return () -> criteriaBuilder.equal(dashboard.get(DashboardEntity_.id), dashboardId.toString());
         }
 
         public JpaPredicate hasDashboardIdIn(Collection<UUID> dashboardIds) {
@@ -84,11 +86,11 @@ final class SelectShareJoinDashboardQuery extends MultiResultJpaQuery<DashboardS
                     .stream()
                     .map(UUID::toString)
                     .collect(toUnmodifiableSet());
-            return in(dashboardIdsAsStrings, dashboard.get("id"));
+            return in(dashboardIdsAsStrings, dashboard.get(DashboardEntity_.id));
         }
 
         public JpaPredicate isAccessibleFor(User searcher) {
-            return () -> criteriaBuilder.equal(dashboard.get("creatorId"), searcher.id().toString());
+            return () -> criteriaBuilder.equal(dashboard.get(DashboardEntity_.creatorId), searcher.id().toString());
         }
     }
 }

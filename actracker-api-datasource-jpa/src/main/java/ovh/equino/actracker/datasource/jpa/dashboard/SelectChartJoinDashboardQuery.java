@@ -3,11 +3,13 @@ package ovh.equino.actracker.datasource.jpa.dashboard;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
 import ovh.equino.actracker.jpa.dashboard.ChartEntity;
+import ovh.equino.actracker.jpa.dashboard.ChartEntity_;
 import ovh.equino.actracker.jpa.dashboard.DashboardEntity;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
 import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
+import ovh.equino.actracker.jpa.dashboard.DashboardEntity_;
 
 import java.util.Collection;
 import java.util.Set;
@@ -23,7 +25,7 @@ final class SelectChartJoinDashboardQuery extends MultiResultJpaQuery<ChartEntit
 
     SelectChartJoinDashboardQuery(EntityManager entityManager) {
         super(entityManager);
-        dashboard = root.join("dashboard", INNER);
+        dashboard = root.join(ChartEntity_.dashboard, INNER);
         this.predicate = new PredicateBuilder();
     }
 
@@ -32,12 +34,12 @@ final class SelectChartJoinDashboardQuery extends MultiResultJpaQuery<ChartEntit
         query.select(
                 criteriaBuilder.construct(
                         ChartJoinDashboardProjection.class,
-                        root.get("id"),
-                        dashboard.get("id"),
-                        root.get("name"),
-                        root.get("groupBy"),
-                        root.get("metric"),
-                        root.get("deleted")
+                        root.get(ChartEntity_.id),
+                        dashboard.get(DashboardEntity_.id),
+                        root.get(ChartEntity_.name),
+                        root.get(ChartEntity_.groupBy),
+                        root.get(ChartEntity_.metric),
+                        root.get(ChartEntity_.deleted)
                 )
         );
     }
@@ -78,11 +80,11 @@ final class SelectChartJoinDashboardQuery extends MultiResultJpaQuery<ChartEntit
         }
 
         public JpaPredicate isNotDeleted() {
-            return () -> criteriaBuilder.isFalse(root.get("deleted"));
+            return () -> criteriaBuilder.isFalse(root.get(ChartEntity_.deleted));
         }
 
         public JpaPredicate hasDashboardId(UUID dashboardId) {
-            return () -> criteriaBuilder.equal(dashboard.get("id"), dashboardId.toString());
+            return () -> criteriaBuilder.equal(dashboard.get(DashboardEntity_.id), dashboardId.toString());
         }
 
         public JpaPredicate hasDashboardIdIn(Collection<UUID> dashboardIds) {
@@ -90,7 +92,7 @@ final class SelectChartJoinDashboardQuery extends MultiResultJpaQuery<ChartEntit
                     .stream()
                     .map(UUID::toString)
                     .collect(toUnmodifiableSet());
-            return in(dashboardIdsAsString, dashboard.get("id"));
+            return in(dashboardIdsAsString, dashboard.get(DashboardEntity_.id));
         }
     }
 }
