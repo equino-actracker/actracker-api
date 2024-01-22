@@ -5,6 +5,7 @@ import ovh.equino.actracker.jpa.notification.NotificationEntity;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
 import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
+import ovh.equino.actracker.jpa.notification.NotificationEntity_;
 
 final class SelectNotificationsQuery extends MultiResultJpaQuery<NotificationEntity, NotificationProjection> {
 
@@ -17,10 +18,10 @@ final class SelectNotificationsQuery extends MultiResultJpaQuery<NotificationEnt
         query.select(
                 criteriaBuilder.construct(
                         NotificationProjection.class,
-                        root.get("id"),
-                        root.get("version"),
-                        root.get("dataType"),
-                        root.get("data")
+                        root.get(NotificationEntity_.id),
+                        root.get(NotificationEntity_.version),
+                        root.get(NotificationEntity_.dataType),
+                        root.get(NotificationEntity_.data)
                 )
         );
     }
