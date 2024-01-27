@@ -4,12 +4,14 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Subquery;
-import ovh.equino.actracker.domain.user.User;
-import ovh.equino.actracker.jpa.dashboard.DashboardEntity;
-import ovh.equino.actracker.jpa.dashboard.DashboardShareEntity;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.SingleResultJpaQuery;
+import ovh.equino.actracker.domain.user.User;
+import ovh.equino.actracker.jpa.dashboard.DashboardEntity;
+import ovh.equino.actracker.jpa.dashboard.DashboardEntity_;
+import ovh.equino.actracker.jpa.dashboard.DashboardShareEntity;
+import ovh.equino.actracker.jpa.dashboard.DashboardShareEntity_;
 
 final class SelectDashboardQuery extends SingleResultJpaQuery<DashboardEntity, DashboardProjection> {
 
@@ -25,10 +27,10 @@ final class SelectDashboardQuery extends SingleResultJpaQuery<DashboardEntity, D
         query.select(
                 criteriaBuilder.construct(
                         DashboardProjection.class,
-                        root.get("id"),
-                        root.get("creatorId"),
-                        root.get("name"),
-                        root.get("deleted")
+                        root.get(DashboardEntity_.id),
+                        root.get(DashboardEntity_.creatorId),
+                        root.get(DashboardEntity_.name),
+                        root.get(DashboardEntity_.deleted)
                 )
         );
     }
@@ -59,21 +61,31 @@ final class SelectDashboardQuery extends SingleResultJpaQuery<DashboardEntity, D
             super(criteriaBuilder, root);
         }
 
-        @Override
+        public JpaPredicate isNotDeleted() {
+            return () -> criteriaBuilder.isFalse(root.get(DashboardEntity_.deleted));
+        }
+
         public JpaPredicate isAccessibleFor(User searcher) {
             return or(
-                    super.isAccessibleFor(searcher),
+                    isOwner(searcher),
                     isGrantee(searcher)
             );
         }
 
+        private JpaPredicate isOwner(User searcher) {
+            return () -> criteriaBuilder.equal(
+                    root.get(DashboardEntity_.creatorId),
+                    searcher.id().toString()
+            );
+        }
+
         private JpaPredicate isGrantee(User user) {
-            Join<DashboardEntity, DashboardShareEntity> shares = root.join("shares", JoinType.LEFT);
+            Join<DashboardEntity, DashboardShareEntity> shares = root.join(DashboardEntity_.shares, JoinType.LEFT);
             Subquery<Long> subQuery = query.subquery(Long.class);
             subQuery.select(criteriaBuilder.literal(1L))
                     .where(
                             criteriaBuilder.and(
-                                    criteriaBuilder.equal(shares.get("granteeId"), user.id().toString())
+                                    criteriaBuilder.equal(shares.get(DashboardShareEntity_.granteeId), user.id().toString())
                             )
                     )
                     .from(DashboardEntity.class);

@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ovh.equino.actracker.jpa.JpaEntity;
 
 import static lombok.AccessLevel.PRIVATE;
 
@@ -16,11 +17,7 @@ import static lombok.AccessLevel.PRIVATE;
 @NoArgsConstructor
 @Getter
 @Setter
-public class NotificationEntity {
-
-    @Id
-    @Column(name = "id")
-    private String id;
+public class NotificationEntity extends JpaEntity {
 
     @Column(name = "version"/*, updatable = false, insertable = false*/)
     // TODO UPDATE WITH TRIGGER BEFORE INSERT

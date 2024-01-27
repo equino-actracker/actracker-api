@@ -4,13 +4,17 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Subquery;
-import ovh.equino.actracker.domain.user.User;
-import ovh.equino.actracker.jpa.dashboard.ChartEntity;
-import ovh.equino.actracker.jpa.tag.TagEntity;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
 import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
+import ovh.equino.actracker.domain.user.User;
+import ovh.equino.actracker.jpa.dashboard.ChartEntity;
+import ovh.equino.actracker.jpa.dashboard.ChartEntity_;
+import ovh.equino.actracker.jpa.tag.TagEntity;
+import ovh.equino.actracker.jpa.tag.TagEntity_;
+import ovh.equino.actracker.jpa.tag.TagShareEntity;
+import ovh.equino.actracker.jpa.tag.TagShareEntity_;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -20,11 +24,11 @@ import static jakarta.persistence.criteria.JoinType.INNER;
 final class SelectChartJoinTagQuery extends MultiResultJpaQuery<ChartEntity, ChartJoinTagProjection> {
 
     private final PredicateBuilder predicate;
-    private final Join<ChartEntity, ?> tags;
+    private final Join<ChartEntity, TagEntity> tags;
 
     SelectChartJoinTagQuery(EntityManager entityManager) {
         super(entityManager);
-        this.tags = root.join("tags", INNER);
+        this.tags = root.join(ChartEntity_.tags, INNER);
         this.predicate = new PredicateBuilder();
     }
 
@@ -33,8 +37,8 @@ final class SelectChartJoinTagQuery extends MultiResultJpaQuery<ChartEntity, Cha
         query.select(
                 criteriaBuilder.construct(
                         ChartJoinTagProjection.class,
-                        root.get("id"),
-                        tags.get("id")
+                        root.get(ChartEntity_.id),
+                        tags.get(TagEntity_.id)
                 )
         );
     }
@@ -74,15 +78,13 @@ final class SelectChartJoinTagQuery extends MultiResultJpaQuery<ChartEntity, Cha
             super(criteriaBuilder, root);
         }
 
-        @Override
         public JpaPredicate isNotDeleted() {
             return and(
-                    super.isNotDeleted(),
-                    () -> criteriaBuilder.isFalse(tags.get("deleted"))
+                    () -> criteriaBuilder.isFalse(root.get(ChartEntity_.deleted)),
+                    () -> criteriaBuilder.isFalse(tags.get(TagEntity_.deleted))
             );
         }
 
-        @Override
         public JpaPredicate isAccessibleFor(User searcher) {
             return isTagAccessibleFor(searcher);
         }
@@ -93,16 +95,16 @@ final class SelectChartJoinTagQuery extends MultiResultJpaQuery<ChartEntity, Cha
 
         private JpaPredicate isTagAccessibleFor(User user) {
             return or(
-                    () -> criteriaBuilder.equal(tags.get("creatorId"), user.id().toString()),
+                    () -> criteriaBuilder.equal(tags.get(TagEntity_.creatorId), user.id().toString()),
                     isTagSharedWith(user)
             );
         }
 
         private JpaPredicate isTagSharedWith(User user) {
-            Join<?, ?> shares = tags.join("shares", JoinType.LEFT);
+            Join<TagEntity, TagShareEntity> shares = tags.join(TagEntity_.shares, JoinType.LEFT);
             Subquery<Long> subQuery = query.subquery(Long.class);
             subQuery.select(criteriaBuilder.literal(1L))
-                    .where(criteriaBuilder.equal(shares.get("granteeId"), user.id().toString()))
+                    .where(criteriaBuilder.equal(shares.get(TagShareEntity_.granteeId), user.id().toString()))
                     .from(TagEntity.class);
             return () -> criteriaBuilder.exists(subQuery);
         }

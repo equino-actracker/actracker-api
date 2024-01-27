@@ -1,10 +1,11 @@
 package ovh.equino.actracker.datasource.jpa.tenant;
 
 import jakarta.persistence.EntityManager;
-import ovh.equino.actracker.jpa.tenant.TenantEntity;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.SingleResultJpaQuery;
+import ovh.equino.actracker.jpa.tenant.TenantEntity;
+import ovh.equino.actracker.jpa.tenant.TenantEntity_;
 
 final class SelectTenantQuery extends SingleResultJpaQuery<TenantEntity, TenantProjection> {
 
@@ -20,9 +21,9 @@ final class SelectTenantQuery extends SingleResultJpaQuery<TenantEntity, TenantP
         query.select(
                 criteriaBuilder.construct(
                         TenantProjection.class,
-                        root.get("id"),
-                        root.get("username"),
-                        root.get("password")
+                        root.get(TenantEntity_.id),
+                        root.get(TenantEntity_.username),
+                        root.get(TenantEntity_.password)
                 )
         );
     }
@@ -54,7 +55,7 @@ final class SelectTenantQuery extends SingleResultJpaQuery<TenantEntity, TenantP
         }
 
         JpaPredicate hasUsername(String username) {
-            return () -> criteriaBuilder.equal(root.get("username"), username);
+            return () -> criteriaBuilder.equal(root.get(TenantEntity_.username), username);
         }
     }
 }

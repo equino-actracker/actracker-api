@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ovh.equino.actracker.jpa.JpaEntity;
 import ovh.equino.actracker.jpa.tag.MetricEntity;
 
 import java.math.BigDecimal;
@@ -13,11 +14,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @Getter
 @Setter
-public class MetricValueEntity {
-
-    @Id
-    @Column(name = "id")
-    private String id;
+public class MetricValueEntity extends JpaEntity {
 
     @ManyToOne
     @JoinColumn(name = "activity_id")

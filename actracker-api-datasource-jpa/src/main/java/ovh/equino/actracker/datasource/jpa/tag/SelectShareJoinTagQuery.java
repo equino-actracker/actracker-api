@@ -2,13 +2,15 @@ package ovh.equino.actracker.datasource.jpa.tag;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
-import ovh.equino.actracker.domain.user.User;
-import ovh.equino.actracker.jpa.tag.TagEntity;
-import ovh.equino.actracker.jpa.tag.TagShareEntity;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
 import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
+import ovh.equino.actracker.domain.user.User;
+import ovh.equino.actracker.jpa.tag.TagEntity;
+import ovh.equino.actracker.jpa.tag.TagEntity_;
+import ovh.equino.actracker.jpa.tag.TagShareEntity;
+import ovh.equino.actracker.jpa.tag.TagShareEntity_;
 
 import java.util.Collection;
 import java.util.Set;
@@ -24,7 +26,7 @@ final class SelectShareJoinTagQuery extends MultiResultJpaQuery<TagShareEntity, 
 
     SelectShareJoinTagQuery(EntityManager entityManager) {
         super(entityManager);
-        this.tag = root.join("tag", INNER);
+        this.tag = root.join(TagShareEntity_.tag, INNER);
         this.predicate = new PredicateBuilder();
     }
 
@@ -33,9 +35,9 @@ final class SelectShareJoinTagQuery extends MultiResultJpaQuery<TagShareEntity, 
         query.select(
                 criteriaBuilder.construct(
                         ShareJoinTagProjection.class,
-                        root.get("granteeId"),
-                        tag.get("id"),
-                        root.get("granteeName")
+                        root.get(TagShareEntity_.granteeId),
+                        tag.get(TagEntity_.id),
+                        root.get(TagShareEntity_.granteeName)
                 )
         );
     }
@@ -75,13 +77,12 @@ final class SelectShareJoinTagQuery extends MultiResultJpaQuery<TagShareEntity, 
             super(criteriaBuilder, root);
         }
 
-        @Override
         public JpaPredicate isNotDeleted() {
-            return () -> criteriaBuilder.isFalse(tag.get("deleted"));
+            return () -> criteriaBuilder.isFalse(tag.get(TagEntity_.deleted));
         }
 
         public JpaPredicate hasTagId(UUID tagId) {
-            return () -> criteriaBuilder.equal(tag.get("id"), tagId.toString());
+            return () -> criteriaBuilder.equal(tag.get(TagEntity_.id), tagId.toString());
         }
 
         public JpaPredicate hasTagIdIn(Collection<UUID> tagIds) {
@@ -89,12 +90,11 @@ final class SelectShareJoinTagQuery extends MultiResultJpaQuery<TagShareEntity, 
                     .stream()
                     .map(UUID::toString)
                     .collect(toUnmodifiableSet());
-            return in(tagIdsAsStrings, tag.get("id"));
+            return in(tagIdsAsStrings, tag.get(TagEntity_.id));
         }
 
-        @Override
         public JpaPredicate isAccessibleFor(User searcher) {
-            return () -> criteriaBuilder.equal(tag.get("creatorId"), searcher.id().toString());
+            return () -> criteriaBuilder.equal(tag.get(TagEntity_.creatorId), searcher.id().toString());
         }
     }
 }

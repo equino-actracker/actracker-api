@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ovh.equino.actracker.jpa.JpaEntity;
 
 import java.util.List;
 
@@ -14,11 +15,7 @@ import static jakarta.persistence.CascadeType.ALL;
 @NoArgsConstructor
 @Getter
 @Setter
-public class DashboardEntity {
-
-    @Id
-    @Column(name = "id")
-    private String id;
+public class DashboardEntity extends JpaEntity {
 
     @Column(name = "creator_id")
     private String creatorId;

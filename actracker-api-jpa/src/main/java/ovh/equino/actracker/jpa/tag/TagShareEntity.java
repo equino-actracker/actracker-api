@@ -4,17 +4,14 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ovh.equino.actracker.jpa.JpaEntity;
 
 @Entity
 @Table(name = "tag_share")
 @NoArgsConstructor
 @Getter
 @Setter
-public class TagShareEntity {
-
-    @Id
-    @Column(name = "id")
-    private String id;
+public class TagShareEntity extends JpaEntity {
 
     @ManyToOne
     @JoinColumn(name = "tag_id")

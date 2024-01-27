@@ -1,10 +1,11 @@
 package ovh.equino.actracker.datasource.jpa;
 
 import jakarta.persistence.EntityManager;
+import ovh.equino.actracker.jpa.JpaEntity;
 
 import java.util.Optional;
 
-public abstract class SingleResultJpaQuery<E, P> extends JpaQuery<E, P, Optional<P>> {
+public abstract class SingleResultJpaQuery<E extends JpaEntity, P> extends JpaQuery<E, P, Optional<P>> {
 
     protected SingleResultJpaQuery(EntityManager entityManager) {
         super(entityManager);

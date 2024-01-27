@@ -3,6 +3,7 @@ dependencies {
     compileOnly 'jakarta.transaction:jakarta.transaction-api:2.0.1' // to be removed
     compileOnly 'org.projectlombok:lombok:1.18.30'
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.hibernate:hibernate-jpamodelgen:6.4.1.Final'
 
     integrationTestImplementation project(':actracker-api-domain')
     integrationTestImplementation 'org.apache.commons:commons-collections4:4.4'

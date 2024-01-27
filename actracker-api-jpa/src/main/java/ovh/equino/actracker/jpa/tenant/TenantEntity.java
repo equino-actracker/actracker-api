@@ -7,17 +7,14 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ovh.equino.actracker.jpa.JpaEntity;
 
 @Entity
 @Table(name = "tenant")
 @NoArgsConstructor
 @Getter
 @Setter
-public class TenantEntity {
-
-    @Id
-    @Column(name = "id")
-    private String id;
+public class TenantEntity extends JpaEntity {
 
     @Column(name = "username")
     private String username;
