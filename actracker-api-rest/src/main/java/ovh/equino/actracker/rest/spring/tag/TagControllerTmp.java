@@ -16,14 +16,14 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 @RestController
-@RequestMapping("/api/tag")
-class TagController {
+@RequestMapping("/tag")
+class TagControllerTmp {
 
     private final TagApplicationService tagApplicationService;
 
     private final TagMapper tagMapper = new TagMapper();
 
-    TagController(TagApplicationService tagApplicationService) {
+    TagControllerTmp(TagApplicationService tagApplicationService) {
         this.tagApplicationService = tagApplicationService;
     }
 

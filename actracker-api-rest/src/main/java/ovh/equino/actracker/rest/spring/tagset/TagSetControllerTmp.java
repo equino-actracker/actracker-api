@@ -16,13 +16,13 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 @RestController
-@RequestMapping("/api/tag-set")
-class TagSetController {
+@RequestMapping("/tag-set")
+class TagSetControllerTmp {
 
     private final TagSetApplicationService tagSetApplicationService;
     private final TagSetMapper tagSetMapper = new TagSetMapper();
 
-    TagSetController(TagSetApplicationService tagSetApplicationService) {
+    TagSetControllerTmp(TagSetApplicationService tagSetApplicationService) {
         this.tagSetApplicationService = tagSetApplicationService;
     }
 
