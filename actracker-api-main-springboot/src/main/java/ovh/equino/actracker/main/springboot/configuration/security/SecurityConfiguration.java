@@ -25,8 +25,8 @@ class SecurityConfiguration {
 
         http
                 .authorizeHttpRequests()
+                .requestMatchers("/api/**").authenticated()
                 .anyRequest().authenticated()
-//                .requestMatchers("/api/**").authenticated()
 //                .anyRequest().anonymous()
                 .and()
                 .httpBasic()
