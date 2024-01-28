@@ -17,13 +17,13 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 @RestController
-@RequestMapping("/api/activity")
-class ActivityController {
+@RequestMapping("/activity")
+class ActivityControllerTmp {
 
     private final ActivityApplicationService activityApplicationService;
     private final ActivityMapper mapper = new ActivityMapper();
 
-    ActivityController(ActivityApplicationService activityApplicationService) {
+    ActivityControllerTmp(ActivityApplicationService activityApplicationService) {
         this.activityApplicationService = activityApplicationService;
     }
 

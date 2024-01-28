@@ -10,13 +10,13 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @RestController
-@RequestMapping("/api/dashboard/{dashboardId}/data")
-class DashboardDataController {
+@RequestMapping("/dashboard/{dashboardId}/data")
+class DashboardDataControllerTmp {
 
     private final DashboardApplicationService dashboardApplicationService;
     private final DashboardDataMapper mapper = new DashboardDataMapper();
 
-    DashboardDataController(DashboardApplicationService dashboardApplicationService) {
+    DashboardDataControllerTmp(DashboardApplicationService dashboardApplicationService) {
 
         this.dashboardApplicationService = dashboardApplicationService;
     }

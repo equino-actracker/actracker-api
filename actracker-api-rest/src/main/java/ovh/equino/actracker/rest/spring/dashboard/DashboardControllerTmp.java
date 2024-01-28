@@ -15,13 +15,13 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 @RestController
-@RequestMapping("/api/dashboard")
-class DashboardController {
+@RequestMapping("/dashboard")
+class DashboardControllerTmp {
 
     private final DashboardApplicationService dashboardApplicationService;
     private final DashboardMapper dashboardMapper = new DashboardMapper();
 
-    DashboardController(DashboardApplicationService dashboardApplicationService) {
+    DashboardControllerTmp(DashboardApplicationService dashboardApplicationService) {
 
         this.dashboardApplicationService = dashboardApplicationService;
     }
