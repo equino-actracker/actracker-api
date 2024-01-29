@@ -25,6 +25,10 @@ spring:
 server:
   servlet:
     context-path: /actracker-api
+management:
+  endpoints:
+    web:
+      base-path: /info
 #logging:
 #  level:
 #    org.springframework.orm.jpa: DEBUG
