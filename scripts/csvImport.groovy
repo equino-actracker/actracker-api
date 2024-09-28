@@ -36,7 +36,7 @@ rows.each { row ->
         }
     """
 
-    def post = new URL("https://prod.cloud.equino.ovh/actracker-api/activity").openConnection();
+    def post = new URL("https://prod.cloud.equino.ovh/actracker-api/api/activity").openConnection();
     def message = activity
     post.setRequestMethod("POST")
     post.setDoOutput(true)
