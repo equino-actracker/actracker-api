@@ -24,7 +24,7 @@ def pageCount = 0
 def pageId = ''
 
 do {
-    def get = new URL("https://prod.cloud.equino.ovh/actracker-api/activity/matching?pageId=${pageId}&pageSize=50").openConnection()
+    def get = new URL("https://prod.cloud.equino.ovh/actracker-api/api/activity/matching?pageId=${pageId}&pageSize=50").openConnection()
     get.setRequestMethod("GET")
     get.setRequestProperty("Content-Type", "application/json")
     get.setRequestProperty("authorization", basicAuthToken)
