@@ -14,13 +14,17 @@ public class MetricsCollector {
     @Value("${actracker-api.environment:local}")
     private String applicationEnvironment;
 
+    @Value("${HOSTNAME:local}")
+    private String hostname;
+
     @Autowired
     private MeterRegistry meterRegistry;
 
     public Object measureAndExecute(ProceedingJoinPoint joinPoint) throws Throwable {
         String methodName = joinPoint.getSignature().getName();
         String className = joinPoint.getTarget().getClass().getSimpleName();
-        String metricName = "actracker-api.%s.%s.%s".formatted(applicationEnvironment, className, methodName);
+        String metricName = "actracker-api.%s.%s.%s.%s"
+                .formatted(applicationEnvironment, hostname, className, methodName);
 
         Callable<Object> procedure = () -> {
             try {
