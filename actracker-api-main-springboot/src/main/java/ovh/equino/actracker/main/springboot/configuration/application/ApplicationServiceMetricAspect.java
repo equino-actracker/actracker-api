@@ -16,7 +16,6 @@ class ApplicationServiceMetricAspect {
 
     @Around("execution(* ovh.equino.actracker.application.*.*ApplicationService.*(..))")
     Object measureAndExecute(ProceedingJoinPoint joinPoint) throws Throwable {
-        System.out.println("Starting measuring");
         return metricsCollector.measureAndExecute(joinPoint);
     }
 }

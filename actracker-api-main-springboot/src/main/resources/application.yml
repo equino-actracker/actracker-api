@@ -4,10 +4,10 @@ spring:
       default:
         # DB
         - 'actracker-api-db-h2'
-#        - 'actracker-api-db-postgres'
+        #        - 'actracker-api-db-postgres'
 
         # MESSAGING
-#        - 'actracker-api-publisher-rabbitmq'
+        #        - 'actracker-api-publisher-rabbitmq'
         - 'actracker-api-publisher-memory'
       dev:
         - 'actracker-api-db-postgres'
@@ -26,13 +26,17 @@ server:
   servlet:
     context-path: /actracker-api
 management:
-#  server:
-#    port: 8081 # This is considered best practice as it avoids sharing the main server thread pool to serve both application requests and management requests
   endpoints:
     web:
       base-path: /info
       exposure:
         include: "health,metrics,prometheus"
+  metrics:
+    distribution:
+      percentiles:
+        all: 0.5, 0.75, 0.95, 0.99
+      percentile-histogram:
+        all: true
 #logging:
 #  level:
 #    org.springframework.orm.jpa: DEBUG
