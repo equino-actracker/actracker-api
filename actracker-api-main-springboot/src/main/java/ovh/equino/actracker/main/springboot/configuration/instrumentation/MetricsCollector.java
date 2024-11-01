@@ -14,7 +14,7 @@ public class MetricsCollector {
     @Value("${actracker-api.environment:local}")
     private String applicationEnvironment;
 
-    @Value("${HOSTNAME:local}")
+    @Value("${HOSTNAME:localhost}")
     private String hostname;
 
     @Autowired
