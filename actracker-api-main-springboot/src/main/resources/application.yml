@@ -4,10 +4,10 @@ spring:
       default:
         # DB
         - 'actracker-api-db-h2'
-#        - 'actracker-api-db-postgres'
+        #        - 'actracker-api-db-postgres'
 
         # MESSAGING
-#        - 'actracker-api-publisher-rabbitmq'
+        #        - 'actracker-api-publisher-rabbitmq'
         - 'actracker-api-publisher-memory'
       dev:
         - 'actracker-api-db-postgres'
@@ -31,6 +31,12 @@ management:
       base-path: /info
       exposure:
         include: "health,metrics,prometheus"
+  metrics:
+    distribution:
+      percentiles:
+        all: 0.5, 0.75, 0.95, 0.99
+      percentile-histogram:
+        all: true
 #logging:
 #  level:
 #    org.springframework.orm.jpa: DEBUG
