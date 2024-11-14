@@ -83,3 +83,13 @@ dependencies {
 springBoot {
     mainClass = 'ovh.equino.actracker.main.springboot.ActrackerApi'
 }
+
+kubernetes {
+    resources {
+        labels {
+            service {
+                metrics = "prometheus"
+            }
+        }
+    }
+}

@@ -13,6 +13,3 @@ spec:
               name: actracker-api-config
       imagePullSecrets:
         - name: equino-registry
-    metadata:
-      labels:
-        metrics: prometheus
