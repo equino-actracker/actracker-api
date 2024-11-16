@@ -11,5 +11,8 @@ spec:
               name: actracker-api-rabbitmq-secret
           - configMapRef:
               name: actracker-api-config
+          ports:
+            - containerPort: 8080
+              name: http
       imagePullSecrets:
         - name: equino-registry
