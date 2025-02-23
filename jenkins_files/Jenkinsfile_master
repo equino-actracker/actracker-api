@@ -7,6 +7,9 @@ pipeline {
 
     environment {
         GH_ACTOR = 'marcinciapa'
+        EQUINO_MAVEN_CREDENTIALS = credentials('EquinoReposilite')
+        ORG_GRADLE_PROJECT_mavenEquinoUsername = "${EQUINO_MAVEN_CREDENTIALS_USR}"
+        ORG_GRADLE_PROJECT_mavenEquinoPassword = "${EQUINO_MAVEN_CREDENTIALS_PSW}"
     }
 
     triggers {
@@ -47,9 +50,7 @@ pipeline {
 
         stage('Publish') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'EquinoNexus', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    sh './gradlew --no-daemon --stacktrace publish -x build -x jar -PequinoNexus.username=${USERNAME} -PequinoNexus.password=${PASSWORD}'
-                }
+                sh './gradlew --no-daemon --stacktrace publish -x build -x jar -PmavenEquinoUrl=https://maven.cloud.equino.ovh/equino'
             }
         }
 

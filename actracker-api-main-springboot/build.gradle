@@ -17,6 +17,6 @@ dependencies {
     runtimeOnly project(':actracker-api-search-datasource')
     runtimeOnly project(':actracker-api-dashboard-generator-repository')
 
-    implementation 'ovh.equino.security:equino-security:0.3.2'
-    implementation 'ovh.equino.security:equino-security-basic-spring:0.3.2'
+    implementation 'ovh.equino.security:equino-security:0.3.3'
+    implementation 'ovh.equino.security:equino-security-basic-spring:0.3.3'
 }
