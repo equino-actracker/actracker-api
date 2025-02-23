@@ -15,14 +15,14 @@ allprojects {
 
     repositories {
         mavenCentral()
-//        maven {
-//            name 'mavenEquino'
-//            url 'https://maven.cloud.equino.ovh/equino'
-//            credentials {
-//                username settings.'mavenEquinoUsername'
-//                password settings.'mavenEquinoPassword'
-//            }
-//        }
+        maven {
+            name 'mavenEquino'
+            url 'https://maven.cloud.equino.ovh/equino'
+            credentials {
+                username project.findProperty('mavenEquinoUsername')
+                password project.findProperty('mavenEquinoPassword')
+            }
+        }
         maven {
             name 'mavenEquinoSnapshot'
             url 'https://maven.cloud.equino.ovh/equinoSnapshot'
