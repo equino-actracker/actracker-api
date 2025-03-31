@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        GH_ORG = 'marcinciapa'
+        GH_ORG = 'equino-actracker'
         GH_REPO = 'actracker-api'
         EQUINO_MAVEN_CREDENTIALS = credentials('EquinoReposilite')
         ORG_GRADLE_PROJECT_mavenEquinoUsername = "${EQUINO_MAVEN_CREDENTIALS_USR}"
