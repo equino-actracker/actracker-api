@@ -1,5 +1,6 @@
-package ovh.equino.actracker.domain;
+package ovh.equino.actracker.domain.tagset;
 
+import ovh.equino.actracker.domain.CommonSearchCriteria;
 import ovh.equino.actracker.domain.user.User;
 
 import java.time.Instant;
@@ -9,13 +10,11 @@ import java.util.UUID;
 import static java.util.Collections.emptySet;
 import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
-import static ovh.equino.actracker.domain.EntitySortCriteria.irrelevant;
 
-public record EntitySearchCriteria(
+public record TagSetSearchCriteria(
 
-        User searcher,
-        Integer pageSize,
-        String pageId,
+        // TODO remove unused fields
+        CommonSearchCriteria common,
         String term,
         Instant timeRangeStart,
         Instant timeRangeEnd,
@@ -24,14 +23,10 @@ public record EntitySearchCriteria(
 
 ) {
 
-    private static final int DEFAULT_PAGE_SIZE = 10;
-    private static final String DEFAULT_PAGE_ID = "";
     private static final String DEFAULT_TERM = "";
 
-    public EntitySearchCriteria {
-        requireNonNull(searcher);
-        pageSize = requireNonNullElse(pageSize, DEFAULT_PAGE_SIZE);
-        pageId = requireNonNullElse(pageId, DEFAULT_PAGE_ID);
+    public TagSetSearchCriteria {
+        requireNonNull(common);
         term = requireNonNullElse(term, DEFAULT_TERM);
         tags = requireNonNullElse(tags, emptySet());
     }

@@ -1,7 +1,7 @@
 package ovh.equino.actracker.application.activity;
 
 import ovh.equino.actracker.application.SearchResult;
-import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.CommonSearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.activity.*;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
@@ -103,10 +103,12 @@ public class ActivityApplicationService {
 
     public SearchResult<ActivityResult> searchActivities(SearchActivitiesQuery searchActivitiesQuery) {
 
-        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
-                actorExtractor.getActor(),
-                searchActivitiesQuery.pageSize(),
-                searchActivitiesQuery.pageId(),
+        var searchCriteria = new ActivitySearchCriteria(
+                new CommonSearchCriteria(
+                        actorExtractor.getActor(),
+                        searchActivitiesQuery.pageSize(),
+                        searchActivitiesQuery.pageId()
+                ),
                 searchActivitiesQuery.term(),
                 searchActivitiesQuery.timeRangeStart(),
                 searchActivitiesQuery.timeRangeEnd(),

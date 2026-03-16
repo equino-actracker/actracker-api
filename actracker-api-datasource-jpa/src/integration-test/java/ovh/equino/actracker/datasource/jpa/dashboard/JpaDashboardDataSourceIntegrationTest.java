@@ -6,10 +6,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.CommonSearchCriteria;
 import ovh.equino.actracker.domain.dashboard.Chart;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
 import ovh.equino.actracker.domain.dashboard.DashboardId;
+import ovh.equino.actracker.domain.dashboard.DashboardSearchCriteria;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tenant.TenantDto;
@@ -87,10 +88,12 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
 
     @Test
     void shouldFindAllAccessibleDashboards() {
-        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
-                searcher,
-                LARGE_PAGE_SIZE,
-                FIRST_PAGE,
+        var searchCriteria = new DashboardSearchCriteria(
+                new CommonSearchCriteria(
+                        searcher,
+                        LARGE_PAGE_SIZE,
+                        FIRST_PAGE
+                ),
                 null,
                 null,
                 null,
@@ -131,10 +134,12 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
         List<DashboardDto> expectedDashboards = testConfiguration.dashboards
                 .accessibleForWithLimitOffset(searcher, pageSize, offset);
         String pageId = expectedDashboards.get(0).id().toString();
-        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
-                searcher,
-                pageSize,
-                pageId,
+        var searchCriteria = new DashboardSearchCriteria(
+                new CommonSearchCriteria(
+                        searcher,
+                        pageSize,
+                        pageId
+                ),
                 null,
                 null,
                 null,
@@ -156,10 +161,12 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
         List<DashboardDto> expectedDashboards = testConfiguration.dashboards.
                 accessibleForExcluding(searcher, excludedDashboards);
 
-        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
-                searcher,
-                LARGE_PAGE_SIZE,
-                FIRST_PAGE,
+        var searchCriteria = new DashboardSearchCriteria(
+                new CommonSearchCriteria(
+                        searcher,
+                        LARGE_PAGE_SIZE,
+                        FIRST_PAGE
+                ),
                 null,
                 null,
                 null,

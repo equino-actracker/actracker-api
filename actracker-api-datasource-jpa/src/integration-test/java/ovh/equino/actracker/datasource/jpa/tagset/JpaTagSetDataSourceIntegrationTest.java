@@ -6,10 +6,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.CommonSearchCriteria;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tagset.TagSetDto;
 import ovh.equino.actracker.domain.tagset.TagSetId;
+import ovh.equino.actracker.domain.tagset.TagSetSearchCriteria;
 import ovh.equino.actracker.domain.tenant.TenantDto;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.IntegrationTestConfiguration;
@@ -77,10 +78,12 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldFindAllAccessibleTagSets() {
-        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
-                searcher,
-                LARGE_PAGE_SIZE,
-                FIRST_PAGE,
+        var searchCriteria = new TagSetSearchCriteria(
+                new CommonSearchCriteria(
+                        searcher,
+                        LARGE_PAGE_SIZE,
+                        FIRST_PAGE
+                ),
                 null,
                 null,
                 null,
@@ -107,10 +110,12 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
                 .accessibleForWithLimitOffset(searcher, pageSize, offset);
         String pageId = expectedTagSets.get(0).id().toString();
 
-        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
-                searcher,
-                pageSize,
-                pageId,
+        var searchCriteria = new TagSetSearchCriteria(
+                new CommonSearchCriteria(
+                        searcher,
+                        pageSize,
+                        pageId
+                ),
                 null,
                 null,
                 null,
@@ -131,10 +136,12 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
         List<TagSetDto> allAccessibleTagSets = testConfiguration.tagSets.accessibleFor(searcher);
         Set<UUID> excludedTagSets = Set.of(allAccessibleTagSets.get(1).id(), allAccessibleTagSets.get(3).id());
         List<TagSetDto> expectedTagSets = testConfiguration.tagSets.accessibleForExcluding(searcher, excludedTagSets);
-        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
-                searcher,
-                LARGE_PAGE_SIZE,
-                FIRST_PAGE,
+        var searchCriteria = new TagSetSearchCriteria(
+                new CommonSearchCriteria(
+                        searcher,
+                        LARGE_PAGE_SIZE,
+                        FIRST_PAGE
+                ),
                 null,
                 null,
                 null,

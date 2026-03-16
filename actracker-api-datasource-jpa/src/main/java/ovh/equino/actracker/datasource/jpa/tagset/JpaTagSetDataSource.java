@@ -1,10 +1,10 @@
 package ovh.equino.actracker.datasource.jpa.tagset;
 
 import jakarta.persistence.EntityManager;
-import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.tagset.TagSetDataSource;
 import ovh.equino.actracker.domain.tagset.TagSetDto;
 import ovh.equino.actracker.domain.tagset.TagSetId;
+import ovh.equino.actracker.domain.tagset.TagSetSearchCriteria;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.JpaDAO;
 
@@ -54,20 +54,20 @@ class JpaTagSetDataSource extends JpaDAO implements TagSetDataSource {
     }
 
     @Override
-    public List<TagSetDto> find(EntitySearchCriteria searchCriteria) {
+    public List<TagSetDto> find(TagSetSearchCriteria searchCriteria) {
 
         SelectTagSetsQuery selectTagSets = new SelectTagSetsQuery(entityManager);
         List<TagSetProjection> tagSetResults = selectTagSets
                 .where(
                         selectTagSets.predicate().and(
-                                selectTagSets.predicate().isAccessibleFor(searchCriteria.searcher()),
+                                selectTagSets.predicate().isAccessibleFor(searchCriteria.common().searcher()),
                                 selectTagSets.predicate().isNotDeleted(),
-                                selectTagSets.predicate().isInPage(searchCriteria.pageId()),
+                                selectTagSets.predicate().isInPage(searchCriteria.common().pageId()),
                                 selectTagSets.predicate().isNotExcluded(searchCriteria.excludeFilter())
                         )
                 )
                 .orderBy(selectTagSets.sort().ascending("id"))
-                .limit(searchCriteria.pageSize())
+                .limit(searchCriteria.common().pageSize())
                 .execute();
 
         Set<UUID> foundTagSetIds = tagSetResults
@@ -83,7 +83,7 @@ class JpaTagSetDataSource extends JpaDAO implements TagSetDataSource {
                                 selectTagSetJoinTag.predicate().and(
                                         selectTagSetJoinTag.predicate().hasTagSetIdIn(foundTagSetIds),
                                         selectTagSetJoinTag.predicate().isNotDeleted(),
-                                        selectTagSetJoinTag.predicate().isAccessibleFor(searchCriteria.searcher())
+                                        selectTagSetJoinTag.predicate().isAccessibleFor(searchCriteria.common().searcher())
                                 )
                         )
                         .execute()

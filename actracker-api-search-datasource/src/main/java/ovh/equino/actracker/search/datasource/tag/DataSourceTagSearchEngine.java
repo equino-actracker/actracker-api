@@ -1,9 +1,10 @@
 package ovh.equino.actracker.search.datasource.tag;
 
-import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.CommonSearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.tag.TagDataSource;
 import ovh.equino.actracker.domain.tag.TagDto;
+import ovh.equino.actracker.domain.tag.TagSearchCriteria;
 import ovh.equino.actracker.domain.tag.TagSearchEngine;
 
 import java.util.LinkedList;
@@ -18,12 +19,14 @@ class DataSourceTagSearchEngine implements TagSearchEngine {
     }
 
     @Override
-    public EntitySearchResult<TagDto> findTags(EntitySearchCriteria searchCriteria) {
+    public EntitySearchResult<TagDto> findTags(TagSearchCriteria searchCriteria) {
 
-        EntitySearchCriteria forNextPageIdSearchCriteria = new EntitySearchCriteria(
-                searchCriteria.searcher(),
-                searchCriteria.pageSize() + 1,   // additional one to calculate next page ID
-                searchCriteria.pageId(),
+        var forNextPageIdSearchCriteria = new TagSearchCriteria(
+                new CommonSearchCriteria(
+                        searchCriteria.common().searcher(),
+                        searchCriteria.common().pageSize() + 1,   // additional one to calculate next page ID
+                        searchCriteria.common().pageId()
+                ),
                 searchCriteria.term(),
                 searchCriteria.timeRangeStart(),
                 searchCriteria.timeRangeEnd(),
@@ -32,9 +35,9 @@ class DataSourceTagSearchEngine implements TagSearchEngine {
         );
 
         List<TagDto> foundTags = tagDataSource.find(forNextPageIdSearchCriteria);
-        String nextPageId = getNextPageId(foundTags, searchCriteria.pageSize());
+        String nextPageId = getNextPageId(foundTags, searchCriteria.common().pageSize());
         List<TagDto> results = foundTags.stream()
-                .limit(searchCriteria.pageSize())
+                .limit(searchCriteria.common().pageSize())
                 .toList();
 
         return new EntitySearchResult<>(nextPageId, results);
