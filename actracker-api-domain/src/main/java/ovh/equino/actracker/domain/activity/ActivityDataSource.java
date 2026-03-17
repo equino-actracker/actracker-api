@@ -1,6 +1,5 @@
 package ovh.equino.actracker.domain.activity;
 
-import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.user.User;
 
 import java.time.Instant;
@@ -11,7 +10,7 @@ public interface ActivityDataSource {
 
     Optional<ActivityDto> find(ActivityId activityId, User searcher);
 
-    List<ActivityDto> find(EntitySearchCriteria searchCriteria);
+    List<ActivityDto> find(ActivitySearchCriteria searchCriteria);
 
     List<ActivityId> findOwnUnfinishedStartedBefore(Instant startTime, User user);
 }

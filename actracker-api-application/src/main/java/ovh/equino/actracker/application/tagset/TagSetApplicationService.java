@@ -1,7 +1,7 @@
 package ovh.equino.actracker.application.tagset;
 
 import ovh.equino.actracker.application.SearchResult;
-import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.CommonSearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.tag.TagId;
@@ -73,10 +73,12 @@ public class TagSetApplicationService {
 
     public SearchResult<TagSetResult> searchTagSets(SearchTagSetsQuery searchTagSetsQuery) {
 
-        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
-                actorExtractor.getActor(),
-                searchTagSetsQuery.pageSize(),
-                searchTagSetsQuery.pageId(),
+        var searchCriteria = new TagSetSearchCriteria(
+                new CommonSearchCriteria(
+                        actorExtractor.getActor(),
+                        searchTagSetsQuery.pageSize(),
+                        searchTagSetsQuery.pageId()
+                ),
                 searchTagSetsQuery.term(),
                 null,
                 null,

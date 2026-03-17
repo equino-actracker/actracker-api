@@ -6,9 +6,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.CommonSearchCriteria;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivityId;
+import ovh.equino.actracker.domain.activity.ActivitySearchCriteria;
 import ovh.equino.actracker.domain.activity.MetricValue;
 import ovh.equino.actracker.domain.tag.MetricDto;
 import ovh.equino.actracker.domain.tag.TagDto;
@@ -91,10 +92,12 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
         Collection<MetricValue> expectedFlattenMetricValues = testConfiguration.activities
                 .flatMetricValuesAccessibleFor(searcher);
 
-        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
-                searcher,
-                LARGE_PAGE_SIZE,
-                FIRST_PAGE,
+        var searchCriteria = new ActivitySearchCriteria(
+                new CommonSearchCriteria(
+                        searcher,
+                        LARGE_PAGE_SIZE,
+                        FIRST_PAGE
+                ),
                 null,
                 null,
                 null,
@@ -124,10 +127,12 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                 .accessibleForWithLimitOffset(searcher, pageSize, offset);
         String pageId = expectedActivities.get(0).id().toString();
 
-        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
-                searcher,
-                pageSize,
-                pageId,
+        var searchCriteria = new ActivitySearchCriteria(
+                new CommonSearchCriteria(
+                        searcher,
+                        pageSize,
+                        pageId
+                ),
                 null,
                 null,
                 null,
@@ -150,10 +155,12 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
         List<ActivityDto> expectedActivities = testConfiguration.activities
                 .accessibleForInTimeRange(searcher, timeRangeStart, timeRangeEnd);
 
-        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
-                searcher,
-                LARGE_PAGE_SIZE,
-                FIRST_PAGE,
+        var searchCriteria = new ActivitySearchCriteria(
+                new CommonSearchCriteria(
+                        searcher,
+                        LARGE_PAGE_SIZE,
+                        FIRST_PAGE
+                ),
                 null,
                 timeRangeStart,
                 timeRangeEnd,
@@ -176,10 +183,12 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
         List<ActivityDto> expectedActivities = testConfiguration.activities
                 .accessibleForExcluding(searcher, excludedActivities);
 
-        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
-                searcher,
-                LARGE_PAGE_SIZE,
-                FIRST_PAGE,
+        var searchCriteria = new ActivitySearchCriteria(
+                new CommonSearchCriteria(
+                        searcher,
+                        LARGE_PAGE_SIZE,
+                        FIRST_PAGE
+                ),
                 null,
                 null,
                 null,
@@ -204,10 +213,12 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
         List<ActivityDto> expectedActivities = testConfiguration.activities
                 .accessibleForContainingAnyOfTags(searcher, requiredTags);
 
-        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
-                searcher,
-                LARGE_PAGE_SIZE,
-                FIRST_PAGE,
+        var searchCriteria = new ActivitySearchCriteria(
+                new CommonSearchCriteria(
+                        searcher,
+                        LARGE_PAGE_SIZE,
+                        FIRST_PAGE
+                ),
                 null,
                 null,
                 null,

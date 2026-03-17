@@ -1,11 +1,7 @@
 package ovh.equino.actracker.datasource.jpa.activity;
 
 import jakarta.persistence.EntityManager;
-import ovh.equino.actracker.domain.EntitySearchCriteria;
-import ovh.equino.actracker.domain.activity.ActivityDataSource;
-import ovh.equino.actracker.domain.activity.ActivityDto;
-import ovh.equino.actracker.domain.activity.ActivityId;
-import ovh.equino.actracker.domain.activity.MetricValue;
+import ovh.equino.actracker.domain.activity.*;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.JpaDAO;
 
@@ -71,7 +67,7 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
     }
 
     @Override
-    public List<ActivityDto> find(EntitySearchCriteria searchCriteria) {
+    public List<ActivityDto> find(ActivitySearchCriteria searchCriteria) {
 
         Timestamp timeRangeStart = isNull(searchCriteria.timeRangeStart())
                 ? null
@@ -85,15 +81,15 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
                 .where(
                         selectActivities.predicate().and(
                                 selectActivities.predicate().isNotDeleted(),
-                                selectActivities.predicate().isAccessibleFor(searchCriteria.searcher()),
-                                selectActivities.predicate().isInPage(searchCriteria.pageId()),
+                                selectActivities.predicate().isAccessibleFor(searchCriteria.common().searcher()),
+                                selectActivities.predicate().isInPage(searchCriteria.common().pageId()),
                                 selectActivities.predicate().isNotExcluded(searchCriteria.excludeFilter()),
                                 selectActivities.predicate().hasAnyOfTag(searchCriteria.tags()),
                                 selectActivities.predicate().isInTimeRange(timeRangeStart, timeRangeEnd)
                         )
                 )
                 .orderBy(selectActivities.sort().ascending("id"))
-                .limit(searchCriteria.pageSize())
+                .limit(searchCriteria.common().pageSize())
                 .execute();
 
         Set<UUID> foundActivityIds = activityResults
@@ -108,7 +104,7 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
                         selectActivityJoinTag.predicate().and(
                                 selectActivityJoinTag.predicate().hasActivityIdIn(foundActivityIds),
                                 selectActivityJoinTag.predicate().isNotDeleted(),
-                                selectActivityJoinTag.predicate().isAccessibleFor(searchCriteria.searcher())
+                                selectActivityJoinTag.predicate().isAccessibleFor(searchCriteria.common().searcher())
                         )
                 )
                 .execute()
@@ -124,7 +120,7 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
                         selectMetricValue.predicate().and(
                                 selectMetricValue.predicate().hasActivityIdIn(foundActivityIds),
                                 selectMetricValue.predicate().isNotDeleted(),
-                                selectMetricValue.predicate().isAccessibleFor(searchCriteria.searcher())
+                                selectMetricValue.predicate().isAccessibleFor(searchCriteria.common().searcher())
                         )
                 )
                 .execute()

@@ -1,9 +1,10 @@
 package ovh.equino.actracker.search.datasource.dashboard;
 
-import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.CommonSearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.dashboard.DashboardDataSource;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
+import ovh.equino.actracker.domain.dashboard.DashboardSearchCriteria;
 import ovh.equino.actracker.domain.dashboard.DashboardSearchEngine;
 
 import java.util.LinkedList;
@@ -18,11 +19,13 @@ class DataSourceDashboardSearchEngine implements DashboardSearchEngine {
     }
 
     @Override
-    public EntitySearchResult<DashboardDto> findDashboards(EntitySearchCriteria searchCriteria) {
-        EntitySearchCriteria forNextPageIdSearchCriteria = new EntitySearchCriteria(
-                searchCriteria.searcher(),
-                searchCriteria.pageSize() + 1,   // additional one to calculate next page ID
-                searchCriteria.pageId(),
+    public EntitySearchResult<DashboardDto> findDashboards(DashboardSearchCriteria searchCriteria) {
+        var forNextPageIdSearchCriteria = new DashboardSearchCriteria(
+                new CommonSearchCriteria(
+                        searchCriteria.common().searcher(),
+                        searchCriteria.common().pageSize() + 1,   // additional one to calculate next page ID
+                        searchCriteria.common().pageId()
+                ),
                 searchCriteria.term(),
                 searchCriteria.timeRangeStart(),
                 searchCriteria.timeRangeEnd(),
@@ -31,9 +34,9 @@ class DataSourceDashboardSearchEngine implements DashboardSearchEngine {
         );
 
         List<DashboardDto> foundDashboards = dashboardDataSource.find(forNextPageIdSearchCriteria);
-        String nextPageId = getNextPageId(foundDashboards, searchCriteria.pageSize());
+        String nextPageId = getNextPageId(foundDashboards, searchCriteria.common().pageSize());
         List<DashboardDto> results = foundDashboards.stream()
-                .limit(searchCriteria.pageSize())
+                .limit(searchCriteria.common().pageSize())
                 .toList();
 
         return new EntitySearchResult<>(nextPageId, results);

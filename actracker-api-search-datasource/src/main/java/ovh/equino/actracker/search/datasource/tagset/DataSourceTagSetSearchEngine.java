@@ -1,9 +1,10 @@
 package ovh.equino.actracker.search.datasource.tagset;
 
-import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.CommonSearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.tagset.TagSetDataSource;
 import ovh.equino.actracker.domain.tagset.TagSetDto;
+import ovh.equino.actracker.domain.tagset.TagSetSearchCriteria;
 import ovh.equino.actracker.domain.tagset.TagSetSearchEngine;
 
 import java.util.LinkedList;
@@ -18,11 +19,13 @@ class DataSourceTagSetSearchEngine implements TagSetSearchEngine {
     }
 
     @Override
-    public EntitySearchResult<TagSetDto> findTagSets(EntitySearchCriteria searchCriteria) {
-        EntitySearchCriteria forNextPageIdSearchCriteria = new EntitySearchCriteria(
-                searchCriteria.searcher(),
-                searchCriteria.pageSize() + 1,   // additional one to calculate next page ID
-                searchCriteria.pageId(),
+    public EntitySearchResult<TagSetDto> findTagSets(TagSetSearchCriteria searchCriteria) {
+        var forNextPageIdSearchCriteria = new TagSetSearchCriteria(
+                new CommonSearchCriteria(
+                        searchCriteria.common().searcher(),
+                        searchCriteria.common().pageSize() + 1,   // additional one to calculate next page ID
+                        searchCriteria.common().pageId()
+                ),
                 searchCriteria.term(),
                 searchCriteria.timeRangeStart(),
                 searchCriteria.timeRangeEnd(),
@@ -31,9 +34,9 @@ class DataSourceTagSetSearchEngine implements TagSetSearchEngine {
         );
 
         List<TagSetDto> foundTagSets = tagSetDataSource.find(forNextPageIdSearchCriteria);
-        String nextPageId = getNextPageId(foundTagSets, searchCriteria.pageSize());
+        String nextPageId = getNextPageId(foundTagSets, searchCriteria.common().pageSize());
         List<TagSetDto> results = foundTagSets.stream()
-                .limit(searchCriteria.pageSize())
+                .limit(searchCriteria.common().pageSize())
                 .toList();
 
         return new EntitySearchResult<>(nextPageId, results);

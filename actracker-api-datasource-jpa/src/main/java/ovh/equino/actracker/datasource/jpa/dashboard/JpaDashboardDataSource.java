@@ -1,11 +1,7 @@
 package ovh.equino.actracker.datasource.jpa.dashboard;
 
 import jakarta.persistence.EntityManager;
-import ovh.equino.actracker.domain.EntitySearchCriteria;
-import ovh.equino.actracker.domain.dashboard.Chart;
-import ovh.equino.actracker.domain.dashboard.DashboardDataSource;
-import ovh.equino.actracker.domain.dashboard.DashboardDto;
-import ovh.equino.actracker.domain.dashboard.DashboardId;
+import ovh.equino.actracker.domain.dashboard.*;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.JpaDAO;
@@ -90,20 +86,20 @@ class JpaDashboardDataSource extends JpaDAO implements DashboardDataSource {
     }
 
     @Override
-    public List<DashboardDto> find(EntitySearchCriteria searchCriteria) {
+    public List<DashboardDto> find(DashboardSearchCriteria searchCriteria) {
 
         SelectDashboardsQuery selectDashboards = new SelectDashboardsQuery(entityManager);
         List<DashboardProjection> dashboardResults = selectDashboards
                 .where(
                         selectDashboards.predicate().and(
                                 selectDashboards.predicate().isNotDeleted(),
-                                selectDashboards.predicate().isAccessibleFor(searchCriteria.searcher()),
-                                selectDashboards.predicate().isInPage(searchCriteria.pageId()),
+                                selectDashboards.predicate().isAccessibleFor(searchCriteria.common().searcher()),
+                                selectDashboards.predicate().isInPage(searchCriteria.common().pageId()),
                                 selectDashboards.predicate().isNotExcluded(searchCriteria.excludeFilter())
                         )
                 )
                 .orderBy(selectDashboards.sort().ascending("id"))
-                .limit(searchCriteria.pageSize())
+                .limit(searchCriteria.common().pageSize())
                 .execute();
 
         Set<UUID> dashboardIds = dashboardResults
@@ -133,7 +129,7 @@ class JpaDashboardDataSource extends JpaDAO implements DashboardDataSource {
                 .where(
                         selectChartJoinTag.predicate().and(
                                 selectChartJoinTag.predicate().hasChartIdIn(chartIds),
-                                selectChartJoinTag.predicate().isAccessibleFor(searchCriteria.searcher()),
+                                selectChartJoinTag.predicate().isAccessibleFor(searchCriteria.common().searcher()),
                                 selectChartJoinTag.predicate().isNotDeleted()
                         )
                 )
@@ -158,7 +154,7 @@ class JpaDashboardDataSource extends JpaDAO implements DashboardDataSource {
                 .where(
                         selectShareJoinDashboard.predicate().and(
                                 selectShareJoinDashboard.predicate().hasDashboardIdIn(dashboardIds),
-                                selectShareJoinDashboard.predicate().isAccessibleFor(searchCriteria.searcher())
+                                selectShareJoinDashboard.predicate().isAccessibleFor(searchCriteria.common().searcher())
                         )
                 )
                 .execute()

@@ -1,9 +1,10 @@
 package ovh.equino.actracker.dashboard.generation.repository;
 
-import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.CommonSearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.dashboard.generation.DashboardGenerationCriteria;
 import ovh.equino.actracker.domain.tag.TagDto;
+import ovh.equino.actracker.domain.tag.TagSearchCriteria;
 import ovh.equino.actracker.domain.tag.TagSearchEngine;
 
 import java.util.ArrayList;
@@ -33,10 +34,12 @@ final class TagFinder {
     private EntitySearchResult<TagDto> fetchNextPageOfTags(DashboardGenerationCriteria generationCriteria,
                                                            String pageId) {
 
-        EntitySearchCriteria searchCriteria = new EntitySearchCriteria(
-                generationCriteria.generator(),
-                PAGE_SIZE,
-                pageId,
+        var searchCriteria = new TagSearchCriteria(
+                new CommonSearchCriteria(
+                        generationCriteria.generator(),
+                        PAGE_SIZE,
+                        pageId
+                ),
                 null,
                 null,
                 null,

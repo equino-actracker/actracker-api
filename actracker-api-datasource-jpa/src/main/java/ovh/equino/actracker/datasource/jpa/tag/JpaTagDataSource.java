@@ -1,12 +1,8 @@
 package ovh.equino.actracker.datasource.jpa.tag;
 
 import jakarta.persistence.EntityManager;
-import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.share.Share;
-import ovh.equino.actracker.domain.tag.MetricDto;
-import ovh.equino.actracker.domain.tag.TagDataSource;
-import ovh.equino.actracker.domain.tag.TagDto;
-import ovh.equino.actracker.domain.tag.TagId;
+import ovh.equino.actracker.domain.tag.*;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.JpaDAO;
 
@@ -66,21 +62,21 @@ class JpaTagDataSource extends JpaDAO implements TagDataSource {
     }
 
     @Override
-    public List<TagDto> find(EntitySearchCriteria searchCriteria) {
+    public List<TagDto> find(TagSearchCriteria searchCriteria) {
 
         SelectTagsQuery selectTags = new SelectTagsQuery(entityManager);
         List<TagProjection> tagResults = selectTags
                 .where(
                         selectTags.predicate().and(
                                 selectTags.predicate().isNotDeleted(),
-                                selectTags.predicate().isAccessibleFor(searchCriteria.searcher()),
-                                selectTags.predicate().isInPage(searchCriteria.pageId()),
+                                selectTags.predicate().isAccessibleFor(searchCriteria.common().searcher()),
+                                selectTags.predicate().isInPage(searchCriteria.common().pageId()),
                                 selectTags.predicate().isNotExcluded(searchCriteria.excludeFilter()),
                                 selectTags.predicate().matchesTerm(searchCriteria.term())
                         )
                 )
                 .orderBy(selectTags.sort().ascending("id"))
-                .limit(searchCriteria.pageSize())
+                .limit(searchCriteria.common().pageSize())
                 .execute();
 
         Set<UUID> foundTagIds = tagResults
@@ -94,7 +90,7 @@ class JpaTagDataSource extends JpaDAO implements TagDataSource {
                 .where(
                         selectShareJoinTag.predicate().and(
                                 selectShareJoinTag.predicate().hasTagIdIn(foundTagIds),
-                                selectShareJoinTag.predicate().isAccessibleFor(searchCriteria.searcher())
+                                selectShareJoinTag.predicate().isAccessibleFor(searchCriteria.common().searcher())
                         )
                 )
                 .execute()
