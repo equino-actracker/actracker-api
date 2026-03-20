@@ -112,10 +112,7 @@ public class DashboardApplicationService {
                         searchDashboardsQuery.pageId()
                 ),
                 searchDashboardsQuery.term(),
-                null,
-                null,
-                searchDashboardsQuery.excludeFilter(),
-                null
+                searchDashboardsQuery.excludeFilter()
         );
 
         EntitySearchResult<DashboardDto> searchResult = dashboardSearchEngine.findDashboards(searchCriteria);

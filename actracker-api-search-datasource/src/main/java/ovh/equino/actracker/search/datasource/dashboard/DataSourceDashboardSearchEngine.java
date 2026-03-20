@@ -27,10 +27,7 @@ class DataSourceDashboardSearchEngine implements DashboardSearchEngine {
                         searchCriteria.common().pageId()
                 ),
                 searchCriteria.term(),
-                searchCriteria.timeRangeStart(),
-                searchCriteria.timeRangeEnd(),
-                searchCriteria.excludeFilter(),
-                searchCriteria.tags()
+                searchCriteria.excludeFilter()
         );
 
         List<DashboardDto> foundDashboards = dashboardDataSource.find(forNextPageIdSearchCriteria);
