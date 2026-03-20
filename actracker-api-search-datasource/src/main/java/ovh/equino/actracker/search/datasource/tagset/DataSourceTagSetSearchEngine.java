@@ -27,10 +27,7 @@ class DataSourceTagSetSearchEngine implements TagSetSearchEngine {
                         searchCriteria.common().pageId()
                 ),
                 searchCriteria.term(),
-                searchCriteria.timeRangeStart(),
-                searchCriteria.timeRangeEnd(),
-                searchCriteria.excludeFilter(),
-                searchCriteria.tags()
+                searchCriteria.excludeFilter()
         );
 
         List<TagSetDto> foundTagSets = tagSetDataSource.find(forNextPageIdSearchCriteria);

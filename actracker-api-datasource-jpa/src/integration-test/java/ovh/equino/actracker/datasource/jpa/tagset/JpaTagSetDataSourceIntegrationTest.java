@@ -85,9 +85,6 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
                         FIRST_PAGE
                 ),
                 null,
-                null,
-                null,
-                null,
                 null
         );
 
@@ -117,9 +114,6 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
                         pageId
                 ),
                 null,
-                null,
-                null,
-                null,
                 null
         );
 
@@ -143,10 +137,7 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
                         FIRST_PAGE
                 ),
                 null,
-                null,
-                null,
-                excludedTagSets,
-                null
+                excludedTagSets
         );
         inTransaction(() -> {
             List<TagSetDto> foundTagSets = dataSource.find(searchCriteria);
