@@ -12,7 +12,6 @@ import static java.util.Objects.requireNonNullElse;
 
 public record ActivitySearchCriteria(
 
-        // TODO remove unused fields
         CommonSearchCriteria common,
         String term,
         Instant timeRangeStart,

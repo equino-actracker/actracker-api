@@ -1,7 +1,6 @@
 package ovh.equino.actracker.domain.tagset;
 
 import ovh.equino.actracker.domain.CommonSearchCriteria;
-import ovh.equino.actracker.domain.user.User;
 
 import java.time.Instant;
 import java.util.Set;
