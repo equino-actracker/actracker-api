@@ -117,10 +117,7 @@ public class TagApplicationService {
                         searchTagsQuery.pageId()
                 ),
                 searchTagsQuery.term(),
-                null,
-                null,
-                searchTagsQuery.excludeFilter(),
-                null
+                searchTagsQuery.excludeFilter()
         );
         EntitySearchResult<TagDto> searchResult = tagSearchEngine.findTags(searchCriteria);
         List<TagResult> resultForClient = searchResult.results()

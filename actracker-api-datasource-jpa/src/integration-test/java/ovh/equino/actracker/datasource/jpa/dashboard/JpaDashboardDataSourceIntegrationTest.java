@@ -95,9 +95,6 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
                         FIRST_PAGE
                 ),
                 null,
-                null,
-                null,
-                null,
                 null
         );
 
@@ -141,9 +138,6 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
                         pageId
                 ),
                 null,
-                null,
-                null,
-                null,
                 null
         );
         inTransaction(() -> {
@@ -168,10 +162,7 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
                         FIRST_PAGE
                 ),
                 null,
-                null,
-                null,
-                excludedDashboards,
-                null
+                excludedDashboards
         );
         inTransaction(() -> {
             List<DashboardDto> foundDashboards = dataSource.find(searchCriteria);

@@ -41,9 +41,6 @@ final class TagFinder {
                         pageId
                 ),
                 null,
-                null,
-                null,
-                null,
                 null
         );
         return searchEngine.findTags(searchCriteria);

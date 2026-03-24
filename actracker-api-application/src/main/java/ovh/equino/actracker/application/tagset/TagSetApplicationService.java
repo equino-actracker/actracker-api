@@ -80,10 +80,7 @@ public class TagSetApplicationService {
                         searchTagSetsQuery.pageId()
                 ),
                 searchTagSetsQuery.term(),
-                null,
-                null,
-                searchTagSetsQuery.excludeFilter(),
-                null
+                searchTagSetsQuery.excludeFilter()
         );
         EntitySearchResult<TagSetDto> searchResult = tagSetSearchEngine.findTagSets(searchCriteria);
         List<TagSetResult> resultForClient = searchResult.results()
