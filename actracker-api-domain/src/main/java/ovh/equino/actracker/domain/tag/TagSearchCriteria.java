@@ -2,7 +2,6 @@ package ovh.equino.actracker.domain.tag;
 
 import ovh.equino.actracker.domain.CommonSearchCriteria;
 
-import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
 
