@@ -1,7 +1,9 @@
 package ovh.equino.actracker.dashboard.generation.repository;
 
 import ovh.equino.actracker.domain.CommonSearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySearchResult;
+import ovh.equino.actracker.domain.PageIdTranslator;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivitySearchCriteria;
 import ovh.equino.actracker.domain.activity.ActivitySearchEngine;
@@ -18,9 +20,11 @@ final class ActivityFinder {
     private static final Integer PAGE_SIZE = 500;
 
     private final ActivitySearchEngine searchEngine;
+    private final PageIdTranslator pageIdTranslator;
 
-    ActivityFinder(ActivitySearchEngine searchEngine) {
+    ActivityFinder(ActivitySearchEngine searchEngine, PageIdTranslator pageIdTranslator) {
         this.searchEngine = searchEngine;
+        this.pageIdTranslator = pageIdTranslator;
     }
 
     List<ActivityDto> find(DashboardGenerationCriteria generationCriteria) {
@@ -40,11 +44,13 @@ final class ActivityFinder {
     private EntitySearchResult<ActivityDto> fetchNextPageOfActivities(DashboardGenerationCriteria generationCriteria,
                                                                       String pageId) {
 
+        var entitySearchPageId = pageIdTranslator.fromString(pageId);
+
         var searchCriteria = new ActivitySearchCriteria(
                 new CommonSearchCriteria(
                         generationCriteria.generator(),
                         PAGE_SIZE,
-                        pageId
+                        entitySearchPageId
                 ),
                 null,
                 generationCriteria.timeRangeStart(),

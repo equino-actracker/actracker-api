@@ -7,6 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import ovh.equino.actracker.domain.CommonSearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.dashboard.Chart;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
 import ovh.equino.actracker.domain.dashboard.DashboardId;
@@ -23,6 +24,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static ovh.equino.actracker.domain.EntitySearchPageId.aPageId;
 
 abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest {
 
@@ -126,11 +128,11 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
 
     @Test
     void shouldFindSecondPageOfDashboards() {
-        int pageSize = 2;
-        int offset = 1;
-        List<DashboardDto> expectedDashboards = testConfiguration.dashboards
-                .accessibleForWithLimitOffset(searcher, pageSize, offset);
-        String pageId = expectedDashboards.get(0).id().toString();
+        var pageSize = 2;
+        var offset = 1;
+        var expectedDashboards = testConfiguration.dashboards.accessibleForWithLimitOffset(searcher, pageSize, offset);
+        var pageId = aPageId().with(EntitySearchPageId.Value.of("id", expectedDashboards.get(0).id().toString()));
+
         var searchCriteria = new DashboardSearchCriteria(
                 new CommonSearchCriteria(
                         searcher,

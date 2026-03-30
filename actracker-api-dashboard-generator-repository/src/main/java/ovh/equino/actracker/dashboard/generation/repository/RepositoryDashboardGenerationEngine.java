@@ -1,5 +1,6 @@
 package ovh.equino.actracker.dashboard.generation.repository;
 
+import ovh.equino.actracker.domain.PageIdTranslator;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivitySearchEngine;
 import ovh.equino.actracker.domain.dashboard.Chart;
@@ -26,9 +27,12 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
     private final TagFinder tagFinder;
     private final ActivityFinder activityFinder;
 
-    RepositoryDashboardGenerationEngine(TagSearchEngine tagSearchEngine, ActivitySearchEngine activitySearchEngine) {
-        this.tagFinder = new TagFinder(tagSearchEngine);
-        this.activityFinder = new ActivityFinder(activitySearchEngine);
+    RepositoryDashboardGenerationEngine(TagSearchEngine tagSearchEngine,
+                                        ActivitySearchEngine activitySearchEngine,
+                                        PageIdTranslator pageIdTranslator) {
+
+        this.tagFinder = new TagFinder(tagSearchEngine, pageIdTranslator);
+        this.activityFinder = new ActivityFinder(activitySearchEngine, pageIdTranslator);
     }
 
     @Override

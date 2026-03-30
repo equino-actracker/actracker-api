@@ -7,6 +7,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import ovh.equino.actracker.domain.CommonSearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchPageId;
+import ovh.equino.actracker.domain.EntitySearchPageId.Value;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivityId;
 import ovh.equino.actracker.domain.activity.ActivitySearchCriteria;
@@ -25,6 +27,7 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.assertj.core.api.Assertions.assertThat;
+import static ovh.equino.actracker.domain.EntitySearchPageId.aPageId;
 import static ovh.equino.actracker.jpa.TestUtil.randomBigDecimal;
 
 abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
@@ -121,11 +124,10 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldFindSecondPageOfActivities() {
-        int pageSize = 3;
-        int offset = 1;
-        List<ActivityDto> expectedActivities = testConfiguration.activities
-                .accessibleForWithLimitOffset(searcher, pageSize, offset);
-        String pageId = expectedActivities.get(0).id().toString();
+        var pageSize = 3;
+        var offset = 1;
+        var expectedActivities = testConfiguration.activities.accessibleForWithLimitOffset(searcher, pageSize, offset);
+        var pageId = aPageId().with(Value.of("id", expectedActivities.get(0).id().toString()));
 
         var searchCriteria = new ActivitySearchCriteria(
                 new CommonSearchCriteria(

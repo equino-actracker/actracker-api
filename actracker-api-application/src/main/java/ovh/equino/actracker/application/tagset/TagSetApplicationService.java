@@ -3,6 +3,7 @@ package ovh.equino.actracker.application.tagset;
 import ovh.equino.actracker.application.SearchResult;
 import ovh.equino.actracker.domain.CommonSearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
+import ovh.equino.actracker.domain.PageIdTranslator;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tagset.*;
@@ -21,13 +22,15 @@ public class TagSetApplicationService {
     private final TagSetSearchEngine tagSetSearchEngine;
     private final TagSetNotifier tagSetNotifier;
     private final ActorExtractor actorExtractor;
+    private final PageIdTranslator pageIdTranslator;
 
     public TagSetApplicationService(TagSetFactory tagSetFactory,
                                     TagSetRepository tagSetRepository,
                                     TagSetDataSource tagSetDataSource,
                                     TagSetSearchEngine tagSetSearchEngine,
                                     TagSetNotifier tagSetNotifier,
-                                    ActorExtractor actorExtractor) {
+                                    ActorExtractor actorExtractor,
+                                    PageIdTranslator pageIdTranslator) {
 
         this.tagSetFactory = tagSetFactory;
         this.tagSetRepository = tagSetRepository;
@@ -35,6 +38,7 @@ public class TagSetApplicationService {
         this.tagSetSearchEngine = tagSetSearchEngine;
         this.tagSetNotifier = tagSetNotifier;
         this.actorExtractor = actorExtractor;
+        this.pageIdTranslator = pageIdTranslator;
     }
 
     public TagSetResult getTagSet(UUID tagSetId) {
@@ -73,11 +77,13 @@ public class TagSetApplicationService {
 
     public SearchResult<TagSetResult> searchTagSets(SearchTagSetsQuery searchTagSetsQuery) {
 
+        var pageId = pageIdTranslator.fromString(searchTagSetsQuery.pageId());
+
         var searchCriteria = new TagSetSearchCriteria(
                 new CommonSearchCriteria(
                         actorExtractor.getActor(),
                         searchTagSetsQuery.pageSize(),
-                        searchTagSetsQuery.pageId()
+                        pageId
                 ),
                 searchTagSetsQuery.term(),
                 searchTagSetsQuery.excludeFilter()

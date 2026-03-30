@@ -7,6 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import ovh.equino.actracker.domain.CommonSearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagSearchCriteria;
@@ -22,6 +23,7 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static java.util.stream.Stream.concat;
 import static org.assertj.core.api.Assertions.assertThat;
+import static ovh.equino.actracker.domain.EntitySearchPageId.aPageId;
 
 abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
 
@@ -103,10 +105,10 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldFindSecondPageOfTags() {
-        int pageSize = 2;
-        int offset = 1;
-        List<TagDto> expectedTags = testConfiguration.tags.accessibleForWithLimitOffset(searcher, pageSize, offset);
-        String pageId = expectedTags.get(0).id().toString();
+        var pageSize = 2;
+        var offset = 1;
+        var expectedTags = testConfiguration.tags.accessibleForWithLimitOffset(searcher, pageSize, offset);
+        var pageId = aPageId().with(EntitySearchPageId.Value.of("id", expectedTags.get(0).id().toString()));
         var searchCriteria = new TagSearchCriteria(
                 new CommonSearchCriteria(
                         searcher,
