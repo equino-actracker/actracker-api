@@ -7,7 +7,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import ovh.equino.actracker.domain.CommonSearchCriteria;
-import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySearchPageId.Value;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivityId;
@@ -143,7 +142,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
         );
 
         inTransaction(() -> {
-            List<ActivityDto> foundActivities = dataSource.find(searchCriteria);
+            var foundActivities = dataSource.find(searchCriteria);
             assertThat(foundActivities)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags", "metricValues")
                     .containsExactly(expectedActivities.get(0), expectedActivities.get(1), expectedActivities.get(2));

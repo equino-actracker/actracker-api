@@ -4,14 +4,11 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import jakarta.persistence.metamodel.SingularAttribute;
 import ovh.equino.actracker.domain.EntitySearchPageId;
-import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.JpaEntity;
 import ovh.equino.actracker.jpa.JpaEntity_;
 
 import java.util.Collection;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -66,10 +63,10 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
     }
 
     public JpaPredicate isInPage(EntitySearchPageId pageId) {
-        if(pageId.isEmpty()) {
+        if (pageId.isEmpty()) {
             return allMatch();
         }
-        JpaPredicate[] pagePredicates = pageId.values().stream()
+        var pagePredicates = pageId.values().stream()
                 .map(this::pageValuePredicate)
                 .toArray(JpaPredicate[]::new);
 
@@ -112,11 +109,9 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
 
     // TODO override in subclasses, matching their fields and calling super at the end
     protected JpaPredicate pageValuePredicate(EntitySearchPageId.Value pageValue) {
-        return switch (pageValue.field()) {
-            case "id" ->
-                    () -> criteriaBuilder.greaterThanOrEqualTo(root.get(JpaEntity_.id), (String) pageValue.value());
-            default ->
-                    allMatch();
-        };
+        if ("id".equals(pageValue.field())) {
+            return () -> criteriaBuilder.greaterThanOrEqualTo(root.get(JpaEntity_.id), (String) pageValue.value());
+        }
+        return allMatch();
     }
 }

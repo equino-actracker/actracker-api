@@ -143,7 +143,7 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
                 null
         );
         inTransaction(() -> {
-            List<DashboardDto> foundDashboards = dataSource.find(searchCriteria);
+            var foundDashboards = dataSource.find(searchCriteria);
             assertThat(foundDashboards)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("charts", "shares")
                     .containsExactlyElementsOf(expectedDashboards);

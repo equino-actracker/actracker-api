@@ -88,8 +88,8 @@ public class TagSetApplicationService {
                 searchTagSetsQuery.term(),
                 searchTagSetsQuery.excludeFilter()
         );
-        EntitySearchResult<TagSetDto> searchResult = tagSetSearchEngine.findTagSets(searchCriteria);
-        List<TagSetResult> resultForClient = searchResult.results()
+        var searchResult = tagSetSearchEngine.findTagSets(searchCriteria);
+        var resultForClient = searchResult.results()
                 .stream()
                 .map(this::toTagSetResult)
                 .toList();

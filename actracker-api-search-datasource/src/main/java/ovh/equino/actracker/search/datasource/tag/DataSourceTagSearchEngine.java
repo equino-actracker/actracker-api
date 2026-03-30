@@ -3,7 +3,6 @@ package ovh.equino.actracker.search.datasource.tag;
 import ovh.equino.actracker.domain.CommonSearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySearchResult;
-import ovh.equino.actracker.domain.PageIdTranslator;
 import ovh.equino.actracker.domain.tag.TagDataSource;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tag.TagSearchCriteria;
@@ -17,11 +16,9 @@ import static ovh.equino.actracker.domain.EntitySearchPageId.aPageId;
 class DataSourceTagSearchEngine implements TagSearchEngine {
 
     private final TagDataSource tagDataSource;
-    private final PageIdTranslator pageIdTranslator;
 
-    DataSourceTagSearchEngine(TagDataSource tagDataSource, PageIdTranslator pageIdTranslator) {
+    DataSourceTagSearchEngine(TagDataSource tagDataSource) {
         this.tagDataSource = tagDataSource;
-        this.pageIdTranslator = pageIdTranslator;
     }
 
     @Override

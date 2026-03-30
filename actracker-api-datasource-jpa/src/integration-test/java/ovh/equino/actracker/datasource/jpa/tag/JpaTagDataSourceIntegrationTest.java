@@ -119,7 +119,7 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
                 null
         );
         inTransaction(() -> {
-            List<TagDto> foundTags = dataSource.find(searchCriteria);
+            var foundTags = dataSource.find(searchCriteria);
             assertThat(foundTags)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("shares", "metrics")
                     .containsExactlyElementsOf(expectedTags);
