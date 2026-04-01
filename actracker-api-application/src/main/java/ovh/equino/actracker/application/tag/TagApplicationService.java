@@ -2,7 +2,7 @@ package ovh.equino.actracker.application.tag;
 
 import ovh.equino.actracker.application.SearchResult;
 import ovh.equino.actracker.domain.CommonSearchCriteria;
-import ovh.equino.actracker.domain.EntitySearchResult;
+import ovh.equino.actracker.domain.PageIdTranslator;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tag.*;
@@ -27,6 +27,7 @@ public class TagApplicationService {
     private final TagNotifier tagNotifier;
     private final ActorExtractor actorExtractor;
     private final TenantDataSource tenantDataSource;
+    private final PageIdTranslator pageIdTranslator;
 
     public TagApplicationService(TagFactory tagFactory,
                                  MetricFactory metricFactory,
@@ -35,7 +36,8 @@ public class TagApplicationService {
                                  TagSearchEngine tagSearchEngine,
                                  TagNotifier tagNotifier,
                                  ActorExtractor actorExtractor,
-                                 TenantDataSource tenantDataSource) {
+                                 TenantDataSource tenantDataSource,
+                                 PageIdTranslator pageIdTranslator) {
 
         this.tagFactory = tagFactory;
         this.metricFactory = metricFactory;
@@ -45,6 +47,7 @@ public class TagApplicationService {
         this.tagNotifier = tagNotifier;
         this.actorExtractor = actorExtractor;
         this.tenantDataSource = tenantDataSource;
+        this.pageIdTranslator = pageIdTranslator;
     }
 
     public TagResult getTag(UUID tagId) {
@@ -110,17 +113,20 @@ public class TagApplicationService {
     }
 
     public SearchResult<TagResult> searchTags(SearchTagsQuery searchTagsQuery) {
+
+        var pageId = pageIdTranslator.fromString(searchTagsQuery.pageId());
+
         var searchCriteria = new TagSearchCriteria(
                 new CommonSearchCriteria(
                         actorExtractor.getActor(),
                         searchTagsQuery.pageSize(),
-                        searchTagsQuery.pageId()
+                        pageId
                 ),
                 searchTagsQuery.term(),
                 searchTagsQuery.excludeFilter()
         );
-        EntitySearchResult<TagDto> searchResult = tagSearchEngine.findTags(searchCriteria);
-        List<TagResult> resultForClient = searchResult.results()
+        var searchResult = tagSearchEngine.findTags(searchCriteria);
+        var resultForClient = searchResult.results()
                 .stream()
                 .map(this::toTagResult)
                 .toList();

@@ -22,4 +22,5 @@ public record TagSearchCriteria(
         requireNonNull(common);
         term = requireNonNullElse(term, DEFAULT_TERM);
     }
+
 }

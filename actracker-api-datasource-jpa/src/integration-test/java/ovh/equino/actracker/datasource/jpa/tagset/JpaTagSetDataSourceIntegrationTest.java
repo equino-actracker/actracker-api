@@ -7,6 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import ovh.equino.actracker.domain.CommonSearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tagset.TagSetDto;
 import ovh.equino.actracker.domain.tagset.TagSetId;
@@ -24,6 +25,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static ovh.equino.actracker.domain.EntitySearchPageId.aPageId;
 
 abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
 
@@ -101,11 +103,11 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldFindSecondPageOfTagSets() {
-        int pageSize = 2;
-        int offset = 1;
-        List<TagSetDto> expectedTagSets = testConfiguration.tagSets
+        var pageSize = 2;
+        var offset = 1;
+        var expectedTagSets = testConfiguration.tagSets
                 .accessibleForWithLimitOffset(searcher, pageSize, offset);
-        String pageId = expectedTagSets.get(0).id().toString();
+        var pageId = aPageId().with(EntitySearchPageId.Value.of("id", expectedTagSets.get(0).id().toString()));
 
         var searchCriteria = new TagSetSearchCriteria(
                 new CommonSearchCriteria(
@@ -118,7 +120,7 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
         );
 
         inTransaction(() -> {
-            List<TagSetDto> foundTagSets = dataSource.find(searchCriteria);
+            var foundTagSets = dataSource.find(searchCriteria);
             assertThat(foundTagSets)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags")
                     .containsExactlyElementsOf(expectedTagSets);

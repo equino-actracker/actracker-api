@@ -69,15 +69,15 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
     @Override
     public List<ActivityDto> find(ActivitySearchCriteria searchCriteria) {
 
-        Timestamp timeRangeStart = isNull(searchCriteria.timeRangeStart())
+        var timeRangeStart = isNull(searchCriteria.timeRangeStart())
                 ? null
                 : Timestamp.from(searchCriteria.timeRangeStart());
-        Timestamp timeRangeEnd = isNull(searchCriteria.timeRangeEnd())
+        var timeRangeEnd = isNull(searchCriteria.timeRangeEnd())
                 ? null
                 : Timestamp.from(searchCriteria.timeRangeEnd());
 
-        SelectActivitiesQuery selectActivities = new SelectActivitiesQuery(entityManager);
-        List<ActivityProjection> activityResults = selectActivities
+        var selectActivities = new SelectActivitiesQuery(entityManager);
+        var activityResults = selectActivities
                 .where(
                         selectActivities.predicate().and(
                                 selectActivities.predicate().isNotDeleted(),
@@ -92,14 +92,14 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
                 .limit(searchCriteria.common().pageSize())
                 .execute();
 
-        Set<UUID> foundActivityIds = activityResults
+        var foundActivityIds = activityResults
                 .stream()
                 .map(ActivityProjection::id)
                 .map(UUID::fromString)
                 .collect(toUnmodifiableSet());
 
-        SelectActivityJoinTagQuery selectActivityJoinTag = new SelectActivityJoinTagQuery(entityManager);
-        Map<String, Set<UUID>> tagsByActivityId = selectActivityJoinTag
+        var selectActivityJoinTag = new SelectActivityJoinTagQuery(entityManager);
+        var tagsByActivityId = selectActivityJoinTag
                 .where(
                         selectActivityJoinTag.predicate().and(
                                 selectActivityJoinTag.predicate().hasActivityIdIn(foundActivityIds),
@@ -114,8 +114,8 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
                         mapping(projection -> UUID.fromString(projection.tagId()), toUnmodifiableSet())
                 ));
 
-        SelectMetricValuesQuery selectMetricValue = new SelectMetricValuesQuery(entityManager);
-        Map<String, List<MetricValue>> metricValues = selectMetricValue
+        var selectMetricValue = new SelectMetricValuesQuery(entityManager);
+        var metricValues = selectMetricValue
                 .where(
                         selectMetricValue.predicate().and(
                                 selectMetricValue.predicate().hasActivityIdIn(foundActivityIds),

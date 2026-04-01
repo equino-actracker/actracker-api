@@ -2,6 +2,7 @@ package ovh.equino.actracker.dashboard.generation.repository;
 
 import ovh.equino.actracker.domain.CommonSearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
+import ovh.equino.actracker.domain.PageIdTranslator;
 import ovh.equino.actracker.domain.dashboard.generation.DashboardGenerationCriteria;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tag.TagSearchCriteria;
@@ -15,9 +16,11 @@ final class TagFinder {
     private static final Integer PAGE_SIZE = 500;
 
     private final TagSearchEngine searchEngine;
+    private final PageIdTranslator pageIdTranslator;
 
-    TagFinder(TagSearchEngine searchEngine) {
+    TagFinder(TagSearchEngine searchEngine, PageIdTranslator pageIdTranslator) {
         this.searchEngine = searchEngine;
+        this.pageIdTranslator = pageIdTranslator;
     }
 
     List<TagDto> find(DashboardGenerationCriteria generationCriteria) {
@@ -34,11 +37,13 @@ final class TagFinder {
     private EntitySearchResult<TagDto> fetchNextPageOfTags(DashboardGenerationCriteria generationCriteria,
                                                            String pageId) {
 
+        var entitySearchPageId = pageIdTranslator.fromString(pageId);
+
         var searchCriteria = new TagSearchCriteria(
                 new CommonSearchCriteria(
                         generationCriteria.generator(),
                         PAGE_SIZE,
-                        pageId
+                        entitySearchPageId
                 ),
                 null,
                 null
