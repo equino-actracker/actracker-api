@@ -12,6 +12,7 @@ public record EntitySearchPageId(Deque<Value> values) {
     }
 
     // TODO Replace String with Field?
+    // TODO add EntitySortCriteria.Order
     public record Value(String field, Object value) {
 
         public static Value of(String field, Object value) {

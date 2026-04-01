@@ -8,7 +8,6 @@ import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNullElse;
 import static ovh.equino.actracker.domain.EntitySortCriteria.Order.ASC;
 
-// TODO remove after removing JpaQueryBuilder
 public record EntitySortCriteria(
         Deque<Level> levels
 ) {
@@ -38,6 +37,7 @@ public record EntitySortCriteria(
     ) {
     }
 
+    // TODO use me
     public interface Field {
     }
 
@@ -45,10 +45,6 @@ public record EntitySortCriteria(
         ASC,
         DESC
     }
-//
-//    public enum CommonSortField implements Field {
-//        ID
-//    }
 
     private Level sortGuard() {
         return new Level("id", ASC);
