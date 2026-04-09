@@ -8,7 +8,8 @@ import static ovh.equino.actracker.domain.EntitySearchPageId.firstPage;
 
 public record CommonSearchCriteria(User searcher,
                                    Integer pageSize,
-                                   EntitySearchPageId pageId) {
+                                   EntitySearchPageId pageId,
+                                   EntitySortCriteria sortCriteria) {
 
     private static final int DEFAULT_PAGE_SIZE = 10;
 
@@ -16,6 +17,7 @@ public record CommonSearchCriteria(User searcher,
         requireNonNull(searcher);
         pageSize = requireNonNullElse(pageSize, DEFAULT_PAGE_SIZE);
         pageId = requireNonNullElse(pageId, firstPage());
+        requireNonNull(sortCriteria);
     }
 
 }

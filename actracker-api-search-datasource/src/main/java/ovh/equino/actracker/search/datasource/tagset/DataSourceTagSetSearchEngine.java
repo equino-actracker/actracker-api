@@ -24,7 +24,8 @@ class DataSourceTagSetSearchEngine implements TagSetSearchEngine {
                 new CommonSearchCriteria(
                         searchCriteria.common().searcher(),
                         searchCriteria.common().pageSize() + 1,   // additional one to calculate next page ID
-                        searchCriteria.common().pageId()
+                        searchCriteria.common().pageId(),
+                        searchCriteria.common().sortCriteria()
                 ),
                 searchCriteria.term(),
                 searchCriteria.excludeFilter()

@@ -49,13 +49,15 @@ class TagSetController {
     SearchResponse<TagSet> searchTagSets(@RequestParam(name = "pageId", required = false) String pageId,
                                          @RequestParam(name = "pageSize", required = false) Integer pageSize,
                                          @RequestParam(name = "term", required = false) String term,
-                                         @RequestParam(name = "excludedTagSets", required = false) String excludedTagSets) {
+                                         @RequestParam(name = "excludedTagSets", required = false) String excludedTagSets,
+                                         @RequestParam(name = "orderBy", required = false) String orderBy) {
 
         SearchTagSetsQuery searchTagSetsQuery = new SearchTagSetsQuery(
                 pageSize,
                 pageId,
                 term,
-                tagSetMapper.parseIds(excludedTagSets)
+                tagSetMapper.parseIds(excludedTagSets),
+                tagSetMapper.parseSortCriteria(orderBy)
         );
         SearchResult<TagSetResult> searchResult = tagSetApplicationService.searchTagSets(searchTagSetsQuery);
         List<TagSet> foundResults = searchResult.results().stream()

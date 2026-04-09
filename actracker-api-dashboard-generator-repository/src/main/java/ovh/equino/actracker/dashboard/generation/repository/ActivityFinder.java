@@ -1,9 +1,6 @@
 package ovh.equino.actracker.dashboard.generation.repository;
 
-import ovh.equino.actracker.domain.CommonSearchCriteria;
-import ovh.equino.actracker.domain.EntitySearchPageId;
-import ovh.equino.actracker.domain.EntitySearchResult;
-import ovh.equino.actracker.domain.PageIdTranslator;
+import ovh.equino.actracker.domain.*;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivitySearchCriteria;
 import ovh.equino.actracker.domain.activity.ActivitySearchEngine;
@@ -50,7 +47,8 @@ final class ActivityFinder {
                 new CommonSearchCriteria(
                         generationCriteria.generator(),
                         PAGE_SIZE,
-                        entitySearchPageId
+                        entitySearchPageId,
+                        EntitySortCriteria.irrelevant()
                 ),
                 null,
                 generationCriteria.timeRangeStart(),

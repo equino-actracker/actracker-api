@@ -1,5 +1,7 @@
 package ovh.equino.actracker.application.activity;
 
+import ovh.equino.actracker.application.SortCriteria;
+
 import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
@@ -13,10 +15,12 @@ public record SearchActivitiesQuery(Integer pageSize,
                                     Instant timeRangeStart,
                                     Instant timeRangeEnd,
                                     Set<UUID> tags,
-                                    Set<UUID> excludeFilter) {
+                                    Set<UUID> excludeFilter,
+                                    SortCriteria sortCriteria) {
 
     public SearchActivitiesQuery {
         tags = requireNonNullElse(tags, emptySet());
         excludeFilter = requireNonNullElse(excludeFilter, emptySet());
+        sortCriteria = requireNonNullElse(sortCriteria, new SortCriteria());
     }
 }

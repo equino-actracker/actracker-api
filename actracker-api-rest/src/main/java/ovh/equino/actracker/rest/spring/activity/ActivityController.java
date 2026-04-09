@@ -77,7 +77,8 @@ class ActivityController {
                 mapper.timestampToInstant(rangeStartMillis),
                 mapper.timestampToInstant(rangeEndMillis),
                 mapper.parseIds(requiredTags),
-                mapper.parseIds(excludedActivities)
+                mapper.parseIds(excludedActivities),
+                mapper.parseSortCriteria(orderBy)
         );
 
         SearchResult<ActivityResult> searchResult = activityApplicationService.searchActivities(searchActivitiesQuery);

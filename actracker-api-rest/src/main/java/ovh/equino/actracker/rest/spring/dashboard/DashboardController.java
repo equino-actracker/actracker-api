@@ -64,13 +64,15 @@ class DashboardController {
     SearchResponse<Dashboard> searchDashboards(@RequestParam(name = "pageId", required = false) String pageId,
                                                @RequestParam(name = "pageSize", required = false) Integer pageSize,
                                                @RequestParam(name = "term", required = false) String term,
-                                               @RequestParam(name = "excludedDashboards", required = false) String excludedDashboards) {
+                                               @RequestParam(name = "excludedDashboards", required = false) String excludedDashboards,
+                                               @RequestParam(name = "orderBy", required = false) String orderBy) {
 
         SearchDashboardsQuery searchDashboardsQuery = new SearchDashboardsQuery(
                 pageSize,
                 pageId,
                 term,
-                dashboardMapper.parseIds(excludedDashboards)
+                dashboardMapper.parseIds(excludedDashboards),
+                dashboardMapper.parseSortCriteria(orderBy)
         );
 
         SearchResult<DashboardResult> searchResult = dashboardApplicationService.searchDashboards(searchDashboardsQuery);

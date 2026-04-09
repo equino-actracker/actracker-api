@@ -115,7 +115,8 @@ public class DashboardApplicationService {
                 new CommonSearchCriteria(
                         actorExtractor.getActor(),
                         searchDashboardsQuery.pageSize(),
-                        pageId
+                        pageId,
+                        searchDashboardsQuery.sortCriteria().toEntitySortCriteria()
                 ),
                 searchDashboardsQuery.term(),
                 searchDashboardsQuery.excludeFilter()

@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import ovh.equino.actracker.domain.CommonSearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchPageId;
+import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tagset.TagSetDto;
 import ovh.equino.actracker.domain.tagset.TagSetId;
@@ -84,7 +85,8 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
                 new CommonSearchCriteria(
                         searcher,
                         LARGE_PAGE_SIZE,
-                        FIRST_PAGE
+                        FIRST_PAGE,
+                        EntitySortCriteria.irrelevant()
                 ),
                 null,
                 null
@@ -113,7 +115,8 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
                 new CommonSearchCriteria(
                         searcher,
                         pageSize,
-                        pageId
+                        pageId,
+                        EntitySortCriteria.irrelevant()
                 ),
                 null,
                 null
@@ -136,7 +139,8 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
                 new CommonSearchCriteria(
                         searcher,
                         LARGE_PAGE_SIZE,
-                        FIRST_PAGE
+                        FIRST_PAGE,
+                        EntitySortCriteria.irrelevant()
                 ),
                 null,
                 excludedTagSets

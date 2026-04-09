@@ -2,7 +2,6 @@ package ovh.equino.actracker.application.tagset;
 
 import ovh.equino.actracker.application.SearchResult;
 import ovh.equino.actracker.domain.CommonSearchCriteria;
-import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.PageIdTranslator;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.tag.TagId;
@@ -10,7 +9,10 @@ import ovh.equino.actracker.domain.tagset.*;
 import ovh.equino.actracker.domain.user.ActorExtractor;
 import ovh.equino.actracker.domain.user.User;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 import static java.util.stream.Collectors.toUnmodifiableSet;
 
@@ -83,7 +85,8 @@ public class TagSetApplicationService {
                 new CommonSearchCriteria(
                         actorExtractor.getActor(),
                         searchTagSetsQuery.pageSize(),
-                        pageId
+                        pageId,
+                        searchTagSetsQuery.sortCriteria().toEntitySortCriteria()
                 ),
                 searchTagSetsQuery.term(),
                 searchTagSetsQuery.excludeFilter()

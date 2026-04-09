@@ -112,7 +112,8 @@ public class ActivityApplicationService {
                 new CommonSearchCriteria(
                         actorExtractor.getActor(),
                         searchActivitiesQuery.pageSize(),
-                        pageId
+                        pageId,
+                        searchActivitiesQuery.sortCriteria().toEntitySortCriteria()
                 ),
                 searchActivitiesQuery.term(),
                 searchActivitiesQuery.timeRangeStart(),

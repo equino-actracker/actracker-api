@@ -120,7 +120,8 @@ public class TagApplicationService {
                 new CommonSearchCriteria(
                         actorExtractor.getActor(),
                         searchTagsQuery.pageSize(),
-                        pageId
+                        pageId,
+                        searchTagsQuery.sortCriteria().toEntitySortCriteria()
                 ),
                 searchTagsQuery.term(),
                 searchTagsQuery.excludeFilter()

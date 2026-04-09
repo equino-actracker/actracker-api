@@ -1,6 +1,7 @@
 package ovh.equino.actracker.rest.spring;
 
 import org.apache.commons.lang3.StringUtils;
+import ovh.equino.actracker.application.SortCriteria;
 
 import java.time.Instant;
 import java.util.*;
@@ -9,6 +10,7 @@ import static java.util.Arrays.stream;
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNullElse;
 import static java.util.stream.Collectors.toUnmodifiableSet;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.split;
 
 abstract public class PayloadMapper {
@@ -35,7 +37,7 @@ abstract public class PayloadMapper {
     }
 
     public UUID stringToUuid(String string) {
-        if(isNull(string)) {
+        if (isNull(string)) {
             return null;
         }
         return UUID.fromString(string);
@@ -56,7 +58,7 @@ abstract public class PayloadMapper {
     }
 
     public Set<UUID> parseIds(String jointIds) {
-        String[] parsedIds = requireNonNullElse(split(jointIds, ','), new String[]{});
+        var parsedIds = requireNonNullElse(split(jointIds, ','), new String[]{});
 
         return stream(parsedIds)
                 .filter(StringUtils::isNotBlank)
@@ -64,5 +66,23 @@ abstract public class PayloadMapper {
                 .map(UUID::fromString)
                 .collect(toUnmodifiableSet());
     }
+
+    public SortCriteria parseSortCriteria(String sortCriteria) {
+        if (isBlank(sortCriteria)) {
+            return null;
+        }
+        var parsedCriteria = split(sortCriteria, ",");
+        var criteria = new SortCriteria();
+        stream(parsedCriteria)
+                .filter(StringUtils::isNotBlank)
+                .map(String::trim)
+                .forEach(parsedCriterion -> {
+                    String field = split(parsedCriterion, '.')[0].trim();
+                    String order = split(parsedCriterion, '.')[1].trim();
+                    criteria.orderBy(field, order);
+                });
+        return criteria;
+    }
+
 
 }

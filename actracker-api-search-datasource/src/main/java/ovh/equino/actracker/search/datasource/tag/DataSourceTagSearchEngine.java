@@ -10,15 +10,16 @@ import ovh.equino.actracker.domain.tag.TagSearchEngine;
 
 import java.util.LinkedList;
 import java.util.List;
-
-import static ovh.equino.actracker.domain.EntitySearchPageId.aPageId;
+import java.util.Optional;
 
 class DataSourceTagSearchEngine implements TagSearchEngine {
 
     private final TagDataSource tagDataSource;
+    private final TagAttributeExtractor tagAttributeExtractor;
 
     DataSourceTagSearchEngine(TagDataSource tagDataSource) {
         this.tagDataSource = tagDataSource;
+        this.tagAttributeExtractor = new TagAttributeExtractor();
     }
 
     @Override
@@ -30,17 +31,18 @@ class DataSourceTagSearchEngine implements TagSearchEngine {
                 new CommonSearchCriteria(
                         searchCriteria.common().searcher(),
                         searchCriteria.common().pageSize() + 1,   // additional one to calculate next page ID
-                        requestedPageId
+                        requestedPageId,
+                        searchCriteria.common().sortCriteria()
                 ),
                 searchCriteria.term(),
                 searchCriteria.excludeFilter()
         );
 
         var foundTags = tagDataSource.find(forNextPageIdSearchCriteria);
-        var nextPageId = getNextPageId(foundTags, searchCriteria.common().pageSize(), requestedPageId);
         var results = foundTags.stream()
                 .limit(searchCriteria.common().pageSize())
                 .toList();
+        var nextPageId = getNextPageId(foundTags, searchCriteria.common().pageSize(), requestedPageId);
 
         return new EntitySearchResult<>(nextPageId, results);
     }
@@ -49,11 +51,22 @@ class DataSourceTagSearchEngine implements TagSearchEngine {
         if (foundTags.size() <= pageSize) {
             return null;
         }
+        var nextPageTag = foundTags.get(pageSize);
 
-        var pageId = aPageId();
+        var nextPageIdValues = previousPageId.values().stream()
+                .map(value -> toNextPageValue(value, nextPageTag))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
+        var nextPageId = new EntitySearchPageId(new LinkedList<>(nextPageIdValues));
         // TODO calculate basing on lastTag and previousPageId
 
         var lastTag = new LinkedList<>(foundTags).get(pageSize);
         return lastTag.id().toString();
+    }
+
+    private Optional<EntitySearchPageId.Value> toNextPageValue(EntitySearchPageId.Value value, TagDto nextPageTag) {
+        var maybeFieldValue = tagAttributeExtractor.extractFieldAttribute(value.field(), nextPageTag);
+        return maybeFieldValue.map(fieldValue -> new EntitySearchPageId.Value(value.field(), fieldValue));
     }
 }
