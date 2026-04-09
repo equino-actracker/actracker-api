@@ -1,6 +1,9 @@
 package ovh.equino.actracker.dashboard.generation.repository;
 
-import ovh.equino.actracker.domain.*;
+import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchPageId;
+import ovh.equino.actracker.domain.EntitySearchResult;
+import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.dashboard.generation.DashboardGenerationCriteria;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tag.TagSearchCriteria;
@@ -9,21 +12,21 @@ import ovh.equino.actracker.domain.tag.TagSearchEngine;
 import java.util.ArrayList;
 import java.util.List;
 
+import static ovh.equino.actracker.domain.EntitySearchPageId.firstPage;
+
 final class TagFinder {
 
     private static final Integer PAGE_SIZE = 500;
 
     private final TagSearchEngine searchEngine;
-    private final PageIdTranslator pageIdTranslator;
 
-    TagFinder(TagSearchEngine searchEngine, PageIdTranslator pageIdTranslator) {
+    TagFinder(TagSearchEngine searchEngine) {
         this.searchEngine = searchEngine;
-        this.pageIdTranslator = pageIdTranslator;
     }
 
     List<TagDto> find(DashboardGenerationCriteria generationCriteria) {
-        List<TagDto> tags = new ArrayList<>();
-        String pageId = "";
+        var tags = new ArrayList<TagDto>();
+        var pageId = firstPage();
         while (pageId != null) {
             EntitySearchResult<TagDto> searchResult = fetchNextPageOfTags(generationCriteria, pageId);
             pageId = searchResult.nextPageId();
@@ -33,15 +36,13 @@ final class TagFinder {
     }
 
     private EntitySearchResult<TagDto> fetchNextPageOfTags(DashboardGenerationCriteria generationCriteria,
-                                                           String pageId) {
-
-        var entitySearchPageId = pageIdTranslator.fromString(pageId);
+                                                           EntitySearchPageId pageId) {
 
         var searchCriteria = new TagSearchCriteria(
                 new EntitySearchCriteria.Common(
                         generationCriteria.generator(),
                         PAGE_SIZE,
-                        entitySearchPageId,
+                        pageId,
                         EntitySortCriteria.irrelevant()
                 ),
                 null,

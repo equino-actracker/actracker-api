@@ -1,6 +1,5 @@
 package ovh.equino.actracker.dashboard.generation.repository;
 
-import ovh.equino.actracker.domain.PageIdTranslator;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivitySearchEngine;
 import ovh.equino.actracker.domain.dashboard.Chart;
@@ -27,12 +26,9 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
     private final TagFinder tagFinder;
     private final ActivityFinder activityFinder;
 
-    RepositoryDashboardGenerationEngine(TagSearchEngine tagSearchEngine,
-                                        ActivitySearchEngine activitySearchEngine,
-                                        PageIdTranslator pageIdTranslator) {
-
-        this.tagFinder = new TagFinder(tagSearchEngine, pageIdTranslator);
-        this.activityFinder = new ActivityFinder(activitySearchEngine, pageIdTranslator);
+    RepositoryDashboardGenerationEngine(TagSearchEngine tagSearchEngine, ActivitySearchEngine activitySearchEngine) {
+        this.tagFinder = new TagFinder(tagSearchEngine);
+        this.activityFinder = new ActivityFinder(activitySearchEngine);
     }
 
     @Override
@@ -114,12 +110,9 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
         ChartGenerator generator = switch (chart.groupBy()) {
             case SELF ->
                     new SelfGroupedChartGenerator(chart, rangeStart, rangeEnd, activities, tags, subBucketsGenerator);
-            case DAY ->
-                    new DailyChartGenerator(chart, rangeStart, rangeEnd, activities, tags, subBucketsGenerator);
-            case WEEK ->
-                    new WeeklyChartGenerator(chart, rangeStart, rangeEnd, activities, tags, subBucketsGenerator);
-            case MONTH ->
-                    new MonthlyChartGenerator(chart, rangeStart, rangeEnd, activities, tags, subBucketsGenerator);
+            case DAY -> new DailyChartGenerator(chart, rangeStart, rangeEnd, activities, tags, subBucketsGenerator);
+            case WEEK -> new WeeklyChartGenerator(chart, rangeStart, rangeEnd, activities, tags, subBucketsGenerator);
+            case MONTH -> new MonthlyChartGenerator(chart, rangeStart, rangeEnd, activities, tags, subBucketsGenerator);
             case WEEKEND ->
                     new WeekendlyChartGenerator(chart, rangeStart, rangeEnd, activities, tags, subBucketsGenerator);
         };

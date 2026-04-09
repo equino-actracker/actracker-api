@@ -127,12 +127,13 @@ public class TagApplicationService {
                 searchTagsQuery.excludeFilter()
         );
         var searchResult = tagSearchEngine.findTags(searchCriteria);
+        var nextPageId = pageIdTranslator.toString(searchResult.nextPageId());
         var resultForClient = searchResult.results()
                 .stream()
                 .map(this::toTagResult)
                 .toList();
 
-        return new SearchResult<>(searchResult.nextPageId(), resultForClient);
+        return new SearchResult<>(nextPageId, resultForClient);
     }
 
     public TagResult renameTag(String newName, UUID tagId) {

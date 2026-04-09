@@ -35,7 +35,7 @@ public abstract class DataSourceSearchEngine<T, S extends EntitySearchCriteria<T
     // TODO remove, calculate nextPageId using last entity of current page
     protected abstract S forNextPageIdSearchCriteria(S searchCriteria);
 
-    private String getNextPageId(List<T> foundEntities, int pageSize, EntitySearchPageId previousPageId) {
+    private EntitySearchPageId getNextPageId(List<T> foundEntities, int pageSize, EntitySearchPageId previousPageId) {
         if (foundEntities.size() <= pageSize) {
             return null;
         }
@@ -46,11 +46,7 @@ public abstract class DataSourceSearchEngine<T, S extends EntitySearchCriteria<T
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList();
-//        return new EntitySearchPageId(new LinkedList<>(nextPageIdValues));
-
-        // TODO remove:
-        var lastEntity = new LinkedList<>(foundEntities).get(pageSize);
-        return lastEntity.toString();
+        return new EntitySearchPageId(new LinkedList<>(nextPageIdValues));
     }
 
     private Optional<EntitySearchPageId.Value> toNextPageValue(EntitySearchPageId.Value value, T nextPageEntity) {

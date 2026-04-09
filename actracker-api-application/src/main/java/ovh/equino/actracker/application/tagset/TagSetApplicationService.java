@@ -92,12 +92,13 @@ public class TagSetApplicationService {
                 searchTagSetsQuery.excludeFilter()
         );
         var searchResult = tagSetSearchEngine.findTagSets(searchCriteria);
+        var nextPageId = pageIdTranslator.toString(searchResult.nextPageId());
         var resultForClient = searchResult.results()
                 .stream()
                 .map(this::toTagSetResult)
                 .toList();
 
-        return new SearchResult<>(searchResult.nextPageId(), resultForClient);
+        return new SearchResult<>(nextPageId, resultForClient);
     }
 
     public TagSetResult renameTagSet(String newName, UUID tagSetId) {

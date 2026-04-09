@@ -123,12 +123,13 @@ public class DashboardApplicationService {
         );
 
         EntitySearchResult<DashboardDto> searchResult = dashboardSearchEngine.findDashboards(searchCriteria);
+        var nextPageId = pageIdTranslator.toString(searchResult.nextPageId());
         List<DashboardResult> resultForClient = searchResult.results()
                 .stream()
                 .map(this::toDashboardResult)
                 .toList();
 
-        return new SearchResult<>(searchResult.nextPageId(), resultForClient);
+        return new SearchResult<>(nextPageId, resultForClient);
     }
 
     public DashboardResult renameDashboard(String newName, UUID dashboardId) {

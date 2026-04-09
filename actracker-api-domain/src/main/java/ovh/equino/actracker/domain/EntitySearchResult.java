@@ -4,7 +4,7 @@ import java.util.List;
 
 public record EntitySearchResult<T>(
 
-        String nextPageId,
+        EntitySearchPageId nextPageId,
         List<T> results
 ) {
 }

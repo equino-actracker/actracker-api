@@ -123,12 +123,13 @@ public class ActivityApplicationService {
         );
 
         var searchResult = activitySearchEngine.findActivities(searchCriteria);
+        var nextPageId = pageIdTranslator.toString(searchResult.nextPageId());
         var resultForClient = searchResult.results()
                 .stream()
                 .map(this::toActivityResult)
                 .toList();
 
-        return new SearchResult<>(searchResult.nextPageId(), resultForClient);
+        return new SearchResult<>(nextPageId, resultForClient);
     }
 
     // TODO do something with that, more than one aggregate modified
