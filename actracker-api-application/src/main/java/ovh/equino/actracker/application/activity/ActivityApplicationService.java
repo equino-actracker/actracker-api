@@ -1,7 +1,7 @@
 package ovh.equino.actracker.application.activity;
 
 import ovh.equino.actracker.application.SearchResult;
-import ovh.equino.actracker.domain.CommonSearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.PageIdTranslator;
 import ovh.equino.actracker.domain.activity.*;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
@@ -109,7 +109,7 @@ public class ActivityApplicationService {
         var pageId = pageIdTranslator.fromString(searchActivitiesQuery.pageId());
 
         var searchCriteria = new ActivitySearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         actorExtractor.getActor(),
                         searchActivitiesQuery.pageSize(),
                         pageId,

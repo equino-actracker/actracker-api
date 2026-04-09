@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import ovh.equino.actracker.domain.CommonSearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.dashboard.Chart;
@@ -92,7 +92,7 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
     @Test
     void shouldFindAllAccessibleDashboards() {
         var searchCriteria = new DashboardSearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         searcher,
                         LARGE_PAGE_SIZE,
                         FIRST_PAGE,
@@ -136,7 +136,7 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
         var pageId = aPageId().with(EntitySearchPageId.Value.of("id", expectedDashboards.get(0).id().toString()));
 
         var searchCriteria = new DashboardSearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         searcher,
                         pageSize,
                         pageId,
@@ -161,7 +161,7 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
                 accessibleForExcluding(searcher, excludedDashboards);
 
         var searchCriteria = new DashboardSearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         searcher,
                         LARGE_PAGE_SIZE,
                         FIRST_PAGE,

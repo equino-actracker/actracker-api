@@ -1,6 +1,6 @@
 package ovh.equino.actracker.domain.activity;
 
-import ovh.equino.actracker.domain.CommonSearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchCriteria;
 
 import java.time.Instant;
 import java.util.Set;
@@ -12,14 +12,14 @@ import static java.util.Objects.requireNonNullElse;
 
 public record ActivitySearchCriteria(
 
-        CommonSearchCriteria common,
+        EntitySearchCriteria.Common common,
         String term,
         Instant timeRangeStart,
         Instant timeRangeEnd,
         Set<UUID> excludeFilter,
         Set<UUID> tags
 
-) {
+) implements EntitySearchCriteria<ActivityDto> {
 
     private static final String DEFAULT_TERM = "";
 

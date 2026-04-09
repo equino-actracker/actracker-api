@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import ovh.equino.actracker.domain.CommonSearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.tag.TagDto;
@@ -81,7 +81,7 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
     @Test
     void shouldFindAllAccessibleTags() {
         var searchCriteria = new TagSearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         searcher,
                         LARGE_PAGE_SIZE,
                         FIRST_PAGE,
@@ -112,7 +112,7 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
         var expectedTags = testConfiguration.tags.accessibleForWithLimitOffset(searcher, pageSize, offset);
         var pageId = aPageId().with(EntitySearchPageId.Value.of("id", expectedTags.get(0).id().toString()));
         var searchCriteria = new TagSearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         searcher,
                         pageSize,
                         pageId,
@@ -135,7 +135,7 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
         Set<UUID> excludedTags = Set.of(allAccessibleTags.get(1).id(), allAccessibleTags.get(2).id());
         List<TagDto> expectedTags = testConfiguration.tags.accessibleForExcluding(searcher, excludedTags);
         var searchCriteria = new TagSearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         searcher,
                         LARGE_PAGE_SIZE,
                         FIRST_PAGE,
@@ -157,7 +157,7 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
         String term = "Accessible shared";
         List<TagDto> expectedTags = testConfiguration.tags.accessibleForMatchingTerm(searcher, term);
         var searchCriteria = new TagSearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         searcher,
                         LARGE_PAGE_SIZE,
                         FIRST_PAGE,

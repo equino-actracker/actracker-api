@@ -1,7 +1,7 @@
 package ovh.equino.actracker.application.dashboard;
 
 import ovh.equino.actracker.application.SearchResult;
-import ovh.equino.actracker.domain.CommonSearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.PageIdTranslator;
 import ovh.equino.actracker.domain.dashboard.*;
@@ -112,7 +112,7 @@ public class DashboardApplicationService {
         var pageId = pageIdTranslator.fromString(searchDashboardsQuery.pageId());
 
         var searchCriteria = new DashboardSearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         actorExtractor.getActor(),
                         searchDashboardsQuery.pageSize(),
                         pageId,

@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import ovh.equino.actracker.domain.CommonSearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchPageId.Value;
 import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.activity.ActivityDto;
@@ -96,7 +96,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                 .flatMetricValuesAccessibleFor(searcher);
 
         var searchCriteria = new ActivitySearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         searcher,
                         LARGE_PAGE_SIZE,
                         FIRST_PAGE,
@@ -131,7 +131,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
         var pageId = aPageId().with(Value.of("id", expectedActivities.get(0).id().toString()));
 
         var searchCriteria = new ActivitySearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         searcher,
                         pageSize,
                         pageId,
@@ -160,7 +160,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                 .accessibleForInTimeRange(searcher, timeRangeStart, timeRangeEnd);
 
         var searchCriteria = new ActivitySearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         searcher,
                         LARGE_PAGE_SIZE,
                         FIRST_PAGE,
@@ -189,7 +189,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                 .accessibleForExcluding(searcher, excludedActivities);
 
         var searchCriteria = new ActivitySearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         searcher,
                         LARGE_PAGE_SIZE,
                         FIRST_PAGE,
@@ -220,7 +220,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                 .accessibleForContainingAnyOfTags(searcher, requiredTags);
 
         var searchCriteria = new ActivitySearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         searcher,
                         LARGE_PAGE_SIZE,
                         FIRST_PAGE,

@@ -44,7 +44,7 @@ final class ActivityFinder {
         var entitySearchPageId = pageIdTranslator.fromString(pageId);
 
         var searchCriteria = new ActivitySearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         generationCriteria.generator(),
                         PAGE_SIZE,
                         entitySearchPageId,

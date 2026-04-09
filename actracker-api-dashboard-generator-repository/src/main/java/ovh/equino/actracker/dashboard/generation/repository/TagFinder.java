@@ -1,9 +1,6 @@
 package ovh.equino.actracker.dashboard.generation.repository;
 
-import ovh.equino.actracker.domain.CommonSearchCriteria;
-import ovh.equino.actracker.domain.EntitySearchResult;
-import ovh.equino.actracker.domain.EntitySortCriteria;
-import ovh.equino.actracker.domain.PageIdTranslator;
+import ovh.equino.actracker.domain.*;
 import ovh.equino.actracker.domain.dashboard.generation.DashboardGenerationCriteria;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tag.TagSearchCriteria;
@@ -41,7 +38,7 @@ final class TagFinder {
         var entitySearchPageId = pageIdTranslator.fromString(pageId);
 
         var searchCriteria = new TagSearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         generationCriteria.generator(),
                         PAGE_SIZE,
                         entitySearchPageId,
