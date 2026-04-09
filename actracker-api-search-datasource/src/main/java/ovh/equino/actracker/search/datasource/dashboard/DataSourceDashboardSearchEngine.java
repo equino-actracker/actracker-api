@@ -27,19 +27,15 @@ class DataSourceDashboardSearchEngine
     }
 
     @Override
-    protected List<DashboardDto> findPage(DashboardSearchCriteria searchCriteria) {
+    protected List<DashboardDto> searchInDataSource(DashboardSearchCriteria searchCriteria) {
         return dashboardDataSource.find(searchCriteria);
     }
 
     @Override
-    protected DashboardSearchCriteria forNextPageIdSearchCriteria(DashboardSearchCriteria searchCriteria) {
+    protected DashboardSearchCriteria withCommonCriteriaReplaced(DashboardSearchCriteria searchCriteria,
+                                                                 EntitySearchCriteria.Common newCommonCriteria) {
         return new DashboardSearchCriteria(
-                new EntitySearchCriteria.Common(
-                        searchCriteria.common().searcher(),
-                        searchCriteria.common().pageSize() + 1,   // additional one to calculate next page ID
-                        searchCriteria.common().pageId(),
-                        searchCriteria.common().sortCriteria()
-                ),
+                newCommonCriteria,
                 searchCriteria.term(),
                 searchCriteria.excludeFilter()
         );

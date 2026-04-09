@@ -8,7 +8,7 @@ import java.util.UUID;
 import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
 
-public record TagSearchCriteria (
+public record TagSearchCriteria(
 
         EntitySearchCriteria.Common common,
         String term,
@@ -22,5 +22,4 @@ public record TagSearchCriteria (
         requireNonNull(common);
         term = requireNonNullElse(term, DEFAULT_TERM);
     }
-
 }

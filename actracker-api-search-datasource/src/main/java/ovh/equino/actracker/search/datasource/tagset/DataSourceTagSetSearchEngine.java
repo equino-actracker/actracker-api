@@ -27,19 +27,15 @@ class DataSourceTagSetSearchEngine
     }
 
     @Override
-    protected List<TagSetDto> findPage(TagSetSearchCriteria searchCriteria) {
+    protected List<TagSetDto> searchInDataSource(TagSetSearchCriteria searchCriteria) {
         return tagSetDataSource.find(searchCriteria);
     }
 
     @Override
-    protected TagSetSearchCriteria forNextPageIdSearchCriteria(TagSetSearchCriteria searchCriteria) {
+    protected TagSetSearchCriteria withCommonCriteriaReplaced(TagSetSearchCriteria searchCriteria,
+                                                              EntitySearchCriteria.Common newCommonCriteria) {
         return new TagSetSearchCriteria(
-                new EntitySearchCriteria.Common(
-                        searchCriteria.common().searcher(),
-                        searchCriteria.common().pageSize() + 1,   // additional one to calculate next page ID
-                        searchCriteria.common().pageId(),
-                        searchCriteria.common().sortCriteria()
-                ),
+                newCommonCriteria,
                 searchCriteria.term(),
                 searchCriteria.excludeFilter()
         );

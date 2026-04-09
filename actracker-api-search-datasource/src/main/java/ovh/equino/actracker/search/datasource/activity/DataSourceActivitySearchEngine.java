@@ -27,19 +27,15 @@ class DataSourceActivitySearchEngine
     }
 
     @Override
-    protected List<ActivityDto> findPage(ActivitySearchCriteria searchCriteria) {
+    protected List<ActivityDto> searchInDataSource(ActivitySearchCriteria searchCriteria) {
         return activityDataSource.find(searchCriteria);
     }
 
     @Override
-    protected ActivitySearchCriteria forNextPageIdSearchCriteria(ActivitySearchCriteria searchCriteria) {
+    protected ActivitySearchCriteria withCommonCriteriaReplaced(ActivitySearchCriteria searchCriteria,
+                                                                EntitySearchCriteria.Common newCommonCriteria) {
         return new ActivitySearchCriteria(
-                new EntitySearchCriteria.Common(
-                        searchCriteria.common().searcher(),
-                        searchCriteria.common().pageSize() + 1,   // additional one to calculate next page ID
-                        searchCriteria.common().pageId(),
-                        searchCriteria.common().sortCriteria()
-                ),
+                newCommonCriteria,
                 searchCriteria.term(),
                 searchCriteria.timeRangeStart(),
                 searchCriteria.timeRangeEnd(),

@@ -20,7 +20,15 @@ public abstract class DataSourceSearchEngine<T, S extends EntitySearchCriteria<T
         var pageSize = searchCriteria.common().pageSize();
         var pageId = searchCriteria.common().pageId();
 
-        var foundEntities = findPage(forNextPageIdSearchCriteria(searchCriteria));
+        var nextPageIdTellingCommonCriteria = new EntitySearchCriteria.Common(
+                searchCriteria.common().searcher(),
+                searchCriteria.common().pageSize() + 1,   // additional one to calculate next page ID
+                searchCriteria.common().pageId(),
+                searchCriteria.common().sortCriteria());
+
+        var nextPageIdTellingCriteria = withCommonCriteriaReplaced(searchCriteria, nextPageIdTellingCommonCriteria);
+        var foundEntities = searchInDataSource(nextPageIdTellingCriteria);
+
         var results = foundEntities.stream()
                 .limit(pageSize)
                 .toList();
@@ -30,10 +38,9 @@ public abstract class DataSourceSearchEngine<T, S extends EntitySearchCriteria<T
         return new EntitySearchResult<>(nextPageId, results);
     }
 
-    protected abstract List<T> findPage(S searchCriteria);
+    protected abstract List<T> searchInDataSource(S searchCriteria);
 
-    // TODO remove, calculate nextPageId using last entity of current page
-    protected abstract S forNextPageIdSearchCriteria(S searchCriteria);
+    protected abstract S withCommonCriteriaReplaced(S searchCriteria, EntitySearchCriteria.Common newCommonCriteria);
 
     private EntitySearchPageId getNextPageId(List<T> foundEntities, int pageSize, EntitySearchPageId previousPageId) {
         if (foundEntities.size() <= pageSize) {
