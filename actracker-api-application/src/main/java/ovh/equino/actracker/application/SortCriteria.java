@@ -18,7 +18,7 @@ public record SortCriteria(LinkedHashMap<String, String> sortFieldWithOrder) {
     }
 
     public void orderBy(String field, String order) {
-        sortFieldWithOrder.putLast(field, order);
+        sortFieldWithOrder.put(field, order);
     }
 
     public EntitySortCriteria toEntitySortCriteria() {
