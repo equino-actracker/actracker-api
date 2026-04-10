@@ -1,7 +1,6 @@
 package ovh.equino.actracker.rest.spring.activity;
 
 import org.springframework.web.bind.annotation.*;
-import ovh.equino.actracker.application.SearchResult;
 import ovh.equino.actracker.application.activity.*;
 import ovh.equino.actracker.rest.spring.SearchResponse;
 import ovh.equino.actracker.rest.spring.tag.Tag;
@@ -70,18 +69,19 @@ class ActivityController {
                                               @RequestParam(name = "rangeEndMillis", required = false) Long rangeEndMillis,
                                               @RequestParam(name = "orderBy", required = false) String orderBy) {
 
-        SearchActivitiesQuery searchActivitiesQuery = new SearchActivitiesQuery(
+        var searchActivitiesQuery = new SearchActivitiesQuery(
                 pageSize,
                 pageId,
                 term,
                 mapper.timestampToInstant(rangeStartMillis),
                 mapper.timestampToInstant(rangeEndMillis),
                 mapper.parseIds(requiredTags),
-                mapper.parseIds(excludedActivities)
+                mapper.parseIds(excludedActivities),
+                mapper.parseSortCriteria(orderBy)
         );
 
-        SearchResult<ActivityResult> searchResult = activityApplicationService.searchActivities(searchActivitiesQuery);
-        List<Activity> results = searchResult.results().stream()
+        var searchResult = activityApplicationService.searchActivities(searchActivitiesQuery);
+        var results = searchResult.results().stream()
                 .map(this::toResponse)
                 .toList();
         return new SearchResponse<>(searchResult.nextPageId(), results);

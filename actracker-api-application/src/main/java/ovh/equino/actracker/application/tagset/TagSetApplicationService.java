@@ -1,15 +1,18 @@
 package ovh.equino.actracker.application.tagset;
 
+import ovh.equino.actracker.application.PageIdTranslator;
 import ovh.equino.actracker.application.SearchResult;
-import ovh.equino.actracker.domain.CommonSearchCriteria;
-import ovh.equino.actracker.domain.EntitySearchResult;
+import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tagset.*;
 import ovh.equino.actracker.domain.user.ActorExtractor;
 import ovh.equino.actracker.domain.user.User;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 import static java.util.stream.Collectors.toUnmodifiableSet;
 
@@ -21,13 +24,15 @@ public class TagSetApplicationService {
     private final TagSetSearchEngine tagSetSearchEngine;
     private final TagSetNotifier tagSetNotifier;
     private final ActorExtractor actorExtractor;
+    private final PageIdTranslator pageIdTranslator;
 
     public TagSetApplicationService(TagSetFactory tagSetFactory,
                                     TagSetRepository tagSetRepository,
                                     TagSetDataSource tagSetDataSource,
                                     TagSetSearchEngine tagSetSearchEngine,
                                     TagSetNotifier tagSetNotifier,
-                                    ActorExtractor actorExtractor) {
+                                    ActorExtractor actorExtractor,
+                                    PageIdTranslator pageIdTranslator) {
 
         this.tagSetFactory = tagSetFactory;
         this.tagSetRepository = tagSetRepository;
@@ -35,6 +40,7 @@ public class TagSetApplicationService {
         this.tagSetSearchEngine = tagSetSearchEngine;
         this.tagSetNotifier = tagSetNotifier;
         this.actorExtractor = actorExtractor;
+        this.pageIdTranslator = pageIdTranslator;
     }
 
     public TagSetResult getTagSet(UUID tagSetId) {
@@ -73,22 +79,26 @@ public class TagSetApplicationService {
 
     public SearchResult<TagSetResult> searchTagSets(SearchTagSetsQuery searchTagSetsQuery) {
 
+        var pageId = pageIdTranslator.fromString(searchTagSetsQuery.pageId());
+
         var searchCriteria = new TagSetSearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         actorExtractor.getActor(),
                         searchTagSetsQuery.pageSize(),
-                        searchTagSetsQuery.pageId()
+                        pageId,
+                        searchTagSetsQuery.sortCriteria().toEntitySortCriteria()
                 ),
                 searchTagSetsQuery.term(),
                 searchTagSetsQuery.excludeFilter()
         );
-        EntitySearchResult<TagSetDto> searchResult = tagSetSearchEngine.findTagSets(searchCriteria);
-        List<TagSetResult> resultForClient = searchResult.results()
+        var searchResult = tagSetSearchEngine.findTagSets(searchCriteria);
+        var nextPageId = pageIdTranslator.toString(searchResult.nextPageId());
+        var resultForClient = searchResult.results()
                 .stream()
                 .map(this::toTagSetResult)
                 .toList();
 
-        return new SearchResult<>(searchResult.nextPageId(), resultForClient);
+        return new SearchResult<>(nextPageId, resultForClient);
     }
 
     public TagSetResult renameTagSet(String newName, UUID tagSetId) {

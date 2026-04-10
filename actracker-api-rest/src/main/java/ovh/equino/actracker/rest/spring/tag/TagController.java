@@ -1,7 +1,6 @@
 package ovh.equino.actracker.rest.spring.tag;
 
 import org.springframework.web.bind.annotation.*;
-import ovh.equino.actracker.application.SearchResult;
 import ovh.equino.actracker.application.tag.*;
 import ovh.equino.actracker.rest.spring.SearchResponse;
 import ovh.equino.actracker.rest.spring.share.Share;
@@ -66,16 +65,18 @@ class TagController {
     SearchResponse<Tag> searchTags(@RequestParam(name = "pageId", required = false) String pageId,
                                    @RequestParam(name = "pageSize", required = false) Integer pageSize,
                                    @RequestParam(name = "term", required = false) String term,
-                                   @RequestParam(name = "excludedTags", required = false) String excludedTags) {
+                                   @RequestParam(name = "excludedTags", required = false) String excludedTags,
+                                   @RequestParam(name = "orderBy", required = false) String orderBy) {
 
-        SearchTagsQuery searchTagsQuery = new SearchTagsQuery(
+        var searchTagsQuery = new SearchTagsQuery(
                 pageSize,
                 pageId,
                 term,
-                tagMapper.parseIds(excludedTags)
+                tagMapper.parseIds(excludedTags),
+                tagMapper.parseSortCriteria(orderBy)
         );
-        SearchResult<TagResult> searchResult = tagApplicationService.searchTags(searchTagsQuery);
-        List<Tag> foundResults = searchResult.results().stream()
+        var searchResult = tagApplicationService.searchTags(searchTagsQuery);
+        var foundResults = searchResult.results().stream()
                 .map(this::toResponse)
                 .toList();
         return new SearchResponse<>(searchResult.nextPageId(), foundResults);

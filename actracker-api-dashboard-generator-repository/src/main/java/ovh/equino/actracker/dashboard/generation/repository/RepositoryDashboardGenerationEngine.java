@@ -110,12 +110,9 @@ class RepositoryDashboardGenerationEngine implements DashboardGenerationEngine {
         ChartGenerator generator = switch (chart.groupBy()) {
             case SELF ->
                     new SelfGroupedChartGenerator(chart, rangeStart, rangeEnd, activities, tags, subBucketsGenerator);
-            case DAY ->
-                    new DailyChartGenerator(chart, rangeStart, rangeEnd, activities, tags, subBucketsGenerator);
-            case WEEK ->
-                    new WeeklyChartGenerator(chart, rangeStart, rangeEnd, activities, tags, subBucketsGenerator);
-            case MONTH ->
-                    new MonthlyChartGenerator(chart, rangeStart, rangeEnd, activities, tags, subBucketsGenerator);
+            case DAY -> new DailyChartGenerator(chart, rangeStart, rangeEnd, activities, tags, subBucketsGenerator);
+            case WEEK -> new WeeklyChartGenerator(chart, rangeStart, rangeEnd, activities, tags, subBucketsGenerator);
+            case MONTH -> new MonthlyChartGenerator(chart, rangeStart, rangeEnd, activities, tags, subBucketsGenerator);
             case WEEKEND ->
                     new WeekendlyChartGenerator(chart, rangeStart, rangeEnd, activities, tags, subBucketsGenerator);
         };

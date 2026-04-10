@@ -6,12 +6,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import ovh.equino.actracker.domain.CommonSearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchPageId;
+import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.dashboard.Chart;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
 import ovh.equino.actracker.domain.dashboard.DashboardId;
 import ovh.equino.actracker.domain.dashboard.DashboardSearchCriteria;
-import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tenant.TenantDto;
 import ovh.equino.actracker.domain.user.User;
@@ -19,10 +20,14 @@ import ovh.equino.actracker.jpa.IntegrationTestConfiguration;
 import ovh.equino.actracker.jpa.JpaIntegrationTest;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static ovh.equino.actracker.domain.EntitySearchPageId.aPageId;
 
 abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest {
 
@@ -89,24 +94,25 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
     @Test
     void shouldFindAllAccessibleDashboards() {
         var searchCriteria = new DashboardSearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         searcher,
                         LARGE_PAGE_SIZE,
-                        FIRST_PAGE
+                        FIRST_PAGE,
+                        EntitySortCriteria.irrelevant()
                 ),
                 null,
                 null
         );
 
-        Collection<Share> expectedFlattenShares = testConfiguration.dashboards.flatSharesAccessibleFor(searcher);
-        Collection<Chart> expectedFlattenCharts = testConfiguration.dashboards.flatChartsAccessibleFor(searcher);
-        List<UUID> expectedFlattenIncludedTags = expectedFlattenCharts
+        var expectedFlattenShares = testConfiguration.dashboards.flatSharesAccessibleFor(searcher);
+        var expectedFlattenCharts = testConfiguration.dashboards.flatChartsAccessibleFor(searcher);
+        var expectedFlattenIncludedTags = expectedFlattenCharts
                 .stream()
                 .flatMap(chart -> chart.includedTags().stream())
                 .toList();
 
         inTransaction(() -> {
-            List<DashboardDto> foundDashboards = dataSource.find(searchCriteria);
+            var foundDashboards = dataSource.find(searchCriteria);
             assertThat(foundDashboards)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("charts", "shares")
                     .containsExactlyElementsOf(testConfiguration.dashboards.accessibleFor(searcher));
@@ -126,22 +132,23 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
 
     @Test
     void shouldFindSecondPageOfDashboards() {
-        int pageSize = 2;
-        int offset = 1;
-        List<DashboardDto> expectedDashboards = testConfiguration.dashboards
-                .accessibleForWithLimitOffset(searcher, pageSize, offset);
-        String pageId = expectedDashboards.get(0).id().toString();
+        var pageSize = 2;
+        var offset = 1;
+        var expectedDashboards = testConfiguration.dashboards.accessibleForWithLimitOffset(searcher, pageSize, offset);
+        var pageId = aPageId().with(EntitySearchPageId.Value.of("id", expectedDashboards.get(0).id().toString()));
+
         var searchCriteria = new DashboardSearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         searcher,
                         pageSize,
-                        pageId
+                        pageId,
+                        EntitySortCriteria.irrelevant()
                 ),
                 null,
                 null
         );
         inTransaction(() -> {
-            List<DashboardDto> foundDashboards = dataSource.find(searchCriteria);
+            var foundDashboards = dataSource.find(searchCriteria);
             assertThat(foundDashboards)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("charts", "shares")
                     .containsExactlyElementsOf(expectedDashboards);
@@ -150,22 +157,23 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
 
     @Test
     void shouldFindNonExcludedDashboards() {
-        List<DashboardDto> allAccessibleDashboards = testConfiguration.dashboards.accessibleFor(searcher);
-        Set<UUID> excludedDashboards = Set.of(allAccessibleDashboards.get(1).id(), allAccessibleDashboards.get(3).id());
-        List<DashboardDto> expectedDashboards = testConfiguration.dashboards.
+        var allAccessibleDashboards = testConfiguration.dashboards.accessibleFor(searcher);
+        var excludedDashboards = Set.of(allAccessibleDashboards.get(1).id(), allAccessibleDashboards.get(3).id());
+        var expectedDashboards = testConfiguration.dashboards.
                 accessibleForExcluding(searcher, excludedDashboards);
 
         var searchCriteria = new DashboardSearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         searcher,
                         LARGE_PAGE_SIZE,
-                        FIRST_PAGE
+                        FIRST_PAGE,
+                        EntitySortCriteria.irrelevant()
                 ),
                 null,
                 excludedDashboards
         );
         inTransaction(() -> {
-            List<DashboardDto> foundDashboards = dataSource.find(searchCriteria);
+            var foundDashboards = dataSource.find(searchCriteria);
             assertThat(foundDashboards)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("charts", "shares")
                     .containsExactlyElementsOf(expectedDashboards);

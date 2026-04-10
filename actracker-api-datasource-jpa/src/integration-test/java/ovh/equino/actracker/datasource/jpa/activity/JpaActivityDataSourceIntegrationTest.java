@@ -6,7 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import ovh.equino.actracker.domain.CommonSearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchPageId.Value;
+import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivityId;
 import ovh.equino.actracker.domain.activity.ActivitySearchCriteria;
@@ -25,6 +27,7 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.assertj.core.api.Assertions.assertThat;
+import static ovh.equino.actracker.domain.EntitySearchPageId.aPageId;
 import static ovh.equino.actracker.jpa.TestUtil.randomBigDecimal;
 
 abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
@@ -93,10 +96,11 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                 .flatMetricValuesAccessibleFor(searcher);
 
         var searchCriteria = new ActivitySearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         searcher,
                         LARGE_PAGE_SIZE,
-                        FIRST_PAGE
+                        FIRST_PAGE,
+                        EntitySortCriteria.irrelevant()
                 ),
                 null,
                 null,
@@ -121,17 +125,17 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldFindSecondPageOfActivities() {
-        int pageSize = 3;
-        int offset = 1;
-        List<ActivityDto> expectedActivities = testConfiguration.activities
-                .accessibleForWithLimitOffset(searcher, pageSize, offset);
-        String pageId = expectedActivities.get(0).id().toString();
+        var pageSize = 3;
+        var offset = 1;
+        var expectedActivities = testConfiguration.activities.accessibleForWithLimitOffset(searcher, pageSize, offset);
+        var pageId = aPageId().with(Value.of("id", expectedActivities.get(0).id().toString()));
 
         var searchCriteria = new ActivitySearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         searcher,
                         pageSize,
-                        pageId
+                        pageId,
+                        EntitySortCriteria.irrelevant()
                 ),
                 null,
                 null,
@@ -141,7 +145,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
         );
 
         inTransaction(() -> {
-            List<ActivityDto> foundActivities = dataSource.find(searchCriteria);
+            var foundActivities = dataSource.find(searchCriteria);
             assertThat(foundActivities)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags", "metricValues")
                     .containsExactly(expectedActivities.get(0), expectedActivities.get(1), expectedActivities.get(2));
@@ -150,16 +154,17 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldFindActivitiesInTimeRange() {
-        Instant timeRangeStart = Instant.ofEpochSecond(40);
-        Instant timeRangeEnd = Instant.ofEpochSecond(60);
-        List<ActivityDto> expectedActivities = testConfiguration.activities
+        var timeRangeStart = Instant.ofEpochSecond(40);
+        var timeRangeEnd = Instant.ofEpochSecond(60);
+        var expectedActivities = testConfiguration.activities
                 .accessibleForInTimeRange(searcher, timeRangeStart, timeRangeEnd);
 
         var searchCriteria = new ActivitySearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         searcher,
                         LARGE_PAGE_SIZE,
-                        FIRST_PAGE
+                        FIRST_PAGE,
+                        EntitySortCriteria.irrelevant()
                 ),
                 null,
                 timeRangeStart,
@@ -169,7 +174,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
         );
 
         inTransaction(() -> {
-            List<ActivityDto> foundActivities = dataSource.find(searchCriteria);
+            var foundActivities = dataSource.find(searchCriteria);
             assertThat(foundActivities)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags", "metricValues")
                     .containsExactlyElementsOf(expectedActivities);
@@ -178,16 +183,17 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldFindNotExcludedActivities() {
-        List<ActivityDto> allAccessibleActivities = testConfiguration.activities.accessibleFor(searcher);
-        Set<UUID> excludedActivities = Set.of(allAccessibleActivities.get(1).id(), allAccessibleActivities.get(3).id());
-        List<ActivityDto> expectedActivities = testConfiguration.activities
+        var allAccessibleActivities = testConfiguration.activities.accessibleFor(searcher);
+        var excludedActivities = Set.of(allAccessibleActivities.get(1).id(), allAccessibleActivities.get(3).id());
+        var expectedActivities = testConfiguration.activities
                 .accessibleForExcluding(searcher, excludedActivities);
 
         var searchCriteria = new ActivitySearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         searcher,
                         LARGE_PAGE_SIZE,
-                        FIRST_PAGE
+                        FIRST_PAGE,
+                        EntitySortCriteria.irrelevant()
                 ),
                 null,
                 null,
@@ -197,7 +203,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
         );
 
         inTransaction(() -> {
-            List<ActivityDto> foundActivities = dataSource.find(searchCriteria);
+            var foundActivities = dataSource.find(searchCriteria);
             assertThat(foundActivities)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags", "metricValues")
                     .containsExactlyElementsOf(expectedActivities);
@@ -206,18 +212,19 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldFindActivitiesWithTags() {
-        Set<UUID> requiredTags = testConfiguration.tags.accessibleForWithLimitOffset(searcher, 3, 0)
+        var requiredTags = testConfiguration.tags.accessibleForWithLimitOffset(searcher, 3, 0)
                 .stream()
                 .map(TagDto::id)
                 .collect(toUnmodifiableSet());
-        List<ActivityDto> expectedActivities = testConfiguration.activities
+        var expectedActivities = testConfiguration.activities
                 .accessibleForContainingAnyOfTags(searcher, requiredTags);
 
         var searchCriteria = new ActivitySearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         searcher,
                         LARGE_PAGE_SIZE,
-                        FIRST_PAGE
+                        FIRST_PAGE,
+                        EntitySortCriteria.irrelevant()
                 ),
                 null,
                 null,
@@ -227,7 +234,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
         );
 
         inTransaction(() -> {
-            List<ActivityDto> foundActivities = dataSource.find(searchCriteria);
+            var foundActivities = dataSource.find(searchCriteria);
             assertThat(foundActivities)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags", "metricValues")
                     .containsExactlyElementsOf(expectedActivities);

@@ -6,7 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import ovh.equino.actracker.domain.CommonSearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchPageId;
+import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tagset.TagSetDto;
 import ovh.equino.actracker.domain.tagset.TagSetId;
@@ -17,13 +19,12 @@ import ovh.equino.actracker.jpa.IntegrationTestConfiguration;
 import ovh.equino.actracker.jpa.JpaIntegrationTest;
 
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static ovh.equino.actracker.domain.EntitySearchPageId.aPageId;
 
 abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
 
@@ -79,17 +80,18 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
     @Test
     void shouldFindAllAccessibleTagSets() {
         var searchCriteria = new TagSetSearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         searcher,
                         LARGE_PAGE_SIZE,
-                        FIRST_PAGE
+                        FIRST_PAGE,
+                        EntitySortCriteria.irrelevant()
                 ),
                 null,
                 null
         );
 
         inTransaction(() -> {
-            List<TagSetDto> foundTagSets = dataSource.find(searchCriteria);
+            var foundTagSets = dataSource.find(searchCriteria);
             assertThat(foundTagSets)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags")
                     .containsExactlyElementsOf(testConfiguration.tagSets.accessibleFor(searcher));
@@ -101,24 +103,25 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldFindSecondPageOfTagSets() {
-        int pageSize = 2;
-        int offset = 1;
-        List<TagSetDto> expectedTagSets = testConfiguration.tagSets
+        var pageSize = 2;
+        var offset = 1;
+        var expectedTagSets = testConfiguration.tagSets
                 .accessibleForWithLimitOffset(searcher, pageSize, offset);
-        String pageId = expectedTagSets.get(0).id().toString();
+        var pageId = aPageId().with(EntitySearchPageId.Value.of("id", expectedTagSets.get(0).id().toString()));
 
         var searchCriteria = new TagSetSearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         searcher,
                         pageSize,
-                        pageId
+                        pageId,
+                        EntitySortCriteria.irrelevant()
                 ),
                 null,
                 null
         );
 
         inTransaction(() -> {
-            List<TagSetDto> foundTagSets = dataSource.find(searchCriteria);
+            var foundTagSets = dataSource.find(searchCriteria);
             assertThat(foundTagSets)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags")
                     .containsExactlyElementsOf(expectedTagSets);
@@ -127,20 +130,21 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldFindNotExcludedTagSets() {
-        List<TagSetDto> allAccessibleTagSets = testConfiguration.tagSets.accessibleFor(searcher);
-        Set<UUID> excludedTagSets = Set.of(allAccessibleTagSets.get(1).id(), allAccessibleTagSets.get(3).id());
-        List<TagSetDto> expectedTagSets = testConfiguration.tagSets.accessibleForExcluding(searcher, excludedTagSets);
+        var allAccessibleTagSets = testConfiguration.tagSets.accessibleFor(searcher);
+        var excludedTagSets = Set.of(allAccessibleTagSets.get(1).id(), allAccessibleTagSets.get(3).id());
+        var expectedTagSets = testConfiguration.tagSets.accessibleForExcluding(searcher, excludedTagSets);
         var searchCriteria = new TagSetSearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         searcher,
                         LARGE_PAGE_SIZE,
-                        FIRST_PAGE
+                        FIRST_PAGE,
+                        EntitySortCriteria.irrelevant()
                 ),
                 null,
                 excludedTagSets
         );
         inTransaction(() -> {
-            List<TagSetDto> foundTagSets = dataSource.find(searchCriteria);
+            var foundTagSets = dataSource.find(searchCriteria);
             assertThat(foundTagSets)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags")
                     .containsExactlyElementsOf(expectedTagSets);

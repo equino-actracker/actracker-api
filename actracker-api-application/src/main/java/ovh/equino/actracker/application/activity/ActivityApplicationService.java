@@ -1,8 +1,8 @@
 package ovh.equino.actracker.application.activity;
 
+import ovh.equino.actracker.application.PageIdTranslator;
 import ovh.equino.actracker.application.SearchResult;
-import ovh.equino.actracker.domain.CommonSearchCriteria;
-import ovh.equino.actracker.domain.EntitySearchResult;
+import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.activity.*;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.tag.MetricId;
@@ -26,13 +26,15 @@ public class ActivityApplicationService {
     private final ActivitySearchEngine activitySearchEngine;
     private final ActivityNotifier activityNotifier;
     private final ActorExtractor actorExtractor;
+    private final PageIdTranslator pageIdTranslator;
 
     public ActivityApplicationService(ActivityFactory activityFactory,
                                       ActivityRepository activityRepository,
                                       ActivityDataSource activityDataSource,
                                       ActivitySearchEngine activitySearchEngine,
                                       ActivityNotifier activityNotifier,
-                                      ActorExtractor actorExtractor) {
+                                      ActorExtractor actorExtractor,
+                                      PageIdTranslator pageIdTranslator) {
 
         this.activityFactory = activityFactory;
         this.activityRepository = activityRepository;
@@ -40,6 +42,7 @@ public class ActivityApplicationService {
         this.activitySearchEngine = activitySearchEngine;
         this.activityNotifier = activityNotifier;
         this.actorExtractor = actorExtractor;
+        this.pageIdTranslator = pageIdTranslator;
     }
 
     public ActivityResult getActivity(UUID activityId) {
@@ -103,11 +106,14 @@ public class ActivityApplicationService {
 
     public SearchResult<ActivityResult> searchActivities(SearchActivitiesQuery searchActivitiesQuery) {
 
+        var pageId = pageIdTranslator.fromString(searchActivitiesQuery.pageId());
+
         var searchCriteria = new ActivitySearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         actorExtractor.getActor(),
                         searchActivitiesQuery.pageSize(),
-                        searchActivitiesQuery.pageId()
+                        pageId,
+                        searchActivitiesQuery.sortCriteria().toEntitySortCriteria()
                 ),
                 searchActivitiesQuery.term(),
                 searchActivitiesQuery.timeRangeStart(),
@@ -116,13 +122,14 @@ public class ActivityApplicationService {
                 searchActivitiesQuery.tags()
         );
 
-        EntitySearchResult<ActivityDto> searchResult = activitySearchEngine.findActivities(searchCriteria);
-        List<ActivityResult> resultForClient = searchResult.results()
+        var searchResult = activitySearchEngine.findActivities(searchCriteria);
+        var nextPageId = pageIdTranslator.toString(searchResult.nextPageId());
+        var resultForClient = searchResult.results()
                 .stream()
                 .map(this::toActivityResult)
                 .toList();
 
-        return new SearchResult<>(searchResult.nextPageId(), resultForClient);
+        return new SearchResult<>(nextPageId, resultForClient);
     }
 
     // TODO do something with that, more than one aggregate modified

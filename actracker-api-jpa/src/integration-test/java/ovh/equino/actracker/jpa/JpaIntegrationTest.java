@@ -3,6 +3,7 @@ package ovh.equino.actracker.jpa;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.hibernate.jpa.HibernatePersistenceProvider;
+import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.tenant.TenantDto;
 
 import java.util.HashMap;
@@ -11,7 +12,7 @@ import java.util.Map;
 public abstract class JpaIntegrationTest {
 
     protected static final int LARGE_PAGE_SIZE = 1000;
-    protected static final String FIRST_PAGE = "";
+    protected static final EntitySearchPageId FIRST_PAGE = EntitySearchPageId.firstPage();
 
     protected final EntityManager entityManager;
 

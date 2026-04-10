@@ -1,7 +1,9 @@
 package ovh.equino.actracker.dashboard.generation.repository;
 
-import ovh.equino.actracker.domain.CommonSearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySearchResult;
+import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.activity.ActivityDto;
 import ovh.equino.actracker.domain.activity.ActivitySearchCriteria;
 import ovh.equino.actracker.domain.activity.ActivitySearchEngine;
@@ -12,6 +14,7 @@ import java.util.List;
 
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static ovh.equino.actracker.domain.EntitySearchPageId.firstPage;
 
 final class ActivityFinder {
 
@@ -24,10 +27,10 @@ final class ActivityFinder {
     }
 
     List<ActivityDto> find(DashboardGenerationCriteria generationCriteria) {
-        List<ActivityDto> activities = new ArrayList<>();
-        String pageId = "";
+        var activities = new ArrayList<ActivityDto>();
+        var pageId = firstPage();
         while (pageId != null) {
-            EntitySearchResult<ActivityDto> searchResult = fetchNextPageOfActivities(generationCriteria, pageId);
+            var searchResult = fetchNextPageOfActivities(generationCriteria, pageId);
             pageId = searchResult.nextPageId();
             activities.addAll(searchResult.results());
         }
@@ -38,13 +41,14 @@ final class ActivityFinder {
     }
 
     private EntitySearchResult<ActivityDto> fetchNextPageOfActivities(DashboardGenerationCriteria generationCriteria,
-                                                                      String pageId) {
+                                                                      EntitySearchPageId pageId) {
 
         var searchCriteria = new ActivitySearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         generationCriteria.generator(),
                         PAGE_SIZE,
-                        pageId
+                        pageId,
+                        EntitySortCriteria.irrelevant()
                 ),
                 null,
                 generationCriteria.timeRangeStart(),

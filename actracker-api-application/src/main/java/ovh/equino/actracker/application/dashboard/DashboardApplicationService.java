@@ -1,7 +1,8 @@
 package ovh.equino.actracker.application.dashboard;
 
+import ovh.equino.actracker.application.PageIdTranslator;
 import ovh.equino.actracker.application.SearchResult;
-import ovh.equino.actracker.domain.CommonSearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.dashboard.*;
 import ovh.equino.actracker.domain.dashboard.generation.*;
@@ -25,6 +26,7 @@ public class DashboardApplicationService {
     private final DashboardNotifier dashboardNotifier;
     private final TenantDataSource tenantDataSource;
     private final ActorExtractor actorExtractor;
+    private final PageIdTranslator pageIdTranslator;
 
     public DashboardApplicationService(DashboardFactory dashboardFactory,
                                        DashboardRepository dashboardRepository,
@@ -33,7 +35,8 @@ public class DashboardApplicationService {
                                        DashboardGenerationEngine dashboardGenerationEngine,
                                        DashboardNotifier dashboardNotifier,
                                        TenantDataSource tenantDataSource,
-                                       ActorExtractor actorExtractor) {
+                                       ActorExtractor actorExtractor,
+                                       PageIdTranslator pageIdTranslator) {
 
         this.dashboardFactory = dashboardFactory;
         this.dashboardRepository = dashboardRepository;
@@ -43,6 +46,7 @@ public class DashboardApplicationService {
         this.dashboardNotifier = dashboardNotifier;
         this.tenantDataSource = tenantDataSource;
         this.actorExtractor = actorExtractor;
+        this.pageIdTranslator = pageIdTranslator;
     }
 
     public DashboardResult getDashboard(UUID dashboardId) {
@@ -105,23 +109,27 @@ public class DashboardApplicationService {
 
     public SearchResult<DashboardResult> searchDashboards(SearchDashboardsQuery searchDashboardsQuery) {
 
+        var pageId = pageIdTranslator.fromString(searchDashboardsQuery.pageId());
+
         var searchCriteria = new DashboardSearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         actorExtractor.getActor(),
                         searchDashboardsQuery.pageSize(),
-                        searchDashboardsQuery.pageId()
+                        pageId,
+                        searchDashboardsQuery.sortCriteria().toEntitySortCriteria()
                 ),
                 searchDashboardsQuery.term(),
                 searchDashboardsQuery.excludeFilter()
         );
 
         EntitySearchResult<DashboardDto> searchResult = dashboardSearchEngine.findDashboards(searchCriteria);
+        var nextPageId = pageIdTranslator.toString(searchResult.nextPageId());
         List<DashboardResult> resultForClient = searchResult.results()
                 .stream()
                 .map(this::toDashboardResult)
                 .toList();
 
-        return new SearchResult<>(searchResult.nextPageId(), resultForClient);
+        return new SearchResult<>(nextPageId, resultForClient);
     }
 
     public DashboardResult renameDashboard(String newName, UUID dashboardId) {

@@ -6,7 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import ovh.equino.actracker.domain.CommonSearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchPageId;
+import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tag.TagId;
 import ovh.equino.actracker.domain.tag.TagSearchCriteria;
@@ -16,12 +18,16 @@ import ovh.equino.actracker.jpa.IntegrationTestConfiguration;
 import ovh.equino.actracker.jpa.JpaIntegrationTest;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static java.util.stream.Stream.concat;
 import static org.assertj.core.api.Assertions.assertThat;
+import static ovh.equino.actracker.domain.EntitySearchPageId.aPageId;
 
 abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
 
@@ -78,17 +84,18 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
     @Test
     void shouldFindAllAccessibleTags() {
         var searchCriteria = new TagSearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         searcher,
                         LARGE_PAGE_SIZE,
-                        FIRST_PAGE
+                        FIRST_PAGE,
+                        EntitySortCriteria.irrelevant()
                 ),
                 null,
                 null
         );
 
         inTransaction(() -> {
-            List<TagDto> foundTags = dataSource.find(searchCriteria);
+            var foundTags = dataSource.find(searchCriteria);
             assertThat(foundTags)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("shares", "metrics")
                     .containsExactlyElementsOf(testConfiguration.tags.accessibleFor(searcher));
@@ -103,21 +110,22 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldFindSecondPageOfTags() {
-        int pageSize = 2;
-        int offset = 1;
-        List<TagDto> expectedTags = testConfiguration.tags.accessibleForWithLimitOffset(searcher, pageSize, offset);
-        String pageId = expectedTags.get(0).id().toString();
+        var pageSize = 2;
+        var offset = 1;
+        var expectedTags = testConfiguration.tags.accessibleForWithLimitOffset(searcher, pageSize, offset);
+        var pageId = aPageId().with(EntitySearchPageId.Value.of("id", expectedTags.get(0).id().toString()));
         var searchCriteria = new TagSearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         searcher,
                         pageSize,
-                        pageId
+                        pageId,
+                        EntitySortCriteria.irrelevant()
                 ),
                 null,
                 null
         );
         inTransaction(() -> {
-            List<TagDto> foundTags = dataSource.find(searchCriteria);
+            var foundTags = dataSource.find(searchCriteria);
             assertThat(foundTags)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("shares", "metrics")
                     .containsExactlyElementsOf(expectedTags);
@@ -126,20 +134,21 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldFindNotExcludedTags() {
-        List<TagDto> allAccessibleTags = testConfiguration.tags.accessibleFor(searcher);
-        Set<UUID> excludedTags = Set.of(allAccessibleTags.get(1).id(), allAccessibleTags.get(2).id());
-        List<TagDto> expectedTags = testConfiguration.tags.accessibleForExcluding(searcher, excludedTags);
+        var allAccessibleTags = testConfiguration.tags.accessibleFor(searcher);
+        var excludedTags = Set.of(allAccessibleTags.get(1).id(), allAccessibleTags.get(2).id());
+        var expectedTags = testConfiguration.tags.accessibleForExcluding(searcher, excludedTags);
         var searchCriteria = new TagSearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         searcher,
                         LARGE_PAGE_SIZE,
-                        FIRST_PAGE
+                        FIRST_PAGE,
+                        EntitySortCriteria.irrelevant()
                 ),
                 null,
                 excludedTags
         );
         inTransaction(() -> {
-            List<TagDto> foundTags = dataSource.find(searchCriteria);
+            var foundTags = dataSource.find(searchCriteria);
             assertThat(foundTags)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("shares", "metrics")
                     .containsExactlyElementsOf(expectedTags);
@@ -148,19 +157,20 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldFindTagsMatchingTerm() {
-        String term = "Accessible shared";
-        List<TagDto> expectedTags = testConfiguration.tags.accessibleForMatchingTerm(searcher, term);
+        var term = "Accessible shared";
+        var expectedTags = testConfiguration.tags.accessibleForMatchingTerm(searcher, term);
         var searchCriteria = new TagSearchCriteria(
-                new CommonSearchCriteria(
+                new EntitySearchCriteria.Common(
                         searcher,
                         LARGE_PAGE_SIZE,
-                        FIRST_PAGE
+                        FIRST_PAGE,
+                        EntitySortCriteria.irrelevant()
                 ),
                 term,
                 null
         );
         inTransaction(() -> {
-            List<TagDto> foundTags = dataSource.find(searchCriteria);
+            var foundTags = dataSource.find(searchCriteria);
             assertThat(foundTags)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("shares", "metrics")
                     .containsExactlyElementsOf(expectedTags);

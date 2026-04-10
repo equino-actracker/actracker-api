@@ -1,49 +1,43 @@
 package ovh.equino.actracker.search.datasource.dashboard;
 
-import ovh.equino.actracker.domain.CommonSearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.dashboard.DashboardDataSource;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
 import ovh.equino.actracker.domain.dashboard.DashboardSearchCriteria;
 import ovh.equino.actracker.domain.dashboard.DashboardSearchEngine;
+import ovh.equino.actracker.search.datasource.DataSourceSearchEngine;
 
-import java.util.LinkedList;
 import java.util.List;
 
-class DataSourceDashboardSearchEngine implements DashboardSearchEngine {
+class DataSourceDashboardSearchEngine
+        extends DataSourceSearchEngine<DashboardDto, DashboardSearchCriteria>
+        implements DashboardSearchEngine {
 
     private final DashboardDataSource dashboardDataSource;
 
     DataSourceDashboardSearchEngine(DashboardDataSource dashboardDataSource) {
+        super(new DashboardAttributeExtractor());
         this.dashboardDataSource = dashboardDataSource;
     }
 
     @Override
     public EntitySearchResult<DashboardDto> findDashboards(DashboardSearchCriteria searchCriteria) {
-        var forNextPageIdSearchCriteria = new DashboardSearchCriteria(
-                new CommonSearchCriteria(
-                        searchCriteria.common().searcher(),
-                        searchCriteria.common().pageSize() + 1,   // additional one to calculate next page ID
-                        searchCriteria.common().pageId()
-                ),
+        return findBy(searchCriteria);
+    }
+
+    @Override
+    protected List<DashboardDto> searchInDataSource(DashboardSearchCriteria searchCriteria) {
+        return dashboardDataSource.find(searchCriteria);
+    }
+
+    @Override
+    protected DashboardSearchCriteria withCommonCriteriaReplaced(DashboardSearchCriteria searchCriteria,
+                                                                 EntitySearchCriteria.Common newCommonCriteria) {
+        return new DashboardSearchCriteria(
+                newCommonCriteria,
                 searchCriteria.term(),
                 searchCriteria.excludeFilter()
         );
-
-        List<DashboardDto> foundDashboards = dashboardDataSource.find(forNextPageIdSearchCriteria);
-        String nextPageId = getNextPageId(foundDashboards, searchCriteria.common().pageSize());
-        List<DashboardDto> results = foundDashboards.stream()
-                .limit(searchCriteria.common().pageSize())
-                .toList();
-
-        return new EntitySearchResult<>(nextPageId, results);
-    }
-
-    private String getNextPageId(List<DashboardDto> foundDashboards, int pageSize) {
-        if (foundDashboards.size() <= pageSize) {
-            return null;
-        }
-        DashboardDto lastDashboard = new LinkedList<>(foundDashboards).get(pageSize);
-        return lastDashboard.id().toString();
     }
 }
