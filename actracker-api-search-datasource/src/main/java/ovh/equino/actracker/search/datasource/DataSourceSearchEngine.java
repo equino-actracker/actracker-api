@@ -3,6 +3,7 @@ package ovh.equino.actracker.search.datasource;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySearchResult;
+import ovh.equino.actracker.domain.EntitySortCriteria;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -18,13 +19,13 @@ public abstract class DataSourceSearchEngine<T, S extends EntitySearchCriteria<T
 
     protected final EntitySearchResult<T> findBy(S searchCriteria) {
         var pageSize = searchCriteria.common().pageSize();
-        var pageId = searchCriteria.common().pageId();
+        var sortCriteria = searchCriteria.common().sortCriteria();
 
         var nextPageIdTellingCommonCriteria = new EntitySearchCriteria.Common(
                 searchCriteria.common().searcher(),
                 searchCriteria.common().pageSize() + 1,   // additional one to calculate next page ID
                 searchCriteria.common().pageId(),
-                searchCriteria.common().sortCriteria());
+                sortCriteria);
 
         var nextPageIdTellingCriteria = withCommonCriteriaReplaced(searchCriteria, nextPageIdTellingCommonCriteria);
         var foundEntities = searchInDataSource(nextPageIdTellingCriteria);
@@ -33,7 +34,7 @@ public abstract class DataSourceSearchEngine<T, S extends EntitySearchCriteria<T
                 .limit(pageSize)
                 .toList();
 
-        var nextPageId = getNextPageId(foundEntities, pageSize, pageId);
+        var nextPageId = getNextPageId(foundEntities, pageSize, sortCriteria);
 
         return new EntitySearchResult<>(nextPageId, results);
     }
@@ -42,22 +43,22 @@ public abstract class DataSourceSearchEngine<T, S extends EntitySearchCriteria<T
 
     protected abstract S withCommonCriteriaReplaced(S searchCriteria, EntitySearchCriteria.Common newCommonCriteria);
 
-    private EntitySearchPageId getNextPageId(List<T> foundEntities, int pageSize, EntitySearchPageId previousPageId) {
+    private EntitySearchPageId getNextPageId(List<T> foundEntities, int pageSize, EntitySortCriteria sortCriteria) {
         if (foundEntities.size() <= pageSize) {
             return null;
         }
         var nextPageEntity = foundEntities.get(pageSize);
 
-        var nextPageIdValues = previousPageId.values().stream()
-                .map(value -> toNextPageValue(value, nextPageEntity))
+        var nextPageIdValues = sortCriteria.levels().stream()
+                .map(level -> toNextPageValue(level, nextPageEntity))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList();
         return new EntitySearchPageId(new LinkedList<>(nextPageIdValues));
     }
 
-    private Optional<EntitySearchPageId.Value> toNextPageValue(EntitySearchPageId.Value value, T nextPageEntity) {
-        return attributeExtractor.extractFieldAttribute(value.field(), nextPageEntity)
-                .map(fieldValue -> new EntitySearchPageId.Value(value.field(), fieldValue));
+    private Optional<EntitySearchPageId.Value> toNextPageValue(EntitySortCriteria.Level level, T nextPageEntity) {
+        return attributeExtractor.extractFieldAttribute(level.field(), nextPageEntity)
+                .map(fieldValue -> new EntitySearchPageId.Value(level.field(), fieldValue));
     }
 }

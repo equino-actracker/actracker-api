@@ -113,7 +113,6 @@ public class TagApplicationService {
     }
 
     public SearchResult<TagResult> searchTags(SearchTagsQuery searchTagsQuery) {
-
         var pageId = pageIdTranslator.fromString(searchTagsQuery.pageId());
 
         var searchCriteria = new TagSearchCriteria(
