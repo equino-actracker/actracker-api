@@ -1,9 +1,9 @@
 package ovh.equino.actracker.application.dashboard;
 
+import ovh.equino.actracker.application.PageIdTranslator;
 import ovh.equino.actracker.application.SearchResult;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchResult;
-import ovh.equino.actracker.domain.PageIdTranslator;
 import ovh.equino.actracker.domain.dashboard.*;
 import ovh.equino.actracker.domain.dashboard.generation.*;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;

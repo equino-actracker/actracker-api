@@ -5,16 +5,14 @@ import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.EntitySortCriteria;
 
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 
 public abstract class DataSourceSearchEngine<T, S extends EntitySearchCriteria<T>> {
 
-    private final NextPageIdExtractor.AttributeValueExtractor<T> attributeExtractor;
+    private final NextPageIdExtractor<T> nextPageIdExtractor;
 
     protected DataSourceSearchEngine(NextPageIdExtractor.AttributeValueExtractor<T> attributeExtractor) {
-        this.attributeExtractor = attributeExtractor;
+        this.nextPageIdExtractor = new NextPageIdExtractor<>(attributeExtractor);
     }
 
     protected final EntitySearchResult<T> findBy(S searchCriteria) {
@@ -48,17 +46,6 @@ public abstract class DataSourceSearchEngine<T, S extends EntitySearchCriteria<T
             return null;
         }
         var nextPageEntity = foundEntities.get(pageSize);
-
-        var nextPageIdValues = sortCriteria.levels().stream()
-                .map(level -> toNextPageValue(level, nextPageEntity))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .toList();
-        return new EntitySearchPageId(new LinkedList<>(nextPageIdValues));
-    }
-
-    private Optional<EntitySearchPageId.Value> toNextPageValue(EntitySortCriteria.Level level, T nextPageEntity) {
-        return attributeExtractor.extractFieldAttribute(level.field(), nextPageEntity)
-                .map(fieldValue -> new EntitySearchPageId.Value(level.field(), fieldValue));
+        return nextPageIdExtractor.nextPageId(sortCriteria, nextPageEntity);
     }
 }

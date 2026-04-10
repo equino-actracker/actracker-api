@@ -19,10 +19,8 @@ import ovh.equino.actracker.jpa.IntegrationTestConfiguration;
 import ovh.equino.actracker.jpa.JpaIntegrationTest;
 
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -93,7 +91,7 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
         );
 
         inTransaction(() -> {
-            List<TagSetDto> foundTagSets = dataSource.find(searchCriteria);
+            var foundTagSets = dataSource.find(searchCriteria);
             assertThat(foundTagSets)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags")
                     .containsExactlyElementsOf(testConfiguration.tagSets.accessibleFor(searcher));
@@ -132,9 +130,9 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
 
     @Test
     void shouldFindNotExcludedTagSets() {
-        List<TagSetDto> allAccessibleTagSets = testConfiguration.tagSets.accessibleFor(searcher);
-        Set<UUID> excludedTagSets = Set.of(allAccessibleTagSets.get(1).id(), allAccessibleTagSets.get(3).id());
-        List<TagSetDto> expectedTagSets = testConfiguration.tagSets.accessibleForExcluding(searcher, excludedTagSets);
+        var allAccessibleTagSets = testConfiguration.tagSets.accessibleFor(searcher);
+        var excludedTagSets = Set.of(allAccessibleTagSets.get(1).id(), allAccessibleTagSets.get(3).id());
+        var expectedTagSets = testConfiguration.tagSets.accessibleForExcluding(searcher, excludedTagSets);
         var searchCriteria = new TagSetSearchCriteria(
                 new EntitySearchCriteria.Common(
                         searcher,
@@ -146,7 +144,7 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
                 excludedTagSets
         );
         inTransaction(() -> {
-            List<TagSetDto> foundTagSets = dataSource.find(searchCriteria);
+            var foundTagSets = dataSource.find(searchCriteria);
             assertThat(foundTagSets)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags")
                     .containsExactlyElementsOf(expectedTagSets);

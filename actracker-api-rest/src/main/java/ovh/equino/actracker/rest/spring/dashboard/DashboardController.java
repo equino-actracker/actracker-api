@@ -67,7 +67,7 @@ class DashboardController {
                                                @RequestParam(name = "excludedDashboards", required = false) String excludedDashboards,
                                                @RequestParam(name = "orderBy", required = false) String orderBy) {
 
-        SearchDashboardsQuery searchDashboardsQuery = new SearchDashboardsQuery(
+        var searchDashboardsQuery = new SearchDashboardsQuery(
                 pageSize,
                 pageId,
                 term,
@@ -75,8 +75,8 @@ class DashboardController {
                 dashboardMapper.parseSortCriteria(orderBy)
         );
 
-        SearchResult<DashboardResult> searchResult = dashboardApplicationService.searchDashboards(searchDashboardsQuery);
-        List<Dashboard> foundResults = searchResult.results().stream()
+        var searchResult = dashboardApplicationService.searchDashboards(searchDashboardsQuery);
+        var foundResults = searchResult.results().stream()
                 .map(this::toResponse)
                 .toList();
         return new SearchResponse<>(searchResult.nextPageId(), foundResults);

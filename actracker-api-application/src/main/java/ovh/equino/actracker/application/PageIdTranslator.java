@@ -1,4 +1,6 @@
-package ovh.equino.actracker.domain;
+package ovh.equino.actracker.application;
+
+import ovh.equino.actracker.domain.EntitySearchPageId;
 
 public interface PageIdTranslator {
 

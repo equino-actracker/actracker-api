@@ -13,7 +13,6 @@ import ovh.equino.actracker.domain.dashboard.Chart;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
 import ovh.equino.actracker.domain.dashboard.DashboardId;
 import ovh.equino.actracker.domain.dashboard.DashboardSearchCriteria;
-import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tenant.TenantDto;
 import ovh.equino.actracker.domain.user.User;
@@ -21,7 +20,10 @@ import ovh.equino.actracker.jpa.IntegrationTestConfiguration;
 import ovh.equino.actracker.jpa.JpaIntegrationTest;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -102,15 +104,15 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
                 null
         );
 
-        Collection<Share> expectedFlattenShares = testConfiguration.dashboards.flatSharesAccessibleFor(searcher);
-        Collection<Chart> expectedFlattenCharts = testConfiguration.dashboards.flatChartsAccessibleFor(searcher);
-        List<UUID> expectedFlattenIncludedTags = expectedFlattenCharts
+        var expectedFlattenShares = testConfiguration.dashboards.flatSharesAccessibleFor(searcher);
+        var expectedFlattenCharts = testConfiguration.dashboards.flatChartsAccessibleFor(searcher);
+        var expectedFlattenIncludedTags = expectedFlattenCharts
                 .stream()
                 .flatMap(chart -> chart.includedTags().stream())
                 .toList();
 
         inTransaction(() -> {
-            List<DashboardDto> foundDashboards = dataSource.find(searchCriteria);
+            var foundDashboards = dataSource.find(searchCriteria);
             assertThat(foundDashboards)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("charts", "shares")
                     .containsExactlyElementsOf(testConfiguration.dashboards.accessibleFor(searcher));
@@ -155,9 +157,9 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
 
     @Test
     void shouldFindNonExcludedDashboards() {
-        List<DashboardDto> allAccessibleDashboards = testConfiguration.dashboards.accessibleFor(searcher);
-        Set<UUID> excludedDashboards = Set.of(allAccessibleDashboards.get(1).id(), allAccessibleDashboards.get(3).id());
-        List<DashboardDto> expectedDashboards = testConfiguration.dashboards.
+        var allAccessibleDashboards = testConfiguration.dashboards.accessibleFor(searcher);
+        var excludedDashboards = Set.of(allAccessibleDashboards.get(1).id(), allAccessibleDashboards.get(3).id());
+        var expectedDashboards = testConfiguration.dashboards.
                 accessibleForExcluding(searcher, excludedDashboards);
 
         var searchCriteria = new DashboardSearchCriteria(
@@ -171,7 +173,7 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
                 excludedDashboards
         );
         inTransaction(() -> {
-            List<DashboardDto> foundDashboards = dataSource.find(searchCriteria);
+            var foundDashboards = dataSource.find(searchCriteria);
             assertThat(foundDashboards)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("charts", "shares")
                     .containsExactlyElementsOf(expectedDashboards);

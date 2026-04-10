@@ -1,8 +1,8 @@
 package ovh.equino.actracker.application.activity;
 
+import ovh.equino.actracker.application.PageIdTranslator;
 import ovh.equino.actracker.application.SearchResult;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
-import ovh.equino.actracker.domain.PageIdTranslator;
 import ovh.equino.actracker.domain.activity.*;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.tag.MetricId;

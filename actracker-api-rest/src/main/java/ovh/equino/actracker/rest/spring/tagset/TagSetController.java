@@ -1,7 +1,6 @@
 package ovh.equino.actracker.rest.spring.tagset;
 
 import org.springframework.web.bind.annotation.*;
-import ovh.equino.actracker.application.SearchResult;
 import ovh.equino.actracker.application.tagset.CreateTagSetCommand;
 import ovh.equino.actracker.application.tagset.SearchTagSetsQuery;
 import ovh.equino.actracker.application.tagset.TagSetApplicationService;
@@ -9,7 +8,6 @@ import ovh.equino.actracker.application.tagset.TagSetResult;
 import ovh.equino.actracker.rest.spring.SearchResponse;
 import ovh.equino.actracker.rest.spring.tag.Tag;
 
-import java.util.List;
 import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.OK;
@@ -52,15 +50,15 @@ class TagSetController {
                                          @RequestParam(name = "excludedTagSets", required = false) String excludedTagSets,
                                          @RequestParam(name = "orderBy", required = false) String orderBy) {
 
-        SearchTagSetsQuery searchTagSetsQuery = new SearchTagSetsQuery(
+        var searchTagSetsQuery = new SearchTagSetsQuery(
                 pageSize,
                 pageId,
                 term,
                 tagSetMapper.parseIds(excludedTagSets),
                 tagSetMapper.parseSortCriteria(orderBy)
         );
-        SearchResult<TagSetResult> searchResult = tagSetApplicationService.searchTagSets(searchTagSetsQuery);
-        List<TagSet> foundResults = searchResult.results().stream()
+        var searchResult = tagSetApplicationService.searchTagSets(searchTagSetsQuery);
+        var foundResults = searchResult.results().stream()
                 .map(this::toResponse)
                 .toList();
         return new SearchResponse<>(searchResult.nextPageId(), foundResults);

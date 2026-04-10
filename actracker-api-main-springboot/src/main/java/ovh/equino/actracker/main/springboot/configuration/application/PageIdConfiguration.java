@@ -1,11 +1,11 @@
-package ovh.equino.actracker.main.springboot.configuration;
+package ovh.equino.actracker.main.springboot.configuration.application;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import ovh.equino.actracker.application.PageIdTranslator;
 import ovh.equino.actracker.domain.EntitySearchPageId;
-import ovh.equino.actracker.domain.PageIdTranslator;
 
 import java.util.Base64;
 
