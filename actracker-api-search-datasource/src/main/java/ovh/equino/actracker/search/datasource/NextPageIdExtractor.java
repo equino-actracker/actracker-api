@@ -25,12 +25,23 @@ public final class NextPageIdExtractor<T> {
         return new EntitySearchPageId(new LinkedList<>(pageIdValues));
     }
 
-    private Optional<EntitySearchPageId.Value> toFieldValue(String field, T dto) {
+    private Optional<EntitySearchPageId.Value> toFieldValue(EntitySortCriteria.Field field, T dto) {
         return attributeValueExtractor.extractFieldAttribute(field, dto)
                 .map(value -> EntitySearchPageId.Value.of(field, value));
     }
 
     public interface AttributeValueExtractor<T> {
-        Optional<?> extractFieldAttribute(String attribute, T dto);
+        Optional<?> extractFieldAttribute(EntitySortCriteria.Field attribute, T dto);
+
+        Optional<?> extractIdFrom(T dto);
+
+        default Optional<?> extractCommonAttribute(EntitySortCriteria.Field attribute, T dto) {
+            if (attribute instanceof EntitySortCriteria.CommonField commonField) {
+                return switch (commonField) {
+                    case ID -> extractIdFrom(dto);
+                };
+            }
+            return Optional.empty();
+        }
     }
 }

@@ -1,6 +1,8 @@
 package ovh.equino.actracker.search.datasource.tag;
 
+import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.tag.TagDto;
+import ovh.equino.actracker.domain.tag.TagSearchCriteria;
 import ovh.equino.actracker.search.datasource.NextPageIdExtractor;
 
 import java.util.Optional;
@@ -8,10 +10,24 @@ import java.util.Optional;
 class TagAttributeExtractor implements NextPageIdExtractor.AttributeValueExtractor<TagDto> {
 
     @Override
-    public Optional<Object> extractFieldAttribute(String attribute, TagDto dto) {
-        return switch (attribute) {
-            case "id" -> Optional.ofNullable(dto.id());
-            default -> Optional.empty();
-        };
+    public Optional<?> extractFieldAttribute(EntitySortCriteria.Field attribute, TagDto dto) {
+        var commonFieldValue = extractCommonAttribute(attribute, dto);
+        if (commonFieldValue.isPresent()) {
+            return commonFieldValue;
+        } else {
+            return extractTagAttribute(attribute);
+        }
+    }
+
+    @Override
+    public Optional<?> extractIdFrom(TagDto dto) {
+        return Optional.of(dto.id());
+    }
+
+    private static Optional<Object> extractTagAttribute(EntitySortCriteria.Field attribute) {
+        if (attribute instanceof TagSearchCriteria.SortableField tagField) {
+            return Optional.empty();
+        }
+        return Optional.empty();
     }
 }

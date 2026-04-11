@@ -1,6 +1,7 @@
 package ovh.equino.actracker.domain.dashboard;
 
 import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.EntitySortCriteria;
 
 import java.util.Set;
 import java.util.UUID;
@@ -21,5 +22,9 @@ public record DashboardSearchCriteria(
     public DashboardSearchCriteria {
         requireNonNull(common);
         term = requireNonNullElse(term, DEFAULT_TERM);
+    }
+
+    public enum SortableField implements EntitySortCriteria.Field {
+
     }
 }

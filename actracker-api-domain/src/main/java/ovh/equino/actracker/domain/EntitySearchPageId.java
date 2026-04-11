@@ -11,11 +11,9 @@ public record EntitySearchPageId(Deque<Value> values) {
         values = requireNonNullElse(values, new LinkedList<>());
     }
 
-    // TODO Replace String with Field?
-    // TODO add EntitySortCriteria.Order
-    public record Value(String field, Object value) {
+    public record Value(EntitySortCriteria.Field field, Object value) {
 
-        public static Value of(String field, Object value) {
+        public static Value of(EntitySortCriteria.Field field, Object value) {
             return new Value(field, value);
         }
     }

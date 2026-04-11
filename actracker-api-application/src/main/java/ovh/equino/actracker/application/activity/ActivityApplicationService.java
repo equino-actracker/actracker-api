@@ -113,7 +113,7 @@ public class ActivityApplicationService {
                         actorExtractor.getActor(),
                         searchActivitiesQuery.pageSize(),
                         pageId,
-                        searchActivitiesQuery.sortCriteria().toEntitySortCriteria()
+                        searchActivitiesQuery.sortCriteria().toEntitySortCriteria(new ActivitySortableFieldResolver())
                 ),
                 searchActivitiesQuery.term(),
                 searchActivitiesQuery.timeRangeStart(),

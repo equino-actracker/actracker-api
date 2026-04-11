@@ -120,7 +120,7 @@ public class TagApplicationService {
                         actorExtractor.getActor(),
                         searchTagsQuery.pageSize(),
                         pageId,
-                        searchTagsQuery.sortCriteria().toEntitySortCriteria()
+                        searchTagsQuery.sortCriteria().toEntitySortCriteria(new TagSortableFieldResolver())
                 ),
                 searchTagsQuery.term(),
                 searchTagsQuery.excludeFilter()

@@ -86,7 +86,7 @@ public class TagSetApplicationService {
                         actorExtractor.getActor(),
                         searchTagSetsQuery.pageSize(),
                         pageId,
-                        searchTagSetsQuery.sortCriteria().toEntitySortCriteria()
+                        searchTagSetsQuery.sortCriteria().toEntitySortCriteria(new TagSetSortableFieldResolver())
                 ),
                 searchTagSetsQuery.term(),
                 searchTagSetsQuery.excludeFilter()
