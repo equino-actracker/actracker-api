@@ -185,9 +185,11 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
 
             if (pageValue.sortField() instanceof ActivitySearchCriteria.SortableField sortableField) {
                 return switch (sortableField) {
-                    case TITLE -> Optional.of(
-                            PageableValue.of(root.get(ActivityEntity_.title), (String) pageValue.value())
-                    );
+                    case TITLE -> Optional.of(PageableValue.of(
+                            root.get(ActivityEntity_.title),
+                            (String) pageValue.value(),
+                            PageableValue.PagingDirection.from(pageValue.sortOrder())
+                    ));
                 };
             }
             return Optional.empty();

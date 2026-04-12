@@ -1,10 +1,12 @@
 package ovh.equino.actracker.domain;
 
+import javax.swing.*;
 import java.util.Deque;
 import java.util.LinkedList;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
+import static ovh.equino.actracker.domain.EntitySortCriteria.Order.ASC;
 
 public record EntitySearchPageId(Deque<Value> values) {
 
@@ -38,6 +40,7 @@ public record EntitySearchPageId(Deque<Value> values) {
     public record Value(EntitySortCriteria.Field sortField, EntitySortCriteria.Order sortOrder, Object value) {
 
         public Value {
+            sortOrder = requireNonNullElse(sortOrder, ASC);
             requireNonNull(sortField);
         }
 

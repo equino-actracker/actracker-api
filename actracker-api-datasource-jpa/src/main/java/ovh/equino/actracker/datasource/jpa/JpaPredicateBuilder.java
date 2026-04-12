@@ -4,6 +4,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder.PageableValue.PagingDirection;
 import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.jpa.JpaEntity;
@@ -113,8 +114,12 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
     }
 
     private <T extends Comparable<T>> JpaPredicate isAfterPageValueBoundary(PageableValue<T> pageableValue) {
-        // TODO support DESC ordering
-        return () -> criteriaBuilder.greaterThanOrEqualTo(pageableValue.field(), pageableValue.value());
+        return switch (pageableValue.pagingDirection()) {
+            case SKIP_LESSER -> () ->
+                    criteriaBuilder.greaterThanOrEqualTo(pageableValue.field(), pageableValue.value());
+            case SKIP_GREATER -> () ->
+                    criteriaBuilder.lessThanOrEqualTo(pageableValue.field(), pageableValue.value());
+        };
     }
 
     private Optional<PageableValue<? extends Comparable<?>>> toPageableValue(EntitySearchPageId.Value pageValue) {
@@ -126,7 +131,11 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
     private Optional<PageableValue<? extends Comparable<?>>> commonPageableValue(EntitySearchPageId.Value pageValue) {
         if (pageValue.sortField() instanceof EntitySortCriteria.CommonField commonField) {
             return switch (commonField) {
-                case ID -> Optional.of(PageableValue.of(root.get(JpaEntity_.id), (String) pageValue.value()));
+                case ID -> Optional.of(PageableValue.of(
+                        root.get(JpaEntity_.id),
+                        (String) pageValue.value(),
+                        PagingDirection.from(pageValue.sortOrder()))
+                );
             };
         }
         return Optional.empty();
@@ -135,9 +144,25 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
     protected abstract Optional<PageableValue<? extends Comparable<?>>> entityPageableValue(
             EntitySearchPageId.Value pageValue);
 
-    protected record PageableValue<T extends Comparable<T>>(Path<T> field, T value) {
-        public static <T extends Comparable<T>> PageableValue<T> of(Path<T> field, T value) {
-            return new PageableValue<>(field, value);
+    protected record PageableValue<T extends Comparable<T>>(Path<T> field, T value, PagingDirection pagingDirection) {
+
+        public static <T extends Comparable<T>> PageableValue<T> of(Path<T> field,
+                                                                    T value,
+                                                                    PagingDirection pagingDirection) {
+
+            return new PageableValue<>(field, value, pagingDirection);
+        }
+
+        public enum PagingDirection {
+            SKIP_GREATER,
+            SKIP_LESSER;
+
+            public static PagingDirection from(EntitySortCriteria.Order sortOrder) {
+                return switch (sortOrder) {
+                    case ASC -> SKIP_LESSER;
+                    case DESC -> SKIP_GREATER;
+                };
+            }
         }
     }
 }

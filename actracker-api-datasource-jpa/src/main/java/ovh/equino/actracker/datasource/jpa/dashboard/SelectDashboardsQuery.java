@@ -107,9 +107,11 @@ final class SelectDashboardsQuery extends MultiResultJpaQuery<DashboardEntity, D
 
             if (pageValue.sortField() instanceof DashboardSearchCriteria.SortableField sortableField) {
                 return switch (sortableField) {
-                    case NAME -> Optional.of(
-                            PageableValue.of(root.get(DashboardEntity_.name), (String) pageValue.value())
-                    );
+                    case NAME -> Optional.of(PageableValue.of(
+                            root.get(DashboardEntity_.name),
+                            (String) pageValue.value(),
+                            PageableValue.PagingDirection.from(pageValue.sortOrder())
+                    ));
                 };
             }
             return Optional.empty();
