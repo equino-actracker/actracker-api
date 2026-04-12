@@ -130,9 +130,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
         var pageSize = 3;
         var offset = 1;
         var expectedActivities = testConfiguration.activities.accessibleForWithLimitOffset(searcher, pageSize, offset);
-        var pageId = aPageId().with(
-                Value.of(new EntitySortCriteria.Level(ID, ASC), expectedActivities.get(0).id().toString())
-        );
+        var pageId = aPageId().with(Value.of(ID, ASC, expectedActivities.get(0).id().toString()));
 
         var searchCriteria = new ActivitySearchCriteria(
                 new EntitySearchCriteria.Common(

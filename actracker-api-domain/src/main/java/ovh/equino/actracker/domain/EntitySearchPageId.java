@@ -35,22 +35,14 @@ public record EntitySearchPageId(Deque<Value> values) {
         return new LinkedList<>(values);
     }
 
-    public record Value(EntitySortCriteria.Level sortLevel, Object value) {
+    public record Value(EntitySortCriteria.Field sortField, EntitySortCriteria.Order sortOrder, Object value) {
 
         public Value {
-            requireNonNull(sortLevel);
+            requireNonNull(sortField);
         }
 
-        public static Value of(EntitySortCriteria.Level sortLevel, Object value) {
-            return new Value(sortLevel, value);
-        }
-
-        public EntitySortCriteria.Field sortField() {
-            return sortLevel().field();
-        }
-
-        public EntitySortCriteria.Order sortOrder() {
-            return sortLevel().order();
+        public static Value of(EntitySortCriteria.Field sortField, EntitySortCriteria.Order sortOrder, Object value) {
+            return new Value(sortField, sortOrder, value);
         }
     }
 }

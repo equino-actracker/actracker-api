@@ -109,9 +109,7 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
         var offset = 1;
         var expectedTagSets = testConfiguration.tagSets
                 .accessibleForWithLimitOffset(searcher, pageSize, offset);
-        var pageId = aPageId().with(
-                Value.of(new EntitySortCriteria.Level(ID, ASC), expectedTagSets.get(0).id().toString())
-        );
+        var pageId = aPageId().with(Value.of(ID, ASC, expectedTagSets.get(0).id().toString()));
 
         var searchCriteria = new TagSetSearchCriteria(
                 new EntitySearchCriteria.Common(
