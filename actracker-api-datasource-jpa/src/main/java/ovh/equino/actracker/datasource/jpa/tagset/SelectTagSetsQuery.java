@@ -88,8 +88,11 @@ final class SelectTagSetsQuery extends MultiResultJpaQuery<TagSetEntity, TagSetP
                 EntitySearchPageId.Value pageValue) {
 
             if (pageValue.field() instanceof TagSetSearchCriteria.SortableField sortableField) {
-//                return switch(sortableField) {
-//                };
+                return switch (sortableField) {
+                    case NAME -> Optional.of(
+                            PageableValue.of(root.get(TagSetEntity_.name), (String) pageValue.value())
+                    );
+                };
             }
             return Optional.empty();
         }

@@ -31,5 +31,6 @@ public record ActivitySearchCriteria(
     }
 
     public enum SortableField implements EntitySortCriteria.Field {
+        TITLE
     }
 }

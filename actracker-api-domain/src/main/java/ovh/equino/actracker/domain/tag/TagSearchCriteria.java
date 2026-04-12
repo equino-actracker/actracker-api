@@ -25,6 +25,6 @@ public record TagSearchCriteria(
     }
 
     public enum SortableField implements EntitySortCriteria.Field {
-
+        NAME
     }
 }

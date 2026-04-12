@@ -136,7 +136,7 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
             EntitySearchPageId.Value pageValue);
 
     protected record PageableValue<T extends Comparable<T>>(Path<T> field, T value) {
-        protected static <T extends Comparable<T>> PageableValue<T> of(Path<T> field, T value) {
+        public static <T extends Comparable<T>> PageableValue<T> of(Path<T> field, T value) {
             return new PageableValue<>(field, value);
         }
     }

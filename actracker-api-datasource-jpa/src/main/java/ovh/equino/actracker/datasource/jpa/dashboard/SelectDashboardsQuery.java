@@ -9,7 +9,6 @@ import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
 import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
 import ovh.equino.actracker.domain.EntitySearchPageId;
-import ovh.equino.actracker.domain.activity.ActivitySearchCriteria;
 import ovh.equino.actracker.domain.dashboard.DashboardSearchCriteria;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.dashboard.DashboardEntity;
@@ -107,8 +106,11 @@ final class SelectDashboardsQuery extends MultiResultJpaQuery<DashboardEntity, D
                 EntitySearchPageId.Value pageValue) {
 
             if (pageValue.field() instanceof DashboardSearchCriteria.SortableField sortableField) {
-//                return switch(sortableField) {
-//                };
+                return switch (sortableField) {
+                    case NAME -> Optional.of(
+                            PageableValue.of(root.get(DashboardEntity_.name), (String) pageValue.value())
+                    );
+                };
             }
             return Optional.empty();
         }

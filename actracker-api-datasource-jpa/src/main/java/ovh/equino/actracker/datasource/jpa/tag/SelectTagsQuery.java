@@ -110,8 +110,11 @@ final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection
                 EntitySearchPageId.Value pageValue) {
 
             if (pageValue.field() instanceof TagSearchCriteria.SortableField sortableField) {
-//                return switch(sortableField) {
-//                };
+                return switch (sortableField) {
+                    case NAME -> Optional.of(
+                            PageableValue.of(root.get(TagEntity_.name), (String) pageValue.value())
+                    );
+                };
             }
             return Optional.empty();
         }

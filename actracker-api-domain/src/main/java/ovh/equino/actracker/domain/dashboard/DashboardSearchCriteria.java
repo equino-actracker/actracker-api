@@ -25,6 +25,6 @@ public record DashboardSearchCriteria(
     }
 
     public enum SortableField implements EntitySortCriteria.Field {
-
+        NAME
     }
 }

@@ -184,8 +184,11 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
                 EntitySearchPageId.Value pageValue) {
 
             if (pageValue.field() instanceof ActivitySearchCriteria.SortableField sortableField) {
-//                return switch(sortableField) {
-//                };
+                return switch (sortableField) {
+                    case TITLE -> Optional.of(
+                            PageableValue.of(root.get(ActivityEntity_.title), (String) pageValue.value())
+                    );
+                };
             }
             return Optional.empty();
         }
