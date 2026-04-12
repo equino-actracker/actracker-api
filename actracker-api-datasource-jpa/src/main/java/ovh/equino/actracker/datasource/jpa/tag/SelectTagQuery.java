@@ -7,11 +7,14 @@ import jakarta.persistence.criteria.Subquery;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.SingleResultJpaQuery;
+import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.tag.TagEntity;
 import ovh.equino.actracker.jpa.tag.TagEntity_;
 import ovh.equino.actracker.jpa.tag.TagShareEntity;
 import ovh.equino.actracker.jpa.tag.TagShareEntity_;
+
+import java.util.Optional;
 
 class SelectTagQuery extends SingleResultJpaQuery<TagEntity, TagProjection> {
 
@@ -90,6 +93,13 @@ class SelectTagQuery extends SingleResultJpaQuery<TagEntity, TagProjection> {
                     )
                     .from(TagEntity.class);
             return () -> criteriaBuilder.exists(subQuery);
+        }
+
+        @Override
+        protected Optional<PageableValue<? extends Comparable<?>>> entityPageableValue(
+                EntitySearchPageId.Value pageValue) {
+
+            return Optional.empty();
         }
     }
 }

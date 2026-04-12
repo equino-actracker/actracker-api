@@ -8,11 +8,15 @@ import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
 import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
+import ovh.equino.actracker.domain.EntitySearchPageId;
+import ovh.equino.actracker.domain.dashboard.DashboardSearchCriteria;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.dashboard.DashboardEntity;
 import ovh.equino.actracker.jpa.dashboard.DashboardEntity_;
 import ovh.equino.actracker.jpa.dashboard.DashboardShareEntity;
 import ovh.equino.actracker.jpa.dashboard.DashboardShareEntity_;
+
+import java.util.Optional;
 
 final class SelectDashboardsQuery extends MultiResultJpaQuery<DashboardEntity, DashboardProjection> {
 
@@ -95,6 +99,22 @@ final class SelectDashboardsQuery extends MultiResultJpaQuery<DashboardEntity, D
                     .where(criteriaBuilder.equal(sharedDashboard.get(DashboardShareEntity_.granteeId), user.id().toString()))
                     .from(DashboardEntity.class);
             return () -> criteriaBuilder.exists(subQuery);
+        }
+
+        @Override
+        protected Optional<PageableValue<? extends Comparable<?>>> entityPageableValue(
+                EntitySearchPageId.Value pageValue) {
+
+            if (pageValue.sortField() instanceof DashboardSearchCriteria.SortableField sortableField) {
+                return switch (sortableField) {
+                    case NAME -> Optional.of(PageableValue.of(
+                            root.get(DashboardEntity_.name),
+                            (String) pageValue.value(),
+                            PageableValue.PagingDirection.from(pageValue.sortOrder())
+                    ));
+                };
+            }
+            return Optional.empty();
         }
     }
 

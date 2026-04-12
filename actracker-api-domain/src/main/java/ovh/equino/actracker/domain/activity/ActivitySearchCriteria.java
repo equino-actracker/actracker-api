@@ -1,6 +1,7 @@
 package ovh.equino.actracker.domain.activity;
 
 import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.EntitySortCriteria;
 
 import java.time.Instant;
 import java.util.Set;
@@ -27,5 +28,9 @@ public record ActivitySearchCriteria(
         requireNonNull(common);
         term = requireNonNullElse(term, DEFAULT_TERM);
         tags = requireNonNullElse(tags, emptySet());
+    }
+
+    public enum SortableField implements EntitySortCriteria.Field {
+        TITLE
     }
 }

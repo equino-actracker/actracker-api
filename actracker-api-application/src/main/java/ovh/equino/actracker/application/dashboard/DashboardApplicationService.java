@@ -3,7 +3,6 @@ package ovh.equino.actracker.application.dashboard;
 import ovh.equino.actracker.application.PageIdTranslator;
 import ovh.equino.actracker.application.SearchResult;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
-import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.dashboard.*;
 import ovh.equino.actracker.domain.dashboard.generation.*;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
@@ -116,15 +115,15 @@ public class DashboardApplicationService {
                         actorExtractor.getActor(),
                         searchDashboardsQuery.pageSize(),
                         pageId,
-                        searchDashboardsQuery.sortCriteria().toEntitySortCriteria()
+                        searchDashboardsQuery.sortCriteria().toEntitySortCriteria(new DashboardSortableFieldResolver())
                 ),
                 searchDashboardsQuery.term(),
                 searchDashboardsQuery.excludeFilter()
         );
 
-        EntitySearchResult<DashboardDto> searchResult = dashboardSearchEngine.findDashboards(searchCriteria);
+        var searchResult = dashboardSearchEngine.findDashboards(searchCriteria);
         var nextPageId = pageIdTranslator.toString(searchResult.nextPageId());
-        List<DashboardResult> resultForClient = searchResult.results()
+        var resultForClient = searchResult.results()
                 .stream()
                 .map(this::toDashboardResult)
                 .toList();

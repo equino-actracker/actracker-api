@@ -3,8 +3,11 @@ package ovh.equino.actracker.application;
 import ovh.equino.actracker.domain.EntitySortCriteria;
 
 import java.util.LinkedHashMap;
+import java.util.Optional;
 
+import static java.util.Arrays.stream;
 import static java.util.Objects.requireNonNullElse;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static ovh.equino.actracker.domain.EntitySortCriteria.Order.ASC;
 
 public record SortCriteria(LinkedHashMap<String, String> sortFieldWithOrder) {
@@ -21,19 +24,39 @@ public record SortCriteria(LinkedHashMap<String, String> sortFieldWithOrder) {
         sortFieldWithOrder.put(field, order);
     }
 
-    public EntitySortCriteria toEntitySortCriteria() {
+    public EntitySortCriteria toEntitySortCriteria(FieldResolver sortableFieldResolver) {
         var sortLevels = sortFieldWithOrder.entrySet().stream()
                 .map(criterion -> toEntitySortCriteriaLevel(
                         criterion.getKey(),
-                        criterion.getValue()
+                        criterion.getValue(),
+                        sortableFieldResolver
                 ))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .toArray(EntitySortCriteria.Level[]::new);
         return new EntitySortCriteria(sortLevels);
     }
 
-    private static EntitySortCriteria.Level toEntitySortCriteriaLevel(String field, String order) {
+    private Optional<EntitySortCriteria.Level> toEntitySortCriteriaLevel(String field,
+                                                                         String order,
+                                                                         FieldResolver sortableFieldResolver) {
+
+        var sortableField = sortableFieldResolver.fromString(field);
         var formattedOrder = requireNonNullElse(order, ASC.toString()).toUpperCase();
-        var sortOrder = EntitySortCriteria.Order.valueOf(formattedOrder);
-        return new EntitySortCriteria.Level(field, sortOrder);
+        var sortCriteriaOrder = EntitySortCriteria.Order.valueOf(formattedOrder);
+        return sortableField.map(it -> new EntitySortCriteria.Level(it, sortCriteriaOrder));
+    }
+
+    public interface FieldResolver {
+        Optional<? extends EntitySortCriteria.Field> fromString(String field);
+
+        default Optional<? extends EntitySortCriteria.Field> commonFieldFromString(String field) {
+            if (isBlank(field)) {
+                return Optional.empty();
+            }
+            return stream(EntitySortCriteria.CommonField.values())
+                    .filter(commonField -> commonField.toString().equals(field.toUpperCase()))
+                    .findAny();
+        }
     }
 }

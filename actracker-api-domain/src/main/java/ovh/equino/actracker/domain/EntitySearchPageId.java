@@ -1,23 +1,17 @@
 package ovh.equino.actracker.domain;
 
+import javax.swing.*;
 import java.util.Deque;
 import java.util.LinkedList;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
+import static ovh.equino.actracker.domain.EntitySortCriteria.Order.ASC;
 
 public record EntitySearchPageId(Deque<Value> values) {
 
     public EntitySearchPageId {
         values = requireNonNullElse(values, new LinkedList<>());
-    }
-
-    // TODO Replace String with Field?
-    // TODO add EntitySortCriteria.Order
-    public record Value(String field, Object value) {
-
-        public static Value of(String field, Object value) {
-            return new Value(field, value);
-        }
     }
 
     public static EntitySearchPageId firstPage() {
@@ -41,5 +35,17 @@ public record EntitySearchPageId(Deque<Value> values) {
     @Override
     public Deque<Value> values() {
         return new LinkedList<>(values);
+    }
+
+    public record Value(EntitySortCriteria.Field sortField, EntitySortCriteria.Order sortOrder, Object value) {
+
+        public Value {
+            sortOrder = requireNonNullElse(sortOrder, ASC);
+            requireNonNull(sortField);
+        }
+
+        public static Value of(EntitySortCriteria.Field sortField, EntitySortCriteria.Order sortOrder, Object value) {
+            return new Value(sortField, sortOrder, value);
+        }
     }
 }
