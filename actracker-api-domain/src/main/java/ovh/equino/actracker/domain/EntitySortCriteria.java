@@ -47,7 +47,7 @@ public record EntitySortCriteria(
 
     public enum Order {
         ASC,
-        DESC
+//        DESC
     }
 
     private Level sortGuard() {
