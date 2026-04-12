@@ -28,6 +28,7 @@ import static java.util.stream.Collectors.toUnmodifiableSet;
 import static java.util.stream.Stream.concat;
 import static org.assertj.core.api.Assertions.assertThat;
 import static ovh.equino.actracker.domain.EntitySearchPageId.aPageId;
+import static ovh.equino.actracker.domain.EntitySortCriteria.CommonField.ID;
 
 abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
 
@@ -113,7 +114,7 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
         var pageSize = 2;
         var offset = 1;
         var expectedTags = testConfiguration.tags.accessibleForWithLimitOffset(searcher, pageSize, offset);
-        var pageId = aPageId().with(EntitySearchPageId.Value.of("id", expectedTags.get(0).id().toString()));
+        var pageId = aPageId().with(EntitySearchPageId.Value.of(ID, expectedTags.get(0).id().toString()));
         var searchCriteria = new TagSearchCriteria(
                 new EntitySearchCriteria.Common(
                         searcher,

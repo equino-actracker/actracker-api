@@ -16,6 +16,7 @@ import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static ovh.equino.actracker.domain.EntitySortCriteria.CommonField.ID;
 
 public abstract class JpaPredicateBuilder<E extends JpaEntity> {
 
@@ -109,7 +110,7 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
 
     // TODO override in subclasses, matching their fields and calling super at the end
     protected JpaPredicate pageValuePredicate(EntitySearchPageId.Value pageValue) {
-        if ("id".equals(pageValue.field())) {
+        if (ID.equals(pageValue.field())) {
             return () -> criteriaBuilder.greaterThanOrEqualTo(root.get(JpaEntity_.id), (String) pageValue.value());
         }
         return allMatch();
