@@ -7,11 +7,14 @@ import jakarta.persistence.criteria.Subquery;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.SingleResultJpaQuery;
+import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.dashboard.DashboardEntity;
 import ovh.equino.actracker.jpa.dashboard.DashboardEntity_;
 import ovh.equino.actracker.jpa.dashboard.DashboardShareEntity;
 import ovh.equino.actracker.jpa.dashboard.DashboardShareEntity_;
+
+import java.util.Optional;
 
 final class SelectDashboardQuery extends SingleResultJpaQuery<DashboardEntity, DashboardProjection> {
 
@@ -90,6 +93,13 @@ final class SelectDashboardQuery extends SingleResultJpaQuery<DashboardEntity, D
                     )
                     .from(DashboardEntity.class);
             return () -> criteriaBuilder.exists(subQuery);
+        }
+
+        @Override
+        protected Optional<PageableValue<? extends Comparable<?>>> entityPageableValue(
+                EntitySearchPageId.Value pageValue) {
+
+            return Optional.empty();
         }
     }
 }

@@ -8,6 +8,7 @@ import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
 import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
+import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.dashboard.ChartEntity;
 import ovh.equino.actracker.jpa.dashboard.ChartEntity_;
@@ -17,6 +18,7 @@ import ovh.equino.actracker.jpa.tag.TagShareEntity;
 import ovh.equino.actracker.jpa.tag.TagShareEntity_;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.UUID;
 
 import static jakarta.persistence.criteria.JoinType.INNER;
@@ -107,6 +109,13 @@ final class SelectChartJoinTagQuery extends MultiResultJpaQuery<ChartEntity, Cha
                     .where(criteriaBuilder.equal(shares.get(TagShareEntity_.granteeId), user.id().toString()))
                     .from(TagEntity.class);
             return () -> criteriaBuilder.exists(subQuery);
+        }
+
+        @Override
+        protected Optional<PageableValue<? extends Comparable<?>>> entityPageableValue(
+                EntitySearchPageId.Value pageValue) {
+
+            return Optional.empty();
         }
     }
 }

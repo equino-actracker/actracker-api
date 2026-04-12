@@ -5,9 +5,13 @@ import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
 import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
+import ovh.equino.actracker.domain.EntitySearchPageId;
+import ovh.equino.actracker.domain.tagset.TagSetSearchCriteria;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.tagset.TagSetEntity;
 import ovh.equino.actracker.jpa.tagset.TagSetEntity_;
+
+import java.util.Optional;
 
 final class SelectTagSetsQuery extends MultiResultJpaQuery<TagSetEntity, TagSetProjection> {
 
@@ -77,6 +81,17 @@ final class SelectTagSetsQuery extends MultiResultJpaQuery<TagSetEntity, TagSetP
                     root.get(TagSetEntity_.creatorId),
                     searcher.id().toString()
             );
+        }
+
+        @Override
+        protected Optional<PageableValue<? extends Comparable<?>>> entityPageableValue(
+                EntitySearchPageId.Value pageValue) {
+
+            if (pageValue.field() instanceof TagSetSearchCriteria.SortableField sortableField) {
+//                return switch(sortableField) {
+//                };
+            }
+            return Optional.empty();
         }
     }
 

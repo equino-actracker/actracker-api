@@ -6,6 +6,7 @@ import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
 import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
+import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.tag.TagEntity;
 import ovh.equino.actracker.jpa.tag.TagEntity_;
@@ -13,6 +14,7 @@ import ovh.equino.actracker.jpa.tag.TagShareEntity;
 import ovh.equino.actracker.jpa.tag.TagShareEntity_;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -95,6 +97,13 @@ final class SelectShareJoinTagQuery extends MultiResultJpaQuery<TagShareEntity, 
 
         public JpaPredicate isAccessibleFor(User searcher) {
             return () -> criteriaBuilder.equal(tag.get(TagEntity_.creatorId), searcher.id().toString());
+        }
+
+        @Override
+        protected Optional<PageableValue<? extends Comparable<?>>> entityPageableValue(
+                EntitySearchPageId.Value pageValue) {
+
+            return Optional.empty();
         }
     }
 }

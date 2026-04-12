@@ -6,6 +6,7 @@ import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
 import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
+import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.activity.ActivityEntity;
 import ovh.equino.actracker.jpa.activity.ActivityEntity_;
@@ -14,6 +15,7 @@ import ovh.equino.actracker.jpa.activity.MetricValueEntity_;
 import ovh.equino.actracker.jpa.tag.*;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.UUID;
 
 import static jakarta.persistence.criteria.JoinType.INNER;
@@ -126,6 +128,13 @@ final class SelectMetricValuesQuery extends MultiResultJpaQuery<MetricValueEntit
                     () -> criteriaBuilder.isFalse(metric.get(MetricEntity_.deleted)),
                     () -> criteriaBuilder.isFalse(tag.get(TagEntity_.deleted))
             );
+        }
+
+        @Override
+        protected Optional<PageableValue<? extends Comparable<?>>> entityPageableValue(
+                EntitySearchPageId.Value pageValue) {
+
+            return Optional.empty();
         }
     }
 }

@@ -8,6 +8,8 @@ import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
 import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
+import ovh.equino.actracker.domain.EntitySearchPageId;
+import ovh.equino.actracker.domain.activity.ActivitySearchCriteria;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.activity.ActivityEntity;
 import ovh.equino.actracker.jpa.activity.ActivityEntity_;
@@ -17,6 +19,7 @@ import ovh.equino.actracker.jpa.tag.TagShareEntity;
 import ovh.equino.actracker.jpa.tag.TagShareEntity_;
 
 import java.sql.Timestamp;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -174,6 +177,17 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
                     )
                     .from(ActivityEntity.class);
             return () -> criteriaBuilder.exists(subQuery);
+        }
+
+        @Override
+        protected Optional<PageableValue<? extends Comparable<?>>> entityPageableValue(
+                EntitySearchPageId.Value pageValue) {
+
+            if (pageValue.field() instanceof ActivitySearchCriteria.SortableField sortableField) {
+//                return switch(sortableField) {
+//                };
+            }
+            return Optional.empty();
         }
     }
 

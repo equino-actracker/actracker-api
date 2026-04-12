@@ -8,11 +8,15 @@ import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
 import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
+import ovh.equino.actracker.domain.EntitySearchPageId;
+import ovh.equino.actracker.domain.tag.TagSearchCriteria;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.tag.TagEntity;
 import ovh.equino.actracker.jpa.tag.TagEntity_;
 import ovh.equino.actracker.jpa.tag.TagShareEntity;
 import ovh.equino.actracker.jpa.tag.TagShareEntity_;
+
+import java.util.Optional;
 
 final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection> {
 
@@ -99,6 +103,17 @@ final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection
                     .where(criteriaBuilder.equal(sharedTag.get(TagShareEntity_.granteeId), user.id().toString()))
                     .from(TagEntity.class);
             return () -> criteriaBuilder.exists(subQuery);
+        }
+
+        @Override
+        protected Optional<PageableValue<? extends Comparable<?>>> entityPageableValue(
+                EntitySearchPageId.Value pageValue) {
+
+            if (pageValue.field() instanceof TagSearchCriteria.SortableField sortableField) {
+//                return switch(sortableField) {
+//                };
+            }
+            return Optional.empty();
         }
     }
 
