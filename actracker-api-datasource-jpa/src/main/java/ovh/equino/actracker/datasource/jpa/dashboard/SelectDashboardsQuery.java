@@ -105,7 +105,7 @@ final class SelectDashboardsQuery extends MultiResultJpaQuery<DashboardEntity, D
         protected Optional<PageableValue<? extends Comparable<?>>> entityPageableValue(
                 EntitySearchPageId.Value pageValue) {
 
-            if (pageValue.field() instanceof DashboardSearchCriteria.SortableField sortableField) {
+            if (pageValue.sortField() instanceof DashboardSearchCriteria.SortableField sortableField) {
                 return switch (sortableField) {
                     case NAME -> Optional.of(
                             PageableValue.of(root.get(DashboardEntity_.name), (String) pageValue.value())

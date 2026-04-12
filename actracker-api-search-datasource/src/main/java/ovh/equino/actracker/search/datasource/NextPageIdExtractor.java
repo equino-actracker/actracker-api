@@ -16,8 +16,7 @@ public final class NextPageIdExtractor<T> {
 
     EntitySearchPageId nextPageId(EntitySortCriteria sortCriteria, T dto) {
         var pageIdValues = sortCriteria.levels().stream()
-                .map(EntitySortCriteria.Level::field)
-                .map(field -> toFieldValue(field, dto))
+                .map(sortLevel -> toFieldValue(sortLevel, dto))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList();
@@ -25,9 +24,9 @@ public final class NextPageIdExtractor<T> {
         return new EntitySearchPageId(new LinkedList<>(pageIdValues));
     }
 
-    private Optional<EntitySearchPageId.Value> toFieldValue(EntitySortCriteria.Field field, T dto) {
-        return attributeValueExtractor.extractFieldAttribute(field, dto)
-                .map(value -> EntitySearchPageId.Value.of(field, value));
+    private Optional<EntitySearchPageId.Value> toFieldValue(EntitySortCriteria.Level sortLevel, T dto) {
+        return attributeValueExtractor.extractFieldAttribute(sortLevel.field(), dto)
+                .map(value -> EntitySearchPageId.Value.of(sortLevel, value));
     }
 
     public interface AttributeValueExtractor<T> {

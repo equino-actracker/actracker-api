@@ -124,7 +124,7 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
     }
 
     private Optional<PageableValue<? extends Comparable<?>>> commonPageableValue(EntitySearchPageId.Value pageValue) {
-        if (pageValue.field() instanceof EntitySortCriteria.CommonField commonField) {
+        if (pageValue.sortField() instanceof EntitySortCriteria.CommonField commonField) {
             return switch (commonField) {
                 case ID -> Optional.of(PageableValue.of(root.get(JpaEntity_.id), (String) pageValue.value()));
             };

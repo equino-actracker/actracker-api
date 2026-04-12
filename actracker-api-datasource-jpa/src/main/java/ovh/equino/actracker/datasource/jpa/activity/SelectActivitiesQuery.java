@@ -183,7 +183,7 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
         protected Optional<PageableValue<? extends Comparable<?>>> entityPageableValue(
                 EntitySearchPageId.Value pageValue) {
 
-            if (pageValue.field() instanceof ActivitySearchCriteria.SortableField sortableField) {
+            if (pageValue.sortField() instanceof ActivitySearchCriteria.SortableField sortableField) {
                 return switch (sortableField) {
                     case TITLE -> Optional.of(
                             PageableValue.of(root.get(ActivityEntity_.title), (String) pageValue.value())

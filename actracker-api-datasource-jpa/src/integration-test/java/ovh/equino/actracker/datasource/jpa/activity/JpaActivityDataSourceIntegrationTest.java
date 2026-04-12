@@ -29,6 +29,7 @@ import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static ovh.equino.actracker.domain.EntitySearchPageId.aPageId;
 import static ovh.equino.actracker.domain.EntitySortCriteria.CommonField.ID;
+import static ovh.equino.actracker.domain.EntitySortCriteria.Order.ASC;
 import static ovh.equino.actracker.jpa.TestUtil.randomBigDecimal;
 
 abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
@@ -129,7 +130,9 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
         var pageSize = 3;
         var offset = 1;
         var expectedActivities = testConfiguration.activities.accessibleForWithLimitOffset(searcher, pageSize, offset);
-        var pageId = aPageId().with(Value.of(ID, expectedActivities.get(0).id().toString()));
+        var pageId = aPageId().with(
+                Value.of(new EntitySortCriteria.Level(ID, ASC), expectedActivities.get(0).id().toString())
+        );
 
         var searchCriteria = new ActivitySearchCriteria(
                 new EntitySearchCriteria.Common(

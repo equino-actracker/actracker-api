@@ -109,7 +109,7 @@ final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection
         protected Optional<PageableValue<? extends Comparable<?>>> entityPageableValue(
                 EntitySearchPageId.Value pageValue) {
 
-            if (pageValue.field() instanceof TagSearchCriteria.SortableField sortableField) {
+            if (pageValue.sortField() instanceof TagSearchCriteria.SortableField sortableField) {
                 return switch (sortableField) {
                     case NAME -> Optional.of(
                             PageableValue.of(root.get(TagEntity_.name), (String) pageValue.value())

@@ -3,19 +3,13 @@ package ovh.equino.actracker.domain;
 import java.util.Deque;
 import java.util.LinkedList;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
 
 public record EntitySearchPageId(Deque<Value> values) {
 
     public EntitySearchPageId {
         values = requireNonNullElse(values, new LinkedList<>());
-    }
-
-    public record Value(EntitySortCriteria.Field field, Object value) {
-
-        public static Value of(EntitySortCriteria.Field field, Object value) {
-            return new Value(field, value);
-        }
     }
 
     public static EntitySearchPageId firstPage() {
@@ -39,5 +33,24 @@ public record EntitySearchPageId(Deque<Value> values) {
     @Override
     public Deque<Value> values() {
         return new LinkedList<>(values);
+    }
+
+    public record Value(EntitySortCriteria.Level sortLevel, Object value) {
+
+        public Value {
+            requireNonNull(sortLevel);
+        }
+
+        public static Value of(EntitySortCriteria.Level sortLevel, Object value) {
+            return new Value(sortLevel, value);
+        }
+
+        public EntitySortCriteria.Field sortField() {
+            return sortLevel().field();
+        }
+
+        public EntitySortCriteria.Order sortOrder() {
+            return sortLevel().order();
+        }
     }
 }
