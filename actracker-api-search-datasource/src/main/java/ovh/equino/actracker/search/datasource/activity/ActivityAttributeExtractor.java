@@ -15,7 +15,7 @@ class ActivityAttributeExtractor implements NextPageIdExtractor.AttributeValueEx
         if (commonFieldValue.isPresent()) {
             return commonFieldValue;
         } else {
-            return extractActivityAttribute(attribute);
+            return extractActivityAttribute(attribute, dto);
         }
     }
 
@@ -24,9 +24,11 @@ class ActivityAttributeExtractor implements NextPageIdExtractor.AttributeValueEx
         return Optional.of(dto.id());
     }
 
-    private static Optional<Object> extractActivityAttribute(EntitySortCriteria.Field attribute) {
-        if (attribute instanceof ActivitySearchCriteria.SortableField activityField) {
-            return Optional.empty();
+    private Optional<Object> extractActivityAttribute(EntitySortCriteria.Field attribute, ActivityDto dto) {
+        if (attribute instanceof ActivitySearchCriteria.SortableField activityAttribute) {
+            return switch (activityAttribute) {
+                case TITLE -> Optional.of(dto.title());
+            };
         }
         return Optional.empty();
     }

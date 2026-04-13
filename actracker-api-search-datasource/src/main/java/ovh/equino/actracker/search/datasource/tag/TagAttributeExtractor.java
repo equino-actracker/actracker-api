@@ -15,7 +15,7 @@ class TagAttributeExtractor implements NextPageIdExtractor.AttributeValueExtract
         if (commonFieldValue.isPresent()) {
             return commonFieldValue;
         } else {
-            return extractTagAttribute(attribute);
+            return extractTagAttribute(attribute, dto);
         }
     }
 
@@ -24,9 +24,11 @@ class TagAttributeExtractor implements NextPageIdExtractor.AttributeValueExtract
         return Optional.of(dto.id());
     }
 
-    private static Optional<Object> extractTagAttribute(EntitySortCriteria.Field attribute) {
-        if (attribute instanceof TagSearchCriteria.SortableField tagField) {
-            return Optional.empty();
+    private static Optional<Object> extractTagAttribute(EntitySortCriteria.Field attribute, TagDto dto) {
+        if (attribute instanceof TagSearchCriteria.SortableField tagAttribute) {
+            return switch (tagAttribute) {
+                case NAME -> Optional.of(dto.name());
+            };
         }
         return Optional.empty();
     }

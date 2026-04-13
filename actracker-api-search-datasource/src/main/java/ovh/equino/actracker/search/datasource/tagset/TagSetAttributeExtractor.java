@@ -15,13 +15,15 @@ class TagSetAttributeExtractor implements NextPageIdExtractor.AttributeValueExtr
         if (commonFieldValue.isPresent()) {
             return commonFieldValue;
         } else {
-            return extractTagSetAttribute(attribute);
+            return extractTagSetAttribute(attribute, dto);
         }
     }
 
-    private static Optional<Object> extractTagSetAttribute(EntitySortCriteria.Field attribute) {
-        if (attribute instanceof TagSetSearchCriteria.SortableField tagSetField) {
-            return Optional.empty();
+    private static Optional<Object> extractTagSetAttribute(EntitySortCriteria.Field attribute, TagSetDto dto) {
+        if (attribute instanceof TagSetSearchCriteria.SortableField tagSetAttribute) {
+            return switch (tagSetAttribute) {
+                case NAME -> Optional.of(dto.name());
+            };
         }
         return Optional.empty();
     }
