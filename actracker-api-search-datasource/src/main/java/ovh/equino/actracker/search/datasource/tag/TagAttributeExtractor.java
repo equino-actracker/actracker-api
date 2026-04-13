@@ -19,11 +19,6 @@ class TagAttributeExtractor implements NextPageIdExtractor.AttributeValueExtract
         }
     }
 
-    @Override
-    public Optional<?> extractIdFrom(TagDto dto) {
-        return Optional.of(dto.id());
-    }
-
     private static Optional<Object> extractTagAttribute(EntitySortCriteria.Field attribute, TagDto dto) {
         if (attribute instanceof TagSearchCriteria.SortableField tagAttribute) {
             return switch (tagAttribute) {
@@ -31,5 +26,10 @@ class TagAttributeExtractor implements NextPageIdExtractor.AttributeValueExtract
             };
         }
         return Optional.empty();
+    }
+
+    @Override
+    public Optional<?> extractIdFrom(TagDto dto) {
+        return Optional.of(dto.id());
     }
 }

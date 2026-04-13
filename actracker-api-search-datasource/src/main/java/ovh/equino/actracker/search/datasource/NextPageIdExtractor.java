@@ -32,8 +32,6 @@ public final class NextPageIdExtractor<T> {
     public interface AttributeValueExtractor<T> {
         Optional<?> extractFieldAttribute(EntitySortCriteria.Field attribute, T dto);
 
-        Optional<?> extractIdFrom(T dto);
-
         default Optional<?> extractCommonAttribute(EntitySortCriteria.Field attribute, T dto) {
             if (attribute instanceof EntitySortCriteria.CommonField commonField) {
                 return switch (commonField) {
@@ -42,5 +40,7 @@ public final class NextPageIdExtractor<T> {
             }
             return Optional.empty();
         }
+
+        Optional<?> extractIdFrom(T dto);
     }
 }

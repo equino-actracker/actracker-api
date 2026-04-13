@@ -19,11 +19,6 @@ class ActivityAttributeExtractor implements NextPageIdExtractor.AttributeValueEx
         }
     }
 
-    @Override
-    public Optional<?> extractIdFrom(ActivityDto dto) {
-        return Optional.of(dto.id());
-    }
-
     private Optional<Object> extractActivityAttribute(EntitySortCriteria.Field attribute, ActivityDto dto) {
         if (attribute instanceof ActivitySearchCriteria.SortableField activityAttribute) {
             return switch (activityAttribute) {
@@ -31,5 +26,10 @@ class ActivityAttributeExtractor implements NextPageIdExtractor.AttributeValueEx
             };
         }
         return Optional.empty();
+    }
+
+    @Override
+    public Optional<?> extractIdFrom(ActivityDto dto) {
+        return Optional.of(dto.id());
     }
 }

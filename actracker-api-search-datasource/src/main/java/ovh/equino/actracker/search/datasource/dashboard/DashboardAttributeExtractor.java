@@ -19,11 +19,6 @@ class DashboardAttributeExtractor implements NextPageIdExtractor.AttributeValueE
         }
     }
 
-    @Override
-    public Optional<?> extractIdFrom(DashboardDto dto) {
-        return Optional.of(dto.id());
-    }
-
     private static Optional<?> extractDashboardAttribute(EntitySortCriteria.Field attribute, DashboardDto dto) {
         if (attribute instanceof DashboardSearchCriteria.SortableField dashboardAttribute) {
             return switch (dashboardAttribute) {
@@ -31,5 +26,10 @@ class DashboardAttributeExtractor implements NextPageIdExtractor.AttributeValueE
             };
         }
         return Optional.empty();
+    }
+
+    @Override
+    public Optional<?> extractIdFrom(DashboardDto dto) {
+        return Optional.of(dto.id());
     }
 }
