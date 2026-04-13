@@ -26,7 +26,6 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 import static java.util.Arrays.stream;
 import static java.util.Objects.isNull;
-import static java.util.Objects.requireNonNullElse;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 class Base64JacksonPageIdTranslator implements PageIdTranslator {
@@ -101,16 +100,11 @@ class Base64JacksonPageIdTranslator implements PageIdTranslator {
             var name = node.get("name").asText();
             var type = node.get("type").asText();
 
-            var pageableFieldType = PageableFieldType.fromString(type)
+            var pageableFieldAlias = PageableFieldAlias.fromString(type)
+                    .orElseThrow(() -> new IllegalArgumentException("Unknown pageable field type %s".formatted(type)));
+            return pageableFieldAlias.findField(name)
                     .orElseThrow(() -> new IllegalArgumentException(
-                            "Unknown pageable field type %s".formatted(type)
-                    ));
-            var enumConstants = requireNonNullElse(pageableFieldType.fieldType.getEnumConstants(), new Object[]{});
-            return (EntitySortCriteria.Field) stream(enumConstants)
-                    .filter(enumConstant -> enumConstant.toString().equals(name))
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException(
-                            "No pageable field name %s found in type %s".formatted(name, pageableFieldType.fieldType)
+                            "No pageable field name %s found in type %s".formatted(name, pageableFieldAlias.fieldType)
                     ));
         }
     }
@@ -130,39 +124,47 @@ class Base64JacksonPageIdTranslator implements PageIdTranslator {
                               JsonGenerator gen,
                               SerializerProvider provider) throws IOException {
 
-            var pageableFieldType = PageableFieldType.fromType(field.getClass())
+            var pageableFieldAlias = PageableFieldAlias.fromClass(field.getClass())
                     .orElseThrow(() -> new IllegalArgumentException(
                             "Unknown pageable field type %s".formatted(field.getClass())
                     ));
             gen.writeStartObject();
             gen.writeStringField("name", field.toString());
-            gen.writeStringField("type", pageableFieldType.toString());
+            gen.writeStringField("type", pageableFieldAlias.toString());
             gen.writeEndObject();
         }
     }
 
-    private enum PageableFieldType {
-        COMMON(EntitySortCriteria.CommonField.class),
-        ACTIVITY(ActivitySearchCriteria.SortableField.class),
-        DASHBOARD(DashboardSearchCriteria.SortableField.class),
-        TAG(TagSearchCriteria.SortableField.class),
-        TAG_SET(TagSetSearchCriteria.SortableField.class);
+    private enum PageableFieldAlias {
+        COMMON(EntitySortCriteria.CommonField.class, EntitySortCriteria.CommonField.values()),
+        ACTIVITY(ActivitySearchCriteria.SortableField.class, ActivitySearchCriteria.SortableField.values()),
+        DASHBOARD(DashboardSearchCriteria.SortableField.class, DashboardSearchCriteria.SortableField.values()),
+        TAG(TagSearchCriteria.SortableField.class, TagSearchCriteria.SortableField.values()),
+        TAG_SET(TagSetSearchCriteria.SortableField.class, TagSetSearchCriteria.SortableField.values());
 
         private final Class<? extends EntitySortCriteria.Field> fieldType;
+        private final EntitySortCriteria.Field[] fields;
 
-        PageableFieldType(Class<? extends EntitySortCriteria.Field> fieldType) {
+        PageableFieldAlias(Class<? extends EntitySortCriteria.Field> fieldType, EntitySortCriteria.Field[] fields) {
             this.fieldType = fieldType;
+            this.fields = fields;
         }
 
-        private static Optional<PageableFieldType> fromType(Class<? extends EntitySortCriteria.Field> type) {
+        private static Optional<PageableFieldAlias> fromClass(Class<? extends EntitySortCriteria.Field> type) {
             return stream(values())
                     .filter(value -> value.fieldType.equals(type))
                     .findAny();
         }
 
-        private static Optional<PageableFieldType> fromString(String type) {
+        private static Optional<PageableFieldAlias> fromString(String type) {
             return stream(values())
                     .filter(value -> value.toString().equals(type))
+                    .findAny();
+        }
+
+        private Optional<EntitySortCriteria.Field> findField(String fieldName) {
+            return stream(fields)
+                    .filter(field -> field.toString().equals(fieldName))
                     .findAny();
         }
     }
