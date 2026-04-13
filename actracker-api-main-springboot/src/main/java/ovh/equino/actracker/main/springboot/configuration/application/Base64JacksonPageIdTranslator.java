@@ -13,15 +13,20 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import ovh.equino.actracker.application.PageIdTranslator;
 import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySortCriteria;
+import ovh.equino.actracker.domain.activity.ActivitySearchCriteria;
+import ovh.equino.actracker.domain.dashboard.DashboardSearchCriteria;
+import ovh.equino.actracker.domain.tag.TagSearchCriteria;
+import ovh.equino.actracker.domain.tagset.TagSetSearchCriteria;
 
 import java.io.IOException;
 import java.util.Base64;
+import java.util.Optional;
 
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 import static java.util.Arrays.stream;
 import static java.util.Objects.isNull;
-import static java.util.Objects.requireNonNull;
+import static java.util.Objects.requireNonNullElse;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 class Base64JacksonPageIdTranslator implements PageIdTranslator {
@@ -95,20 +100,18 @@ class Base64JacksonPageIdTranslator implements PageIdTranslator {
             JsonNode node = p.readValueAsTree();
             var name = node.get("name").asText();
             var type = node.get("type").asText();
-            try {
 
-                Class<?> sortFieldType = Class.forName(type);
-                Object[] enumConstants = sortFieldType.getEnumConstants();
-                requireNonNull(enumConstants);
-                return (EntitySortCriteria.Field) stream(enumConstants)
-                        .filter(enumConstant -> enumConstant.toString().equals(name))
-                        .findFirst()
-                        .orElseThrow(() -> new IllegalArgumentException("No enum constant found for " + name));
-
-
-            } catch (ClassNotFoundException e) {
-                throw new RuntimeException(e);
-            }
+            var pageableFieldType = PageableFieldType.fromString(type)
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "Unknown pageable field type %s".formatted(type)
+                    ));
+            var enumConstants = requireNonNullElse(pageableFieldType.fieldType.getEnumConstants(), new Object[]{});
+            return (EntitySortCriteria.Field) stream(enumConstants)
+                    .filter(enumConstant -> enumConstant.toString().equals(name))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "No pageable field name %s found in type %s".formatted(name, pageableFieldType.fieldType)
+                    ));
         }
     }
 
@@ -123,14 +126,44 @@ class Base64JacksonPageIdTranslator implements PageIdTranslator {
         }
 
         @Override
-        public void serialize(EntitySortCriteria.Field value,
+        public void serialize(EntitySortCriteria.Field field,
                               JsonGenerator gen,
                               SerializerProvider provider) throws IOException {
 
+            var pageableFieldType = PageableFieldType.fromType(field.getClass())
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "Unknown pageable field type %s".formatted(field.getClass())
+                    ));
             gen.writeStartObject();
-            gen.writeStringField("name", value.toString());
-            gen.writeStringField("type", value.getClass().getName());   // TODO - dengerous, replace with type registry [common: common, tag: tag...]
+            gen.writeStringField("name", field.toString());
+            gen.writeStringField("type", pageableFieldType.toString());
             gen.writeEndObject();
+        }
+    }
+
+    private enum PageableFieldType {
+        COMMON(EntitySortCriteria.CommonField.class),
+        ACTIVITY(ActivitySearchCriteria.SortableField.class),
+        DASHBOARD(DashboardSearchCriteria.SortableField.class),
+        TAG(TagSearchCriteria.SortableField.class),
+        TAG_SET(TagSetSearchCriteria.SortableField.class);
+
+        private final Class<? extends EntitySortCriteria.Field> fieldType;
+
+        PageableFieldType(Class<? extends EntitySortCriteria.Field> fieldType) {
+            this.fieldType = fieldType;
+        }
+
+        private static Optional<PageableFieldType> fromType(Class<? extends EntitySortCriteria.Field> type) {
+            return stream(values())
+                    .filter(value -> value.fieldType.equals(type))
+                    .findAny();
+        }
+
+        private static Optional<PageableFieldType> fromString(String type) {
+            return stream(values())
+                    .filter(value -> value.toString().equals(type))
+                    .findAny();
         }
     }
 }
