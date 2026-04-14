@@ -2,6 +2,7 @@ package ovh.equino.actracker.application.tag;
 
 import ovh.equino.actracker.application.PageIdTranslator;
 import ovh.equino.actracker.application.SearchResult;
+import ovh.equino.actracker.application.SortCriteria;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.share.Share;
@@ -28,6 +29,7 @@ public class TagApplicationService {
     private final ActorExtractor actorExtractor;
     private final TenantDataSource tenantDataSource;
     private final PageIdTranslator pageIdTranslator;
+    private final SortCriteria.Translator sortCriteriaTranslator;
 
     public TagApplicationService(TagFactory tagFactory,
                                  MetricFactory metricFactory,
@@ -48,6 +50,7 @@ public class TagApplicationService {
         this.actorExtractor = actorExtractor;
         this.tenantDataSource = tenantDataSource;
         this.pageIdTranslator = pageIdTranslator;
+        this.sortCriteriaTranslator = new SortCriteria.Translator(new TagSortableFieldResolver());
     }
 
     public TagResult getTag(UUID tagId) {
@@ -120,7 +123,7 @@ public class TagApplicationService {
                         actorExtractor.getActor(),
                         searchTagsQuery.pageSize(),
                         pageId,
-                        searchTagsQuery.sortCriteria().toEntitySortCriteria(new TagSortableFieldResolver())
+                        sortCriteriaTranslator.toEntitySortCriteria(searchTagsQuery.sortCriteria())
                 ),
                 searchTagsQuery.term(),
                 searchTagsQuery.excludeFilter()

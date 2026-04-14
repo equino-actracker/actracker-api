@@ -24,33 +24,41 @@ public record SortCriteria(LinkedHashMap<String, String> sortFieldWithOrder) {
         sortFieldWithOrder.put(field, order);
     }
 
-    public EntitySortCriteria toEntitySortCriteria(FieldResolver sortableFieldResolver) {
-        var sortLevels = sortFieldWithOrder.entrySet().stream()
-                .map(criterion -> toEntitySortCriteriaLevel(
-                        criterion.getKey(),
-                        criterion.getValue(),
-                        sortableFieldResolver
-                ))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .toArray(EntitySortCriteria.Level[]::new);
-        return new EntitySortCriteria(sortLevels);
-    }
-
-    private Optional<EntitySortCriteria.Level> toEntitySortCriteriaLevel(String field,
-                                                                         String order,
-                                                                         FieldResolver sortableFieldResolver) {
-
-        var sortableField = sortableFieldResolver.fromString(field);
-        var formattedOrder = requireNonNullElse(order, ASC.toString()).toUpperCase();
-        var sortCriteriaOrder = EntitySortCriteria.Order.valueOf(formattedOrder);
-        return sortableField.map(it -> new EntitySortCriteria.Level(it, sortCriteriaOrder));
-    }
-
     public interface FieldResolver {
         Optional<? extends EntitySortCriteria.Field> fromString(String field);
+    }
 
-        default Optional<? extends EntitySortCriteria.Field> commonFieldFromString(String field) {
+    public static final class Translator {
+        private final FieldResolver sortableFieldResolver;
+
+        public Translator(FieldResolver sortableFieldResolver) {
+            this.sortableFieldResolver = sortableFieldResolver;
+        }
+
+        public EntitySortCriteria toEntitySortCriteria(SortCriteria sortCriteria) {
+            var sortLevels = sortCriteria.sortFieldWithOrder().entrySet().stream()
+                    .map(criterion -> toEntitySortCriteriaLevel(criterion.getKey(), criterion.getValue()))
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .toArray(EntitySortCriteria.Level[]::new);
+            return new EntitySortCriteria(sortLevels);
+        }
+
+        private Optional<EntitySortCriteria.Level> toEntitySortCriteriaLevel(String field, String order) {
+            var formattedOrder = requireNonNullElse(order, ASC.toString()).toUpperCase();
+            var sortCriteriaOrder = EntitySortCriteria.Order.valueOf(formattedOrder);
+            return commonFieldFromString(field).map(it -> toSortLevel(it, sortCriteriaOrder)).or(() ->
+                    sortableFieldResolver.fromString(field).map(it -> toSortLevel(it, sortCriteriaOrder))
+            );
+        }
+
+        private static EntitySortCriteria.Level toSortLevel(EntitySortCriteria.Field it,
+                                                            EntitySortCriteria.Order sortCriteriaOrder) {
+
+            return new EntitySortCriteria.Level(it, sortCriteriaOrder);
+        }
+
+        private Optional<? extends EntitySortCriteria.Field> commonFieldFromString(String field) {
             if (isBlank(field)) {
                 return Optional.empty();
             }

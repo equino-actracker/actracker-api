@@ -2,6 +2,7 @@ package ovh.equino.actracker.application.dashboard;
 
 import ovh.equino.actracker.application.PageIdTranslator;
 import ovh.equino.actracker.application.SearchResult;
+import ovh.equino.actracker.application.SortCriteria;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.dashboard.*;
 import ovh.equino.actracker.domain.dashboard.generation.*;
@@ -26,6 +27,7 @@ public class DashboardApplicationService {
     private final TenantDataSource tenantDataSource;
     private final ActorExtractor actorExtractor;
     private final PageIdTranslator pageIdTranslator;
+    private final SortCriteria.Translator sortCriteriaTranslator;
 
     public DashboardApplicationService(DashboardFactory dashboardFactory,
                                        DashboardRepository dashboardRepository,
@@ -46,6 +48,7 @@ public class DashboardApplicationService {
         this.tenantDataSource = tenantDataSource;
         this.actorExtractor = actorExtractor;
         this.pageIdTranslator = pageIdTranslator;
+        this.sortCriteriaTranslator = new SortCriteria.Translator(new DashboardSortableFieldResolver());
     }
 
     public DashboardResult getDashboard(UUID dashboardId) {
@@ -115,7 +118,7 @@ public class DashboardApplicationService {
                         actorExtractor.getActor(),
                         searchDashboardsQuery.pageSize(),
                         pageId,
-                        searchDashboardsQuery.sortCriteria().toEntitySortCriteria(new DashboardSortableFieldResolver())
+                        sortCriteriaTranslator.toEntitySortCriteria(searchDashboardsQuery.sortCriteria())
                 ),
                 searchDashboardsQuery.term(),
                 searchDashboardsQuery.excludeFilter()

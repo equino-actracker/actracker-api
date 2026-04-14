@@ -2,6 +2,7 @@ package ovh.equino.actracker.application.tagset;
 
 import ovh.equino.actracker.application.PageIdTranslator;
 import ovh.equino.actracker.application.SearchResult;
+import ovh.equino.actracker.application.SortCriteria;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
 import ovh.equino.actracker.domain.tag.TagId;
@@ -25,6 +26,7 @@ public class TagSetApplicationService {
     private final TagSetNotifier tagSetNotifier;
     private final ActorExtractor actorExtractor;
     private final PageIdTranslator pageIdTranslator;
+    private final SortCriteria.Translator sortCriteriaTranslator;
 
     public TagSetApplicationService(TagSetFactory tagSetFactory,
                                     TagSetRepository tagSetRepository,
@@ -41,6 +43,7 @@ public class TagSetApplicationService {
         this.tagSetNotifier = tagSetNotifier;
         this.actorExtractor = actorExtractor;
         this.pageIdTranslator = pageIdTranslator;
+        this.sortCriteriaTranslator = new SortCriteria.Translator(new TagSetSortableFieldResolver());
     }
 
     public TagSetResult getTagSet(UUID tagSetId) {
@@ -86,7 +89,7 @@ public class TagSetApplicationService {
                         actorExtractor.getActor(),
                         searchTagSetsQuery.pageSize(),
                         pageId,
-                        searchTagSetsQuery.sortCriteria().toEntitySortCriteria(new TagSetSortableFieldResolver())
+                        sortCriteriaTranslator.toEntitySortCriteria(searchTagSetsQuery.sortCriteria())
                 ),
                 searchTagSetsQuery.term(),
                 searchTagSetsQuery.excludeFilter()
