@@ -4,9 +4,12 @@ import jakarta.persistence.EntityManager;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.SingleResultJpaQuery;
+import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.tagset.TagSetEntity;
 import ovh.equino.actracker.jpa.tagset.TagSetEntity_;
+
+import java.util.Optional;
 
 final class SelectTagSetQuery extends SingleResultJpaQuery<TagSetEntity, TagSetProjection> {
 
@@ -71,6 +74,13 @@ final class SelectTagSetQuery extends SingleResultJpaQuery<TagSetEntity, TagSetP
                     root.get(TagSetEntity_.creatorId),
                     searcher.id().toString()
             );
+        }
+
+        @Override
+        protected Optional<PageableValue<? extends Comparable<?>>> entityPageableValue(
+                EntitySearchPageId.Value pageValue) {
+
+            return Optional.empty();
         }
     }
 }

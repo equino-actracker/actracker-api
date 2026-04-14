@@ -7,7 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
-import ovh.equino.actracker.domain.EntitySearchPageId;
+import ovh.equino.actracker.domain.EntitySearchPageId.Value;
 import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tag.TagId;
@@ -28,6 +28,8 @@ import static java.util.stream.Collectors.toUnmodifiableSet;
 import static java.util.stream.Stream.concat;
 import static org.assertj.core.api.Assertions.assertThat;
 import static ovh.equino.actracker.domain.EntitySearchPageId.aPageId;
+import static ovh.equino.actracker.domain.EntitySortCriteria.CommonField.ID;
+import static ovh.equino.actracker.domain.EntitySortCriteria.Order.ASC;
 
 abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
 
@@ -113,7 +115,7 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
         var pageSize = 2;
         var offset = 1;
         var expectedTags = testConfiguration.tags.accessibleForWithLimitOffset(searcher, pageSize, offset);
-        var pageId = aPageId().with(EntitySearchPageId.Value.of("id", expectedTags.get(0).id().toString()));
+        var pageId = aPageId().with(Value.of(ID, ASC, expectedTags.get(0).id().toString()));
         var searchCriteria = new TagSearchCriteria(
                 new EntitySearchCriteria.Common(
                         searcher,

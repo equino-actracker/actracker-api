@@ -2,6 +2,7 @@ package ovh.equino.actracker.datasource.jpa.dashboard;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
+import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.dashboard.DashboardEntity;
 import ovh.equino.actracker.jpa.dashboard.DashboardEntity_;
@@ -13,6 +14,7 @@ import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
 import ovh.equino.actracker.jpa.dashboard.DashboardShareEntity_;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -91,6 +93,13 @@ final class SelectShareJoinDashboardQuery extends MultiResultJpaQuery<DashboardS
 
         public JpaPredicate isAccessibleFor(User searcher) {
             return () -> criteriaBuilder.equal(dashboard.get(DashboardEntity_.creatorId), searcher.id().toString());
+        }
+
+        @Override
+        protected Optional<PageableValue<? extends Comparable<?>>> entityPageableValue(
+                EntitySearchPageId.Value pageValue) {
+
+            return Optional.empty();
         }
     }
 }

@@ -2,6 +2,7 @@ package ovh.equino.actracker.application.activity;
 
 import ovh.equino.actracker.application.PageIdTranslator;
 import ovh.equino.actracker.application.SearchResult;
+import ovh.equino.actracker.application.SortCriteria;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.activity.*;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
@@ -27,6 +28,7 @@ public class ActivityApplicationService {
     private final ActivityNotifier activityNotifier;
     private final ActorExtractor actorExtractor;
     private final PageIdTranslator pageIdTranslator;
+    private final SortCriteria.Translator sortCriteriaTranslator;
 
     public ActivityApplicationService(ActivityFactory activityFactory,
                                       ActivityRepository activityRepository,
@@ -43,6 +45,7 @@ public class ActivityApplicationService {
         this.activityNotifier = activityNotifier;
         this.actorExtractor = actorExtractor;
         this.pageIdTranslator = pageIdTranslator;
+        this.sortCriteriaTranslator = new SortCriteria.Translator(new ActivitySortableFieldResolver());
     }
 
     public ActivityResult getActivity(UUID activityId) {
@@ -113,7 +116,7 @@ public class ActivityApplicationService {
                         actorExtractor.getActor(),
                         searchActivitiesQuery.pageSize(),
                         pageId,
-                        searchActivitiesQuery.sortCriteria().toEntitySortCriteria()
+                        sortCriteriaTranslator.toEntitySortCriteria(searchActivitiesQuery.sortCriteria())
                 ),
                 searchActivitiesQuery.term(),
                 searchActivitiesQuery.timeRangeStart(),

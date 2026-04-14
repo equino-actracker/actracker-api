@@ -4,8 +4,11 @@ import jakarta.persistence.EntityManager;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.SingleResultJpaQuery;
+import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.jpa.tenant.TenantEntity;
 import ovh.equino.actracker.jpa.tenant.TenantEntity_;
+
+import java.util.Optional;
 
 final class SelectTenantQuery extends SingleResultJpaQuery<TenantEntity, TenantProjection> {
 
@@ -56,6 +59,13 @@ final class SelectTenantQuery extends SingleResultJpaQuery<TenantEntity, TenantP
 
         JpaPredicate hasUsername(String username) {
             return () -> criteriaBuilder.equal(root.get(TenantEntity_.username), username);
+        }
+
+        @Override
+        protected Optional<PageableValue<? extends Comparable<?>>> entityPageableValue(
+                EntitySearchPageId.Value pageValue) {
+
+            return Optional.empty();
         }
     }
 }

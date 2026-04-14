@@ -5,7 +5,9 @@ import java.util.LinkedList;
 
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
+import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
+import static ovh.equino.actracker.domain.EntitySortCriteria.CommonField.ID;
 import static ovh.equino.actracker.domain.EntitySortCriteria.Order.ASC;
 
 public record EntitySortCriteria(
@@ -32,13 +34,21 @@ public record EntitySortCriteria(
     }
 
     public record Level(
-            String field,
+            Field field,
             Order order
     ) {
+
+        public Level {
+            order = requireNonNullElse(order, ASC);
+            requireNonNull(field);
+        }
     }
 
-    // TODO use me
     public interface Field {
+    }
+
+    public enum CommonField implements Field {
+        ID
     }
 
     public enum Order {
@@ -47,6 +57,6 @@ public record EntitySortCriteria(
     }
 
     private Level sortGuard() {
-        return new Level("id", ASC);
+        return new Level(ID, ASC);
     }
 }

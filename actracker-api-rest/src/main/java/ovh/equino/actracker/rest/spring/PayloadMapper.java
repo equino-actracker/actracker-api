@@ -67,6 +67,7 @@ abstract public class PayloadMapper {
                 .collect(toUnmodifiableSet());
     }
 
+    // TODO fixme - check in docs what split() returns
     public SortCriteria parseSortCriteria(String sortCriteria) {
         if (isBlank(sortCriteria)) {
             return null;

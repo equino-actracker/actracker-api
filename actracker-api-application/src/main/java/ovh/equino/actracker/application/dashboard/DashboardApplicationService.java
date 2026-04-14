@@ -2,8 +2,8 @@ package ovh.equino.actracker.application.dashboard;
 
 import ovh.equino.actracker.application.PageIdTranslator;
 import ovh.equino.actracker.application.SearchResult;
+import ovh.equino.actracker.application.SortCriteria;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
-import ovh.equino.actracker.domain.EntitySearchResult;
 import ovh.equino.actracker.domain.dashboard.*;
 import ovh.equino.actracker.domain.dashboard.generation.*;
 import ovh.equino.actracker.domain.exception.EntityNotFoundException;
@@ -27,6 +27,7 @@ public class DashboardApplicationService {
     private final TenantDataSource tenantDataSource;
     private final ActorExtractor actorExtractor;
     private final PageIdTranslator pageIdTranslator;
+    private final SortCriteria.Translator sortCriteriaTranslator;
 
     public DashboardApplicationService(DashboardFactory dashboardFactory,
                                        DashboardRepository dashboardRepository,
@@ -47,6 +48,7 @@ public class DashboardApplicationService {
         this.tenantDataSource = tenantDataSource;
         this.actorExtractor = actorExtractor;
         this.pageIdTranslator = pageIdTranslator;
+        this.sortCriteriaTranslator = new SortCriteria.Translator(new DashboardSortableFieldResolver());
     }
 
     public DashboardResult getDashboard(UUID dashboardId) {
@@ -116,15 +118,15 @@ public class DashboardApplicationService {
                         actorExtractor.getActor(),
                         searchDashboardsQuery.pageSize(),
                         pageId,
-                        searchDashboardsQuery.sortCriteria().toEntitySortCriteria()
+                        sortCriteriaTranslator.toEntitySortCriteria(searchDashboardsQuery.sortCriteria())
                 ),
                 searchDashboardsQuery.term(),
                 searchDashboardsQuery.excludeFilter()
         );
 
-        EntitySearchResult<DashboardDto> searchResult = dashboardSearchEngine.findDashboards(searchCriteria);
+        var searchResult = dashboardSearchEngine.findDashboards(searchCriteria);
         var nextPageId = pageIdTranslator.toString(searchResult.nextPageId());
-        List<DashboardResult> resultForClient = searchResult.results()
+        var resultForClient = searchResult.results()
                 .stream()
                 .map(this::toDashboardResult)
                 .toList();

@@ -16,8 +16,7 @@ public final class NextPageIdExtractor<T> {
 
     EntitySearchPageId nextPageId(EntitySortCriteria sortCriteria, T dto) {
         var pageIdValues = sortCriteria.levels().stream()
-                .map(EntitySortCriteria.Level::field)
-                .map(field -> toFieldValue(field, dto))
+                .map(sortLevel -> toFieldValue(sortLevel, dto))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList();
@@ -25,12 +24,23 @@ public final class NextPageIdExtractor<T> {
         return new EntitySearchPageId(new LinkedList<>(pageIdValues));
     }
 
-    private Optional<EntitySearchPageId.Value> toFieldValue(String field, T dto) {
-        return attributeValueExtractor.extractFieldAttribute(field, dto)
-                .map(value -> EntitySearchPageId.Value.of(field, value));
+    private Optional<EntitySearchPageId.Value> toFieldValue(EntitySortCriteria.Level sortLevel, T dto) {
+        return attributeValueExtractor.extractFieldAttribute(sortLevel.field(), dto)
+                .map(value -> EntitySearchPageId.Value.of(sortLevel.field(), sortLevel.order(), value));
     }
 
     public interface AttributeValueExtractor<T> {
-        Optional<?> extractFieldAttribute(String attribute, T dto);
+        Optional<?> extractFieldAttribute(EntitySortCriteria.Field attribute, T dto);
+
+        default Optional<?> extractCommonAttribute(EntitySortCriteria.Field attribute, T dto) {
+            if (attribute instanceof EntitySortCriteria.CommonField commonField) {
+                return switch (commonField) {
+                    case ID -> extractIdFrom(dto);
+                };
+            }
+            return Optional.empty();
+        }
+
+        Optional<?> extractIdFrom(T dto);
     }
 }
