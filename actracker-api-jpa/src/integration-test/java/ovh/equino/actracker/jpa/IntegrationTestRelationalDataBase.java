@@ -16,10 +16,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static java.util.Arrays.stream;
 import static java.util.Objects.isNull;
@@ -108,6 +105,10 @@ public abstract class IntegrationTestRelationalDataBase {
                 preparedStatement.execute();
             }
         }
+    }
+
+    public synchronized void addTags(Collection<TagDto> tags) throws SQLException {
+        addTags(tags.toArray(new TagDto[0]));
     }
 
     public synchronized void addTags(TagDto... tags) throws SQLException {

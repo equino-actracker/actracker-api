@@ -7,6 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySearchPageId.Value;
 import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.tag.TagDto;
@@ -18,18 +19,20 @@ import ovh.equino.actracker.jpa.IntegrationTestConfiguration;
 import ovh.equino.actracker.jpa.JpaIntegrationTest;
 
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
+import static java.util.Collections.emptySet;
+import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static java.util.stream.Stream.concat;
 import static org.assertj.core.api.Assertions.assertThat;
 import static ovh.equino.actracker.domain.EntitySearchPageId.aPageId;
+import static ovh.equino.actracker.domain.EntitySearchPageId.firstPage;
 import static ovh.equino.actracker.domain.EntitySortCriteria.CommonField.ID;
 import static ovh.equino.actracker.domain.EntitySortCriteria.Order.ASC;
+import static ovh.equino.actracker.domain.tag.TagSearchCriteria.SortableField.NAME;
+import static ovh.equino.actracker.jpa.tag.TagTestData.aTag;
 
 abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
 
@@ -200,6 +203,82 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
                     .flatMap(TagDto::shares)
                     .containsExactlyInAnyOrderElementsOf(testConfiguration.tags.flatSharesAccessibleFor(searcher));
         });
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("tagsSortedAndPaginated")
+    void shouldFindTagsSortedAndPaginated(String name,
+                                          User searcher,
+                                          Collection<TagDto> existingTags,
+                                          EntitySortCriteria sortCriteria,
+                                          Collection<TagDto> expectedFirstPage,
+                                          EntitySearchPageId secondPageId,
+                                          Collection<TagDto> expectedSecondPage) throws SQLException {
+
+        // given
+        database().addUsers(new TenantDto(searcher.id(), "username", "password"));
+        database().addTags(existingTags);
+
+        var pageSize = expectedFirstPage.size();
+
+        // when
+        inTransaction(() -> {
+            var pageId = firstPage();
+            var searchCriteria = new TagSearchCriteria(
+                    new EntitySearchCriteria.Common(
+                            searcher,
+                            pageSize,
+                            pageId,
+                            sortCriteria
+                    ),
+                    null,
+                    emptySet()
+            );
+            var foundFirstPage = dataSource.find(searchCriteria);
+
+            // then
+            assertThat(foundFirstPage).containsExactlyElementsOf(expectedFirstPage);
+        });
+
+        // and
+        inTransaction(() -> {
+            var searchCriteria = new TagSearchCriteria(
+                    new EntitySearchCriteria.Common(
+                            searcher,
+                            pageSize,
+                            secondPageId,
+                            sortCriteria
+                    ),
+                    null,
+                    emptySet()
+            );
+            var foundSecondPage = dataSource.find(searchCriteria);
+
+            // then
+            assertThat(foundSecondPage).containsExactlyElementsOf(expectedSecondPage);
+        });
+    }
+
+    static Stream<Arguments> tagsSortedAndPaginated() {
+        var user = new User(randomUUID());
+
+        var tag1 = aTag().createdBy(user.id()).withId(new UUID(100, 1)).named("a tag").built();
+        var tag2 = aTag().createdBy(user.id()).withId(new UUID(100, 2)).named("a tag").built();
+        var tag3 = aTag().createdBy(user.id()).withId(new UUID(100, 3)).named("B tag").built();
+
+        return Stream.of(
+                Arguments.of(
+                        "NAME:ASC",
+                        user,
+                        List.of(tag1, tag2, tag3),
+                        EntitySortCriteria.sortBy(NAME, ASC),
+                        List.of(tag3, tag1),
+                        aPageId()
+                                .with(Value.of(NAME, ASC, tag2.name()))
+                                .with(Value.of(ID, ASC, tag2.id())),
+                        List.of(tag2)
+                )
+        );
     }
 
     @BeforeAll
