@@ -218,11 +218,10 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
         // given
         database().addUsers(new TenantDto(searcher.id(), "username", "password"));
         database().addTags(existingTags);
-
         var pageSize = expectedFirstPage.size();
 
-        // when
         inTransaction(() -> {
+            // when
             var pageId = firstPage();
             var searchCriteria = new TagSearchCriteria(
                     new EntitySearchCriteria.Common(
@@ -242,6 +241,7 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
 
         // and
         inTransaction(() -> {
+            // when
             var searchCriteria = new TagSearchCriteria(
                     new EntitySearchCriteria.Common(
                             searcher,
