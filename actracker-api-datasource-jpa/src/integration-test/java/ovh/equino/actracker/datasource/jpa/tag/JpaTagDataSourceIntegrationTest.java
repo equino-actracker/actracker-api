@@ -223,12 +223,12 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
 
         inTransaction(() -> {
             // when
-            var pageId = firstPage();
+            var firstPageId = firstPage();
             var searchCriteria = new TagSearchCriteria(
                     new EntitySearchCriteria.Common(
                             searcher,
                             pageSize,
-                            pageId,
+                            firstPageId,
                             sortCriteria
                     ),
                     null,
