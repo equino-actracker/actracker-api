@@ -133,7 +133,7 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
             return switch (commonField) {
                 case ID -> Optional.of(PageableValue.of(
                         root.get(JpaEntity_.id),
-                        (String) pageValue.value(),
+                        pageValue.value().toString(),
                         PagingDirection.from(pageValue.sortOrder()))
                 );
             };
