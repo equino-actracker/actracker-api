@@ -31,6 +31,7 @@ import static ovh.equino.actracker.domain.EntitySearchPageId.aPageId;
 import static ovh.equino.actracker.domain.EntitySearchPageId.firstPage;
 import static ovh.equino.actracker.domain.EntitySortCriteria.CommonField.ID;
 import static ovh.equino.actracker.domain.EntitySortCriteria.Order.ASC;
+import static ovh.equino.actracker.domain.EntitySortCriteria.Order.DESC;
 import static ovh.equino.actracker.domain.EntitySortCriteria.sortBy;
 import static ovh.equino.actracker.domain.tag.TagSearchCriteria.SortableField.NAME;
 import static ovh.equino.actracker.jpa.tag.TagTestData.aTag;
@@ -279,6 +280,28 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
                 ),
                 Arguments.of(
                         "NAME:ASC",
+                        user,
+                        List.of(tag1, tag2, tag3),
+                        sortBy(NAME, ASC),
+                        List.of(tag3, tag1),
+                        aPageId()
+                                .with(Value.of(NAME, ASC, tag2.name()))
+                                .with(Value.of(ID, ASC, tag2.id())),
+                        List.of(tag2)
+                ),
+                Arguments.of(
+                        "NAME:DESC",
+                        user,
+                        List.of(tag1, tag2, tag3),
+                        sortBy(NAME, ASC),
+                        List.of(tag2, tag1),
+                        aPageId()
+                                .with(Value.of(NAME, DESC, tag3.name()))
+                                .with(Value.of(ID, ASC, tag3.id())),
+                        List.of(tag3)
+                ),
+                Arguments.of(
+                        "All criteria: [NAME:ASC]",
                         user,
                         List.of(tag1, tag2, tag3),
                         sortBy(NAME, ASC),
