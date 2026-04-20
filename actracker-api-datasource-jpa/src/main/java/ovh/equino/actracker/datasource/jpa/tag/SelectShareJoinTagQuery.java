@@ -2,11 +2,13 @@ package ovh.equino.actracker.datasource.jpa.tag;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Path;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
 import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
 import ovh.equino.actracker.domain.EntitySearchPageId;
+import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.tag.TagEntity;
 import ovh.equino.actracker.jpa.tag.TagEntity_;
@@ -103,6 +105,11 @@ final class SelectShareJoinTagQuery extends MultiResultJpaQuery<TagShareEntity, 
         protected Optional<PageableValue<? extends Comparable<?>>> entityPageableValue(
                 EntitySearchPageId.Value pageValue) {
 
+            return Optional.empty();
+        }
+
+        @Override
+        protected Optional<Path<?>> entitySortableField(EntitySortCriteria.Field field) {
             return Optional.empty();
         }
     }

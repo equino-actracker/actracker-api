@@ -293,8 +293,8 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
                         "NAME:DESC",
                         user,
                         List.of(tag1, tag2, tag3),
-                        sortBy(NAME, ASC),
-                        List.of(tag2, tag1),
+                        sortBy(NAME, DESC),
+                        List.of(tag1, tag2),
                         aPageId()
                                 .with(Value.of(NAME, DESC, tag3.name()))
                                 .with(Value.of(ID, ASC, tag3.id())),

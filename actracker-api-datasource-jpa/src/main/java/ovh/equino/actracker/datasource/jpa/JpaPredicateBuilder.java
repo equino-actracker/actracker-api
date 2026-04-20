@@ -10,10 +10,7 @@ import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.jpa.JpaEntity;
 import ovh.equino.actracker.jpa.JpaEntity_;
 
-import java.util.Collection;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toUnmodifiableSet;
@@ -98,6 +95,40 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
     public JpaPredicate noneMatch() {
         return or();
     }
+
+    public List<JpaSortCriteria> sortCriteria(EntitySortCriteria sortCriteria) {
+        return sortCriteria.levels().stream()
+                .map(level -> toSortCriterion(level.field(), level.order()))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
+    }
+
+    private Optional<JpaSortCriteria> toSortCriterion(EntitySortCriteria.Field field, EntitySortCriteria.Order order) {
+        return sortableField(field).flatMap(sortableField ->
+                switch (order) {
+                    case ASC -> Optional.of(() -> criteriaBuilder.asc(sortableField));
+                    case DESC -> Optional.of(() -> criteriaBuilder.desc(sortableField));
+                }
+        );
+    }
+
+    private Optional<Path<?>> sortableField(EntitySortCriteria.Field field) {
+        return commonSortableField(field)
+                .or(() -> entitySortableField(field))
+                .or(Optional::empty);
+    }
+
+    private Optional<Path<?>> commonSortableField(EntitySortCriteria.Field field) {
+        if (field instanceof EntitySortCriteria.CommonField commonField) {
+            return switch (commonField) {
+                case ID -> Optional.of(root.get(JpaEntity_.id));
+            };
+        }
+        return Optional.empty();
+    }
+
+    protected abstract Optional<Path<?>> entitySortableField(EntitySortCriteria.Field field);
 
     public JpaPredicate isInPage(EntitySearchPageId pageId) {
         if (pageId.isEmpty()) {

@@ -1,10 +1,12 @@
 package ovh.equino.actracker.datasource.jpa.tenant;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.Path;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.SingleResultJpaQuery;
 import ovh.equino.actracker.domain.EntitySearchPageId;
+import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.jpa.tenant.TenantEntity;
 import ovh.equino.actracker.jpa.tenant.TenantEntity_;
 
@@ -59,6 +61,11 @@ final class SelectTenantQuery extends SingleResultJpaQuery<TenantEntity, TenantP
 
         JpaPredicate hasUsername(String username) {
             return () -> criteriaBuilder.equal(root.get(TenantEntity_.username), username);
+        }
+
+        @Override
+        protected Optional<Path<?>> entitySortableField(EntitySortCriteria.Field field) {
+            return Optional.empty();
         }
 
         @Override

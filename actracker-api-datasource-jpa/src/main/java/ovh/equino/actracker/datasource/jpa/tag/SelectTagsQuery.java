@@ -3,12 +3,14 @@ package ovh.equino.actracker.datasource.jpa.tag;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Subquery;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
 import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
 import ovh.equino.actracker.domain.EntitySearchPageId;
+import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.tag.TagSearchCriteria;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.tag.TagEntity;
@@ -116,6 +118,16 @@ final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection
                             (String) pageValue.value(),
                             PageableValue.PagingDirection.from(pageValue.sortOrder())
                     ));
+                };
+            }
+            return Optional.empty();
+        }
+
+        @Override
+        protected Optional<Path<?>> entitySortableField(EntitySortCriteria.Field field) {
+            if (field instanceof TagSearchCriteria.SortableField sortableField) {
+                return switch (sortableField) {
+                    case NAME -> Optional.of(root.get(TagEntity_.name));
                 };
             }
             return Optional.empty();

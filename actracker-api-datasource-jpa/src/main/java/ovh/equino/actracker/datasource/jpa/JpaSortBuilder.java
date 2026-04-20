@@ -3,6 +3,7 @@ package ovh.equino.actracker.datasource.jpa;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Root;
 
+// TODO remove!
 public abstract class JpaSortBuilder<E> {
 
     private final CriteriaBuilder criteriaBuilder;
