@@ -264,6 +264,8 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
     static Stream<Arguments> tagsSortedAndPaginated() {
         var user = new User(randomUUID());
 
+        // TODO add tags with nulls
+        // TODO first page should contains nulls
         var tag1 = aTag().createdBy(user.id()).withId(new UUID(100, 1)).named("a tag").built();
         var tag2 = aTag().createdBy(user.id()).withId(new UUID(100, 2)).named("a tag").built();
         var tag3 = aTag().createdBy(user.id()).withId(new UUID(100, 3)).named("B tag").built();

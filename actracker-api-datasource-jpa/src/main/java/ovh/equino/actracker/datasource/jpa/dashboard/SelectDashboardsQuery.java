@@ -107,25 +107,25 @@ final class SelectDashboardsQuery extends MultiResultJpaQuery<DashboardEntity, D
         protected Optional<PageableValue<? extends Comparable<?>>> entityPageableValue(
                 EntitySearchPageId.Value pageValue) {
 
-            if (pageValue.sortField() instanceof DashboardSearchCriteria.SortableField sortableField) {
-                return switch (sortableField) {
-                    case NAME -> Optional.of(PageableValue.of(
-                            root.get(DashboardEntity_.name),
-                            (String) pageValue.value(),
-                            PageableValue.PagingDirection.from(pageValue.sortOrder())
-                    ));
-                };
-            }
+//            if (pageValue.sortField() instanceof DashboardSearchCriteria.SortableField sortableField) {
+//                return switch (sortableField) {
+//                    case NAME -> Optional.of(PageableValue.of(
+//                            root.get(DashboardEntity_.name),
+//                            (String) pageValue.value(),
+//                            PageableValue.PagingDirection.from(pageValue.sortOrder())
+//                    ));
+//                };
+//            }
             return Optional.empty();
         }
 
         @Override
         protected Optional<Path<?>> entitySortableField(EntitySortCriteria.Field field) {
-            if (field instanceof DashboardSearchCriteria.SortableField sortableField) {
-                return switch (sortableField) {
-                    case NAME -> Optional.of(root.get(DashboardEntity_.name));
-                };
-            }
+//            if (field instanceof DashboardSearchCriteria.SortableField sortableField) {
+//                return switch (sortableField) {
+//                    case NAME -> Optional.of(root.get(DashboardEntity_.name));
+//                };
+//            }
             return Optional.empty();
         }
     }
