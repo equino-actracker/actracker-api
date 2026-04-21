@@ -1,9 +1,6 @@
 package ovh.equino.actracker.datasource.jpa;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.Path;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder.PageableValue.PagingDirection;
 import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySortCriteria;
@@ -113,13 +110,13 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
         );
     }
 
-    private Optional<Path<?>> sortableField(EntitySortCriteria.Field field) {
+    private Optional<Expression<?>> sortableField(EntitySortCriteria.Field field) {
         return commonSortableField(field)
                 .or(() -> entitySortableField(field))
                 .or(Optional::empty);
     }
 
-    private Optional<Path<?>> commonSortableField(EntitySortCriteria.Field field) {
+    private Optional<Expression<?>> commonSortableField(EntitySortCriteria.Field field) {
         if (field instanceof EntitySortCriteria.CommonField commonField) {
             return switch (commonField) {
                 case ID -> Optional.of(root.get(JpaEntity_.id));
@@ -128,7 +125,7 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
         return Optional.empty();
     }
 
-    protected abstract Optional<Path<?>> entitySortableField(EntitySortCriteria.Field field);
+    protected abstract Optional<Expression<?>> entitySortableField(EntitySortCriteria.Field field);
 
     public JpaPredicate isInPage(EntitySearchPageId pageId) {
         if (pageId.isEmpty()) {
@@ -175,9 +172,11 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
     protected abstract Optional<PageableValue<? extends Comparable<?>>> entityPageableValue(
             EntitySearchPageId.Value pageValue);
 
-    protected record PageableValue<T extends Comparable<T>>(Path<T> field, T value, PagingDirection pagingDirection) {
+    protected record PageableValue<T extends Comparable<T>>(Expression<T> field,
+                                                            T value,
+                                                            PagingDirection pagingDirection) {
 
-        public static <T extends Comparable<T>> PageableValue<T> of(Path<T> field,
+        public static <T extends Comparable<T>> PageableValue<T> of(Expression<T> field,
                                                                     T value,
                                                                     PagingDirection pagingDirection) {
 

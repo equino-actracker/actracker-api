@@ -16,12 +16,9 @@ public final class TagTestData {
     private UUID id = randomUUID();
     private UUID creatorId = randomUUID();
     private String name = "nameless tag";
-    private Collection<MetricDto> metric = new ArrayList<>();
+    private Collection<MetricDto> metrics = new ArrayList<>();
     private List<Share> shares = new ArrayList<>();
     private boolean deleted = false;
-
-    private TagTestData() {
-    }
 
     public static TagTestData aTag() {
         return new TagTestData();
@@ -32,9 +29,17 @@ public final class TagTestData {
         return this;
     }
 
+    public UUID creatorId() {
+        return creatorId;
+    }
+
     public TagTestData withId(UUID id) {
         this.id = id;
         return this;
+    }
+
+    public UUID id() {
+        return id;
     }
 
     public TagTestData named(String name) {
@@ -42,7 +47,23 @@ public final class TagTestData {
         return this;
     }
 
-    public TagDto built() {
-        return new TagDto(id, creatorId, name, metric, shares, deleted);
+    public String name() {
+        return name;
+    }
+
+    public Collection<MetricDto> metrics() {
+        return metrics;
+    }
+
+    public List<Share> shares() {
+        return shares;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public TagDto asDto() {
+        return new TagDto(id, creatorId, name, metrics, shares, deleted);
     }
 }

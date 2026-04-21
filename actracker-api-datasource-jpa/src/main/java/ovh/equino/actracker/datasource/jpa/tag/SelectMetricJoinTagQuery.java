@@ -1,8 +1,8 @@
 package ovh.equino.actracker.datasource.jpa.tag;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.Path;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
@@ -107,7 +107,7 @@ final class SelectMetricJoinTagQuery extends MultiResultJpaQuery<MetricEntity, M
         }
 
         @Override
-        protected Optional<Path<?>> entitySortableField(EntitySortCriteria.Field field) {
+        protected Optional<Expression<?>> entitySortableField(EntitySortCriteria.Field field) {
             return Optional.empty();
         }
     }

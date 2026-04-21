@@ -1,9 +1,9 @@
 package ovh.equino.actracker.datasource.jpa.dashboard;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Subquery;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
@@ -105,7 +105,7 @@ final class SelectDashboardQuery extends SingleResultJpaQuery<DashboardEntity, D
         }
 
         @Override
-        protected Optional<Path<?>> entitySortableField(EntitySortCriteria.Field field) {
+        protected Optional<Expression<?>> entitySortableField(EntitySortCriteria.Field field) {
             return Optional.empty();
         }
     }

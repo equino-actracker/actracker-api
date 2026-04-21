@@ -1,14 +1,13 @@
 package ovh.equino.actracker.datasource.jpa.tagset;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Expression;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
 import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
 import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySortCriteria;
-import ovh.equino.actracker.domain.tagset.TagSetSearchCriteria;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.tagset.TagSetEntity;
 import ovh.equino.actracker.jpa.tagset.TagSetEntity_;
@@ -102,7 +101,7 @@ final class SelectTagSetsQuery extends MultiResultJpaQuery<TagSetEntity, TagSetP
         }
 
         @Override
-        protected Optional<Path<?>> entitySortableField(EntitySortCriteria.Field field) {
+        protected Optional<Expression<?>> entitySortableField(EntitySortCriteria.Field field) {
 //            if (field instanceof TagSetSearchCriteria.SortableField sortableField) {
 //                return switch (sortableField) {
 //                    case NAME -> Optional.of(root.get(TagSetEntity_.name));

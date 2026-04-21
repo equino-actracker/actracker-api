@@ -139,7 +139,7 @@ final class SelectMetricValuesQuery extends MultiResultJpaQuery<MetricValueEntit
         }
 
         @Override
-        protected Optional<Path<?>> entitySortableField(EntitySortCriteria.Field field) {
+        protected Optional<Expression<?>> entitySortableField(EntitySortCriteria.Field field) {
             return Optional.empty();
         }
     }

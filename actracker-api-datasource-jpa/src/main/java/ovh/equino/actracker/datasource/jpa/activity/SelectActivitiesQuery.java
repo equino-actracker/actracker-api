@@ -1,17 +1,13 @@
 package ovh.equino.actracker.datasource.jpa.activity;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.Path;
-import jakarta.persistence.criteria.Subquery;
+import jakarta.persistence.criteria.*;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
 import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
 import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySortCriteria;
-import ovh.equino.actracker.domain.activity.ActivitySearchCriteria;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.activity.ActivityEntity;
 import ovh.equino.actracker.jpa.activity.ActivityEntity_;
@@ -198,7 +194,7 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
         }
 
         @Override
-        protected Optional<Path<?>> entitySortableField(EntitySortCriteria.Field field) {
+        protected Optional<Expression<?>> entitySortableField(EntitySortCriteria.Field field) {
 //            if (field instanceof ActivitySearchCriteria.SortableField sortableField) {
 //                return switch (sortableField) {
 //                    case TITLE -> Optional.of(root.get(ActivityEntity_.title));
