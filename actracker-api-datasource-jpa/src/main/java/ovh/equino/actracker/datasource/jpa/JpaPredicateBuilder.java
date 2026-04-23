@@ -140,34 +140,30 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
                 .map(Optional::get)
                 .toList();
 
-        // TODO remove:
-        var pagePredicates = pageId.values().stream()
-                .map(this::toPageableValue)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .map(this::isAfterPageValueBoundary)
-                .toArray(JpaPredicate[]::new);
-
-        return and(pagePredicates);
+        return isAfterPageValueBoundary(pageableValues);
     }
 
-    private JpaPredicate isAfterPageValueBoundary(List<PageableValue<?>> pageableValues) {
+    private JpaPredicate isAfterPageValueBoundary(
+            List<? extends PageableValue<? extends Comparable<?>>> pageableValues) {
+
         if (isEmpty(pageableValues)) {
             return allMatch();
         }
 
         var predicates = new LinkedList<JpaPredicate>();
         var pageableValueIterator = pageableValues.iterator();
-        var alreadyHandledFields = new ArrayList<PageableValue<?>>();
+        var alreadyHandledValues = new ArrayList<PageableValue<?>>();
 
         while (pageableValueIterator.hasNext()) {
+            var pageableValue = pageableValueIterator.next();
             predicates.add(
                     predicateForNextValue(
-                            pageableValueIterator.next(),
+                            pageableValue,
                             pageableValueIterator.hasNext(),
-                            alreadyHandledFields
+                            alreadyHandledValues
                     )
             );
+            alreadyHandledValues.add(pageableValue);
         }
 
         return or(predicates.toArray(new JpaPredicate[]{}));
@@ -181,23 +177,12 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
                 .map(value -> (JpaPredicate) () -> criteriaBuilder.equal(value.field(), value.value()));
 
         var newPredicate = isLast
-                ? (JpaPredicate) () -> criteriaBuilder.greaterThanOrEqualTo(pageableValue.field, pageableValue.value)
-                : (JpaPredicate) () -> criteriaBuilder.greaterThan(pageableValue.field, pageableValue.value);
+                ? (JpaPredicate) () -> criteriaBuilder.greaterThan(pageableValue.field, pageableValue.value)
+                : (JpaPredicate) () -> criteriaBuilder.greaterThanOrEqualTo(pageableValue.field, pageableValue.value);
 
         var predicates = concat(handlePredicates, Stream.of(newPredicate)).toArray(JpaPredicate[]::new);
 
-        return or(predicates);
-    }
-
-    // TODO doesn't work:
-    private <T extends Comparable<T>> JpaPredicate isAfterPageValueBoundary(PageableValue<T> pageableValue) {
-        return switch (pageableValue.pagingDirection()) {
-            case SKIP_LESSER -> () ->
-                    criteriaBuilder.greaterThanOrEqualTo(pageableValue.field(), pageableValue.value());
-            case SKIP_GREATER -> () ->
-                    // TODO descending sort doesn't work yet
-                    criteriaBuilder.lessThanOrEqualTo(pageableValue.field(), pageableValue.value());
-        };
+        return and(predicates);
     }
 
     private Optional<PageableValue<? extends Comparable<?>>> toPageableValue(EntitySearchPageId.Value pageValue) {
