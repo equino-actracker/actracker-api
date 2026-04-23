@@ -8,9 +8,11 @@ import ovh.equino.actracker.jpa.JpaEntity;
 import ovh.equino.actracker.jpa.JpaEntity_;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toUnmodifiableSet;
+import static java.util.stream.Stream.concat;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -131,6 +133,14 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
         if (pageId.isEmpty()) {
             return allMatch();
         }
+
+        var pageableValues = pageId.values().stream()
+                .map(this::toPageableValue)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
+
+        // TODO remove:
         var pagePredicates = pageId.values().stream()
                 .map(this::toPageableValue)
                 .filter(Optional::isPresent)
@@ -141,11 +151,51 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
         return and(pagePredicates);
     }
 
+    private JpaPredicate isAfterPageValueBoundary(List<PageableValue<?>> pageableValues) {
+        if (isEmpty(pageableValues)) {
+            return allMatch();
+        }
+
+        var predicates = new LinkedList<JpaPredicate>();
+        var pageableValueIterator = pageableValues.iterator();
+        var alreadyHandledFields = new ArrayList<PageableValue<?>>();
+
+        while (pageableValueIterator.hasNext()) {
+            predicates.add(
+                    predicateForNextValue(
+                            pageableValueIterator.next(),
+                            pageableValueIterator.hasNext(),
+                            alreadyHandledFields
+                    )
+            );
+        }
+
+        return or(predicates.toArray(new JpaPredicate[]{}));
+    }
+
+    private <T extends Comparable<T>> JpaPredicate predicateForNextValue(PageableValue<T> pageableValue,
+                                                                         boolean isLast,
+                                                                         Collection<PageableValue<?>> handledValues) {
+
+        var handlePredicates = handledValues.stream()
+                .map(value -> (JpaPredicate) () -> criteriaBuilder.equal(value.field(), value.value()));
+
+        var newPredicate = isLast
+                ? (JpaPredicate) () -> criteriaBuilder.greaterThanOrEqualTo(pageableValue.field, pageableValue.value)
+                : (JpaPredicate) () -> criteriaBuilder.greaterThan(pageableValue.field, pageableValue.value);
+
+        var predicates = concat(handlePredicates, Stream.of(newPredicate)).toArray(JpaPredicate[]::new);
+
+        return or(predicates);
+    }
+
+    // TODO doesn't work:
     private <T extends Comparable<T>> JpaPredicate isAfterPageValueBoundary(PageableValue<T> pageableValue) {
         return switch (pageableValue.pagingDirection()) {
             case SKIP_LESSER -> () ->
                     criteriaBuilder.greaterThanOrEqualTo(pageableValue.field(), pageableValue.value());
             case SKIP_GREATER -> () ->
+                    // TODO descending sort doesn't work yet
                     criteriaBuilder.lessThanOrEqualTo(pageableValue.field(), pageableValue.value());
         };
     }

@@ -215,88 +215,50 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
                                           TenantTestData searcher,
                                           Collection<TagTestData> existingTags,
                                           EntitySortCriteria sortCriteria,
-                                          Collection<TagDto> expectedFirstPage,
-                                          EntitySearchPageId secondPageId,
-                                          Collection<TagDto> expectedSecondPage,
-                                          EntitySearchPageId thirdPageId,
-                                          Collection<TagDto> expectedThirdPage) throws SQLException {
+                                          List<ExpectedPage> expectedPages) throws SQLException {
 
         // given
         database().addUsersData(searcher);
         database().addTagsData(existingTags);
-        var pageSize = expectedFirstPage.size();
 
-        inTransaction(() -> {
-            // when
-            var firstPageId = firstPage();
-            var searchCriteria = new TagSearchCriteria(
-                    new EntitySearchCriteria.Common(
-                            searcher.asUser(),
-                            pageSize,
-                            firstPageId,
-                            sortCriteria
-                    ),
-                    null,
-                    emptySet()
-            );
-            var foundFirstPage = dataSource.find(searchCriteria);
+        var i = 0;
+        for(var expectedPage : expectedPages) {
+            System.out.printf("VERIFYING PAGE:%d%n", i);
 
-            // then
-            assertThat(foundFirstPage).containsExactlyElementsOf(expectedFirstPage);
-        });
+            inTransaction(() -> {
+                var searchCriteria = new TagSearchCriteria(
+                        new EntitySearchCriteria.Common(
+                                searcher.asUser(),
+                                expectedPage.pageSize(),
+                                expectedPage.pageId(),
+                                sortCriteria
+                        ),
+                        null,
+                        emptySet()
+                );
 
-        // and
-        inTransaction(() -> {
-            // when
-            var searchCriteria = new TagSearchCriteria(
-                    new EntitySearchCriteria.Common(
-                            searcher.asUser(),
-                            pageSize,
-                            secondPageId,
-                            sortCriteria
-                    ),
-                    null,
-                    emptySet()
-            );
-            var foundSecondPage = dataSource.find(searchCriteria);
+                // when
+                var foundPage = dataSource.find(searchCriteria);
 
-            // then
-            assertThat(foundSecondPage).containsExactlyElementsOf(expectedSecondPage);
-        });
+                // then
+                assertThat(foundPage).containsExactlyElementsOf(expectedPage.expectedDTOs());
+            });
 
-        // and
-        inTransaction(() -> {
-            // when
-            var searchCriteria = new TagSearchCriteria(
-                    new EntitySearchCriteria.Common(
-                            searcher.asUser(),
-                            pageSize,
-                            thirdPageId,
-                            sortCriteria
-                    ),
-                    null,
-                    emptySet()
-            );
-            var foundThirdPage = dataSource.find(searchCriteria);
-
-            // then
-            assertThat(foundThirdPage).containsExactlyElementsOf(expectedThirdPage);
-        });
+            System.out.printf("PAGE %d VERIFIED%n", i++);
+        }
     }
 
     static Stream<Arguments> tagsSortedAndPaginated() {
         var user = aTenant();
 
-        // TODO first page and first result of second page should contain nulls
-        var tag1 = aTag().createdBy(user.id()).withId(new UUID(100, 1)).named("Z tag");
-        var tag2 = aTag().createdBy(user.id()).withId(new UUID(100, 2)).named("a tag");
-        var tag3 = aTag().createdBy(user.id()).withId(new UUID(100, 3)).named("a tag");
+        var tag1 = aTag().createdBy(user.id()).withId(new UUID(100, 1)).named("Z");
+        var tag2 = aTag().createdBy(user.id()).withId(new UUID(100, 2)).named("a");
+        var tag3 = aTag().createdBy(user.id()).withId(new UUID(100, 3)).named("a");
         var tag4 = aTag().createdBy(user.id()).withId(new UUID(100, 4)).named(null);
         var tag5 = aTag().createdBy(user.id()).withId(new UUID(100, 5)).named(null);
-        var tag6 = aTag().createdBy(user.id()).withId(new UUID(100, 6)).named(null);
-        var tag7 = aTag().createdBy(user.id()).withId(new UUID(100, 7)).named(null);
+        var tag6 = aTag().createdBy(user.id()).withId(new UUID(100, 6)).named("ZZZ");
 
-        var tagsToAdd = List.of(tag1, tag2, tag3, tag4, tag5, tag6, tag7);
+        var tagsToAdd = List.of(tag1, tag2, tag3, tag4, tag5, tag6);
 
         return Stream.of(
                 Arguments.of(
@@ -304,58 +266,85 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
                         user,
                         tagsToAdd,
                         EntitySortCriteria.irrelevant(),
-                        List.of(tag1, tag2, tag3).stream().map(TagTestData::asDto).toList(),
-                        aPageId().with(Value.of(ID, ASC, tag4.id())),
-                        List.of(tag4, tag5, tag6).stream().map(TagTestData::asDto).toList(),
-                        aPageId().with(Value.of(ID, ASC, tag7.id())),
-                        List.of(tag7).stream().map(TagTestData::asDto).toList()
+                        List.of(
+                                new ExpectedPage(firstPage(), 3, List.of(tag1, tag2, tag3)),
+                                new ExpectedPage(
+                                        aPageId().with(Value.of(ID, ASC, tag4.id())),
+                                        100,
+                                        List.of(tag4, tag5, tag6)
+                                )
+                        )
                 ),
+
                 Arguments.of(
                         "NAME:ASC",
                         user,
                         tagsToAdd,
                         sortBy(NAME, ASC),
-                        List.of(tag4, tag5, tag6).stream().map(TagTestData::asDto).toList(),
-                        aPageId()
-                                .with(Value.of(NAME, ASC, tag7.name()))
-                                .with(Value.of(ID, ASC, tag7.id())),
-                        List.of(tag7, tag2, tag3).stream().map(TagTestData::asDto).toList(),
-                        aPageId()
-                                .with(Value.of(NAME, ASC, tag1.name()))
-                                .with(Value.of(ID, ASC, tag1.id())),
-                        List.of(tag1).stream().map(TagTestData::asDto).toList()
+                        List.of(
+                                new ExpectedPage(firstPage(), 3, List.of(tag4, tag5, tag2)),
+                                new ExpectedPage(
+                                        aPageId()
+                                                .with(Value.of(NAME, DESC, null))
+                                                .with(Value.of(ID, ASC, tag5.id())),
+                                        2,
+                                        List.of(tag5, tag2)
+                                ),
+                                new ExpectedPage(
+                                        aPageId()
+                                                .with(Value.of(NAME, DESC, ""))
+                                                .with(Value.of(ID, ASC, tag5.id())),
+                                        2,
+                                        List.of(tag5, tag2)
+                                ),
+                                new ExpectedPage(
+                                        aPageId()
+                                                .with(Value.of(NAME, DESC, tag2.name()))
+                                                .with(Value.of(ID, ASC, tag2.id())),
+                                        100,
+                                        List.of(tag2, tag3, tag1, tag6)
+                                )
+                        )
                 ),
-                Arguments.of(
-                        "NAME:DESC",
-                        user,
-                        tagsToAdd,
-                        sortBy(NAME, DESC),
-                        List.of(tag4, tag5, tag6).stream().map(TagTestData::asDto).toList(),
-                        aPageId()
-                                .with(Value.of(NAME, DESC, tag7.name()))
-                                .with(Value.of(ID, ASC, tag7.id())),
-                        List.of(tag7, tag1, tag2).stream().map(TagTestData::asDto).toList(),
-                        aPageId()
-                                .with(Value.of(NAME, DESC, tag3.name()))
-                                .with(Value.of(ID, ASC, tag3.id())),
-                        List.of(tag3).stream().map(TagTestData::asDto).toList()
-                        ),
+
                 Arguments.of(
                         "All criteria: [NAME:ASC]",
                         user,
                         tagsToAdd,
                         sortBy(NAME, ASC),
-                        List.of(tag4, tag5, tag6).stream().map(TagTestData::asDto).toList(),
-                        aPageId()
-                                .with(Value.of(NAME, ASC, tag7.name()))
-                                .with(Value.of(ID, ASC, tag7.id())),
-                        List.of(tag7, tag2, tag3).stream().map(TagTestData::asDto).toList(),
-                        aPageId()
-                                .with(Value.of(NAME, ASC, tag1.name()))
-                                .with(Value.of(ID, ASC, tag1.id())),
-                        List.of(tag1).stream().map(TagTestData::asDto).toList()
+                        List.of(
+                                new ExpectedPage(firstPage(), 3, List.of(tag4, tag5, tag2)),
+                                new ExpectedPage(
+                                        aPageId()
+                                                .with(Value.of(NAME, DESC, null))
+                                                .with(Value.of(ID, ASC, tag5.id())),
+                                        2,
+                                        List.of(tag5, tag2)
+                                ),
+                                new ExpectedPage(
+                                        aPageId()
+                                                .with(Value.of(NAME, DESC, ""))
+                                                .with(Value.of(ID, ASC, tag5.id())),
+                                        2,
+                                        List.of(tag5, tag2)
+                                ),
+                                new ExpectedPage(
+                                        aPageId()
+                                                .with(Value.of(NAME, DESC, tag2.name()))
+                                                .with(Value.of(ID, ASC, tag2.id())),
+                                        100,
+                                        List.of(tag2, tag3, tag1, tag6)
+                                )
+                        )
                 )
         );
+    }
+
+    private record ExpectedPage(EntitySearchPageId pageId, int pageSize, List<TagTestData> expectedResults) {
+
+        List<TagDto> expectedDTOs() {
+            return expectedResults.stream().map(TagTestData::asDto).toList();
+        }
     }
 
     @BeforeAll

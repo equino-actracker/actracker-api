@@ -20,6 +20,8 @@ import ovh.equino.actracker.jpa.tag.TagShareEntity_;
 
 import java.util.Optional;
 
+import static java.util.Objects.requireNonNullElse;
+
 final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection> {
 
     private final PredicateBuilder predicate;
@@ -32,7 +34,12 @@ final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection
         this.predicate = new PredicateBuilder();
         this.sort = new SortBuilder();
 
-        this.tagNameSortableField = criteriaBuilder.lower(root.get(TagEntity_.name));
+        this.tagNameSortableField = criteriaBuilder.lower(
+                criteriaBuilder.coalesce(
+                        root.get(TagEntity_.name),
+                        ""
+                )
+        );
     }
 
     @Override
@@ -120,7 +127,7 @@ final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection
                 return switch (sortableField) {
                     case NAME -> Optional.of(PageableValue.of(
                             tagNameSortableField,
-                            pageValue.value().toString().toLowerCase(),
+                            requireNonNullElse(pageValue.value(), "").toString().toLowerCase(),
                             PageableValue.PagingDirection.from(pageValue.sortOrder())
                     ));
                 };
