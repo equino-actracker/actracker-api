@@ -1,12 +1,13 @@
 package ovh.equino.actracker.datasource.jpa.tagset;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.Expression;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
 import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
 import ovh.equino.actracker.domain.EntitySearchPageId;
-import ovh.equino.actracker.domain.tagset.TagSetSearchCriteria;
+import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.tagset.TagSetEntity;
 import ovh.equino.actracker.jpa.tagset.TagSetEntity_;
@@ -87,16 +88,13 @@ final class SelectTagSetsQuery extends MultiResultJpaQuery<TagSetEntity, TagSetP
         protected Optional<PageableValue<? extends Comparable<?>>> entityPageableValue(
                 EntitySearchPageId.Value pageValue) {
 
-            if (pageValue.sortField() instanceof TagSetSearchCriteria.SortableField sortableField) {
-                return switch (sortableField) {
-                    case NAME -> Optional.of(PageableValue.of(
-                            root.get(TagSetEntity_.name),
-                            (String) pageValue.value(),
-                            PageableValue.PagingDirection.from(pageValue.sortOrder())
-                    ));
-                };
-            }
             return Optional.empty();
+        }
+
+        @Override
+        protected Optional<Expression<?>> entitySortableField(EntitySortCriteria.Field field) {
+            return Optional.empty();
+
         }
     }
 

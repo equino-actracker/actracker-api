@@ -64,8 +64,10 @@ class JpaTagDataSource extends JpaDAO implements TagDataSource {
     @Override
     public List<TagDto> find(TagSearchCriteria searchCriteria) {
 
-        SelectTagsQuery selectTags = new SelectTagsQuery(entityManager);
-        List<TagProjection> tagResults = selectTags
+        var selectTags = new SelectTagsQuery(entityManager);
+        var sortCriteria = selectTags.predicate().sortCriteria(searchCriteria.common().sortCriteria());
+
+        var tagResults = selectTags
                 .where(
                         selectTags.predicate().and(
                                 selectTags.predicate().isNotDeleted(),
@@ -75,18 +77,18 @@ class JpaTagDataSource extends JpaDAO implements TagDataSource {
                                 selectTags.predicate().matchesTerm(searchCriteria.term())
                         )
                 )
-                .orderBy(selectTags.sort().ascending("id"))
+                .orderBy(sortCriteria)
                 .limit(searchCriteria.common().pageSize())
                 .execute();
 
-        Set<UUID> foundTagIds = tagResults
+        var foundTagIds = tagResults
                 .stream()
                 .map(TagProjection::id)
                 .map(UUID::fromString)
                 .collect(toUnmodifiableSet());
 
-        SelectShareJoinTagQuery selectShareJoinTag = new SelectShareJoinTagQuery(entityManager);
-        Map<String, List<Share>> sharesByTagId = selectShareJoinTag
+        var selectShareJoinTag = new SelectShareJoinTagQuery(entityManager);
+        var sharesByTagId = selectShareJoinTag
                 .where(
                         selectShareJoinTag.predicate().and(
                                 selectShareJoinTag.predicate().hasTagIdIn(foundTagIds),
@@ -100,8 +102,8 @@ class JpaTagDataSource extends JpaDAO implements TagDataSource {
                         mapping(ShareJoinTagProjection::toShare, toList())
                 ));
 
-        SelectMetricJoinTagQuery selectMetricJoinTag = new SelectMetricJoinTagQuery(entityManager);
-        Map<String, List<MetricDto>> metricsByTagId = selectMetricJoinTag
+        var selectMetricJoinTag = new SelectMetricJoinTagQuery(entityManager);
+        var metricsByTagId = selectMetricJoinTag
                 .where(
                         selectMetricJoinTag.predicate().and(
                                 selectMetricJoinTag.predicate().hasTagIdIn(foundTagIds),

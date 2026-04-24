@@ -1,15 +1,13 @@
 package ovh.equino.actracker.datasource.jpa.activity;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.Subquery;
+import jakarta.persistence.criteria.*;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
 import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
 import ovh.equino.actracker.domain.EntitySearchPageId;
-import ovh.equino.actracker.domain.activity.ActivitySearchCriteria;
+import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.activity.ActivityEntity;
 import ovh.equino.actracker.jpa.activity.ActivityEntity_;
@@ -183,15 +181,11 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
         protected Optional<PageableValue<? extends Comparable<?>>> entityPageableValue(
                 EntitySearchPageId.Value pageValue) {
 
-            if (pageValue.sortField() instanceof ActivitySearchCriteria.SortableField sortableField) {
-                return switch (sortableField) {
-                    case TITLE -> Optional.of(PageableValue.of(
-                            root.get(ActivityEntity_.title),
-                            (String) pageValue.value(),
-                            PageableValue.PagingDirection.from(pageValue.sortOrder())
-                    ));
-                };
-            }
+            return Optional.empty();
+        }
+
+        @Override
+        protected Optional<Expression<?>> entitySortableField(EntitySortCriteria.Field field) {
             return Optional.empty();
         }
     }

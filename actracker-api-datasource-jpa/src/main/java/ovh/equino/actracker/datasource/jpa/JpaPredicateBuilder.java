@@ -1,22 +1,18 @@
 package ovh.equino.actracker.datasource.jpa;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.Path;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder.PageableValue.PagingDirection;
 import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.jpa.JpaEntity;
 import ovh.equino.actracker.jpa.JpaEntity_;
 
-import java.util.Collection;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toUnmodifiableSet;
+import static java.util.stream.Stream.concat;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -99,27 +95,89 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
         return or();
     }
 
+    public List<JpaSortCriteria> sortCriteria(EntitySortCriteria sortCriteria) {
+        return sortCriteria.levels().stream()
+                .map(level -> toSortCriterion(level.field()))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
+    }
+
+    private Optional<JpaSortCriteria> toSortCriterion(EntitySortCriteria.Field field) {
+        return sortableField(field).map(sortableField -> () -> criteriaBuilder.asc(sortableField));
+    }
+
+    private Optional<Expression<?>> sortableField(EntitySortCriteria.Field field) {
+        return commonSortableField(field)
+                .or(() -> entitySortableField(field))
+                .or(Optional::empty);
+    }
+
+    private Optional<Expression<?>> commonSortableField(EntitySortCriteria.Field field) {
+        if (field instanceof EntitySortCriteria.CommonField commonField) {
+            return switch (commonField) {
+                case ID -> Optional.of(root.get(JpaEntity_.id));
+            };
+        }
+        return Optional.empty();
+    }
+
+    protected abstract Optional<Expression<?>> entitySortableField(EntitySortCriteria.Field field);
+
     public JpaPredicate isInPage(EntitySearchPageId pageId) {
         if (pageId.isEmpty()) {
             return allMatch();
         }
-        var pagePredicates = pageId.values().stream()
+
+        var pageableValues = pageId.values().stream()
                 .map(this::toPageableValue)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .map(this::isAfterPageValueBoundary)
-                .toArray(JpaPredicate[]::new);
+                .toList();
 
-        return and(pagePredicates);
+        return isAfterPageValueBoundary(pageableValues);
     }
 
-    private <T extends Comparable<T>> JpaPredicate isAfterPageValueBoundary(PageableValue<T> pageableValue) {
-        return switch (pageableValue.pagingDirection()) {
-            case SKIP_LESSER -> () ->
-                    criteriaBuilder.greaterThanOrEqualTo(pageableValue.field(), pageableValue.value());
-            case SKIP_GREATER -> () ->
-                    criteriaBuilder.lessThanOrEqualTo(pageableValue.field(), pageableValue.value());
-        };
+    private JpaPredicate isAfterPageValueBoundary(
+            List<? extends PageableValue<? extends Comparable<?>>> pageableValues) {
+
+        if (isEmpty(pageableValues)) {
+            return allMatch();
+        }
+
+        var predicates = new LinkedList<JpaPredicate>();
+        var pageableValueIterator = pageableValues.iterator();
+        var alreadyHandledValues = new ArrayList<PageableValue<?>>();
+
+        while (pageableValueIterator.hasNext()) {
+            var pageableValue = pageableValueIterator.next();
+            predicates.add(
+                    predicateForNextValue(
+                            pageableValue,
+                            pageableValueIterator.hasNext(),
+                            alreadyHandledValues
+                    )
+            );
+            alreadyHandledValues.add(pageableValue);
+        }
+
+        return or(predicates.toArray(new JpaPredicate[]{}));
+    }
+
+    private <T extends Comparable<T>> JpaPredicate predicateForNextValue(PageableValue<T> pageableValue,
+                                                                         boolean isLast,
+                                                                         Collection<PageableValue<?>> handledValues) {
+
+        var handlePredicates = handledValues.stream()
+                .map(value -> (JpaPredicate) () -> criteriaBuilder.equal(value.field(), value.value()));
+
+        var newPredicate = isLast
+                ? (JpaPredicate) () -> criteriaBuilder.greaterThan(pageableValue.field, pageableValue.value)
+                : (JpaPredicate) () -> criteriaBuilder.greaterThanOrEqualTo(pageableValue.field, pageableValue.value);
+
+        var predicates = concat(handlePredicates, Stream.of(newPredicate)).toArray(JpaPredicate[]::new);
+
+        return and(predicates);
     }
 
     private Optional<PageableValue<? extends Comparable<?>>> toPageableValue(EntitySearchPageId.Value pageValue) {
@@ -133,7 +191,7 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
             return switch (commonField) {
                 case ID -> Optional.of(PageableValue.of(
                         root.get(JpaEntity_.id),
-                        (String) pageValue.value(),
+                        pageValue.value().toString(),
                         PagingDirection.from(pageValue.sortOrder()))
                 );
             };
@@ -144,9 +202,11 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
     protected abstract Optional<PageableValue<? extends Comparable<?>>> entityPageableValue(
             EntitySearchPageId.Value pageValue);
 
-    protected record PageableValue<T extends Comparable<T>>(Path<T> field, T value, PagingDirection pagingDirection) {
+    protected record PageableValue<T extends Comparable<T>>(Expression<T> field,
+                                                            T value,
+                                                            PagingDirection pagingDirection) {
 
-        public static <T extends Comparable<T>> PageableValue<T> of(Path<T> field,
+        public static <T extends Comparable<T>> PageableValue<T> of(Expression<T> field,
                                                                     T value,
                                                                     PagingDirection pagingDirection) {
 

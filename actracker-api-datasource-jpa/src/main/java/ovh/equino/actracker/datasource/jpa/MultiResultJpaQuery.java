@@ -36,6 +36,13 @@ public abstract class MultiResultJpaQuery<E extends JpaEntity, P> extends JpaQue
         return this;
     }
 
+    public final MultiResultJpaQuery<E, P> orderBy(List<JpaSortCriteria> sortCriteria) {
+        if (sortCriteria != null) {
+            this.sortCriteria = sortCriteria;
+        }
+        return this;
+    }
+
     @Override
     public final List<P> execute() {
         initProjection();

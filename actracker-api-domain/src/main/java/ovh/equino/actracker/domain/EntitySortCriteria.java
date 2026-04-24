@@ -33,6 +33,10 @@ public record EntitySortCriteria(
         return new EntitySortCriteria();
     }
 
+    public static EntitySortCriteria sortBy(Field field, Order order) {
+        return new EntitySortCriteria(new Level(field, order));
+    }
+
     public record Level(
             Field field,
             Order order

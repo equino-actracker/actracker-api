@@ -1,6 +1,7 @@
 package ovh.equino.actracker.datasource.jpa.dashboard;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Subquery;
@@ -9,6 +10,7 @@ import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
 import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
 import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
 import ovh.equino.actracker.domain.EntitySearchPageId;
+import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.dashboard.ChartEntity;
 import ovh.equino.actracker.jpa.dashboard.ChartEntity_;
@@ -115,6 +117,11 @@ final class SelectChartJoinTagQuery extends MultiResultJpaQuery<ChartEntity, Cha
         protected Optional<PageableValue<? extends Comparable<?>>> entityPageableValue(
                 EntitySearchPageId.Value pageValue) {
 
+            return Optional.empty();
+        }
+
+        @Override
+        protected Optional<Expression<?>> entitySortableField(EntitySortCriteria.Field field) {
             return Optional.empty();
         }
     }

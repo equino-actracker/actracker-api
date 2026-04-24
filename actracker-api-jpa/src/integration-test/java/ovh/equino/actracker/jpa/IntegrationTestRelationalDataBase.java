@@ -11,15 +11,14 @@ import ovh.equino.actracker.domain.tag.MetricDto;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tagset.TagSetDto;
 import ovh.equino.actracker.domain.tenant.TenantDto;
+import ovh.equino.actracker.jpa.tag.TagTestData;
+import ovh.equino.actracker.jpa.tenant.TenantTestData;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static java.util.Arrays.stream;
 import static java.util.Objects.isNull;
@@ -39,6 +38,18 @@ public abstract class IntegrationTestRelationalDataBase {
     protected abstract String driverClassName();
 
     protected abstract Connection getConnection() throws SQLException;
+
+    public synchronized void addUsersData(TenantTestData... users) throws SQLException {
+        addUsers(stream(users).map(TenantTestData::asDto).toList());
+    }
+
+    public synchronized void addUsersData(Collection<TenantTestData> users) throws SQLException {
+        addUsers(users.stream().map(TenantTestData::asDto).toList());
+    }
+
+    public synchronized void addUsers(Collection<TenantDto> users) throws SQLException {
+        addUsers(users.toArray(new TenantDto[]{}));
+    }
 
     public synchronized void addUsers(TenantDto... users) throws SQLException {
         List<TenantDto> notAddedUsers = stream(users)
@@ -108,6 +119,14 @@ public abstract class IntegrationTestRelationalDataBase {
                 preparedStatement.execute();
             }
         }
+    }
+
+    public synchronized void addTagsData(Collection<TagTestData> tags) throws SQLException {
+        addTags(tags.stream().map(TagTestData::asDto).toList());
+    }
+
+    public synchronized void addTags(Collection<TagDto> tags) throws SQLException {
+        addTags(tags.toArray(new TagDto[0]));
     }
 
     public synchronized void addTags(TagDto... tags) throws SQLException {
