@@ -88,25 +88,11 @@ final class SelectTagSetsQuery extends MultiResultJpaQuery<TagSetEntity, TagSetP
         protected Optional<PageableValue<? extends Comparable<?>>> entityPageableValue(
                 EntitySearchPageId.Value pageValue) {
 
-//            if (pageValue.sortField() instanceof TagSetSearchCriteria.SortableField sortableField) {
-//                return switch (sortableField) {
-//                    case NAME -> Optional.of(PageableValue.of(
-//                            root.get(TagSetEntity_.name),
-//                            (String) pageValue.value(),
-//                            PageableValue.PagingDirection.from(pageValue.sortOrder())
-//                    ));
-//                };
-//            }
             return Optional.empty();
         }
 
         @Override
         protected Optional<Expression<?>> entitySortableField(EntitySortCriteria.Field field) {
-//            if (field instanceof TagSetSearchCriteria.SortableField sortableField) {
-//                return switch (sortableField) {
-//                    case NAME -> Optional.of(root.get(TagSetEntity_.name));
-//                };
-//            }
             return Optional.empty();
 
         }

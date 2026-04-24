@@ -97,19 +97,14 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
 
     public List<JpaSortCriteria> sortCriteria(EntitySortCriteria sortCriteria) {
         return sortCriteria.levels().stream()
-                .map(level -> toSortCriterion(level.field(), level.order()))
+                .map(level -> toSortCriterion(level.field()))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList();
     }
 
-    private Optional<JpaSortCriteria> toSortCriterion(EntitySortCriteria.Field field, EntitySortCriteria.Order order) {
-        return sortableField(field).flatMap(sortableField ->
-                switch (order) {
-                    case ASC -> Optional.of(() -> criteriaBuilder.asc(sortableField));
-                    case DESC -> Optional.of(() -> criteriaBuilder.desc(sortableField));
-                }
-        );
+    private Optional<JpaSortCriteria> toSortCriterion(EntitySortCriteria.Field field) {
+        return sortableField(field).map(sortableField -> () -> criteriaBuilder.asc(sortableField));
     }
 
     private Optional<Expression<?>> sortableField(EntitySortCriteria.Field field) {

@@ -52,7 +52,6 @@ public record EntitySortCriteria(
     }
 
     public enum CommonField implements Field {
-        // TODO disable sort by ID
         ID
     }
 
