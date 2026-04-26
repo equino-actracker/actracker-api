@@ -98,7 +98,7 @@ final class SelectShareJoinDashboardQuery extends MultiResultJpaQuery<DashboardS
         }
 
         @Override
-        protected Optional<PageableValue<? extends Comparable<?>>> entityPageableValue(
+        protected Optional<PageableAttribute<? extends Comparable<?>>> entityPageableAttribute(
                 EntitySearchPageId.Value pageValue) {
 
             return Optional.empty();

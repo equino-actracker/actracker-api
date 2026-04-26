@@ -21,6 +21,8 @@ import ovh.equino.actracker.jpa.tag.TagShareEntity_;
 import java.util.Optional;
 
 import static java.util.Objects.requireNonNullElse;
+import static ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder.GREATEST_STRING;
+import static ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder.LOWEST_STRING;
 import static ovh.equino.actracker.domain.EntitySortCriteria.Order.DESC;
 
 final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection> {
@@ -39,13 +41,13 @@ final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection
         this.tagNameAscendingSortableAttribute = criteriaBuilder.lower(
                 criteriaBuilder.coalesce(
                         root.get(TagEntity_.name),
-                        ""
+                        LOWEST_STRING
                 )
         );
         this.tagNameDescendingSortableAttribute = criteriaBuilder.lower(
                 criteriaBuilder.coalesce(
                         root.get(TagEntity_.name),
-                        String.valueOf(Character.MAX_VALUE)
+                        GREATEST_STRING
                 )
         );
     }
@@ -129,15 +131,20 @@ final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection
         }
 
         @Override
-        protected Optional<PageableValue<? extends Comparable<?>>> entityPageableValue(
+        protected Optional<PageableAttribute<? extends Comparable<?>>> entityPageableAttribute(
                 EntitySearchPageId.Value pageValue) {
 
-            if (pageValue.sortField() instanceof TagSearchCriteria.SortableField sortableField) {
-                return switch (sortableField) {
-                    case NAME -> Optional.of(PageableValue.of(
-                            tagNameAscendingSortableAttribute,
-                            requireNonNullElse(pageValue.value(), "").toString().toLowerCase(),
-                            PageableValue.PagingDirection.from(pageValue.sortOrder())
+            if (pageValue.sortField() instanceof TagSearchCriteria.SortableField sortableAttribute) {
+                var sortDirection = pageValue.sortOrder();
+                return switch (sortableAttribute) {
+                    case NAME -> Optional.of(PageableAttribute.of(
+                            sortDirection == DESC
+                                    ? tagNameDescendingSortableAttribute
+                                    : tagNameAscendingSortableAttribute,
+                            sortDirection == DESC
+                                    ? requireNonNullElse(pageValue.value(), GREATEST_STRING).toString().toLowerCase()
+                                    : requireNonNullElse(pageValue.value(), LOWEST_STRING).toString().toLowerCase(),
+                            PageableAttribute.Direction.from(sortDirection)
                     ));
                 };
             }

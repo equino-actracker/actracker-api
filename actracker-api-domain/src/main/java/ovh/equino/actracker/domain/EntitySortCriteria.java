@@ -16,7 +16,8 @@ public record EntitySortCriteria(
 
     public EntitySortCriteria {
         levels = new LinkedList<>(requireNonNullElse(levels, emptyList()));
-        levels.addLast(sortGuard());
+        var firstCriterionDirection = !levels.isEmpty() ? levels.getFirst().order : ASC;
+        levels.addLast(sortGuard(firstCriterionDirection));
     }
 
     public EntitySortCriteria(Level... levels) {
@@ -60,7 +61,7 @@ public record EntitySortCriteria(
         DESC
     }
 
-    private Level sortGuard() {
-        return new Level(ID, ASC);
+    private Level sortGuard(Order firstCriterionDirection) {
+        return new Level(ID, firstCriterionDirection);
     }
 }

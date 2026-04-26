@@ -100,7 +100,7 @@ final class SelectChartJoinDashboardQuery extends MultiResultJpaQuery<ChartEntit
         }
 
         @Override
-        protected Optional<PageableValue<? extends Comparable<?>>> entityPageableValue(
+        protected Optional<PageableAttribute<? extends Comparable<?>>> entityPageableAttribute(
                 EntitySearchPageId.Value pageValue) {
 
             return Optional.empty();

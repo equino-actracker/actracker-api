@@ -100,7 +100,7 @@ final class SelectMetricJoinTagQuery extends MultiResultJpaQuery<MetricEntity, M
         }
 
         @Override
-        protected Optional<PageableValue<? extends Comparable<?>>> entityPageableValue(
+        protected Optional<PageableAttribute<? extends Comparable<?>>> entityPageableAttribute(
                 EntitySearchPageId.Value pageValue) {
 
             return Optional.empty();

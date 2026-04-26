@@ -128,7 +128,7 @@ final class SelectTagSetJoinTagQuery extends MultiResultJpaQuery<TagSetEntity, T
         }
 
         @Override
-        protected Optional<PageableValue<? extends Comparable<?>>> entityPageableValue(
+        protected Optional<PageableAttribute<? extends Comparable<?>>> entityPageableAttribute(
                 EntitySearchPageId.Value pageValue) {
 
             return Optional.empty();

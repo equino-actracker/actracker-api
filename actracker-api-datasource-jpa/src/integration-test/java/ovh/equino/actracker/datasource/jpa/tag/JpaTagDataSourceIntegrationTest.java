@@ -292,13 +292,6 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
                                 ),
                                 new ExpectedPage(
                                         aPageId()
-                                                .with(Value.of(NAME, ASC, ""))
-                                                .with(Value.of(ID, ASC, tag5.id())),
-                                        2,
-                                        List.of(tag5, tag2)
-                                ),
-                                new ExpectedPage(
-                                        aPageId()
                                                 .with(Value.of(NAME, ASC, tag2.name()))
                                                 .with(Value.of(ID, ASC, tag2.id())),
                                         100,
@@ -323,13 +316,6 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
                                 ),
                                 new ExpectedPage(
                                         aPageId()
-                                                .with(Value.of(NAME, DESC, ""))
-                                                .with(Value.of(ID, DESC, tag4.id())),
-                                        2,
-                                        List.of(tag4, tag6)
-                                ),
-                                new ExpectedPage(
-                                        aPageId()
                                                 .with(Value.of(NAME, DESC, tag6.name()))
                                                 .with(Value.of(ID, DESC, tag6.id())),
                                         100,
@@ -348,13 +334,6 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
                                 new ExpectedPage(
                                         aPageId()
                                                 .with(Value.of(NAME, DESC, null))
-                                                .with(Value.of(ID, DESC, tag4.id())),
-                                        2,
-                                        List.of(tag4, tag6)
-                                ),
-                                new ExpectedPage(
-                                        aPageId()
-                                                .with(Value.of(NAME, DESC, ""))
                                                 .with(Value.of(ID, DESC, tag4.id())),
                                         2,
                                         List.of(tag4, tag6)
