@@ -21,23 +21,31 @@ import ovh.equino.actracker.jpa.tag.TagShareEntity_;
 import java.util.Optional;
 
 import static java.util.Objects.requireNonNullElse;
+import static ovh.equino.actracker.domain.EntitySortCriteria.Order.DESC;
 
 final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection> {
 
     private final PredicateBuilder predicate;
     private final SortBuilder sort;
 
-    private final Expression<String> tagNameSortableField;
+    private final Expression<String> tagNameAscendingSortableAttribute;
+    private final Expression<String> tagNameDescendingSortableAttribute;
 
     SelectTagsQuery(EntityManager entityManager) {
         super(entityManager);
         this.predicate = new PredicateBuilder();
         this.sort = new SortBuilder();
 
-        this.tagNameSortableField = criteriaBuilder.lower(
+        this.tagNameAscendingSortableAttribute = criteriaBuilder.lower(
                 criteriaBuilder.coalesce(
                         root.get(TagEntity_.name),
                         ""
+                )
+        );
+        this.tagNameDescendingSortableAttribute = criteriaBuilder.lower(
+                criteriaBuilder.coalesce(
+                        root.get(TagEntity_.name),
+                        String.valueOf(Character.MAX_VALUE)
                 )
         );
     }
@@ -50,7 +58,8 @@ final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection
                                 root.get(TagEntity_.id),
                                 root.get(TagEntity_.creatorId),
                                 root.get(TagEntity_.name),
-                                tagNameSortableField,
+                                tagNameAscendingSortableAttribute,
+                                tagNameDescendingSortableAttribute,
                                 root.get(TagEntity_.deleted)
                         )
                 )
@@ -126,7 +135,7 @@ final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection
             if (pageValue.sortField() instanceof TagSearchCriteria.SortableField sortableField) {
                 return switch (sortableField) {
                     case NAME -> Optional.of(PageableValue.of(
-                            tagNameSortableField,
+                            tagNameAscendingSortableAttribute,
                             requireNonNullElse(pageValue.value(), "").toString().toLowerCase(),
                             PageableValue.PagingDirection.from(pageValue.sortOrder())
                     ));
@@ -136,10 +145,12 @@ final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection
         }
 
         @Override
-        protected Optional<Expression<?>> entitySortableField(EntitySortCriteria.Field field) {
-            if (field instanceof TagSearchCriteria.SortableField sortableField) {
-                return switch (sortableField) {
-                    case NAME -> Optional.of(tagNameSortableField);
+        protected Optional<Expression<?>> entitySortableAttribute(EntitySortCriteria.Level sortCriterion) {
+            if (sortCriterion.field() instanceof TagSearchCriteria.SortableField sortableAttribute) {
+                return switch (sortableAttribute) {
+                    case NAME -> DESC == sortCriterion.order()
+                            ? Optional.of(tagNameDescendingSortableAttribute)
+                            : Optional.of(tagNameAscendingSortableAttribute);
                 };
             }
             return Optional.empty();

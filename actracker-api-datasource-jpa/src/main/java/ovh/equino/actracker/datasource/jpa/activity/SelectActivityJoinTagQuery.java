@@ -135,7 +135,7 @@ final class SelectActivityJoinTagQuery extends MultiResultJpaQuery<ActivityEntit
         }
 
         @Override
-        protected Optional<Expression<?>> entitySortableField(EntitySortCriteria.Field field) {
+        protected Optional<Expression<?>> entitySortableAttribute(EntitySortCriteria.Level sortCriterion) {
             return Optional.empty();
         }
     }

@@ -97,24 +97,28 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
 
     public List<JpaSortCriteria> sortCriteria(EntitySortCriteria sortCriteria) {
         return sortCriteria.levels().stream()
-                .map(level -> toSortCriterion(level.field()))
+                .map(this::toSortCriterion)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList();
     }
 
-    private Optional<JpaSortCriteria> toSortCriterion(EntitySortCriteria.Field field) {
-        return sortableField(field).map(sortableField -> () -> criteriaBuilder.asc(sortableField));
+    private Optional<JpaSortCriteria> toSortCriterion(EntitySortCriteria.Level sortCriterion) {
+        return sortableAttribute(sortCriterion)
+                .map(sortableAttribute -> () -> switch (sortCriterion.order()) {
+                    case ASC -> criteriaBuilder.asc(sortableAttribute);
+                    case DESC -> criteriaBuilder.desc(sortableAttribute);
+                });
     }
 
-    private Optional<Expression<?>> sortableField(EntitySortCriteria.Field field) {
-        return commonSortableField(field)
-                .or(() -> entitySortableField(field))
+    private Optional<Expression<?>> sortableAttribute(EntitySortCriteria.Level sortCriterion) {
+        return commonSortableAttribute(sortCriterion)
+                .or(() -> entitySortableAttribute(sortCriterion))
                 .or(Optional::empty);
     }
 
-    private Optional<Expression<?>> commonSortableField(EntitySortCriteria.Field field) {
-        if (field instanceof EntitySortCriteria.CommonField commonField) {
+    private Optional<Expression<?>> commonSortableAttribute(EntitySortCriteria.Level sortCriterion) {
+        if (sortCriterion.field() instanceof EntitySortCriteria.CommonField commonField) {
             return switch (commonField) {
                 case ID -> Optional.of(root.get(JpaEntity_.id));
             };
@@ -122,7 +126,7 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
         return Optional.empty();
     }
 
-    protected abstract Optional<Expression<?>> entitySortableField(EntitySortCriteria.Field field);
+    protected abstract Optional<Expression<?>> entitySortableAttribute(EntitySortCriteria.Level sortCriterion);
 
     public JpaPredicate isInPage(EntitySearchPageId pageId) {
         if (pageId.isEmpty()) {

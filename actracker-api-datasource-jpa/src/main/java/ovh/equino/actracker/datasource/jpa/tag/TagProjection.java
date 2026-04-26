@@ -7,10 +7,15 @@ import ovh.equino.actracker.domain.tag.TagDto;
 import java.util.List;
 import java.util.UUID;
 
-record TagProjection(String id, String creatorId, String name, String nameSortable, Boolean deleted) {
+record TagProjection(String id,
+                     String creatorId,
+                     String name,
+                     String nameSortableAscending,
+                     String nameSortableDescending,
+                     Boolean deleted) {
 
     TagProjection(String id, String creatorId, String name, Boolean deleted) {
-        this(id, creatorId, name, null, deleted);
+        this(id, creatorId, name, null, null, deleted);
     }
 
     TagDto toTag(List<Share> shares, List<MetricDto> metrics) {
