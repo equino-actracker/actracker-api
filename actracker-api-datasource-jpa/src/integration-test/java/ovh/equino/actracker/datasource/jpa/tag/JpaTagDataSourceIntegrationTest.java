@@ -306,7 +306,6 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
                         tagsToAdd,
                         sortBy(NAME, DESC),
                         List.of(
-                                new ExpectedPage(firstPage(), 6, List.of(tag5, tag4, tag6, tag1, tag3, tag2)), // TODO remove
                                 new ExpectedPage(firstPage(), 3, List.of(tag5, tag4, tag6)),
                                 new ExpectedPage(
                                         aPageId()

@@ -10,14 +10,12 @@ import java.util.UUID;
 record TagProjection(String id,
                      String creatorId,
                      String name,
-                     String nameSortableAscending,
-                     String nameSortableDescending,
                      String tagNameLowerCase,
                      Integer tagNameNullWeight,
                      Boolean deleted) {
 
     TagProjection(String id, String creatorId, String name, Boolean deleted) {
-        this(id, creatorId, name, null, null, null, null, deleted);
+        this(id, creatorId, name, null, null, deleted);
     }
 
     TagDto toTag(List<Share> shares, List<MetricDto> metrics) {

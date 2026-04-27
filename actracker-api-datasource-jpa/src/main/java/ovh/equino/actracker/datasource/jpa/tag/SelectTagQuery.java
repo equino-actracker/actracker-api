@@ -1,7 +1,6 @@
 package ovh.equino.actracker.datasource.jpa.tag;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Subquery;
@@ -18,7 +17,6 @@ import ovh.equino.actracker.jpa.tag.TagShareEntity;
 import ovh.equino.actracker.jpa.tag.TagShareEntity_;
 
 import java.util.List;
-import java.util.Optional;
 
 import static java.util.Collections.emptyList;
 
@@ -102,24 +100,12 @@ class SelectTagQuery extends SingleResultJpaQuery<TagEntity, TagProjection> {
         }
 
         @Override
-        protected Optional<PageableAttribute<? extends Comparable<?>>> entityPageableAttribute(
-                EntitySearchPageId.Value pageValue) {
-
-            return Optional.empty();
-        }
-
-        @Override
         protected List<JpaSortCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion) {
             return emptyList();
         }
 
         @Override
-        protected Optional<Expression<?>> entitySortableAttribute(EntitySortCriteria.Level sortCriterion) {
-            return Optional.empty();
-        }
-
-        @Override
-        protected List<PageableAttribute<? extends Comparable<?>>> toEntityPageConditions(EntitySearchPageId.Value pageAttribute) {
+        protected List<PageCondition<? extends Comparable<?>>> toEntityPageConditions(EntitySearchPageId.Value pageAttribute) {
             return emptyList();
         }
     }

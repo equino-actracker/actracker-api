@@ -95,24 +95,12 @@ final class SelectChartJoinDashboardQuery extends MultiResultJpaQuery<ChartEntit
         }
 
         @Override
-        protected Optional<PageableAttribute<? extends Comparable<?>>> entityPageableAttribute(
-                EntitySearchPageId.Value pageValue) {
-
-            return Optional.empty();
-        }
-
-        @Override
         protected List<JpaSortCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion) {
             return emptyList();
         }
 
         @Override
-        protected Optional<Expression<?>> entitySortableAttribute(EntitySortCriteria.Level sortCriterion) {
-            return Optional.empty();
-        }
-
-        @Override
-        protected List<PageableAttribute<? extends Comparable<?>>> toEntityPageConditions(EntitySearchPageId.Value pageAttribute) {
+        protected List<PageCondition<? extends Comparable<?>>> toEntityPageConditions(EntitySearchPageId.Value pageAttribute) {
             return emptyList();
         }
     }

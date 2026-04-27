@@ -73,22 +73,10 @@ final class SelectTenantQuery extends SingleResultJpaQuery<TenantEntity, TenantP
         }
 
         @Override
-        protected Optional<Expression<?>> entitySortableAttribute(EntitySortCriteria.Level sortCriterion) {
-            return Optional.empty();
-        }
-
-        @Override
-        protected List<PageableAttribute<? extends Comparable<?>>> toEntityPageConditions(
+        protected List<PageCondition<? extends Comparable<?>>> toEntityPageConditions(
                 EntitySearchPageId.Value pageAttribute) {
 
             return emptyList();
-        }
-
-        @Override
-        protected Optional<PageableAttribute<? extends Comparable<?>>> entityPageableAttribute(
-                EntitySearchPageId.Value pageValue) {
-
-            return Optional.empty();
         }
     }
 }

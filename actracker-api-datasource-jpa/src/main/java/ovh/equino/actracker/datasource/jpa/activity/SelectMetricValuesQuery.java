@@ -14,7 +14,6 @@ import ovh.equino.actracker.jpa.tag.*;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static jakarta.persistence.criteria.JoinType.INNER;
@@ -131,24 +130,12 @@ final class SelectMetricValuesQuery extends MultiResultJpaQuery<MetricValueEntit
         }
 
         @Override
-        protected Optional<PageableAttribute<? extends Comparable<?>>> entityPageableAttribute(
-                EntitySearchPageId.Value pageValue) {
-
-            return Optional.empty();
-        }
-
-        @Override
         protected List<JpaSortCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion) {
             return emptyList();
         }
 
         @Override
-        protected Optional<Expression<?>> entitySortableAttribute(EntitySortCriteria.Level sortCriterion) {
-            return Optional.empty();
-        }
-
-        @Override
-        protected List<PageableAttribute<? extends Comparable<?>>> toEntityPageConditions(
+        protected List<PageCondition<? extends Comparable<?>>> toEntityPageConditions(
                 EntitySearchPageId.Value pageAttribute) {
 
             return emptyList();
