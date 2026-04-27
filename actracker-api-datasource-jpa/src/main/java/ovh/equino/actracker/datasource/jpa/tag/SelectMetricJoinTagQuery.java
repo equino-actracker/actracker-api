@@ -3,10 +3,7 @@ package ovh.equino.actracker.datasource.jpa.tag;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
-import ovh.equino.actracker.datasource.jpa.JpaPredicate;
-import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
-import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
-import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
+import ovh.equino.actracker.datasource.jpa.*;
 import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.jpa.tag.MetricEntity;
@@ -14,12 +11,10 @@ import ovh.equino.actracker.jpa.tag.MetricEntity_;
 import ovh.equino.actracker.jpa.tag.TagEntity;
 import ovh.equino.actracker.jpa.tag.TagEntity_;
 
-import java.util.Collection;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static jakarta.persistence.criteria.JoinType.INNER;
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 
 final class SelectMetricJoinTagQuery extends MultiResultJpaQuery<MetricEntity, MetricJoinTagProjection> {
@@ -107,8 +102,18 @@ final class SelectMetricJoinTagQuery extends MultiResultJpaQuery<MetricEntity, M
         }
 
         @Override
+        protected List<JpaSortCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion) {
+            return emptyList();
+        }
+
+        @Override
         protected Optional<Expression<?>> entitySortableAttribute(EntitySortCriteria.Level sortCriterion) {
             return Optional.empty();
+        }
+
+        @Override
+        protected List<PageableAttribute<? extends Comparable<?>>> toEntityPageConditions(EntitySearchPageId.Value pageAttribute) {
+            return emptyList();
         }
     }
 }

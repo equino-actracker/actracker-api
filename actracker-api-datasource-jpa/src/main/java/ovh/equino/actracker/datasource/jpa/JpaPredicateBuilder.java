@@ -1,7 +1,7 @@
 package ovh.equino.actracker.datasource.jpa;
 
 import jakarta.persistence.criteria.*;
-import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder.PageableAttribute.Direction;
+import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder.PageableAttribute.Relation;
 import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.jpa.JpaEntity;
@@ -11,14 +11,20 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.stream;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static java.util.stream.Stream.concat;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static ovh.equino.actracker.domain.EntitySortCriteria.Order.DESC;
 
 public abstract class JpaPredicateBuilder<E extends JpaEntity> {
 
+    // TODO remove
     public static final String LOWEST_STRING = "";
+    // TODO remove
     public static final String GREATEST_STRING = String.valueOf(Character.MAX_VALUE);
 
     private final CriteriaBuilder criteriaBuilder;
@@ -100,11 +106,31 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
 
     public List<JpaSortCriteria> sortCriteria(EntitySortCriteria sortCriteria) {
         return sortCriteria.levels().stream()
-                .map(this::toSortCriterion)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .map(this::toOrderCriteria)
+                .flatMap(List::stream)
                 .toList();
     }
+
+    private List<JpaSortCriteria> toOrderCriteria(EntitySortCriteria.Level sortCriterion) {
+        var commonOrderCriteria = toCommonOrderCriteria(sortCriterion);
+        if (isNotEmpty(commonOrderCriteria)) {
+            return commonOrderCriteria;
+        }
+        return toEntityOrderCriteria(sortCriterion);
+    }
+
+    private List<JpaSortCriteria> toCommonOrderCriteria(EntitySortCriteria.Level sortCriterion) {
+        if (sortCriterion.field() instanceof EntitySortCriteria.CommonField commonField) {
+            return switch (commonField) {
+                case ID -> DESC == sortCriterion.order()
+                        ? singletonList(() -> criteriaBuilder.desc(root.get(JpaEntity_.id)))
+                        : singletonList(() -> criteriaBuilder.asc(root.get(JpaEntity_.id)));
+            };
+        }
+        return emptyList();
+    }
+
+    protected abstract List<JpaSortCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion);
 
     private Optional<JpaSortCriteria> toSortCriterion(EntitySortCriteria.Level sortCriterion) {
         return sortableAttribute(sortCriterion)
@@ -142,55 +168,86 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
                 .map(Optional::get)
                 .toList();
 
-        return isInPage(pageableAttributes);
+        var pageConditions = pageId.values().stream()
+                .map(this::toPageConditions)
+                .flatMap(List::stream)
+                .toList();
+
+        return isInPage(pageConditions);
     }
 
     private JpaPredicate isInPage(
-            List<? extends PageableAttribute<? extends Comparable<?>>> pageableValues) {
+            List<? extends PageableAttribute<? extends Comparable<?>>> pageConditions) {
 
-        if (isEmpty(pageableValues)) {
+        if (isEmpty(pageConditions)) {
             return allMatch();
         }
 
         var predicates = new LinkedList<JpaPredicate>();
-        var pageableValueIterator = pageableValues.iterator();
-        var alreadyHandledValues = new ArrayList<PageableAttribute<?>>();
+        var pageConditionsIterator = pageConditions.iterator();
+        var alreadyHandledConditions = new ArrayList<PageableAttribute<?>>();
 
-        while (pageableValueIterator.hasNext()) {
-            var pageableValue = pageableValueIterator.next();
+        while (pageConditionsIterator.hasNext()) {
+            var pageCondition = pageConditionsIterator.next();
             predicates.add(
-                    predicateForNextValue(
-                            pageableValue,
-                            pageableValueIterator.hasNext(),
-                            alreadyHandledValues
+                    predicateForNextCondition(
+                            pageCondition,
+                            pageConditionsIterator.hasNext(),
+                            alreadyHandledConditions
                     )
             );
-            alreadyHandledValues.add(pageableValue);
+            alreadyHandledConditions.add(pageCondition);
         }
 
         return or(predicates.toArray(new JpaPredicate[]{}));
     }
 
-    private <T extends Comparable<T>> JpaPredicate predicateForNextValue(PageableAttribute<T> pageableAttribute,
-                                                                         boolean isLast,
-                                                                         Collection<PageableAttribute<?>> handledValues) {
+    private <T extends Comparable<T>> JpaPredicate predicateForNextCondition(PageableAttribute<T> pageCondition,
+                                                                             boolean isLast,
+                                                                             Collection<PageableAttribute<?>> handledConditions) {
 
-        var handlePredicates = handledValues.stream()
+        var handledPredicates = handledConditions.stream()
                 .map(value -> (JpaPredicate) () -> criteriaBuilder.equal(value.field(), value.value()));
 
-        var newPredicate = switch (pageableAttribute.direction()) {
-            case ASC -> isLast
-                    ? (JpaPredicate) () -> criteriaBuilder.greaterThan(pageableAttribute.field, pageableAttribute.value)
-                    : (JpaPredicate) () -> criteriaBuilder.greaterThanOrEqualTo(pageableAttribute.field, pageableAttribute.value);
-            case DESC -> isLast
-                    ? (JpaPredicate) () -> criteriaBuilder.lessThan(pageableAttribute.field, pageableAttribute.value)
-                    : (JpaPredicate) () -> criteriaBuilder.lessThanOrEqualTo(pageableAttribute.field, pageableAttribute.value);
+        var newPredicate = switch (pageCondition.relation()) {
+            case GTE -> isLast
+                    ? (JpaPredicate) () -> criteriaBuilder.greaterThan(pageCondition.field, pageCondition.value)
+                    : (JpaPredicate) () -> criteriaBuilder.greaterThanOrEqualTo(pageCondition.field, pageCondition.value);
+            case LTE -> isLast
+                    ? (JpaPredicate) () -> criteriaBuilder.lessThan(pageCondition.field, pageCondition.value)
+                    : (JpaPredicate) () -> criteriaBuilder.lessThanOrEqualTo(pageCondition.field, pageCondition.value);
         };
 
-        var predicates = concat(handlePredicates, Stream.of(newPredicate)).toArray(JpaPredicate[]::new);
+        var predicates = concat(handledPredicates, Stream.of(newPredicate)).toArray(JpaPredicate[]::new);
 
         return and(predicates);
     }
+
+    private List<PageableAttribute<? extends Comparable<?>>> toPageConditions(EntitySearchPageId.Value pageAttribute) {
+        var commonPageConditions = toCommonPageConditions(pageAttribute);
+        if (isNotEmpty(commonPageConditions)) {
+            return commonPageConditions;
+        }
+        return toEntityPageConditions(pageAttribute);
+    }
+
+    private List<PageableAttribute<? extends Comparable<?>>> toCommonPageConditions(
+            EntitySearchPageId.Value pageAttribute) {
+
+        if (pageAttribute.sortField() instanceof EntitySortCriteria.CommonField commonField) {
+            return switch (commonField) {
+                case ID -> singletonList(PageableAttribute.of(
+                        root.get(JpaEntity_.id),
+                        pageAttribute.value().toString(),
+                        Relation.from(pageAttribute.sortOrder()))
+                );
+            };
+        }
+        return emptyList();
+    }
+
+    protected abstract List<PageableAttribute<? extends Comparable<?>>> toEntityPageConditions(
+            EntitySearchPageId.Value pageAttribute);
 
     private Optional<PageableAttribute<? extends Comparable<?>>> toPageableAttribute(
             EntitySearchPageId.Value pageAttribute) {
@@ -208,7 +265,7 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
                 case ID -> Optional.of(PageableAttribute.of(
                         root.get(JpaEntity_.id),
                         pageAttribute.value().toString(),
-                        Direction.from(pageAttribute.sortOrder()))
+                        Relation.from(pageAttribute.sortOrder()))
                 );
             };
         }
@@ -218,25 +275,26 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
     protected abstract Optional<PageableAttribute<? extends Comparable<?>>> entityPageableAttribute(
             EntitySearchPageId.Value pageValue);
 
+    // TODO rename to page condition
     protected record PageableAttribute<T extends Comparable<T>>(Expression<T> field,
                                                                 T value,
-                                                                Direction direction) {
+                                                                Relation relation) {
 
         public static <T extends Comparable<T>> PageableAttribute<T> of(Expression<T> field,
                                                                         T value,
-                                                                        Direction direction) {
+                                                                        Relation relation) {
 
-            return new PageableAttribute<>(field, value, direction);
+            return new PageableAttribute<>(field, value, relation);
         }
 
-        public enum Direction {
-            DESC,
-            ASC;
+        public enum Relation {
+            LTE,
+            GTE;
 
-            public static Direction from(EntitySortCriteria.Order sortOrder) {
+            public static Relation from(EntitySortCriteria.Order sortOrder) {
                 return switch (sortOrder) {
-                    case ASC -> ASC;
-                    case DESC -> DESC;
+                    case ASC -> GTE;
+                    case DESC -> LTE;
                 };
             }
         }

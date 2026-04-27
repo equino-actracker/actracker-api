@@ -7,6 +7,7 @@ import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Subquery;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
+import ovh.equino.actracker.datasource.jpa.JpaSortCriteria;
 import ovh.equino.actracker.datasource.jpa.SingleResultJpaQuery;
 import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySortCriteria;
@@ -16,7 +17,10 @@ import ovh.equino.actracker.jpa.tag.TagEntity_;
 import ovh.equino.actracker.jpa.tag.TagShareEntity;
 import ovh.equino.actracker.jpa.tag.TagShareEntity_;
 
+import java.util.List;
 import java.util.Optional;
+
+import static java.util.Collections.emptyList;
 
 class SelectTagQuery extends SingleResultJpaQuery<TagEntity, TagProjection> {
 
@@ -105,8 +109,18 @@ class SelectTagQuery extends SingleResultJpaQuery<TagEntity, TagProjection> {
         }
 
         @Override
+        protected List<JpaSortCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion) {
+            return emptyList();
+        }
+
+        @Override
         protected Optional<Expression<?>> entitySortableAttribute(EntitySortCriteria.Level sortCriterion) {
             return Optional.empty();
+        }
+
+        @Override
+        protected List<PageableAttribute<? extends Comparable<?>>> toEntityPageConditions(EntitySearchPageId.Value pageAttribute) {
+            return emptyList();
         }
     }
 }

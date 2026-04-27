@@ -5,10 +5,7 @@ import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Subquery;
-import ovh.equino.actracker.datasource.jpa.JpaPredicate;
-import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
-import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
-import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
+import ovh.equino.actracker.datasource.jpa.*;
 import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.user.User;
@@ -17,7 +14,10 @@ import ovh.equino.actracker.jpa.dashboard.DashboardEntity_;
 import ovh.equino.actracker.jpa.dashboard.DashboardShareEntity;
 import ovh.equino.actracker.jpa.dashboard.DashboardShareEntity_;
 
+import java.util.List;
 import java.util.Optional;
+
+import static java.util.Collections.emptyList;
 
 final class SelectDashboardsQuery extends MultiResultJpaQuery<DashboardEntity, DashboardProjection> {
 
@@ -110,8 +110,18 @@ final class SelectDashboardsQuery extends MultiResultJpaQuery<DashboardEntity, D
         }
 
         @Override
+        protected List<JpaSortCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion) {
+            return emptyList();
+        }
+
+        @Override
         protected Optional<Expression<?>> entitySortableAttribute(EntitySortCriteria.Level sortCriterion) {
             return Optional.empty();
+        }
+
+        @Override
+        protected List<PageableAttribute<? extends Comparable<?>>> toEntityPageConditions(EntitySearchPageId.Value pageAttribute) {
+            return emptyList();
         }
     }
 

@@ -4,13 +4,17 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Expression;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
+import ovh.equino.actracker.datasource.jpa.JpaSortCriteria;
 import ovh.equino.actracker.datasource.jpa.SingleResultJpaQuery;
 import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.jpa.tenant.TenantEntity;
 import ovh.equino.actracker.jpa.tenant.TenantEntity_;
 
+import java.util.List;
 import java.util.Optional;
+
+import static java.util.Collections.emptyList;
 
 final class SelectTenantQuery extends SingleResultJpaQuery<TenantEntity, TenantProjection> {
 
@@ -64,8 +68,20 @@ final class SelectTenantQuery extends SingleResultJpaQuery<TenantEntity, TenantP
         }
 
         @Override
+        protected List<JpaSortCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion) {
+            return emptyList();
+        }
+
+        @Override
         protected Optional<Expression<?>> entitySortableAttribute(EntitySortCriteria.Level sortCriterion) {
             return Optional.empty();
+        }
+
+        @Override
+        protected List<PageableAttribute<? extends Comparable<?>>> toEntityPageConditions(
+                EntitySearchPageId.Value pageAttribute) {
+
+            return emptyList();
         }
 
         @Override

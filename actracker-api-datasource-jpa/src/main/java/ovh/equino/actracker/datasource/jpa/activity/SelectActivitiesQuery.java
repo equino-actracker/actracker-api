@@ -1,11 +1,11 @@
 package ovh.equino.actracker.datasource.jpa.activity;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.*;
-import ovh.equino.actracker.datasource.jpa.JpaPredicate;
-import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
-import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
-import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Subquery;
+import ovh.equino.actracker.datasource.jpa.*;
 import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.user.User;
@@ -17,10 +17,12 @@ import ovh.equino.actracker.jpa.tag.TagShareEntity;
 import ovh.equino.actracker.jpa.tag.TagShareEntity_;
 
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import static java.util.Collections.emptyList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, ActivityProjection> {
@@ -185,8 +187,18 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
         }
 
         @Override
+        protected List<JpaSortCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion) {
+            return emptyList();
+        }
+
+        @Override
         protected Optional<Expression<?>> entitySortableAttribute(EntitySortCriteria.Level sortCriterion) {
             return Optional.empty();
+        }
+
+        @Override
+        protected List<PageableAttribute<? extends Comparable<?>>> toEntityPageConditions(EntitySearchPageId.Value pageAttribute) {
+            return emptyList();
         }
     }
 
