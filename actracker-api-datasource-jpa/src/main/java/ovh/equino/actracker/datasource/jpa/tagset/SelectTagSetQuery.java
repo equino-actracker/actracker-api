@@ -1,9 +1,9 @@
 package ovh.equino.actracker.datasource.jpa.tagset;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.Expression;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
+import ovh.equino.actracker.datasource.jpa.JpaSortCriteria;
 import ovh.equino.actracker.datasource.jpa.SingleResultJpaQuery;
 import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySortCriteria;
@@ -11,7 +11,9 @@ import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.tagset.TagSetEntity;
 import ovh.equino.actracker.jpa.tagset.TagSetEntity_;
 
-import java.util.Optional;
+import java.util.List;
+
+import static java.util.Collections.emptyList;
 
 final class SelectTagSetQuery extends SingleResultJpaQuery<TagSetEntity, TagSetProjection> {
 
@@ -79,15 +81,13 @@ final class SelectTagSetQuery extends SingleResultJpaQuery<TagSetEntity, TagSetP
         }
 
         @Override
-        protected Optional<PageableValue<? extends Comparable<?>>> entityPageableValue(
-                EntitySearchPageId.Value pageValue) {
-
-            return Optional.empty();
+        protected List<JpaSortCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion) {
+            return emptyList();
         }
 
         @Override
-        protected Optional<Expression<?>> entitySortableField(EntitySortCriteria.Field field) {
-            return Optional.empty();
+        protected List<PageCondition<? extends Comparable<?>>> toEntityPageConditions(EntitySearchPageId.Value pageAttribute) {
+            return emptyList();
         }
     }
 }

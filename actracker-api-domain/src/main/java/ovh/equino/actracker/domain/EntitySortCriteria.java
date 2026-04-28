@@ -10,13 +10,14 @@ import static java.util.Objects.requireNonNullElse;
 import static ovh.equino.actracker.domain.EntitySortCriteria.CommonField.ID;
 import static ovh.equino.actracker.domain.EntitySortCriteria.Order.ASC;
 
-public record EntitySortCriteria(
-        Deque<Level> levels
-) {
+public record EntitySortCriteria(Deque<Level> levels) {
 
     public EntitySortCriteria {
         levels = new LinkedList<>(requireNonNullElse(levels, emptyList()));
-        levels.addLast(sortGuard());
+
+        // id is usually kept DESC if your primary sort is DESC to keep the index traversal efficient.
+        var firstCriterionDirection = !levels.isEmpty() ? levels.getFirst().order : ASC;
+        levels.addLast(sortGuard(firstCriterionDirection));
     }
 
     public EntitySortCriteria(Level... levels) {
@@ -60,7 +61,7 @@ public record EntitySortCriteria(
         DESC
     }
 
-    private Level sortGuard() {
-        return new Level(ID, ASC);
+    private Level sortGuard(Order firstCriterionDirection) {
+        return new Level(ID, firstCriterionDirection);
     }
 }

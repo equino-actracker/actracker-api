@@ -32,6 +32,7 @@ import static ovh.equino.actracker.domain.EntitySearchPageId.aPageId;
 import static ovh.equino.actracker.domain.EntitySearchPageId.firstPage;
 import static ovh.equino.actracker.domain.EntitySortCriteria.CommonField.ID;
 import static ovh.equino.actracker.domain.EntitySortCriteria.Order.ASC;
+import static ovh.equino.actracker.domain.EntitySortCriteria.Order.DESC;
 import static ovh.equino.actracker.domain.EntitySortCriteria.sortBy;
 import static ovh.equino.actracker.domain.tag.TagSearchCriteria.SortableField.NAME;
 import static ovh.equino.actracker.jpa.tag.TagTestData.aTag;
@@ -291,13 +292,6 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
                                 ),
                                 new ExpectedPage(
                                         aPageId()
-                                                .with(Value.of(NAME, ASC, ""))
-                                                .with(Value.of(ID, ASC, tag5.id())),
-                                        2,
-                                        List.of(tag5, tag2)
-                                ),
-                                new ExpectedPage(
-                                        aPageId()
                                                 .with(Value.of(NAME, ASC, tag2.name()))
                                                 .with(Value.of(ID, ASC, tag2.id())),
                                         100,
@@ -307,32 +301,49 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
                 ),
 
                 Arguments.of(
-                        "All criteria: [NAME:ASC]",
+                        "NAME:DESC",
                         user,
                         tagsToAdd,
-                        sortBy(NAME, ASC),
+                        sortBy(NAME, DESC),
                         List.of(
-                                new ExpectedPage(firstPage(), 3, List.of(tag4, tag5, tag2)),
+                                new ExpectedPage(firstPage(), 3, List.of(tag5, tag4, tag6)),
                                 new ExpectedPage(
                                         aPageId()
-                                                .with(Value.of(NAME, ASC, null))
-                                                .with(Value.of(ID, ASC, tag5.id())),
+                                                .with(Value.of(NAME, DESC, null))
+                                                .with(Value.of(ID, DESC, tag4.id())),
                                         2,
-                                        List.of(tag5, tag2)
+                                        List.of(tag4, tag6)
                                 ),
                                 new ExpectedPage(
                                         aPageId()
-                                                .with(Value.of(NAME, ASC, ""))
-                                                .with(Value.of(ID, ASC, tag5.id())),
-                                        2,
-                                        List.of(tag5, tag2)
-                                ),
-                                new ExpectedPage(
-                                        aPageId()
-                                                .with(Value.of(NAME, ASC, tag2.name()))
-                                                .with(Value.of(ID, ASC, tag2.id())),
+                                                .with(Value.of(NAME, DESC, tag6.name()))
+                                                .with(Value.of(ID, DESC, tag6.id())),
                                         100,
-                                        List.of(tag2, tag3, tag1, tag6)
+                                        List.of(tag6, tag1, tag3, tag2)
+                                )
+                        )
+                ),
+
+                Arguments.of(
+                        "All criteria: [NAME:DESC]",
+                        user,
+                        tagsToAdd,
+                        sortBy(NAME, DESC),
+                        List.of(
+                                new ExpectedPage(firstPage(), 3, List.of(tag5, tag4, tag6)),
+                                new ExpectedPage(
+                                        aPageId()
+                                                .with(Value.of(NAME, DESC, null))
+                                                .with(Value.of(ID, DESC, tag4.id())),
+                                        2,
+                                        List.of(tag4, tag6)
+                                ),
+                                new ExpectedPage(
+                                        aPageId()
+                                                .with(Value.of(NAME, DESC, tag6.name()))
+                                                .with(Value.of(ID, DESC, tag6.id())),
+                                        100,
+                                        List.of(tag6, tag1, tag3, tag2)
                                 )
                         )
                 )
