@@ -122,24 +122,6 @@ final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection
         }
 
         @Override
-        protected List<JpaSortCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion) {
-            if (sortCriterion.field() instanceof TagSearchCriteria.SortableField sortableAttribute) {
-                return switch (sortableAttribute) {
-                    case NAME -> nameOrderCriteria(sortCriterion);
-                };
-            }
-            return emptyList();
-        }
-
-        private List<JpaSortCriteria> nameOrderCriteria(EntitySortCriteria.Level sortCriterion) {
-            var nullFirstOrder = (JpaSortCriteria) () -> criteriaBuilder.asc(tagNameNullWeight);
-            var nonNullOrder = DESC == sortCriterion.order()
-                    ? (JpaSortCriteria) () -> criteriaBuilder.desc(tagNameLowerCase)
-                    : (JpaSortCriteria) () -> criteriaBuilder.asc(tagNameLowerCase);
-            return List.of(nullFirstOrder, nonNullOrder);
-        }
-
-        @Override
         protected List<PageCondition<? extends Comparable<?>>> toEntityPageConditions(
                 EntitySearchPageId.Value pageAttribute) {
 
@@ -169,6 +151,24 @@ final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection
     public final class SortBuilder extends JpaSortBuilder<TagEntity> {
         private SortBuilder() {
             super(criteriaBuilder, root);
+        }
+
+        @Override
+        protected List<JpaOrderCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion) {
+            if (sortCriterion.field() instanceof TagSearchCriteria.SortableField sortableAttribute) {
+                return switch (sortableAttribute) {
+                    case NAME -> nameOrderCriteria(sortCriterion);
+                };
+            }
+            return emptyList();
+        }
+
+        private List<JpaOrderCriteria> nameOrderCriteria(EntitySortCriteria.Level sortCriterion) {
+            var nullFirstOrder = (JpaOrderCriteria) () -> criteriaBuilder.asc(tagNameNullWeight);
+            var nonNullOrder = DESC == sortCriterion.order()
+                    ? (JpaOrderCriteria) () -> criteriaBuilder.desc(tagNameLowerCase)
+                    : (JpaOrderCriteria) () -> criteriaBuilder.asc(tagNameLowerCase);
+            return List.of(nullFirstOrder, nonNullOrder);
         }
     }
 }

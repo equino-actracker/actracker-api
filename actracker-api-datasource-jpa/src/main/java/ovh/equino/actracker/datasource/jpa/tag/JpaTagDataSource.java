@@ -65,7 +65,6 @@ class JpaTagDataSource extends JpaDAO implements TagDataSource {
     public List<TagDto> find(TagSearchCriteria searchCriteria) {
 
         var selectTags = new SelectTagsQuery(entityManager);
-        var sortCriteria = selectTags.predicate().sortCriteria(searchCriteria.common().sortCriteria());
 
         var tagResults = selectTags
                 .where(
@@ -77,7 +76,7 @@ class JpaTagDataSource extends JpaDAO implements TagDataSource {
                                 selectTags.predicate().matchesTerm(searchCriteria.term())
                         )
                 )
-                .orderBy(sortCriteria)
+                .orderBy(searchCriteria.common().sortCriteria())
                 .limit(searchCriteria.common().pageSize())
                 .execute();
 

@@ -1,17 +1,21 @@
 package ovh.equino.actracker.datasource.jpa.dashboard;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
-import ovh.equino.actracker.datasource.jpa.*;
+import ovh.equino.actracker.datasource.jpa.JpaPredicate;
+import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
+import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
+import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
 import ovh.equino.actracker.domain.EntitySearchPageId;
-import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.jpa.dashboard.ChartEntity;
 import ovh.equino.actracker.jpa.dashboard.ChartEntity_;
 import ovh.equino.actracker.jpa.dashboard.DashboardEntity;
 import ovh.equino.actracker.jpa.dashboard.DashboardEntity_;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import static jakarta.persistence.criteria.JoinType.INNER;
 import static java.util.Collections.emptyList;
@@ -92,11 +96,6 @@ final class SelectChartJoinDashboardQuery extends MultiResultJpaQuery<ChartEntit
                     .map(UUID::toString)
                     .collect(toUnmodifiableSet());
             return in(dashboardIdsAsString, dashboard.get(DashboardEntity_.id));
-        }
-
-        @Override
-        protected List<JpaSortCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion) {
-            return emptyList();
         }
 
         @Override

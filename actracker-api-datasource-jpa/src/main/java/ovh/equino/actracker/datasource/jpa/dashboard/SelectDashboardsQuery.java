@@ -101,11 +101,6 @@ final class SelectDashboardsQuery extends MultiResultJpaQuery<DashboardEntity, D
         }
 
         @Override
-        protected List<JpaSortCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion) {
-            return emptyList();
-        }
-
-        @Override
         protected List<PageCondition<? extends Comparable<?>>> toEntityPageConditions(EntitySearchPageId.Value pageAttribute) {
             return emptyList();
         }
@@ -114,6 +109,11 @@ final class SelectDashboardsQuery extends MultiResultJpaQuery<DashboardEntity, D
     public final class SortBuilder extends JpaSortBuilder<DashboardEntity> {
         private SortBuilder() {
             super(criteriaBuilder, root);
+        }
+
+        @Override
+        protected List<JpaOrderCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion) {
+            return emptyList();
         }
     }
 }

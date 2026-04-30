@@ -178,11 +178,6 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
         }
 
         @Override
-        protected List<JpaSortCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion) {
-            return emptyList();
-        }
-
-        @Override
         protected List<PageCondition<? extends Comparable<?>>> toEntityPageConditions(EntitySearchPageId.Value pageAttribute) {
             return emptyList();
         }
@@ -191,6 +186,11 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
     public class SortBuilder extends JpaSortBuilder<ActivityEntity> {
         private SortBuilder() {
             super(criteriaBuilder, root);
+        }
+
+        @Override
+        protected List<JpaOrderCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion) {
+            return emptyList();
         }
     }
 }

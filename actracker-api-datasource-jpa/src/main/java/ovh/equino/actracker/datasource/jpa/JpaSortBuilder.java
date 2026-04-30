@@ -2,8 +2,18 @@ package ovh.equino.actracker.datasource.jpa;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Root;
+import ovh.equino.actracker.domain.EntitySortCriteria;
+import ovh.equino.actracker.jpa.JpaEntity;
+import ovh.equino.actracker.jpa.JpaEntity_;
 
-public abstract class JpaSortBuilder<E> {
+import java.util.List;
+
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static ovh.equino.actracker.domain.EntitySortCriteria.Order.DESC;
+
+public abstract class JpaSortBuilder<E extends JpaEntity> {
 
     private final CriteriaBuilder criteriaBuilder;
     private final Root<E> root;
@@ -13,11 +23,37 @@ public abstract class JpaSortBuilder<E> {
         this.root = root;
     }
 
-    public JpaSortCriteria ascending(String fieldName) {
+    // TODO remove
+    public JpaOrderCriteria ascending(String fieldName) {
         return () -> criteriaBuilder.asc(root.get(fieldName));
     }
 
-    public JpaSortCriteria descending(String fieldName) {
-        return () -> criteriaBuilder.desc(root.get(fieldName));
+    // TODO make package private
+    public List<JpaOrderCriteria> toOrderCriteria(EntitySortCriteria sortCriteria) {
+        return sortCriteria.levels().stream()
+                .map(this::toOrderCriteria)
+                .flatMap(List::stream)
+                .toList();
     }
+
+    private List<JpaOrderCriteria> toOrderCriteria(EntitySortCriteria.Level sortCriterion) {
+        var commonOrderCriteria = toCommonOrderCriteria(sortCriterion);
+        if (isNotEmpty(commonOrderCriteria)) {
+            return commonOrderCriteria;
+        }
+        return toEntityOrderCriteria(sortCriterion);
+    }
+
+    private List<JpaOrderCriteria> toCommonOrderCriteria(EntitySortCriteria.Level sortCriterion) {
+        if (sortCriterion.field() instanceof EntitySortCriteria.CommonField commonField) {
+            return switch (commonField) {
+                case ID -> DESC == sortCriterion.order()
+                        ? singletonList(() -> criteriaBuilder.desc(root.get(JpaEntity_.id)))
+                        : singletonList(() -> criteriaBuilder.asc(root.get(JpaEntity_.id)));
+            };
+        }
+        return emptyList();
+    }
+
+    protected abstract List<JpaOrderCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion);
 }

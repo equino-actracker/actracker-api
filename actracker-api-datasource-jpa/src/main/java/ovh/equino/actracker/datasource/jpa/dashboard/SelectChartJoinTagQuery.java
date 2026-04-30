@@ -4,9 +4,11 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Subquery;
-import ovh.equino.actracker.datasource.jpa.*;
+import ovh.equino.actracker.datasource.jpa.JpaPredicate;
+import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
+import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
+import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
 import ovh.equino.actracker.domain.EntitySearchPageId;
-import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.dashboard.ChartEntity;
 import ovh.equino.actracker.jpa.dashboard.ChartEntity_;
@@ -108,11 +110,6 @@ final class SelectChartJoinTagQuery extends MultiResultJpaQuery<ChartEntity, Cha
                     .where(criteriaBuilder.equal(shares.get(TagShareEntity_.granteeId), user.id().toString()))
                     .from(TagEntity.class);
             return () -> criteriaBuilder.exists(subQuery);
-        }
-
-        @Override
-        protected List<JpaSortCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion) {
-            return emptyList();
         }
 
         @Override

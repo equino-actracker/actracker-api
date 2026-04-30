@@ -83,11 +83,6 @@ final class SelectTagSetsQuery extends MultiResultJpaQuery<TagSetEntity, TagSetP
         }
 
         @Override
-        protected List<JpaSortCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion) {
-            return emptyList();
-        }
-
-        @Override
         protected List<PageCondition<? extends Comparable<?>>> toEntityPageConditions(EntitySearchPageId.Value pageAttribute) {
             return emptyList();
         }
@@ -96,6 +91,11 @@ final class SelectTagSetsQuery extends MultiResultJpaQuery<TagSetEntity, TagSetP
     public class SortBuilder extends JpaSortBuilder<TagSetEntity> {
         private SortBuilder() {
             super(criteriaBuilder, root);
+        }
+
+        @Override
+        protected List<JpaOrderCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion) {
+            return emptyList();
         }
     }
 }

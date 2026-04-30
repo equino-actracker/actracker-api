@@ -1,8 +1,7 @@
 package ovh.equino.actracker.datasource.jpa;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.Order;
+import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.jpa.JpaEntity;
 
 import java.util.List;
@@ -13,13 +12,14 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 public abstract class MultiResultJpaQuery<E extends JpaEntity, P> extends JpaQuery<E, P, List<P>> {
 
     private Integer rowLimit;
-    private List<JpaSortCriteria> sortCriteria;
+    private List<JpaOrderCriteria> sortCriteria;
 
     protected MultiResultJpaQuery(EntityManager entityManager) {
         super(entityManager);
     }
 
-    public abstract JpaSortBuilder<E> sort();
+    // TODO make protected
+    protected abstract JpaSortBuilder<E> sort();
 
     public final MultiResultJpaQuery<E, P> limit(int rowNum) {
         if (rowNum < 0) {
@@ -29,16 +29,15 @@ public abstract class MultiResultJpaQuery<E extends JpaEntity, P> extends JpaQue
         return this;
     }
 
-    public final MultiResultJpaQuery<E, P> orderBy(JpaSortCriteria... sortCriteria) {
-        if (sortCriteria != null) {
-            this.sortCriteria = stream(sortCriteria).toList();
-        }
+    public final MultiResultJpaQuery<E, P> orderBy(EntitySortCriteria sortCriteria) {
+        this.sortCriteria = sort().toOrderCriteria(sortCriteria);
         return this;
     }
 
-    public final MultiResultJpaQuery<E, P> orderBy(List<JpaSortCriteria> sortCriteria) {
+    // TODO remove
+    public MultiResultJpaQuery<E, P> orderBy(JpaOrderCriteria... sortCriteria) {
         if (sortCriteria != null) {
-            this.sortCriteria = sortCriteria;
+            this.sortCriteria = stream(sortCriteria).toList();
         }
         return this;
     }
@@ -50,13 +49,13 @@ public abstract class MultiResultJpaQuery<E extends JpaEntity, P> extends JpaQue
             query.where(predicate.toRawPredicate());
         }
         if (isNotEmpty(sortCriteria)) {
-            List<Order> order = sortCriteria
+            var order = sortCriteria
                     .stream()
-                    .map(JpaSortCriteria::toRawSort)
+                    .map(JpaOrderCriteria::toRawOrder)
                     .toList();
             query.orderBy(order);
         }
-        TypedQuery<P> typedQuery = entityManager.createQuery(query);
+        var typedQuery = entityManager.createQuery(query);
         if (rowLimit != null) {
             typedQuery.setMaxResults(rowLimit);
         }
