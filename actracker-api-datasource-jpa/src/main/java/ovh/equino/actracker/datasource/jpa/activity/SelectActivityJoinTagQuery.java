@@ -6,7 +6,7 @@ import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Subquery;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
-import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
+import ovh.equino.actracker.datasource.jpa.JpaOrderBuilder;
 import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
 import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.user.User;
@@ -72,7 +72,7 @@ final class SelectActivityJoinTagQuery extends MultiResultJpaQuery<ActivityEntit
      */
     @Override
     @Deprecated
-    public JpaSortBuilder<ActivityEntity> sort() {
+    public JpaOrderBuilder<ActivityEntity> order() {
         throw new RuntimeException("Sorting activities joint with tags not supported");
     }
 

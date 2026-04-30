@@ -13,12 +13,12 @@ import static java.util.Collections.singletonList;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static ovh.equino.actracker.domain.EntitySortCriteria.Order.DESC;
 
-public abstract class JpaSortBuilder<E extends JpaEntity> {
+public abstract class JpaOrderBuilder<E extends JpaEntity> {
 
     private final CriteriaBuilder criteriaBuilder;
     private final Root<E> root;
 
-    protected JpaSortBuilder(CriteriaBuilder criteriaBuilder, Root<E> root) {
+    protected JpaOrderBuilder(CriteriaBuilder criteriaBuilder, Root<E> root) {
         this.criteriaBuilder = criteriaBuilder;
         this.root = root;
     }
@@ -29,7 +29,7 @@ public abstract class JpaSortBuilder<E extends JpaEntity> {
     }
 
     // TODO make package private
-    public List<JpaOrderCriteria> toOrderCriteria(EntitySortCriteria sortCriteria) {
+    public List<JpaOrderCriteria> from(EntitySortCriteria sortCriteria) {
         return sortCriteria.levels().stream()
                 .map(this::toOrderCriteria)
                 .flatMap(List::stream)

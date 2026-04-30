@@ -25,7 +25,7 @@ import static ovh.equino.actracker.domain.EntitySortCriteria.Order.DESC;
 final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection> {
 
     private final PredicateBuilder predicate;
-    private final SortBuilder sort;
+    private final OrderBuilder sort;
 
     private final Expression<String> tagNameLowerCase;
     private final Expression<Integer> tagNameNullWeight;
@@ -34,7 +34,7 @@ final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection
     SelectTagsQuery(EntityManager entityManager) {
         super(entityManager);
         this.predicate = new PredicateBuilder();
-        this.sort = new SortBuilder();
+        this.sort = new OrderBuilder();
 
         this.tagNameLowerCase = criteriaBuilder.lower(root.get(TagEntity_.name));
         this.tagNameNullWeight = criteriaBuilder.selectCase()
@@ -65,7 +65,7 @@ final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection
     }
 
     @Override
-    public JpaSortBuilder<TagEntity> sort() {
+    public JpaOrderBuilder<TagEntity> order() {
         return sort;
     }
 
@@ -148,8 +148,8 @@ final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection
         }
     }
 
-    public final class SortBuilder extends JpaSortBuilder<TagEntity> {
-        private SortBuilder() {
+    public final class OrderBuilder extends JpaOrderBuilder<TagEntity> {
+        private OrderBuilder() {
             super(criteriaBuilder, root);
         }
 

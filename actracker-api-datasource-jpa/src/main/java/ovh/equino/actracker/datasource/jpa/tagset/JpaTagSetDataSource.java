@@ -66,7 +66,7 @@ class JpaTagSetDataSource extends JpaDAO implements TagSetDataSource {
                                 selectTagSets.predicate().isNotExcluded(searchCriteria.excludeFilter())
                         )
                 )
-                .orderBy(selectTagSets.sort().ascending("id"))
+                .orderBy(selectTagSets.order().ascending("id"))
                 .limit(searchCriteria.common().pageSize())
                 .execute();
 

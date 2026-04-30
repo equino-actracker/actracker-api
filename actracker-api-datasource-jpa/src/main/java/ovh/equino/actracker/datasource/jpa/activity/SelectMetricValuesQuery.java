@@ -4,7 +4,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.*;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
-import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
+import ovh.equino.actracker.datasource.jpa.JpaOrderBuilder;
 import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
 import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.user.User;
@@ -78,7 +78,7 @@ final class SelectMetricValuesQuery extends MultiResultJpaQuery<MetricValueEntit
      */
     @Override
     @Deprecated
-    public JpaSortBuilder<MetricValueEntity> sort() {
+    public JpaOrderBuilder<MetricValueEntity> order() {
         throw new RuntimeException("Sorting metric values not supported");
     }
 

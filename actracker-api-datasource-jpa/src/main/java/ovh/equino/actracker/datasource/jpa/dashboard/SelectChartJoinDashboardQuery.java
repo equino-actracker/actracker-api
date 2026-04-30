@@ -4,7 +4,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
-import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
+import ovh.equino.actracker.datasource.jpa.JpaOrderBuilder;
 import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
 import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.jpa.dashboard.ChartEntity;
@@ -63,7 +63,7 @@ final class SelectChartJoinDashboardQuery extends MultiResultJpaQuery<ChartEntit
      */
     @Override
     @Deprecated
-    public JpaSortBuilder<ChartEntity> sort() {
+    public JpaOrderBuilder<ChartEntity> order() {
         throw new RuntimeException("Sorting charts joint with dashboards not supported");
     }
 

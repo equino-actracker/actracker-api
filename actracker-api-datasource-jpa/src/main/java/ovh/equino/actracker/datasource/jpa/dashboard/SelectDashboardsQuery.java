@@ -20,12 +20,12 @@ import static java.util.Collections.emptyList;
 final class SelectDashboardsQuery extends MultiResultJpaQuery<DashboardEntity, DashboardProjection> {
 
     private final PredicateBuilder predicate;
-    private final SortBuilder sort;
+    private final OrderBuilder sort;
 
     SelectDashboardsQuery(EntityManager entityManager) {
         super(entityManager);
         this.predicate = new PredicateBuilder();
-        this.sort = new SortBuilder();
+        this.sort = new OrderBuilder();
     }
 
     @Override
@@ -54,7 +54,7 @@ final class SelectDashboardsQuery extends MultiResultJpaQuery<DashboardEntity, D
     }
 
     @Override
-    public SortBuilder sort() {
+    public OrderBuilder order() {
         return sort;
     }
 
@@ -106,8 +106,8 @@ final class SelectDashboardsQuery extends MultiResultJpaQuery<DashboardEntity, D
         }
     }
 
-    public final class SortBuilder extends JpaSortBuilder<DashboardEntity> {
-        private SortBuilder() {
+    public final class OrderBuilder extends JpaOrderBuilder<DashboardEntity> {
+        private OrderBuilder() {
             super(criteriaBuilder, root);
         }
 

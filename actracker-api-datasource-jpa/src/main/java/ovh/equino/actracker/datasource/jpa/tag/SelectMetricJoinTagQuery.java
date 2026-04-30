@@ -4,7 +4,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
-import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
+import ovh.equino.actracker.datasource.jpa.JpaOrderBuilder;
 import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
 import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.jpa.tag.MetricEntity;
@@ -73,7 +73,7 @@ final class SelectMetricJoinTagQuery extends MultiResultJpaQuery<MetricEntity, M
      */
     @Override
     @Deprecated
-    public JpaSortBuilder<MetricEntity> sort() {
+    public JpaOrderBuilder<MetricEntity> order() {
         throw new RuntimeException("Sorting metrics joint with tags not supported");
     }
 

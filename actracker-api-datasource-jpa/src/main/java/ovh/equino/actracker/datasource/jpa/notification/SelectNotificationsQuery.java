@@ -3,7 +3,7 @@ package ovh.equino.actracker.datasource.jpa.notification;
 import jakarta.persistence.EntityManager;
 import ovh.equino.actracker.jpa.notification.NotificationEntity;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
-import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
+import ovh.equino.actracker.datasource.jpa.JpaOrderBuilder;
 import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
 import ovh.equino.actracker.jpa.notification.NotificationEntity_;
 
@@ -48,7 +48,7 @@ final class SelectNotificationsQuery extends MultiResultJpaQuery<NotificationEnt
      */
     @Override
     @Deprecated
-    public JpaSortBuilder<NotificationEntity> sort() {
+    public JpaOrderBuilder<NotificationEntity> order() {
         throw new RuntimeException("Sorting notifications not supported");
     }
 }

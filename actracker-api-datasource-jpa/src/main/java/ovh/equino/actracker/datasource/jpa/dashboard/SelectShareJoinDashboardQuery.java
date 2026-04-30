@@ -4,7 +4,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
-import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
+import ovh.equino.actracker.datasource.jpa.JpaOrderBuilder;
 import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
 import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.user.User;
@@ -70,7 +70,7 @@ final class SelectShareJoinDashboardQuery extends MultiResultJpaQuery<DashboardS
      */
     @Override
     @Deprecated
-    public JpaSortBuilder<DashboardShareEntity> sort() {
+    public JpaOrderBuilder<DashboardShareEntity> order() {
         throw new RuntimeException("Sorting shares joint with dashboards not supported");
     }
 

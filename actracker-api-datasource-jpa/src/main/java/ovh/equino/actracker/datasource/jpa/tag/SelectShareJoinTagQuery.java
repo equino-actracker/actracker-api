@@ -4,7 +4,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
-import ovh.equino.actracker.datasource.jpa.JpaSortBuilder;
+import ovh.equino.actracker.datasource.jpa.JpaOrderBuilder;
 import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
 import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.user.User;
@@ -61,7 +61,7 @@ final class SelectShareJoinTagQuery extends MultiResultJpaQuery<TagShareEntity, 
      */
     @Override
     @Deprecated
-    public JpaSortBuilder<TagShareEntity> sort() {
+    public JpaOrderBuilder<TagShareEntity> order() {
         throw new RuntimeException("Sorting shares joint with tags not supported");
     }
 

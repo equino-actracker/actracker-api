@@ -15,12 +15,12 @@ import static java.util.Collections.emptyList;
 final class SelectTagSetsQuery extends MultiResultJpaQuery<TagSetEntity, TagSetProjection> {
 
     private final PredicateBuilder predicateBuilder;
-    private final SortBuilder sortBuilder;
+    private final OrderBuilder sortBuilder;
 
     SelectTagSetsQuery(EntityManager entityManager) {
         super(entityManager);
         this.predicateBuilder = new PredicateBuilder();
-        this.sortBuilder = new SortBuilder();
+        this.sortBuilder = new OrderBuilder();
     }
 
     @Override
@@ -42,7 +42,7 @@ final class SelectTagSetsQuery extends MultiResultJpaQuery<TagSetEntity, TagSetP
     }
 
     @Override
-    public JpaSortBuilder<TagSetEntity> sort() {
+    public JpaOrderBuilder<TagSetEntity> order() {
         return sortBuilder;
     }
 
@@ -88,8 +88,8 @@ final class SelectTagSetsQuery extends MultiResultJpaQuery<TagSetEntity, TagSetP
         }
     }
 
-    public class SortBuilder extends JpaSortBuilder<TagSetEntity> {
-        private SortBuilder() {
+    public class OrderBuilder extends JpaOrderBuilder<TagSetEntity> {
+        private OrderBuilder() {
             super(criteriaBuilder, root);
         }
 
