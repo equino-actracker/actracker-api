@@ -18,7 +18,6 @@ import static java.util.stream.Stream.concat;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static ovh.equino.actracker.domain.EntitySortCriteria.Order.DESC;
 
 public abstract class JpaPredicateBuilder<E extends JpaEntity> {
 
@@ -98,34 +97,6 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
     public JpaPredicate noneMatch() {
         return or();
     }
-
-    public List<JpaSortCriteria> sortCriteria(EntitySortCriteria sortCriteria) {
-        return sortCriteria.levels().stream()
-                .map(this::toOrderCriteria)
-                .flatMap(List::stream)
-                .toList();
-    }
-
-    private List<JpaSortCriteria> toOrderCriteria(EntitySortCriteria.Level sortCriterion) {
-        var commonOrderCriteria = toCommonOrderCriteria(sortCriterion);
-        if (isNotEmpty(commonOrderCriteria)) {
-            return commonOrderCriteria;
-        }
-        return toEntityOrderCriteria(sortCriterion);
-    }
-
-    private List<JpaSortCriteria> toCommonOrderCriteria(EntitySortCriteria.Level sortCriterion) {
-        if (sortCriterion.field() instanceof EntitySortCriteria.CommonField commonField) {
-            return switch (commonField) {
-                case ID -> DESC == sortCriterion.order()
-                        ? singletonList(() -> criteriaBuilder.desc(root.get(JpaEntity_.id)))
-                        : singletonList(() -> criteriaBuilder.asc(root.get(JpaEntity_.id)));
-            };
-        }
-        return emptyList();
-    }
-
-    protected abstract List<JpaSortCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion);
 
     public JpaPredicate isInPage(EntitySearchPageId pageId) {
         if (pageId.isEmpty()) {

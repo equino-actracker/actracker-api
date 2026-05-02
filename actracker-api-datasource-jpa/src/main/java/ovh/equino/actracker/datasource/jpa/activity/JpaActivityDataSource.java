@@ -88,7 +88,7 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
                                 selectActivities.predicate().isInTimeRange(timeRangeStart, timeRangeEnd)
                         )
                 )
-                .orderBy(selectActivities.sort().ascending("id"))
+                .orderBy(selectActivities.order().ascending("id"))
                 .limit(searchCriteria.common().pageSize())
                 .execute();
 

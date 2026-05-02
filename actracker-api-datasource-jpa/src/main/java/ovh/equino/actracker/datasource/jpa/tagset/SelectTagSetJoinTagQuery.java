@@ -4,9 +4,11 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Subquery;
-import ovh.equino.actracker.datasource.jpa.*;
+import ovh.equino.actracker.datasource.jpa.JpaPredicate;
+import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
+import ovh.equino.actracker.datasource.jpa.JpaOrderBuilder;
+import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
 import ovh.equino.actracker.domain.EntitySearchPageId;
-import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.tag.TagEntity;
 import ovh.equino.actracker.jpa.tag.TagEntity_;
@@ -54,7 +56,7 @@ final class SelectTagSetJoinTagQuery extends MultiResultJpaQuery<TagSetEntity, T
      */
     @Override
     @Deprecated
-    public JpaSortBuilder<TagSetEntity> sort() {
+    public JpaOrderBuilder<TagSetEntity> order() {
         throw new RuntimeException("Sorting tag sets joint with tags not supported");
     }
 
@@ -122,11 +124,6 @@ final class SelectTagSetJoinTagQuery extends MultiResultJpaQuery<TagSetEntity, T
 
         public JpaPredicate hasTagSetIdIn(Collection<UUID> tagSetIds) {
             return super.hasIdIn(tagSetIds);
-        }
-
-        @Override
-        protected List<JpaSortCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion) {
-            return emptyList();
         }
 
         @Override

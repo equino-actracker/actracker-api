@@ -4,9 +4,11 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Subquery;
-import ovh.equino.actracker.datasource.jpa.*;
+import ovh.equino.actracker.datasource.jpa.JpaPredicate;
+import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
+import ovh.equino.actracker.datasource.jpa.JpaOrderBuilder;
+import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
 import ovh.equino.actracker.domain.EntitySearchPageId;
-import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.activity.ActivityEntity;
 import ovh.equino.actracker.jpa.activity.ActivityEntity_;
@@ -70,7 +72,7 @@ final class SelectActivityJoinTagQuery extends MultiResultJpaQuery<ActivityEntit
      */
     @Override
     @Deprecated
-    public JpaSortBuilder<ActivityEntity> sort() {
+    public JpaOrderBuilder<ActivityEntity> order() {
         throw new RuntimeException("Sorting activities joint with tags not supported");
     }
 
@@ -122,11 +124,6 @@ final class SelectActivityJoinTagQuery extends MultiResultJpaQuery<ActivityEntit
                     .where(criteriaBuilder.equal(shares.get(TagShareEntity_.granteeId), user.id().toString()))
                     .from(TagEntity.class);
             return () -> criteriaBuilder.exists(subQuery);
-        }
-
-        @Override
-        protected List<JpaSortCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion) {
-            return emptyList();
         }
 
         @Override
