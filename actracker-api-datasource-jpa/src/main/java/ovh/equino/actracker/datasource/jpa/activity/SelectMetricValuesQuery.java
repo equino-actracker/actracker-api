@@ -2,9 +2,11 @@ package ovh.equino.actracker.datasource.jpa.activity;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.*;
-import ovh.equino.actracker.datasource.jpa.*;
+import ovh.equino.actracker.datasource.jpa.JpaPredicate;
+import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
+import ovh.equino.actracker.datasource.jpa.JpaOrderBuilder;
+import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
 import ovh.equino.actracker.domain.EntitySearchPageId;
-import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.activity.ActivityEntity;
 import ovh.equino.actracker.jpa.activity.ActivityEntity_;
@@ -76,7 +78,7 @@ final class SelectMetricValuesQuery extends MultiResultJpaQuery<MetricValueEntit
      */
     @Override
     @Deprecated
-    public JpaSortBuilder<MetricValueEntity> sort() {
+    public JpaOrderBuilder<MetricValueEntity> order() {
         throw new RuntimeException("Sorting metric values not supported");
     }
 
@@ -127,11 +129,6 @@ final class SelectMetricValuesQuery extends MultiResultJpaQuery<MetricValueEntit
                     () -> criteriaBuilder.isFalse(metric.get(MetricEntity_.deleted)),
                     () -> criteriaBuilder.isFalse(tag.get(TagEntity_.deleted))
             );
-        }
-
-        @Override
-        protected List<JpaSortCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion) {
-            return emptyList();
         }
 
         @Override

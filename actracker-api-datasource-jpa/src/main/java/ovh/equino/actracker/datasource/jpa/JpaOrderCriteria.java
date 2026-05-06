@@ -2,7 +2,7 @@ package ovh.equino.actracker.datasource.jpa;
 
 import jakarta.persistence.criteria.Order;
 
-public interface JpaSortCriteria {
+public interface JpaOrderCriteria {
 
-    Order toRawSort();
+    Order toRawOrder();
 }

@@ -3,10 +3,8 @@ package ovh.equino.actracker.datasource.jpa.tagset;
 import jakarta.persistence.EntityManager;
 import ovh.equino.actracker.datasource.jpa.JpaPredicate;
 import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
-import ovh.equino.actracker.datasource.jpa.JpaSortCriteria;
 import ovh.equino.actracker.datasource.jpa.SingleResultJpaQuery;
 import ovh.equino.actracker.domain.EntitySearchPageId;
-import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.tagset.TagSetEntity;
 import ovh.equino.actracker.jpa.tagset.TagSetEntity_;
@@ -78,11 +76,6 @@ final class SelectTagSetQuery extends SingleResultJpaQuery<TagSetEntity, TagSetP
                     root.get(TagSetEntity_.creatorId),
                     searcher.id().toString()
             );
-        }
-
-        @Override
-        protected List<JpaSortCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion) {
-            return emptyList();
         }
 
         @Override

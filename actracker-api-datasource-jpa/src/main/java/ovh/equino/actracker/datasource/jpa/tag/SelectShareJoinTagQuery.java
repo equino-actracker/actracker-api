@@ -2,9 +2,11 @@ package ovh.equino.actracker.datasource.jpa.tag;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
-import ovh.equino.actracker.datasource.jpa.*;
+import ovh.equino.actracker.datasource.jpa.JpaPredicate;
+import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder;
+import ovh.equino.actracker.datasource.jpa.JpaOrderBuilder;
+import ovh.equino.actracker.datasource.jpa.MultiResultJpaQuery;
 import ovh.equino.actracker.domain.EntitySearchPageId;
-import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.tag.TagEntity;
 import ovh.equino.actracker.jpa.tag.TagEntity_;
@@ -59,7 +61,7 @@ final class SelectShareJoinTagQuery extends MultiResultJpaQuery<TagShareEntity, 
      */
     @Override
     @Deprecated
-    public JpaSortBuilder<TagShareEntity> sort() {
+    public JpaOrderBuilder<TagShareEntity> order() {
         throw new RuntimeException("Sorting shares joint with tags not supported");
     }
 
@@ -96,11 +98,6 @@ final class SelectShareJoinTagQuery extends MultiResultJpaQuery<TagShareEntity, 
 
         public JpaPredicate isAccessibleFor(User searcher) {
             return () -> criteriaBuilder.equal(tag.get(TagEntity_.creatorId), searcher.id().toString());
-        }
-
-        @Override
-        protected List<JpaSortCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion) {
-            return emptyList();
         }
 
         @Override

@@ -26,12 +26,12 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, ActivityProjection> {
 
     private final PredicateBuilder predicateBuilder;
-    private final SortBuilder sortBuilder;
+    private final OrderBuilder sortBuilder;
 
     SelectActivitiesQuery(EntityManager entityManager) {
         super(entityManager);
         this.predicateBuilder = new PredicateBuilder();
-        this.sortBuilder = new SortBuilder();
+        this.sortBuilder = new OrderBuilder();
     }
 
     @Override
@@ -58,7 +58,7 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
     }
 
     @Override
-    public SortBuilder sort() {
+    public OrderBuilder order() {
         return sortBuilder;
     }
 
@@ -178,19 +178,19 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
         }
 
         @Override
-        protected List<JpaSortCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion) {
-            return emptyList();
-        }
-
-        @Override
         protected List<PageCondition<? extends Comparable<?>>> toEntityPageConditions(EntitySearchPageId.Value pageAttribute) {
             return emptyList();
         }
     }
 
-    public class SortBuilder extends JpaSortBuilder<ActivityEntity> {
-        private SortBuilder() {
+    public class OrderBuilder extends JpaOrderBuilder<ActivityEntity> {
+        private OrderBuilder() {
             super(criteriaBuilder, root);
+        }
+
+        @Override
+        protected List<JpaOrderCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion) {
+            return emptyList();
         }
     }
 }
