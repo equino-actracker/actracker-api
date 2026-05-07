@@ -8,7 +8,10 @@ import ovh.equino.actracker.domain.tagset.TagSetSearchCriteria;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.JpaDAO;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.*;
@@ -56,8 +59,10 @@ class JpaTagSetDataSource extends JpaDAO implements TagSetDataSource {
     @Override
     public List<TagSetDto> find(TagSetSearchCriteria searchCriteria) {
 
-        SelectTagSetsQuery selectTagSets = new SelectTagSetsQuery(entityManager);
-        List<TagSetProjection> tagSetResults = selectTagSets
+        var selectTagSets = new SelectTagSetsQuery(entityManager);
+        var orderCriteria = selectTagSets.order().from(searchCriteria.common().sortCriteria());
+
+        var tagSetResults = selectTagSets
                 .where(
                         selectTagSets.predicate().and(
                                 selectTagSets.predicate().isAccessibleFor(searchCriteria.common().searcher()),
@@ -66,18 +71,18 @@ class JpaTagSetDataSource extends JpaDAO implements TagSetDataSource {
                                 selectTagSets.predicate().isNotExcluded(searchCriteria.excludeFilter())
                         )
                 )
-                .orderBy(selectTagSets.order().ascending("id"))
+                .orderBy(orderCriteria)
                 .limit(searchCriteria.common().pageSize())
                 .execute();
 
-        Set<UUID> foundTagSetIds = tagSetResults
+        var foundTagSetIds = tagSetResults
                 .stream()
                 .map(TagSetProjection::id)
                 .map(UUID::fromString)
                 .collect(toUnmodifiableSet());
 
-        SelectTagSetJoinTagQuery selectTagSetJoinTag = new SelectTagSetJoinTagQuery(entityManager);
-        Map<String, Set<UUID>> tagIdsByTagSetId =
+        var selectTagSetJoinTag = new SelectTagSetJoinTagQuery(entityManager);
+        var tagIdsByTagSetId =
                 selectTagSetJoinTag
                         .where(
                                 selectTagSetJoinTag.predicate().and(

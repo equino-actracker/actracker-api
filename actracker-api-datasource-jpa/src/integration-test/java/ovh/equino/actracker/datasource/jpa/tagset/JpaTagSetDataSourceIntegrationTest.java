@@ -33,7 +33,7 @@ import static ovh.equino.actracker.domain.EntitySortCriteria.CommonField.ID;
 import static ovh.equino.actracker.domain.EntitySortCriteria.Order.ASC;
 import static ovh.equino.actracker.domain.EntitySortCriteria.Order.DESC;
 import static ovh.equino.actracker.domain.EntitySortCriteria.sortBy;
-import static ovh.equino.actracker.domain.tag.TagSearchCriteria.SortableField.NAME;
+import static ovh.equino.actracker.domain.tagset.TagSetSearchCriteria.SortableField.NAME;
 import static ovh.equino.actracker.jpa.TagSetTestData.aTagSet;
 import static ovh.equino.actracker.jpa.tenant.TenantTestData.aTenant;
 

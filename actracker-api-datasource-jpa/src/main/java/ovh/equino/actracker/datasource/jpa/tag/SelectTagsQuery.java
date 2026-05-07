@@ -24,17 +24,16 @@ import static ovh.equino.actracker.domain.EntitySortCriteria.Order.DESC;
 
 final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection> {
 
-    private final PredicateBuilder predicate;
-    private final OrderBuilder sort;
+    private final PredicateBuilder predicateBuilder;
+    private final OrderBuilder orderBuilder;
 
     private final Expression<String> tagNameLowerCase;
     private final Expression<Integer> tagNameNullWeight;
 
-
     SelectTagsQuery(EntityManager entityManager) {
         super(entityManager);
-        this.predicate = new PredicateBuilder();
-        this.sort = new OrderBuilder();
+        this.predicateBuilder = new PredicateBuilder();
+        this.orderBuilder = new OrderBuilder();
 
         this.tagNameLowerCase = criteriaBuilder.lower(root.get(TagEntity_.name));
         this.tagNameNullWeight = criteriaBuilder.selectCase()
@@ -56,17 +55,17 @@ final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection
                                 root.get(TagEntity_.deleted)
                         )
                 )
-                .distinct(true);
+                .distinct(true);    // TODO Find a way to remove it, then remove sortable attributes from TagProjection
     }
 
     @Override
     public PredicateBuilder predicate() {
-        return predicate;
+        return predicateBuilder;
     }
 
     @Override
     public JpaOrderBuilder<TagEntity> order() {
-        return sort;
+        return orderBuilder;
     }
 
     @Override
@@ -134,6 +133,7 @@ final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection
             return emptyList();
         }
 
+        // TODO refactor, extract method for null first condition
         private List<PageCondition<? extends Comparable<?>>> nameCondition(EntitySearchPageId.Value pageAttribute) {
             if (isNull(pageAttribute.value())) {
                 return singletonList(PageCondition.of(tagNameNullWeight, 0, PageCondition.Relation.GTE));
@@ -163,6 +163,7 @@ final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection
             return emptyList();
         }
 
+        // TODO refactor, extract method for null first sort
         private List<JpaOrderCriteria> nameOrderCriteria(EntitySortCriteria.Level sortCriterion) {
             var nullFirstOrder = (JpaOrderCriteria) () -> criteriaBuilder.asc(tagNameNullWeight);
             var nonNullOrder = DESC == sortCriterion.order()
