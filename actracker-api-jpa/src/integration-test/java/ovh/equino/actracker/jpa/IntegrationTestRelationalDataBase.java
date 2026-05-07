@@ -43,14 +43,12 @@ public abstract class IntegrationTestRelationalDataBase {
         addUsers(stream(users).map(TenantTestData::asDto).toList());
     }
 
-    public synchronized void addUsersData(Collection<TenantTestData> users) throws SQLException {
-        addUsers(users.stream().map(TenantTestData::asDto).toList());
-    }
-
+    @Deprecated
     public synchronized void addUsers(Collection<TenantDto> users) throws SQLException {
         addUsers(users.toArray(new TenantDto[]{}));
     }
 
+    @Deprecated
     public synchronized void addUsers(TenantDto... users) throws SQLException {
         List<TenantDto> notAddedUsers = stream(users)
                 .filter(user -> !addedEntityIds.contains(user.id()))
