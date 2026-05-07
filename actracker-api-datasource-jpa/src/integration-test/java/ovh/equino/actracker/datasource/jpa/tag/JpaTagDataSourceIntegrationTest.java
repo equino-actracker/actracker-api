@@ -251,12 +251,12 @@ abstract class JpaTagDataSourceIntegrationTest extends JpaIntegrationTest {
     static Stream<Arguments> tagsSortedAndPaginated() {
         var user = aTenant();
 
-        var tag1 = aTag().createdBy(user.id()).withId(new UUID(100, 1)).named("Z");
-        var tag2 = aTag().createdBy(user.id()).withId(new UUID(100, 2)).named("a");
-        var tag3 = aTag().createdBy(user.id()).withId(new UUID(100, 3)).named("a");
-        var tag4 = aTag().createdBy(user.id()).withId(new UUID(100, 4)).named(null);
-        var tag5 = aTag().createdBy(user.id()).withId(new UUID(100, 5)).named(null);
-        var tag6 = aTag().createdBy(user.id()).withId(new UUID(100, 6)).named("ZZZ");
+        var tag1 = aTag().createdBy(user).withId(new UUID(100, 1)).named("Z");
+        var tag2 = aTag().createdBy(user).withId(new UUID(100, 2)).named("a");
+        var tag3 = aTag().createdBy(user).withId(new UUID(100, 3)).named("a");
+        var tag4 = aTag().createdBy(user).withId(new UUID(100, 4)).named(null);
+        var tag5 = aTag().createdBy(user).withId(new UUID(100, 5)).named(null);
+        var tag6 = aTag().createdBy(user).withId(new UUID(100, 6)).named("ZZZ");
 
         var tagsToAdd = List.of(tag1, tag2, tag3, tag4, tag5, tag6);
 

@@ -1,30 +1,30 @@
-package ovh.equino.actracker.jpa.tag;
+package ovh.equino.actracker.jpa;
 
-import ovh.equino.actracker.domain.tag.TagDto;
+import ovh.equino.actracker.domain.tagset.TagSetDto;
 import ovh.equino.actracker.jpa.tenant.TenantTestData;
 
 import java.util.UUID;
 
-import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
 import static java.util.UUID.randomUUID;
 import static ovh.equino.actracker.jpa.tenant.TenantTestData.aTenant;
 
-public final class TagTestData {
+public class TagSetTestData {
 
     private UUID id = randomUUID();
     private TenantTestData creator = aTenant();
-    private String name = "nameless tag";
+    private String name = "nameless tag set";
 
-    public static TagTestData aTag() {
-        return new TagTestData();
+    public static TagSetTestData aTagSet() {
+        return new TagSetTestData();
     }
 
-    public TagTestData createdBy(TenantTestData creator) {
+    public TagSetTestData createdBy(TenantTestData creator) {
         this.creator = creator;
         return this;
     }
 
-    public TagTestData withId(UUID id) {
+    public TagSetTestData withId(UUID id) {
         this.id = id;
         return this;
     }
@@ -33,7 +33,7 @@ public final class TagTestData {
         return id;
     }
 
-    public TagTestData named(String name) {
+    public TagSetTestData named(String name) {
         this.name = name;
         return this;
     }
@@ -42,7 +42,7 @@ public final class TagTestData {
         return name;
     }
 
-    public TagDto asDto() {
-        return new TagDto(id, creator.id(), name, emptyList(), emptyList(), false);
+    public TagSetDto asDto() {
+        return new TagSetDto(id, creator.id(), name, emptySet(), false);
     }
 }

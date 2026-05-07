@@ -125,10 +125,12 @@ public abstract class IntegrationTestRelationalDataBase {
         addTags(tags.stream().map(TagTestData::asDto).toList());
     }
 
+    @Deprecated
     public synchronized void addTags(Collection<TagDto> tags) throws SQLException {
         addTags(tags.toArray(new TagDto[0]));
     }
 
+    @Deprecated
     public synchronized void addTags(TagDto... tags) throws SQLException {
         List<TagDto> notAddedTags = stream(tags)
                 .filter(tag -> !addedEntityIds.contains(tag.id()))
@@ -182,6 +184,16 @@ public abstract class IntegrationTestRelationalDataBase {
         }
     }
 
+    public synchronized void addTagSetsData(Collection<TagSetTestData> tagSets) throws SQLException {
+        addTagSets(tagSets.stream().map(TagSetTestData::asDto).toList());
+    }
+
+    @Deprecated
+    public synchronized void addTagSets(Collection<TagSetDto> tagSets) throws SQLException {
+        addTagSets(tagSets.toArray(new TagSetDto[0]));
+    }
+
+    @Deprecated
     public synchronized void addTagSets(TagSetDto... tagSets) throws SQLException {
         List<TagSetDto> notAddedTagSets = stream(tagSets)
                 .filter(tagSet -> !addedEntityIds.contains(tagSet.id()))
