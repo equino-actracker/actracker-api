@@ -1,6 +1,7 @@
 package ovh.equino.actracker.datasource.jpa;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Root;
 import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.jpa.JpaEntity;
@@ -23,12 +24,11 @@ public abstract class JpaOrderBuilder<E extends JpaEntity> {
         this.root = root;
     }
 
-    // TODO remove
+    @Deprecated
     public JpaOrderCriteria ascending(String fieldName) {
         return () -> criteriaBuilder.asc(root.get(fieldName));
     }
 
-    // TODO make package private
     public List<JpaOrderCriteria> from(EntitySortCriteria sortCriteria) {
         return sortCriteria.levels().stream()
                 .map(this::toOrderCriteria)
@@ -56,4 +56,15 @@ public abstract class JpaOrderBuilder<E extends JpaEntity> {
     }
 
     protected abstract List<JpaOrderCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion);
+
+    protected List<JpaOrderCriteria> nullFirstOrderCriteria(Expression<?> nullableAttribute,
+                                                            Expression<?> nullWeightAttribute,
+                                                            EntitySortCriteria.Order sortDirection) {
+
+        var nullWeightOrder = (JpaOrderCriteria) () -> criteriaBuilder.asc(nullWeightAttribute);
+        var nonNullOrder = DESC == sortDirection
+                ? (JpaOrderCriteria) () -> criteriaBuilder.desc(nullableAttribute)
+                : (JpaOrderCriteria) () -> criteriaBuilder.asc(nullableAttribute);
+        return List.of(nullWeightOrder, nonNullOrder);
+    }
 }

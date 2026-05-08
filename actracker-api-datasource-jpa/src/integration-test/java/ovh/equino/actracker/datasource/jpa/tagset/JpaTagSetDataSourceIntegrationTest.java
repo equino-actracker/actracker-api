@@ -7,6 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySearchPageId.Value;
 import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.tag.TagDto;
@@ -17,16 +18,24 @@ import ovh.equino.actracker.domain.tenant.TenantDto;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.IntegrationTestConfiguration;
 import ovh.equino.actracker.jpa.JpaIntegrationTest;
+import ovh.equino.actracker.jpa.TagSetTestData;
+import ovh.equino.actracker.jpa.tenant.TenantTestData;
 
 import java.sql.SQLException;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
+import static java.util.Collections.emptySet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static ovh.equino.actracker.domain.EntitySearchPageId.aPageId;
+import static ovh.equino.actracker.domain.EntitySearchPageId.firstPage;
 import static ovh.equino.actracker.domain.EntitySortCriteria.CommonField.ID;
 import static ovh.equino.actracker.domain.EntitySortCriteria.Order.ASC;
+import static ovh.equino.actracker.domain.EntitySortCriteria.Order.DESC;
+import static ovh.equino.actracker.domain.EntitySortCriteria.sortBy;
+import static ovh.equino.actracker.domain.tagset.TagSetSearchCriteria.SortableField.NAME;
+import static ovh.equino.actracker.jpa.TagSetTestData.aTagSet;
+import static ovh.equino.actracker.jpa.tenant.TenantTestData.aTenant;
 
 abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
 
@@ -151,6 +160,154 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("tags")
                     .containsExactlyElementsOf(expectedTagSets);
         });
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("tagSetsSortedAndPaginated")
+    void shouldFindTagSetsSortedAndPaginated(String testName,
+                                             TenantTestData searcher,
+                                             Collection<TagSetTestData> existingTagSets,
+                                             EntitySortCriteria sortCriteria,
+                                             List<ExpectedPage> expectedPages) throws SQLException {
+
+        // given
+        database().addUsersData(searcher);
+        database().addTagSetsData(existingTagSets);
+
+        var i = 0;
+        for (var expectedPage : expectedPages) {
+            System.out.printf("VERIFYING PAGE:%d%n", i);
+
+            inTransaction(() -> {
+                var searchCriteria = new TagSetSearchCriteria(
+                        new EntitySearchCriteria.Common(
+                                searcher.asUser(),
+                                expectedPage.pageSize(),
+                                expectedPage.pageId(),
+                                sortCriteria
+                        ),
+                        null,
+                        emptySet()
+                );
+
+                // when
+                var foundPage = dataSource.find(searchCriteria);
+
+                // then
+                assertThat(foundPage).containsExactlyElementsOf(expectedPage.expectedDTOs());
+            });
+
+            System.out.printf("PAGE %d VERIFIED%n", i++);
+        }
+    }
+
+    static Stream<Arguments> tagSetsSortedAndPaginated() {
+        var user = aTenant();
+
+        var tagSet1 = aTagSet().createdBy(user).withId(new UUID(200, 1)).named("Z");
+        var tagSet2 = aTagSet().createdBy(user).withId(new UUID(200, 2)).named("a");
+        var tagSet3 = aTagSet().createdBy(user).withId(new UUID(200, 3)).named("a");
+        var tagSet4 = aTagSet().createdBy(user).withId(new UUID(200, 4)).named(null);
+        var tagSet5 = aTagSet().createdBy(user).withId(new UUID(200, 5)).named(null);
+        var tagSet6 = aTagSet().createdBy(user).withId(new UUID(200, 6)).named("ZZZ");
+
+        var tagSetsToAdd = List.of(tagSet1, tagSet2, tagSet3, tagSet4, tagSet5, tagSet6);
+
+        return Stream.of(
+                Arguments.of(
+                        "No Sort",
+                        user,
+                        tagSetsToAdd,
+                        EntitySortCriteria.irrelevant(),
+                        List.of(
+                                new ExpectedPage(firstPage(), 3, List.of(tagSet1, tagSet2, tagSet3)),
+                                new ExpectedPage(
+                                        aPageId().with(Value.of(ID, ASC, tagSet4.id())),
+                                        100,
+                                        List.of(tagSet4, tagSet5, tagSet6)
+                                )
+                        )
+                ),
+
+                Arguments.of(
+                        "NAME:ASC",
+                        user,
+                        tagSetsToAdd,
+                        sortBy(NAME, ASC),
+                        List.of(
+                                new ExpectedPage(firstPage(), 3, List.of(tagSet4, tagSet5, tagSet2)),
+                                new ExpectedPage(
+                                        aPageId()
+                                                .with(Value.of(NAME, ASC, null))
+                                                .with(Value.of(ID, ASC, tagSet5.id())),
+                                        2,
+                                        List.of(tagSet5, tagSet2)
+                                ),
+                                new ExpectedPage(
+                                        aPageId()
+                                                .with(Value.of(NAME, ASC, tagSet2.name()))
+                                                .with(Value.of(ID, ASC, tagSet2.id())),
+                                        100,
+                                        List.of(tagSet2, tagSet3, tagSet1, tagSet6)
+                                )
+                        )
+                ),
+
+                Arguments.of(
+                        "NAME:DESC",
+                        user,
+                        tagSetsToAdd,
+                        sortBy(NAME, DESC),
+                        List.of(
+                                new ExpectedPage(firstPage(), 3, List.of(tagSet5, tagSet4, tagSet6)),
+                                new ExpectedPage(
+                                        aPageId()
+                                                .with(Value.of(NAME, DESC, null))
+                                                .with(Value.of(ID, DESC, tagSet4.id())),
+                                        2,
+                                        List.of(tagSet4, tagSet6)
+                                ),
+                                new ExpectedPage(
+                                        aPageId()
+                                                .with(Value.of(NAME, DESC, tagSet6.name()))
+                                                .with(Value.of(ID, DESC, tagSet6.id())),
+                                        100,
+                                        List.of(tagSet6, tagSet1, tagSet3, tagSet2)
+                                )
+                        )
+                ),
+
+                Arguments.of(
+                        "All criteria: [NAME:DESC]",
+                        user,
+                        tagSetsToAdd,
+                        sortBy(NAME, DESC),
+                        List.of(
+                                new ExpectedPage(firstPage(), 3, List.of(tagSet5, tagSet4, tagSet6)),
+                                new ExpectedPage(
+                                        aPageId()
+                                                .with(Value.of(NAME, DESC, null))
+                                                .with(Value.of(ID, DESC, tagSet4.id())),
+                                        2,
+                                        List.of(tagSet4, tagSet6)
+                                ),
+                                new ExpectedPage(
+                                        aPageId()
+                                                .with(Value.of(NAME, DESC, tagSet6.name()))
+                                                .with(Value.of(ID, DESC, tagSet6.id())),
+                                        100,
+                                        List.of(tagSet6, tagSet1, tagSet3, tagSet2)
+                                )
+                        )
+                )
+        );
+    }
+
+    private record ExpectedPage(EntitySearchPageId pageId, int pageSize, List<TagSetTestData> expectedResults) {
+
+        List<TagSetDto> expectedDTOs() {
+            return expectedResults.stream().map(TagSetTestData::asDto).toList();
+        }
     }
 
     @BeforeAll

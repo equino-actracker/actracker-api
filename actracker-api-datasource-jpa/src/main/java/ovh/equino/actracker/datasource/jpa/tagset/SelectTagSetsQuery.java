@@ -1,9 +1,11 @@
 package ovh.equino.actracker.datasource.jpa.tagset;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.Expression;
 import ovh.equino.actracker.datasource.jpa.*;
 import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySortCriteria;
+import ovh.equino.actracker.domain.tagset.TagSetSearchCriteria;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.tagset.TagSetEntity;
 import ovh.equino.actracker.jpa.tagset.TagSetEntity_;
@@ -15,12 +17,21 @@ import static java.util.Collections.emptyList;
 final class SelectTagSetsQuery extends MultiResultJpaQuery<TagSetEntity, TagSetProjection> {
 
     private final PredicateBuilder predicateBuilder;
-    private final OrderBuilder sortBuilder;
+    private final OrderBuilder orderBuilder;
+
+    private final Expression<String> tagSetNameLowerCase;
+    private final Expression<Integer> tagSetNameNullWeight;
 
     SelectTagSetsQuery(EntityManager entityManager) {
         super(entityManager);
         this.predicateBuilder = new PredicateBuilder();
-        this.sortBuilder = new OrderBuilder();
+        this.orderBuilder = new OrderBuilder();
+
+        this.tagSetNameLowerCase = criteriaBuilder.lower(root.get(TagSetEntity_.name));
+        this.tagSetNameNullWeight = criteriaBuilder.selectCase()
+                .when(criteriaBuilder.isNull(root.get(TagSetEntity_.name)), 0)
+                .otherwise(1)
+                .as(Integer.class);
     }
 
     @Override
@@ -43,7 +54,7 @@ final class SelectTagSetsQuery extends MultiResultJpaQuery<TagSetEntity, TagSetP
 
     @Override
     public JpaOrderBuilder<TagSetEntity> order() {
-        return sortBuilder;
+        return orderBuilder;
     }
 
     @Override
@@ -83,7 +94,20 @@ final class SelectTagSetsQuery extends MultiResultJpaQuery<TagSetEntity, TagSetP
         }
 
         @Override
-        protected List<PageCondition<? extends Comparable<?>>> toEntityPageConditions(EntitySearchPageId.Value pageAttribute) {
+        protected List<PageCondition<? extends Comparable<?>>> toEntityPageConditions(
+                EntitySearchPageId.Value pageAttribute) {
+
+            if (pageAttribute.sortField() instanceof TagSetSearchCriteria.SortableField sortableAttribute) {
+                var sortDirection = pageAttribute.sortOrder();
+                return switch (sortableAttribute) {
+                    case NAME -> nullFirstPageCondition(
+                            tagSetNameLowerCase,
+                            tagSetNameNullWeight,
+                            nullableValueLowerCase(pageAttribute),
+                            sortDirection
+                    );
+                };
+            }
             return emptyList();
         }
     }
@@ -95,6 +119,12 @@ final class SelectTagSetsQuery extends MultiResultJpaQuery<TagSetEntity, TagSetP
 
         @Override
         protected List<JpaOrderCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion) {
+            if (sortCriterion.field() instanceof TagSetSearchCriteria.SortableField sortableAttribute) {
+                var sortDirection = sortCriterion.order();
+                return switch (sortableAttribute) {
+                    case NAME -> nullFirstOrderCriteria(tagSetNameLowerCase, tagSetNameNullWeight, sortDirection);
+                };
+            }
             return emptyList();
         }
     }

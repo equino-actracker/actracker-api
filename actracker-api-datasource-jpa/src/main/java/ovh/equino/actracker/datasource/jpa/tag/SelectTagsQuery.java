@@ -18,23 +18,19 @@ import ovh.equino.actracker.jpa.tag.TagShareEntity_;
 import java.util.List;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
-import static java.util.Objects.isNull;
-import static ovh.equino.actracker.domain.EntitySortCriteria.Order.DESC;
 
 final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection> {
 
-    private final PredicateBuilder predicate;
-    private final OrderBuilder sort;
+    private final PredicateBuilder predicateBuilder;
+    private final OrderBuilder orderBuilder;
 
     private final Expression<String> tagNameLowerCase;
     private final Expression<Integer> tagNameNullWeight;
 
-
     SelectTagsQuery(EntityManager entityManager) {
         super(entityManager);
-        this.predicate = new PredicateBuilder();
-        this.sort = new OrderBuilder();
+        this.predicateBuilder = new PredicateBuilder();
+        this.orderBuilder = new OrderBuilder();
 
         this.tagNameLowerCase = criteriaBuilder.lower(root.get(TagEntity_.name));
         this.tagNameNullWeight = criteriaBuilder.selectCase()
@@ -56,17 +52,17 @@ final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection
                                 root.get(TagEntity_.deleted)
                         )
                 )
-                .distinct(true);
+                .distinct(true);    // TODO Find a way to remove it, then remove sortable attributes from TagProjection
     }
 
     @Override
     public PredicateBuilder predicate() {
-        return predicate;
+        return predicateBuilder;
     }
 
     @Override
     public JpaOrderBuilder<TagEntity> order() {
-        return sort;
+        return orderBuilder;
     }
 
     @Override
@@ -126,25 +122,17 @@ final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection
                 EntitySearchPageId.Value pageAttribute) {
 
             if (pageAttribute.sortField() instanceof TagSearchCriteria.SortableField sortableAttribute) {
+                var sortDirection = pageAttribute.sortOrder();
                 return switch (sortableAttribute) {
-                    case NAME -> nameCondition(pageAttribute);
-
+                    case NAME -> nullFirstPageCondition(
+                            tagNameLowerCase,
+                            tagNameNullWeight,
+                            nullableValueLowerCase(pageAttribute),
+                            sortDirection
+                    );
                 };
             }
             return emptyList();
-        }
-
-        private List<PageCondition<? extends Comparable<?>>> nameCondition(EntitySearchPageId.Value pageAttribute) {
-            if (isNull(pageAttribute.value())) {
-                return singletonList(PageCondition.of(tagNameNullWeight, 0, PageCondition.Relation.GTE));
-            }
-
-            var pageValue = pageAttribute.value().toString().toLowerCase();
-            var relation = PageCondition.Relation.from(pageAttribute.sortOrder());
-            return List.of(
-                    PageCondition.of(tagNameNullWeight, 1, PageCondition.Relation.GTE),
-                    PageCondition.of(tagNameLowerCase, pageValue, relation)
-            );
         }
     }
 
@@ -156,19 +144,12 @@ final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection
         @Override
         protected List<JpaOrderCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion) {
             if (sortCriterion.field() instanceof TagSearchCriteria.SortableField sortableAttribute) {
+                var sortDirection = sortCriterion.order();
                 return switch (sortableAttribute) {
-                    case NAME -> nameOrderCriteria(sortCriterion);
+                    case NAME -> nullFirstOrderCriteria(tagNameLowerCase, tagNameNullWeight, sortDirection);
                 };
             }
             return emptyList();
-        }
-
-        private List<JpaOrderCriteria> nameOrderCriteria(EntitySortCriteria.Level sortCriterion) {
-            var nullFirstOrder = (JpaOrderCriteria) () -> criteriaBuilder.asc(tagNameNullWeight);
-            var nonNullOrder = DESC == sortCriterion.order()
-                    ? (JpaOrderCriteria) () -> criteriaBuilder.desc(tagNameLowerCase)
-                    : (JpaOrderCriteria) () -> criteriaBuilder.asc(tagNameLowerCase);
-            return List.of(nullFirstOrder, nonNullOrder);
         }
     }
 }
