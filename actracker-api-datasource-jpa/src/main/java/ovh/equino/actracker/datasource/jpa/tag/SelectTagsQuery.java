@@ -18,9 +18,6 @@ import ovh.equino.actracker.jpa.tag.TagShareEntity_;
 import java.util.List;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
-import static java.util.Objects.isNull;
-import static ovh.equino.actracker.domain.EntitySortCriteria.Order.DESC;
 
 final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection> {
 
@@ -125,26 +122,17 @@ final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection
                 EntitySearchPageId.Value pageAttribute) {
 
             if (pageAttribute.sortField() instanceof TagSearchCriteria.SortableField sortableAttribute) {
+                var sortDirection = pageAttribute.sortOrder();
                 return switch (sortableAttribute) {
-                    case NAME -> nameCondition(pageAttribute);
-
+                    case NAME -> nullFirstPageCondition(
+                            tagNameLowerCase,
+                            tagNameNullWeight,
+                            nullableValueLowerCase(pageAttribute),
+                            sortDirection
+                    );
                 };
             }
             return emptyList();
-        }
-
-        // TODO refactor, extract method for null first condition
-        private List<PageCondition<? extends Comparable<?>>> nameCondition(EntitySearchPageId.Value pageAttribute) {
-            if (isNull(pageAttribute.value())) {
-                return singletonList(PageCondition.of(tagNameNullWeight, 0, PageCondition.Relation.GTE));
-            }
-
-            var pageValue = pageAttribute.value().toString().toLowerCase();
-            var relation = PageCondition.Relation.from(pageAttribute.sortOrder());
-            return List.of(
-                    PageCondition.of(tagNameNullWeight, 1, PageCondition.Relation.GTE),
-                    PageCondition.of(tagNameLowerCase, pageValue, relation)
-            );
         }
     }
 
@@ -156,20 +144,12 @@ final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection
         @Override
         protected List<JpaOrderCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion) {
             if (sortCriterion.field() instanceof TagSearchCriteria.SortableField sortableAttribute) {
+                var sortDirection = sortCriterion.order();
                 return switch (sortableAttribute) {
-                    case NAME -> nameOrderCriteria(sortCriterion);
+                    case NAME -> nullFirstOrderCriteria(tagNameLowerCase, tagNameNullWeight, sortDirection);
                 };
             }
             return emptyList();
-        }
-
-        // TODO refactor, extract method for null first sort
-        private List<JpaOrderCriteria> nameOrderCriteria(EntitySortCriteria.Level sortCriterion) {
-            var nullFirstOrder = (JpaOrderCriteria) () -> criteriaBuilder.asc(tagNameNullWeight);
-            var nonNullOrder = DESC == sortCriterion.order()
-                    ? (JpaOrderCriteria) () -> criteriaBuilder.desc(tagNameLowerCase)
-                    : (JpaOrderCriteria) () -> criteriaBuilder.asc(tagNameLowerCase);
-            return List.of(nullFirstOrder, nonNullOrder);
         }
     }
 }

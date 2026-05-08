@@ -13,9 +13,6 @@ import ovh.equino.actracker.jpa.tagset.TagSetEntity_;
 import java.util.List;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
-import static java.util.Objects.isNull;
-import static ovh.equino.actracker.domain.EntitySortCriteria.Order.DESC;
 
 final class SelectTagSetsQuery extends MultiResultJpaQuery<TagSetEntity, TagSetProjection> {
 
@@ -97,29 +94,21 @@ final class SelectTagSetsQuery extends MultiResultJpaQuery<TagSetEntity, TagSetP
         }
 
         @Override
-        protected List<PageCondition<? extends Comparable<?>>> toEntityPageConditions(EntitySearchPageId.Value pageAttribute) {
+        protected List<PageCondition<? extends Comparable<?>>> toEntityPageConditions(
+                EntitySearchPageId.Value pageAttribute) {
 
             if (pageAttribute.sortField() instanceof TagSetSearchCriteria.SortableField sortableAttribute) {
+                var sortDirection = pageAttribute.sortOrder();
                 return switch (sortableAttribute) {
-                    case NAME -> nameCondition(pageAttribute);
-
+                    case NAME -> nullFirstPageCondition(
+                            tagSetNameLowerCase,
+                            tagSetNameNullWeight,
+                            nullableValueLowerCase(pageAttribute),
+                            sortDirection
+                    );
                 };
             }
             return emptyList();
-        }
-
-        // TODO refactor, extract method for null first condition
-        private List<PageCondition<? extends Comparable<?>>> nameCondition(EntitySearchPageId.Value pageAttribute) {
-            if (isNull(pageAttribute.value())) {
-                return singletonList(PageCondition.of(tagSetNameNullWeight, 0, PageCondition.Relation.GTE));
-            }
-
-            var pageValue = pageAttribute.value().toString().toLowerCase();
-            var relation = PageCondition.Relation.from(pageAttribute.sortOrder());
-            return List.of(
-                    PageCondition.of(tagSetNameNullWeight, 1, PageCondition.Relation.GTE),
-                    PageCondition.of(tagSetNameLowerCase, pageValue, relation)
-            );
         }
     }
 
@@ -131,20 +120,12 @@ final class SelectTagSetsQuery extends MultiResultJpaQuery<TagSetEntity, TagSetP
         @Override
         protected List<JpaOrderCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion) {
             if (sortCriterion.field() instanceof TagSetSearchCriteria.SortableField sortableAttribute) {
+                var sortDirection = sortCriterion.order();
                 return switch (sortableAttribute) {
-                    case NAME -> nameOrderCriteria(sortCriterion);
+                    case NAME -> nullFirstOrderCriteria(tagSetNameLowerCase, tagSetNameNullWeight, sortDirection);
                 };
             }
             return emptyList();
-        }
-
-        // TODO refactor, extract method for null first sort
-        private List<JpaOrderCriteria> nameOrderCriteria(EntitySortCriteria.Level sortCriterion) {
-            var nullFirstOrder = (JpaOrderCriteria) () -> criteriaBuilder.asc(tagSetNameNullWeight);
-            var nonNullOrder = DESC == sortCriterion.order()
-                    ? (JpaOrderCriteria) () -> criteriaBuilder.desc(tagSetNameLowerCase)
-                    : (JpaOrderCriteria) () -> criteriaBuilder.asc(tagSetNameLowerCase);
-            return List.of(nullFirstOrder, nonNullOrder);
         }
     }
 }

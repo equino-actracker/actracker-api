@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static java.util.stream.Stream.concat;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
@@ -184,6 +185,29 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
     protected abstract List<PageCondition<? extends Comparable<?>>> toEntityPageConditions(
             EntitySearchPageId.Value pageAttribute);
 
+    protected <T extends Comparable<T>> List<PageCondition<? extends Comparable<?>>> nullFirstPageCondition(
+            Expression<T> nullableAttribute,
+            Expression<Integer> nullWeightAttribute,
+            T pageAttributeValue,
+            EntitySortCriteria.Order sortDirection) {
+
+        if (isNull(pageAttributeValue)) {
+            return singletonList(PageCondition.of(nullWeightAttribute, 0, PageCondition.Relation.GTE));
+        }
+
+        var relation = PageCondition.Relation.from(sortDirection);
+        return List.of(
+                PageCondition.of(nullWeightAttribute, 1, PageCondition.Relation.GTE),
+                PageCondition.of(nullableAttribute, pageAttributeValue, relation)
+        );
+    }
+
+    protected String nullableValueLowerCase(EntitySearchPageId.Value attributeValue) {
+        if (isNull(attributeValue.value())) {
+            return null;
+        }
+        return attributeValue.value().toString().toLowerCase();
+    }
 
     protected record PageCondition<T extends Comparable<T>>(Expression<T> field,
                                                             T value,
