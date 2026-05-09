@@ -88,8 +88,10 @@ class JpaDashboardDataSource extends JpaDAO implements DashboardDataSource {
     @Override
     public List<DashboardDto> find(DashboardSearchCriteria searchCriteria) {
 
-        SelectDashboardsQuery selectDashboards = new SelectDashboardsQuery(entityManager);
-        List<DashboardProjection> dashboardResults = selectDashboards
+        var selectDashboards = new SelectDashboardsQuery(entityManager);
+        var orderCriteria = selectDashboards.order().from(searchCriteria.common().sortCriteria());
+
+        var dashboardResults = selectDashboards
                 .where(
                         selectDashboards.predicate().and(
                                 selectDashboards.predicate().isNotDeleted(),
@@ -98,18 +100,18 @@ class JpaDashboardDataSource extends JpaDAO implements DashboardDataSource {
                                 selectDashboards.predicate().isNotExcluded(searchCriteria.excludeFilter())
                         )
                 )
-                .orderBy(selectDashboards.order().ascending("id"))
+                .orderBy(orderCriteria)
                 .limit(searchCriteria.common().pageSize())
                 .execute();
 
-        Set<UUID> dashboardIds = dashboardResults
+        var dashboardIds = dashboardResults
                 .stream()
                 .map(DashboardProjection::id)
                 .map(UUID::fromString)
                 .collect(toUnmodifiableSet());
 
-        SelectChartJoinDashboardQuery selectChartJoinDashboard = new SelectChartJoinDashboardQuery(entityManager);
-        List<ChartJoinDashboardProjection> chartsResults = selectChartJoinDashboard
+        var selectChartJoinDashboard = new SelectChartJoinDashboardQuery(entityManager);
+        var chartsResults = selectChartJoinDashboard
                 .where(
                         selectChartJoinDashboard.predicate().and(
                                 selectChartJoinDashboard.predicate().hasDashboardIdIn(dashboardIds),
@@ -118,14 +120,14 @@ class JpaDashboardDataSource extends JpaDAO implements DashboardDataSource {
                 )
                 .execute();
 
-        Set<UUID> chartIds = chartsResults
+        var chartIds = chartsResults
                 .stream()
                 .map(ChartJoinDashboardProjection::id)
                 .map(UUID::fromString)
                 .collect(toUnmodifiableSet());
 
-        SelectChartJoinTagQuery selectChartJoinTag = new SelectChartJoinTagQuery(entityManager);
-        Map<String, Set<UUID>> tagsByChartId = selectChartJoinTag
+        var selectChartJoinTag = new SelectChartJoinTagQuery(entityManager);
+        var tagsByChartId = selectChartJoinTag
                 .where(
                         selectChartJoinTag.predicate().and(
                                 selectChartJoinTag.predicate().hasChartIdIn(chartIds),
@@ -140,7 +142,7 @@ class JpaDashboardDataSource extends JpaDAO implements DashboardDataSource {
                         mapping(ChartJoinTagProjection::toTagId, toUnmodifiableSet())
                 ));
 
-        Map<String, List<Chart>> charts = chartsResults
+        var charts = chartsResults
                 .stream()
                 .collect(groupingBy(
                         ChartJoinDashboardProjection::dashboardId,
@@ -149,8 +151,8 @@ class JpaDashboardDataSource extends JpaDAO implements DashboardDataSource {
                         )
                 ));
 
-        SelectShareJoinDashboardQuery selectShareJoinDashboard = new SelectShareJoinDashboardQuery(entityManager);
-        Map<String, List<Share>> shareByDashboardId = selectShareJoinDashboard
+        var selectShareJoinDashboard = new SelectShareJoinDashboardQuery(entityManager);
+        var shareByDashboardId = selectShareJoinDashboard
                 .where(
                         selectShareJoinDashboard.predicate().and(
                                 selectShareJoinDashboard.predicate().hasDashboardIdIn(dashboardIds),

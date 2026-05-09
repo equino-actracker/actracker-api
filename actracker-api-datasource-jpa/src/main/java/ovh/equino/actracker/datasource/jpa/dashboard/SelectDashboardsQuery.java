@@ -1,12 +1,14 @@
 package ovh.equino.actracker.datasource.jpa.dashboard;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Subquery;
 import ovh.equino.actracker.datasource.jpa.*;
 import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySortCriteria;
+import ovh.equino.actracker.domain.dashboard.DashboardSearchCriteria;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.dashboard.DashboardEntity;
 import ovh.equino.actracker.jpa.dashboard.DashboardEntity_;
@@ -19,13 +21,22 @@ import static java.util.Collections.emptyList;
 
 final class SelectDashboardsQuery extends MultiResultJpaQuery<DashboardEntity, DashboardProjection> {
 
-    private final PredicateBuilder predicate;
-    private final OrderBuilder sort;
+    private final PredicateBuilder predicateBuilder;
+    private final OrderBuilder orderBuilder;
+
+    private final Expression<String> dashboardNameLowerCase;
+    private final Expression<Integer> dashboardNameNullWeight;
 
     SelectDashboardsQuery(EntityManager entityManager) {
         super(entityManager);
-        this.predicate = new PredicateBuilder();
-        this.sort = new OrderBuilder();
+        this.predicateBuilder = new PredicateBuilder();
+        this.orderBuilder = new OrderBuilder();
+
+        this.dashboardNameLowerCase = criteriaBuilder.lower(root.get(DashboardEntity_.name));
+        this.dashboardNameNullWeight = criteriaBuilder.selectCase()
+                .when(criteriaBuilder.isNull(root.get(DashboardEntity_.name)), 0)
+                .otherwise(1)
+                .as(Integer.class);
     }
 
     @Override
@@ -36,6 +47,8 @@ final class SelectDashboardsQuery extends MultiResultJpaQuery<DashboardEntity, D
                                 root.get(DashboardEntity_.id),
                                 root.get(DashboardEntity_.creatorId),
                                 root.get(DashboardEntity_.name),
+                                dashboardNameLowerCase,
+                                dashboardNameNullWeight,
                                 root.get(DashboardEntity_.deleted)
                         )
                 )
@@ -44,7 +57,7 @@ final class SelectDashboardsQuery extends MultiResultJpaQuery<DashboardEntity, D
 
     @Override
     public PredicateBuilder predicate() {
-        return predicate;
+        return predicateBuilder;
     }
 
     @Override
@@ -55,7 +68,7 @@ final class SelectDashboardsQuery extends MultiResultJpaQuery<DashboardEntity, D
 
     @Override
     public OrderBuilder order() {
-        return sort;
+        return orderBuilder;
     }
 
     @Override
@@ -101,8 +114,22 @@ final class SelectDashboardsQuery extends MultiResultJpaQuery<DashboardEntity, D
         }
 
         @Override
-        protected List<PageCondition<? extends Comparable<?>>> toEntityPageConditions(EntitySearchPageId.Value pageAttribute) {
+        protected List<PageCondition<? extends Comparable<?>>> toEntityPageConditions(
+                EntitySearchPageId.Value pageAttribute) {
+
+            if (pageAttribute.sortField() instanceof DashboardSearchCriteria.SortableField sortableAttribute) {
+                var sortDirection = pageAttribute.sortOrder();
+                return switch (sortableAttribute) {
+                    case NAME -> nullFirstPageConditions(
+                            dashboardNameLowerCase,
+                            dashboardNameNullWeight,
+                            nullableValueLowerCase(pageAttribute),
+                            sortDirection
+                    );
+                };
+            }
             return emptyList();
+
         }
     }
 
@@ -113,6 +140,12 @@ final class SelectDashboardsQuery extends MultiResultJpaQuery<DashboardEntity, D
 
         @Override
         protected List<JpaOrderCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion) {
+            if (sortCriterion.field() instanceof DashboardSearchCriteria.SortableField sortableAttribute) {
+                var sortDirection = sortCriterion.order();
+                return switch (sortableAttribute) {
+                    case NAME -> nullFirstOrderCriteria(dashboardNameLowerCase, dashboardNameNullWeight, sortDirection);
+                };
+            }
             return emptyList();
         }
     }

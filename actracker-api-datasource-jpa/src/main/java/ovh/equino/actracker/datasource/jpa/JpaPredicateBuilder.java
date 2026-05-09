@@ -185,7 +185,7 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
     protected abstract List<PageCondition<? extends Comparable<?>>> toEntityPageConditions(
             EntitySearchPageId.Value pageAttribute);
 
-    protected <T extends Comparable<T>> List<PageCondition<? extends Comparable<?>>> nullFirstPageCondition(
+    protected <T extends Comparable<T>> List<PageCondition<? extends Comparable<?>>> nullFirstPageConditions(
             Expression<T> nullableAttribute,
             Expression<Integer> nullWeightAttribute,
             T pageAttributeValue,
