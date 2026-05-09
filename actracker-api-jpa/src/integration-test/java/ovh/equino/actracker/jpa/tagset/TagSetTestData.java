@@ -1,4 +1,4 @@
-package ovh.equino.actracker.jpa;
+package ovh.equino.actracker.jpa.tagset;
 
 import ovh.equino.actracker.domain.tagset.TagSetDto;
 import ovh.equino.actracker.jpa.tenant.TenantTestData;
