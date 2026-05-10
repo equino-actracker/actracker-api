@@ -13,10 +13,24 @@ import static java.util.Objects.isNull;
 record ActivityProjection(String id,
                           String creatorId,
                           String title,
+                          String activityTitleLowerCase,
+                          Integer activityTitleNullWeight,
                           Timestamp startTime,
                           Timestamp endTime,
                           String comment,
                           Boolean deleted) {
+
+    @SuppressWarnings("unused")
+    ActivityProjection(String id,
+                       String creatorId,
+                       String title,
+                       Timestamp startTime,
+                       Timestamp endTime,
+                       String comment,
+                       Boolean deleted) {
+
+        this(id, creatorId, title, null, null, startTime, endTime, comment, deleted);
+    }
 
     ActivityDto toActivity(Set<UUID> tagIds, List<MetricValue> metricValues) {
 

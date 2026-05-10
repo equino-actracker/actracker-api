@@ -7,7 +7,10 @@ import ovh.equino.actracker.jpa.JpaDAO;
 
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
@@ -77,6 +80,8 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
                 : Timestamp.from(searchCriteria.timeRangeEnd());
 
         var selectActivities = new SelectActivitiesQuery(entityManager);
+        var orderCriteria = selectActivities.order().from(searchCriteria.common().sortCriteria());
+
         var activityResults = selectActivities
                 .where(
                         selectActivities.predicate().and(
@@ -88,7 +93,7 @@ class JpaActivityDataSource extends JpaDAO implements ActivityDataSource {
                                 selectActivities.predicate().isInTimeRange(timeRangeStart, timeRangeEnd)
                         )
                 )
-                .orderBy(selectActivities.order().ascending("id"))
+                .orderBy(orderCriteria)
                 .limit(searchCriteria.common().pageSize())
                 .execute();
 

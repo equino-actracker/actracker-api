@@ -1,12 +1,14 @@
 package ovh.equino.actracker.datasource.jpa.activity;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Subquery;
 import ovh.equino.actracker.datasource.jpa.*;
 import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySortCriteria;
+import ovh.equino.actracker.domain.activity.ActivitySearchCriteria;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.activity.ActivityEntity;
 import ovh.equino.actracker.jpa.activity.ActivityEntity_;
@@ -26,12 +28,21 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, ActivityProjection> {
 
     private final PredicateBuilder predicateBuilder;
-    private final OrderBuilder sortBuilder;
+    private final OrderBuilder orderBuilder;
+
+    private final Expression<String> activityTitleLowerCase;
+    private final Expression<Integer> activityTitleNullWeight;
 
     SelectActivitiesQuery(EntityManager entityManager) {
         super(entityManager);
         this.predicateBuilder = new PredicateBuilder();
-        this.sortBuilder = new OrderBuilder();
+        this.orderBuilder = new OrderBuilder();
+
+        this.activityTitleLowerCase = criteriaBuilder.lower(root.get(ActivityEntity_.title));
+        this.activityTitleNullWeight = criteriaBuilder.selectCase()
+                .when(criteriaBuilder.isNull(root.get(ActivityEntity_.title)), 0)
+                .otherwise(1)
+                .as(Integer.class);
     }
 
     @Override
@@ -43,6 +54,8 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
                                 root.get(ActivityEntity_.id),
                                 root.get(ActivityEntity_.creatorId),
                                 root.get(ActivityEntity_.title),
+                                activityTitleLowerCase,
+                                activityTitleNullWeight,
                                 root.get(ActivityEntity_.startTime),
                                 root.get(ActivityEntity_.endTime),
                                 root.get(ActivityEntity_.comment),
@@ -59,7 +72,7 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
 
     @Override
     public OrderBuilder order() {
-        return sortBuilder;
+        return orderBuilder;
     }
 
     @Override
@@ -178,7 +191,20 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
         }
 
         @Override
-        protected List<PageCondition<? extends Comparable<?>>> toEntityPageConditions(EntitySearchPageId.Value pageAttribute) {
+        protected List<PageCondition<? extends Comparable<?>>> toEntityPageConditions(
+                EntitySearchPageId.Value pageAttribute) {
+
+            if (pageAttribute.sortField() instanceof ActivitySearchCriteria.SortableField sortableAttribute) {
+                var sortDirection = pageAttribute.sortOrder();
+                return switch (sortableAttribute) {
+                    case TITLE -> nullFirstPageConditions(
+                            activityTitleLowerCase,
+                            activityTitleNullWeight,
+                            nullableValueLowerCase(pageAttribute),
+                            sortDirection
+                    );
+                };
+            }
             return emptyList();
         }
     }
@@ -190,6 +216,13 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
 
         @Override
         protected List<JpaOrderCriteria> toEntityOrderCriteria(EntitySortCriteria.Level sortCriterion) {
+            if (sortCriterion.field() instanceof ActivitySearchCriteria.SortableField sortableAttribute) {
+                var sortDirection = sortCriterion.order();
+                return switch (sortableAttribute) {
+                    case TITLE ->
+                            nullFirstOrderCriteria(activityTitleLowerCase, activityTitleNullWeight, sortDirection);
+                };
+            }
             return emptyList();
         }
     }
