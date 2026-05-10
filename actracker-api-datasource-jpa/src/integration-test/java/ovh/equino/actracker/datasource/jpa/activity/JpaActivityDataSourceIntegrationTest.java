@@ -7,6 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import ovh.equino.actracker.domain.EntitySearchCriteria;
+import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySearchPageId.Value;
 import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.activity.ActivityDto;
@@ -19,18 +20,27 @@ import ovh.equino.actracker.domain.tenant.TenantDto;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.IntegrationTestConfiguration;
 import ovh.equino.actracker.jpa.JpaIntegrationTest;
+import ovh.equino.actracker.jpa.activity.ActivityTestData;
+import ovh.equino.actracker.jpa.tenant.TenantTestData;
 
 import java.sql.SQLException;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static ovh.equino.actracker.domain.EntitySearchPageId.aPageId;
+import static ovh.equino.actracker.domain.EntitySearchPageId.firstPage;
 import static ovh.equino.actracker.domain.EntitySortCriteria.CommonField.ID;
 import static ovh.equino.actracker.domain.EntitySortCriteria.Order.ASC;
+import static ovh.equino.actracker.domain.EntitySortCriteria.Order.DESC;
+import static ovh.equino.actracker.domain.EntitySortCriteria.sortBy;
+import static ovh.equino.actracker.domain.activity.ActivitySearchCriteria.SortableField.TITLE;
 import static ovh.equino.actracker.jpa.TestUtil.randomBigDecimal;
+import static ovh.equino.actracker.jpa.activity.ActivityTestData.anActivity;
+import static ovh.equino.actracker.jpa.tenant.TenantTestData.aTenant;
 
 abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
 
@@ -257,6 +267,157 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
             List<ActivityId> foundActivities = dataSource.findOwnUnfinishedStartedBefore(startTime, searcher);
             assertThat(foundActivities).containsExactlyInAnyOrderElementsOf(expectedActivityIds);
         });
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("activitiesSortedAndPaginated")
+    void shouldFindActivitiesSortedAndPaginated(String testName,
+                                                TenantTestData searcher,
+                                                Collection<ActivityTestData> existingActivities,
+                                                EntitySortCriteria sortCriteria,
+                                                List<ExpectedPage> expectedPages) throws SQLException {
+
+        // given
+        database().addUsersData(searcher);
+        database().addActivitiesData(existingActivities);
+
+        var i = 0;
+        for (var expectedPage : expectedPages) {
+            System.out.printf("VERIFYING PAGE:%d%n", i);
+
+            inTransaction(() -> {
+                var searchCriteria = new ActivitySearchCriteria(
+                        new EntitySearchCriteria.Common(
+                                searcher.asUser(),
+                                expectedPage.pageSize(),
+                                expectedPage.pageId(),
+                                sortCriteria
+                        ),
+                        null,
+                        null,
+                        null,
+                        emptySet(),
+                        emptySet()
+                );
+
+                // when
+                var foundPage = dataSource.find(searchCriteria);
+
+                // then
+                assertThat(foundPage).containsExactlyElementsOf(expectedPage.expectedDTOs());
+            });
+
+            System.out.printf("PAGE %d VERIFIED%n", i++);
+        }
+    }
+
+    static Stream<Arguments> activitiesSortedAndPaginated() {
+        var user = aTenant();
+
+        var activity1 = anActivity().createdBy(user).withId(new UUID(400, 1)).withTitle("Z");
+        var activity2 = anActivity().createdBy(user).withId(new UUID(400, 2)).withTitle("a");
+        var activity3 = anActivity().createdBy(user).withId(new UUID(400, 3)).withTitle("a");
+        var activity4 = anActivity().createdBy(user).withId(new UUID(400, 4)).withTitle(null);
+        var activity5 = anActivity().createdBy(user).withId(new UUID(400, 5)).withTitle(null);
+        var activity6 = anActivity().createdBy(user).withId(new UUID(400, 6)).withTitle("ZZZ");
+
+        var activitiesToAdd = List.of(activity1, activity2, activity3, activity4, activity5, activity6);
+
+        return Stream.of(
+                Arguments.of(
+                        "No Sort",
+                        user,
+                        activitiesToAdd,
+                        EntitySortCriteria.irrelevant(),
+                        List.of(
+                                new ExpectedPage(firstPage(), 3, List.of(activity1, activity2, activity3)),
+                                new ExpectedPage(
+                                        aPageId().with(Value.of(ID, ASC, activity4.id())),
+                                        100,
+                                        List.of(activity4, activity5, activity6)
+                                )
+                        )
+                ),
+
+                Arguments.of(
+                        "TITLE:ASC",
+                        user,
+                        activitiesToAdd,
+                        sortBy(TITLE, ASC),
+                        List.of(
+                                new ExpectedPage(firstPage(), 3, List.of(activity4, activity5, activity2)),
+                                new ExpectedPage(
+                                        aPageId()
+                                                .with(Value.of(TITLE, ASC, null))
+                                                .with(Value.of(ID, ASC, activity5.id())),
+                                        2,
+                                        List.of(activity5, activity2)
+                                ),
+                                new ExpectedPage(
+                                        aPageId()
+                                                .with(Value.of(TITLE, ASC, activity2.title()))
+                                                .with(Value.of(ID, ASC, activity2.id())),
+                                        100,
+                                        List.of(activity2, activity3, activity1, activity6)
+                                )
+                        )
+                ),
+
+                Arguments.of(
+                        "TITLE:DESC",
+                        user,
+                        activitiesToAdd,
+                        sortBy(TITLE, DESC),
+                        List.of(
+                                new ExpectedPage(firstPage(), 3, List.of(activity5, activity4, activity6)),
+                                new ExpectedPage(
+                                        aPageId()
+                                                .with(Value.of(TITLE, DESC, null))
+                                                .with(Value.of(ID, DESC, activity4.id())),
+                                        2,
+                                        List.of(activity4, activity6)
+                                ),
+                                new ExpectedPage(
+                                        aPageId()
+                                                .with(Value.of(TITLE, DESC, activity6.title()))
+                                                .with(Value.of(ID, DESC, activity6.id())),
+                                        100,
+                                        List.of(activity6, activity1, activity3, activity2)
+                                )
+                        )
+                ),
+
+                Arguments.of(
+                        "All criteria: [TITLE:DESC]",
+                        user,
+                        activitiesToAdd,
+                        sortBy(TITLE, DESC),
+                        List.of(
+                                new ExpectedPage(firstPage(), 3, List.of(activity5, activity4, activity6)),
+                                new ExpectedPage(
+                                        aPageId()
+                                                .with(Value.of(TITLE, DESC, null))
+                                                .with(Value.of(ID, DESC, activity4.id())),
+                                        2,
+                                        List.of(activity4, activity6)
+                                ),
+                                new ExpectedPage(
+                                        aPageId()
+                                                .with(Value.of(TITLE, DESC, activity6.title()))
+                                                .with(Value.of(ID, DESC, activity6.id())),
+                                        100,
+                                        List.of(activity6, activity1, activity3, activity2)
+                                )
+                        )
+                )
+        );
+    }
+
+    private record ExpectedPage(EntitySearchPageId pageId, int pageSize, List<ActivityTestData> expectedResults) {
+
+        List<ActivityDto> expectedDTOs() {
+            return expectedResults.stream().map(ActivityTestData::asDto).toList();
+        }
     }
 
     @BeforeAll

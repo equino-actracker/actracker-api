@@ -9,7 +9,7 @@ import static java.util.Collections.emptySet;
 import static java.util.UUID.randomUUID;
 import static ovh.equino.actracker.jpa.tenant.TenantTestData.aTenant;
 
-public class TagSetTestData {
+public final class TagSetTestData {
 
     private UUID id = randomUUID();
     private TenantTestData creator = aTenant();
