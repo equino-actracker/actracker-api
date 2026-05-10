@@ -100,7 +100,7 @@ final class SelectTagSetsQuery extends MultiResultJpaQuery<TagSetEntity, TagSetP
             if (pageAttribute.sortField() instanceof TagSetSearchCriteria.SortableField sortableAttribute) {
                 var sortDirection = pageAttribute.sortOrder();
                 return switch (sortableAttribute) {
-                    case NAME -> nullFirstPageCondition(
+                    case NAME -> nullFirstPageConditions(
                             tagSetNameLowerCase,
                             tagSetNameNullWeight,
                             nullableValueLowerCase(pageAttribute),

@@ -14,6 +14,7 @@ record TagProjection(String id,
                      Integer tagNameNullWeight,
                      Boolean deleted) {
 
+    @SuppressWarnings("unused")
     TagProjection(String id, String creatorId, String name, Boolean deleted) {
         this(id, creatorId, name, null, null, deleted);
     }

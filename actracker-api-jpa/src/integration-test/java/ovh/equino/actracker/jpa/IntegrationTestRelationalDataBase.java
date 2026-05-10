@@ -11,7 +11,9 @@ import ovh.equino.actracker.domain.tag.MetricDto;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tagset.TagSetDto;
 import ovh.equino.actracker.domain.tenant.TenantDto;
+import ovh.equino.actracker.jpa.dashboard.DashboardTestData;
 import ovh.equino.actracker.jpa.tag.TagTestData;
+import ovh.equino.actracker.jpa.tagset.TagSetTestData;
 import ovh.equino.actracker.jpa.tenant.TenantTestData;
 
 import java.sql.Connection;
@@ -225,6 +227,16 @@ public abstract class IntegrationTestRelationalDataBase {
         }
     }
 
+    public synchronized void addDashboardsData(Collection<DashboardTestData> dashboards) throws SQLException {
+        addDashboards(dashboards.stream().map(DashboardTestData::asDto).toList());
+    }
+
+    @Deprecated
+    public synchronized void addDashboards(Collection<DashboardDto> dashboards) throws SQLException {
+        addDashboards(dashboards.toArray(DashboardDto[]::new));
+    }
+
+    @Deprecated
     public synchronized void addDashboards(DashboardDto... dashboards) throws SQLException {
         List<DashboardDto> notAddedDashboards = stream(dashboards)
                 .filter(dashboard -> !addedEntityIds.contains(dashboard.id()))
@@ -246,6 +258,7 @@ public abstract class IntegrationTestRelationalDataBase {
         }
     }
 
+    @Deprecated
     private void addAssociatedShares(DashboardDto dashboard) throws SQLException {
         try (Connection connection = getConnection()) {
             for (Share share : dashboard.shares()) {

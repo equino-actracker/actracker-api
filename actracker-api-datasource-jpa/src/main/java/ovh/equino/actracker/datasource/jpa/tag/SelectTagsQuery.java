@@ -52,7 +52,7 @@ final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection
                                 root.get(TagEntity_.deleted)
                         )
                 )
-                .distinct(true);    // TODO Find a way to remove it, then remove sortable attributes from TagProjection
+                .distinct(true);
     }
 
     @Override
@@ -124,7 +124,7 @@ final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection
             if (pageAttribute.sortField() instanceof TagSearchCriteria.SortableField sortableAttribute) {
                 var sortDirection = pageAttribute.sortOrder();
                 return switch (sortableAttribute) {
-                    case NAME -> nullFirstPageCondition(
+                    case NAME -> nullFirstPageConditions(
                             tagNameLowerCase,
                             tagNameNullWeight,
                             nullableValueLowerCase(pageAttribute),
