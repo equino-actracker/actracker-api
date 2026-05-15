@@ -9,6 +9,7 @@ import java.util.Optional;
 
 class TagSetAttributeExtractor implements NextPageIdExtractor.AttributeValueExtractor<TagSetDto> {
 
+    // TODO move to super interface?
     @Override
     public Optional<?> extractFieldAttribute(EntitySortCriteria.Field attribute, TagSetDto dto) {
         var commonFieldValue = extractCommonAttribute(attribute, dto);
@@ -19,7 +20,7 @@ class TagSetAttributeExtractor implements NextPageIdExtractor.AttributeValueExtr
         }
     }
 
-    private static Optional<Object> extractTagSetAttribute(EntitySortCriteria.Field attribute, TagSetDto dto) {
+    private Optional<?> extractTagSetAttribute(EntitySortCriteria.Field attribute, TagSetDto dto) {
         if (attribute instanceof TagSetSearchCriteria.SortableField tagSetAttribute) {
             return switch (tagSetAttribute) {
                 case NAME -> Optional.of(dto.name());

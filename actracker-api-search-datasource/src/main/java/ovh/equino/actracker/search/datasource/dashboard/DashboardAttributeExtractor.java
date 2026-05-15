@@ -9,6 +9,7 @@ import java.util.Optional;
 
 class DashboardAttributeExtractor implements NextPageIdExtractor.AttributeValueExtractor<DashboardDto> {
 
+    // TODO move to super interface?
     @Override
     public Optional<?> extractFieldAttribute(EntitySortCriteria.Field attribute, DashboardDto dto) {
         var commonFieldValue = extractCommonAttribute(attribute, dto);
@@ -19,7 +20,7 @@ class DashboardAttributeExtractor implements NextPageIdExtractor.AttributeValueE
         }
     }
 
-    private static Optional<?> extractDashboardAttribute(EntitySortCriteria.Field attribute, DashboardDto dto) {
+    private Optional<?> extractDashboardAttribute(EntitySortCriteria.Field attribute, DashboardDto dto) {
         if (attribute instanceof DashboardSearchCriteria.SortableField dashboardAttribute) {
             return switch (dashboardAttribute) {
                 case NAME -> Optional.of(dto.name());
