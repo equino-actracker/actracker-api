@@ -7,23 +7,13 @@ import ovh.equino.actracker.search.datasource.NextPageIdExtractor;
 
 import java.util.Optional;
 
-class TagSetAttributeExtractor implements NextPageIdExtractor.AttributeValueExtractor<TagSetDto> {
+final class TagSetAttributeExtractor extends NextPageIdExtractor.AttributeValueExtractor<TagSetDto> {
 
-    // TODO move to super interface?
     @Override
-    public Optional<?> extractFieldAttribute(EntitySortCriteria.Field attribute, TagSetDto dto) {
-        var commonFieldValue = extractCommonAttribute(attribute, dto);
-        if (commonFieldValue.isPresent()) {
-            return commonFieldValue;
-        } else {
-            return extractTagSetAttribute(attribute, dto);
-        }
-    }
-
-    private Optional<?> extractTagSetAttribute(EntitySortCriteria.Field attribute, TagSetDto dto) {
+    protected Optional<?> extractEntityAttribute(EntitySortCriteria.Field attribute, TagSetDto dto) {
         if (attribute instanceof TagSetSearchCriteria.SortableField tagSetAttribute) {
             return switch (tagSetAttribute) {
-                case NAME -> Optional.of(dto.name());
+                case NAME -> Optional.ofNullable(dto.name());
             };
         }
         return Optional.empty();

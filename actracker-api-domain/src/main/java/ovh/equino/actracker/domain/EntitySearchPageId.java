@@ -1,6 +1,5 @@
 package ovh.equino.actracker.domain;
 
-import javax.swing.*;
 import java.util.Deque;
 import java.util.LinkedList;
 
@@ -46,6 +45,10 @@ public record EntitySearchPageId(Deque<Value> values) {
 
         public static Value of(EntitySortCriteria.Field sortField, EntitySortCriteria.Order sortOrder, Object value) {
             return new Value(sortField, sortOrder, value);
+        }
+
+        public static Value nullValue(EntitySortCriteria.Field sortField, EntitySortCriteria.Order sortOrder) {
+            return new Value(sortField, sortOrder, null);
         }
     }
 }

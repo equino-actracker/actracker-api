@@ -17,22 +17,29 @@ public final class NextPageIdExtractor<T> {
     EntitySearchPageId nextPageId(EntitySortCriteria sortCriteria, T dto) {
         var pageIdValues = sortCriteria.levels().stream()
                 .map(sortLevel -> toFieldValue(sortLevel, dto))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
                 .toList();
 
         return new EntitySearchPageId(new LinkedList<>(pageIdValues));
     }
 
-    private Optional<EntitySearchPageId.Value> toFieldValue(EntitySortCriteria.Level sortLevel, T dto) {
+    private EntitySearchPageId.Value toFieldValue(EntitySortCriteria.Level sortLevel, T dto) {
         return attributeValueExtractor.extractFieldAttribute(sortLevel.field(), dto)
-                .map(value -> EntitySearchPageId.Value.of(sortLevel.field(), sortLevel.order(), value));
+                .map(value -> EntitySearchPageId.Value.of(sortLevel.field(), sortLevel.order(), value))
+                .orElse(EntitySearchPageId.Value.of(sortLevel.field(), sortLevel.order(), null));
     }
 
-    public interface AttributeValueExtractor<T> {
-        Optional<?> extractFieldAttribute(EntitySortCriteria.Field attribute, T dto);
+    public abstract static class AttributeValueExtractor<T> {
 
-        default Optional<?> extractCommonAttribute(EntitySortCriteria.Field attribute, T dto) {
+        Optional<?> extractFieldAttribute(EntitySortCriteria.Field attribute, T dto) {
+            var commonFieldValue = extractCommonAttribute(attribute, dto);
+            if (commonFieldValue.isPresent()) {
+                return commonFieldValue;
+            } else {
+                return extractEntityAttribute(attribute, dto);
+            }
+        }
+
+        private Optional<?> extractCommonAttribute(EntitySortCriteria.Field attribute, T dto) {
             if (attribute instanceof EntitySortCriteria.CommonField commonField) {
                 return switch (commonField) {
                     case ID -> extractIdFrom(dto);
@@ -41,6 +48,8 @@ public final class NextPageIdExtractor<T> {
             return Optional.empty();
         }
 
-        Optional<?> extractIdFrom(T dto);
+        protected abstract Optional<?> extractEntityAttribute(EntitySortCriteria.Field attribute, T dto);
+
+        protected abstract Optional<?> extractIdFrom(T dto);
     }
 }
