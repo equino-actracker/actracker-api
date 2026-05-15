@@ -10,6 +10,7 @@ import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySearchPageId.Value;
 import ovh.equino.actracker.domain.EntitySortCriteria;
+import ovh.equino.actracker.domain.activity.ActivitySearchCriteria;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tagset.TagSetDto;
 import ovh.equino.actracker.domain.tagset.TagSetId;
@@ -223,6 +224,23 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
                                 new ExpectedPage(firstPage(), 3, List.of(tagSet1, tagSet2, tagSet3)),
                                 new ExpectedPage(
                                         aPageId().with(Value.of(ID, ASC, tagSet4.id())),
+                                        100,
+                                        List.of(tagSet4, tagSet5, tagSet6)
+                                )
+                        )
+                ),
+
+                Arguments.of(
+                        "Non-existing criterion",
+                        user,
+                        tagSetsToAdd,
+                        sortBy(ActivitySearchCriteria.SortableField.TITLE, ASC),
+                        List.of(
+                                new ExpectedPage(firstPage(), 3, List.of(tagSet1, tagSet2, tagSet3)),
+                                new ExpectedPage(
+                                        aPageId()
+                                                .with(Value.of(ActivitySearchCriteria.SortableField.TITLE, ASC, null))
+                                                .with(Value.of(ID, ASC, tagSet4.id())),
                                         100,
                                         List.of(tagSet4, tagSet5, tagSet6)
                                 )

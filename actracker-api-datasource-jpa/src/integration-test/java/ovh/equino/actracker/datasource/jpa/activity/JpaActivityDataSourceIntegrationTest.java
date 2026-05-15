@@ -16,6 +16,7 @@ import ovh.equino.actracker.domain.activity.ActivitySearchCriteria;
 import ovh.equino.actracker.domain.activity.MetricValue;
 import ovh.equino.actracker.domain.tag.MetricDto;
 import ovh.equino.actracker.domain.tag.TagDto;
+import ovh.equino.actracker.domain.tag.TagSearchCriteria;
 import ovh.equino.actracker.domain.tenant.TenantDto;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.IntegrationTestConfiguration;
@@ -333,6 +334,23 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                                 new ExpectedPage(firstPage(), 3, List.of(activity1, activity2, activity3)),
                                 new ExpectedPage(
                                         aPageId().with(Value.of(ID, ASC, activity4.id())),
+                                        100,
+                                        List.of(activity4, activity5, activity6)
+                                )
+                        )
+                ),
+
+                Arguments.of(
+                        "Non-existing criterion",
+                        user,
+                        activitiesToAdd,
+                        sortBy(TagSearchCriteria.SortableField.NAME, ASC),
+                        List.of(
+                                new ExpectedPage(firstPage(), 3, List.of(activity1, activity2, activity3)),
+                                new ExpectedPage(
+                                        aPageId()
+                                                .with(Value.of(TagSearchCriteria.SortableField.NAME, ASC, null))
+                                                .with(Value.of(ID, ASC, activity4.id())),
                                         100,
                                         List.of(activity4, activity5, activity6)
                                 )
