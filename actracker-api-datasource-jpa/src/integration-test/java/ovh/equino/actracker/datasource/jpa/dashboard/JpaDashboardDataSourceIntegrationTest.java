@@ -10,6 +10,7 @@ import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySearchPageId.Value;
 import ovh.equino.actracker.domain.EntitySortCriteria;
+import ovh.equino.actracker.domain.activity.ActivitySearchCriteria;
 import ovh.equino.actracker.domain.dashboard.Chart;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
 import ovh.equino.actracker.domain.dashboard.DashboardId;
@@ -250,6 +251,23 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
                                 new ExpectedPage(firstPage(), 3, List.of(dashboard1, dashboard2, dashboard3)),
                                 new ExpectedPage(
                                         aPageId().with(Value.of(ID, ASC, dashboard4.id())),
+                                        100,
+                                        List.of(dashboard4, dashboard5, dashboard6)
+                                )
+                        )
+                ),
+
+                Arguments.of(
+                        "Non-existing criterion",
+                        user,
+                        dashboardsToAdd,
+                        sortBy(ActivitySearchCriteria.SortableField.TITLE, ASC),
+                        List.of(
+                                new ExpectedPage(firstPage(), 3, List.of(dashboard1, dashboard2, dashboard3)),
+                                new ExpectedPage(
+                                        aPageId()
+                                                .with(Value.of(ActivitySearchCriteria.SortableField.TITLE, ASC, null))
+                                                .with(Value.of(ID, ASC, dashboard4.id())),
                                         100,
                                         List.of(dashboard4, dashboard5, dashboard6)
                                 )

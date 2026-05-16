@@ -7,7 +7,7 @@ import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
 
-public class TenantTestData {
+public final class TenantTestData {
 
     private UUID id = randomUUID();
     private String username = id.toString();

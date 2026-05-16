@@ -11,6 +11,7 @@ import ovh.equino.actracker.domain.tag.MetricDto;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tagset.TagSetDto;
 import ovh.equino.actracker.domain.tenant.TenantDto;
+import ovh.equino.actracker.jpa.activity.ActivityTestData;
 import ovh.equino.actracker.jpa.dashboard.DashboardTestData;
 import ovh.equino.actracker.jpa.tag.TagTestData;
 import ovh.equino.actracker.jpa.tagset.TagSetTestData;
@@ -69,6 +70,16 @@ public abstract class IntegrationTestRelationalDataBase {
         }
     }
 
+    public synchronized void addActivitiesData(Collection<ActivityTestData> activities) throws SQLException {
+        addActivities(activities.stream().map(ActivityTestData::asDto).toList());
+    }
+
+    @Deprecated
+    public synchronized void addActivities(Collection<ActivityDto> activities) throws SQLException {
+        addActivities(activities.toArray(ActivityDto[]::new));
+    }
+
+    @Deprecated
     public synchronized void addActivities(ActivityDto... activities) throws SQLException {
         List<ActivityDto> notAddedActivities = stream(activities)
                 .filter(activity -> !addedEntityIds.contains(activity.id()))
