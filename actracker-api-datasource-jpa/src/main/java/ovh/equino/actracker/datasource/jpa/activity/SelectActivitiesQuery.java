@@ -203,6 +203,7 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
                             nullableValueLowerCase(pageAttribute),
                             sortDirection
                     );
+                    case END_TIME -> emptyList(); // TODO implement
                 };
             }
             return emptyList();
@@ -221,6 +222,7 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
                 return switch (sortableAttribute) {
                     case TITLE ->
                             nullFirstOrderCriteria(activityTitleLowerCase, activityTitleNullWeight, sortDirection);
+                    case END_TIME -> emptyList(); // TODO implement
                 };
             }
             return emptyList();

@@ -38,6 +38,7 @@ import static ovh.equino.actracker.domain.EntitySortCriteria.CommonField.ID;
 import static ovh.equino.actracker.domain.EntitySortCriteria.Order.ASC;
 import static ovh.equino.actracker.domain.EntitySortCriteria.Order.DESC;
 import static ovh.equino.actracker.domain.EntitySortCriteria.sortBy;
+import static ovh.equino.actracker.domain.activity.ActivitySearchCriteria.SortableField.END_TIME;
 import static ovh.equino.actracker.domain.activity.ActivitySearchCriteria.SortableField.TITLE;
 import static ovh.equino.actracker.jpa.TestUtil.randomBigDecimal;
 import static ovh.equino.actracker.jpa.activity.ActivityTestData.anActivity;
@@ -315,12 +316,28 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
     static Stream<Arguments> activitiesSortedAndPaginated() {
         var user = aTenant();
 
-        var activity1 = anActivity().createdBy(user).withId(new UUID(400, 1)).withTitle("Z");
-        var activity2 = anActivity().createdBy(user).withId(new UUID(400, 2)).withTitle("a");
-        var activity3 = anActivity().createdBy(user).withId(new UUID(400, 3)).withTitle("a");
-        var activity4 = anActivity().createdBy(user).withId(new UUID(400, 4)).withTitle(null);
-        var activity5 = anActivity().createdBy(user).withId(new UUID(400, 5)).withTitle(null);
-        var activity6 = anActivity().createdBy(user).withId(new UUID(400, 6)).withTitle("ZZZ");
+        var activity1 = anActivity().createdBy(user).withId(new UUID(400, 1)).withTitle("Z").endedAt(null);
+        var activity2 = anActivity().createdBy(user).withId(new UUID(400, 2)).withTitle("a").endedAt(null);
+        var activity3 = anActivity()
+                .createdBy(user)
+                .withId(new UUID(400, 3))
+                .withTitle("a")
+                .endedAt(Instant.ofEpochSecond(1));
+        var activity4 = anActivity()
+                .createdBy(user)
+                .withId(new UUID(400, 4))
+                .withTitle(null)
+                .endedAt(Instant.ofEpochSecond(1));
+        var activity5 = anActivity()
+                .createdBy(user)
+                .withId(new UUID(400, 5))
+                .withTitle(null)
+                .endedAt(Instant.ofEpochSecond(3));
+        var activity6 = anActivity()
+                .createdBy(user)
+                .withId(new UUID(400, 6))
+                .withTitle("ZZZ")
+                .endedAt(Instant.ofEpochSecond(2));
 
         var activitiesToAdd = List.of(activity1, activity2, activity3, activity4, activity5, activity6);
 
@@ -406,15 +423,64 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                 ),
 
                 Arguments.of(
-                        "All criteria: [TITLE:DESC]",
+                        "END_TIME:ASC",
                         user,
                         activitiesToAdd,
-                        sortBy(TITLE, DESC),
+                        sortBy(END_TIME, ASC),
+                        List.of(
+                                new ExpectedPage(firstPage(), 3, List.of(activity1, activity2, activity3)),
+                                new ExpectedPage(
+                                        aPageId()
+                                                .with(Value.of(END_TIME, ASC, null))
+                                                .with(Value.of(ID, ASC, activity2.id())),
+                                        2,
+                                        List.of(activity2, activity3)
+                                ),
+                                new ExpectedPage(
+                                        aPageId()
+                                                .with(Value.of(END_TIME, ASC, activity3.endTime()))
+                                                .with(Value.of(ID, ASC, activity3.id())),
+                                        100,
+                                        List.of(activity3, activity4, activity6, activity5)
+                                )
+                        )
+                ),
+
+                Arguments.of(
+                        "END_TIME:DESC",
+                        user,
+                        activitiesToAdd,
+                        sortBy(END_TIME, DESC),
+                        List.of(
+                                new ExpectedPage(firstPage(), 3, List.of(activity1, activity2, activity5)),
+                                new ExpectedPage(
+                                        aPageId()
+                                                .with(Value.of(END_TIME, DESC, null))
+                                                .with(Value.of(ID, DESC, activity2.id())),
+                                        2,
+                                        List.of(activity2, activity5)
+                                ),
+                                new ExpectedPage(
+                                        aPageId()
+                                                .with(Value.of(END_TIME, DESC, activity5.endTime()))
+                                                .with(Value.of(ID, DESC, activity5.id())),
+                                        100,
+                                        List.of(activity5, activity6, activity4, activity3)
+                                )
+                        )
+                ),
+
+                Arguments.of(
+                        "All criteria: [TITLE:DESC,END_TIME:ASC]",
+                        user,
+                        activitiesToAdd,
+                        sortBy(TITLE, DESC).thenSortBy(END_TIME, ASC),
                         List.of(
                                 new ExpectedPage(firstPage(), 3, List.of(activity5, activity4, activity6)),
                                 new ExpectedPage(
                                         aPageId()
                                                 .with(Value.of(TITLE, DESC, null))
+                                                .with(Value.of(END_TIME, ASC, activity4.endTime()))
                                                 .with(Value.of(ID, DESC, activity4.id())),
                                         2,
                                         List.of(activity4, activity6)
@@ -422,9 +488,10 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                                 new ExpectedPage(
                                         aPageId()
                                                 .with(Value.of(TITLE, DESC, activity6.title()))
+                                                .with(Value.of(END_TIME, ASC, activity6.endTime()))
                                                 .with(Value.of(ID, DESC, activity6.id())),
                                         100,
-                                        List.of(activity6, activity1, activity3, activity2)
+                                        List.of(activity6, activity1, activity2, activity3)
                                 )
                         )
                 )
