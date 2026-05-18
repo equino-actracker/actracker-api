@@ -123,7 +123,7 @@ final class SelectDashboardsQuery extends MultiResultJpaQuery<DashboardEntity, D
                     case NAME -> nullFirstPageConditions(
                             dashboardNameLowerCase,
                             dashboardNameNullWeight,
-                            nullableValueLowerCase(pageAttribute),
+                            nullableStringLowerCase(pageAttribute),
                             sortDirection
                     );
                 };

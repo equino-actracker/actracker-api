@@ -127,7 +127,7 @@ final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection
                     case NAME -> nullFirstPageConditions(
                             tagNameLowerCase,
                             tagNameNullWeight,
-                            nullableValueLowerCase(pageAttribute),
+                            nullableStringLowerCase(pageAttribute),
                             sortDirection
                     );
                 };

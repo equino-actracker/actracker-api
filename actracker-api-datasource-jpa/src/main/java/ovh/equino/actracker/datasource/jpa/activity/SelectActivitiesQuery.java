@@ -18,6 +18,7 @@ import ovh.equino.actracker.jpa.tag.TagShareEntity;
 import ovh.equino.actracker.jpa.tag.TagShareEntity_;
 
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -32,6 +33,8 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
 
     private final Expression<String> activityTitleLowerCase;
     private final Expression<Integer> activityTitleNullWeight;
+    private final Expression<Integer> activityEndTimeNullWeight;
+
 
     SelectActivitiesQuery(EntityManager entityManager) {
         super(entityManager);
@@ -41,6 +44,10 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
         this.activityTitleLowerCase = criteriaBuilder.lower(root.get(ActivityEntity_.title));
         this.activityTitleNullWeight = criteriaBuilder.selectCase()
                 .when(criteriaBuilder.isNull(root.get(ActivityEntity_.title)), 0)
+                .otherwise(1)
+                .as(Integer.class);
+        this.activityEndTimeNullWeight = criteriaBuilder.selectCase()
+                .when(criteriaBuilder.isNull(root.get(ActivityEntity_.endTime)), 0)
                 .otherwise(1)
                 .as(Integer.class);
     }
@@ -58,6 +65,7 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
                                 activityTitleNullWeight,
                                 root.get(ActivityEntity_.startTime),
                                 root.get(ActivityEntity_.endTime),
+                                activityEndTimeNullWeight,
                                 root.get(ActivityEntity_.comment),
                                 root.get(ActivityEntity_.deleted)
                         )
@@ -200,10 +208,15 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
                     case TITLE -> nullFirstPageConditions(
                             activityTitleLowerCase,
                             activityTitleNullWeight,
-                            nullableValueLowerCase(pageAttribute),
+                            nullableStringLowerCase(pageAttribute),
                             sortDirection
                     );
-                    case END_TIME -> emptyList(); // TODO implement
+                    case END_TIME -> nullFirstPageConditions(
+                            root.get(ActivityEntity_.endTime).as(Date.class),
+                            activityEndTimeNullWeight,
+                            nullableTimestamp(pageAttribute),
+                            sortDirection
+                    );
                 };
             }
             return emptyList();
@@ -220,9 +233,16 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
             if (sortCriterion.field() instanceof ActivitySearchCriteria.SortableField sortableAttribute) {
                 var sortDirection = sortCriterion.order();
                 return switch (sortableAttribute) {
-                    case TITLE ->
-                            nullFirstOrderCriteria(activityTitleLowerCase, activityTitleNullWeight, sortDirection);
-                    case END_TIME -> emptyList(); // TODO implement
+                    case TITLE -> nullFirstOrderCriteria(
+                            activityTitleLowerCase,
+                            activityTitleNullWeight,
+                            sortDirection
+                    );
+                    case END_TIME -> nullFirstOrderCriteria(
+                            root.get(ActivityEntity_.endTime),
+                            activityEndTimeNullWeight,
+                            sortDirection
+                    );
                 };
             }
             return emptyList();

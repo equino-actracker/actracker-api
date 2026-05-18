@@ -103,7 +103,7 @@ final class SelectTagSetsQuery extends MultiResultJpaQuery<TagSetEntity, TagSetP
                     case NAME -> nullFirstPageConditions(
                             tagSetNameLowerCase,
                             tagSetNameNullWeight,
-                            nullableValueLowerCase(pageAttribute),
+                            nullableStringLowerCase(pageAttribute),
                             sortDirection
                     );
                 };

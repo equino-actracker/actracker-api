@@ -25,7 +25,7 @@ public final class NextPageIdExtractor<T> {
     private EntitySearchPageId.Value toFieldValue(EntitySortCriteria.Level sortLevel, T dto) {
         return attributeValueExtractor.extractFieldAttribute(sortLevel.field(), dto)
                 .map(value -> EntitySearchPageId.Value.of(sortLevel.field(), sortLevel.order(), value))
-                .orElse(EntitySearchPageId.Value.of(sortLevel.field(), sortLevel.order(), null));
+                .orElse(EntitySearchPageId.Value.nullValue(sortLevel.field(), sortLevel.order()));
     }
 
     public abstract static class AttributeValueExtractor<T> {

@@ -7,6 +7,7 @@ import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.jpa.JpaEntity;
 import ovh.equino.actracker.jpa.JpaEntity_;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -202,11 +203,18 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
         );
     }
 
-    protected String nullableValueLowerCase(EntitySearchPageId.Value attributeValue) {
+    protected String nullableStringLowerCase(EntitySearchPageId.Value attributeValue) {
         if (isNull(attributeValue.value())) {
             return null;
         }
         return attributeValue.value().toString().toLowerCase();
+    }
+
+    protected Date nullableTimestamp(EntitySearchPageId.Value attributeValue) {
+        if (isNull(attributeValue.value())) {
+            return null;
+        }
+        return Date.from((Instant) attributeValue.value());
     }
 
     protected record PageCondition<T extends Comparable<T>>(Expression<T> field,

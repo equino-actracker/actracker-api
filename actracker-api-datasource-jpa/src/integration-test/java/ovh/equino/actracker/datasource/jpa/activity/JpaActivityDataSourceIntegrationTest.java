@@ -452,13 +452,13 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                         activitiesToAdd,
                         sortBy(END_TIME, DESC),
                         List.of(
-                                new ExpectedPage(firstPage(), 3, List.of(activity1, activity2, activity5)),
+                                new ExpectedPage(firstPage(), 3, List.of(activity2, activity1, activity5)),
                                 new ExpectedPage(
                                         aPageId()
                                                 .with(Value.of(END_TIME, DESC, null))
-                                                .with(Value.of(ID, DESC, activity2.id())),
+                                                .with(Value.of(ID, DESC, activity1.id())),
                                         2,
-                                        List.of(activity2, activity5)
+                                        List.of(activity1, activity5)
                                 ),
                                 new ExpectedPage(
                                         aPageId()
@@ -476,14 +476,14 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                         activitiesToAdd,
                         sortBy(TITLE, DESC).thenSortBy(END_TIME, ASC),
                         List.of(
-                                new ExpectedPage(firstPage(), 3, List.of(activity5, activity4, activity6)),
+                                new ExpectedPage(firstPage(), 3, List.of(activity4, activity5, activity6)),
                                 new ExpectedPage(
                                         aPageId()
                                                 .with(Value.of(TITLE, DESC, null))
-                                                .with(Value.of(END_TIME, ASC, activity4.endTime()))
-                                                .with(Value.of(ID, DESC, activity4.id())),
+                                                .with(Value.of(END_TIME, ASC, activity5.endTime()))
+                                                .with(Value.of(ID, DESC, activity5.id())),
                                         2,
-                                        List.of(activity4, activity6)
+                                        List.of(activity5, activity6)
                                 ),
                                 new ExpectedPage(
                                         aPageId()
