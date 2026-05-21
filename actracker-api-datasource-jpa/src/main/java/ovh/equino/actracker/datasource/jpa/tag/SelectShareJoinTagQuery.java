@@ -101,7 +101,7 @@ final class SelectShareJoinTagQuery extends MultiResultJpaQuery<TagShareEntity, 
         }
 
         @Override
-        protected List<PageCondition<? extends Comparable<?>>> toEntityPageConditions(EntitySearchPageId.Value pageAttribute) {
+        protected List<PageCondition<?>> toEntityPageConditions(EntitySearchPageId.Value pageAttribute) {
             return emptyList();
         }
     }

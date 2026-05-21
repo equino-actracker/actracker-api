@@ -18,7 +18,6 @@ import ovh.equino.actracker.jpa.tag.TagShareEntity;
 import ovh.equino.actracker.jpa.tag.TagShareEntity_;
 
 import java.sql.Timestamp;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -199,7 +198,7 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
         }
 
         @Override
-        protected List<PageCondition<? extends Comparable<?>>> toEntityPageConditions(
+        protected List<PageCondition<?>> toEntityPageConditions(
                 EntitySearchPageId.Value pageAttribute) {
 
             if (pageAttribute.sortField() instanceof ActivitySearchCriteria.SortableField sortableAttribute) {
@@ -212,7 +211,7 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
                             sortDirection
                     );
                     case END_TIME -> nullFirstPageConditions(
-                            root.get(ActivityEntity_.endTime).as(Date.class),
+                            root.get(ActivityEntity_.endTime),
                             activityEndTimeNullWeight,
                             nullableTimestamp(pageAttribute),
                             sortDirection

@@ -127,7 +127,7 @@ final class SelectActivityJoinTagQuery extends MultiResultJpaQuery<ActivityEntit
         }
 
         @Override
-        protected List<PageCondition<? extends Comparable<?>>> toEntityPageConditions(
+        protected List<PageCondition<?>> toEntityPageConditions(
                 EntitySearchPageId.Value pageAttribute) {
 
             return emptyList();
