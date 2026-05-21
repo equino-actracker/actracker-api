@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import ovh.equino.actracker.application.PageIdTranslator;
 import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySortCriteria;
@@ -19,6 +20,8 @@ import ovh.equino.actracker.domain.tag.TagSearchCriteria;
 import ovh.equino.actracker.domain.tagset.TagSetSearchCriteria;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Base64;
 import java.util.Optional;
 
@@ -26,6 +29,7 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 import static java.util.Arrays.stream;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 class Base64JacksonPageIdTranslator implements PageIdTranslator {
@@ -51,9 +55,10 @@ class Base64JacksonPageIdTranslator implements PageIdTranslator {
         );
 
         var customMappingModule = new SimpleModule();
-        customMappingModule.addDeserializer(EntitySortCriteria.Field.class, new EntitySortCriteriaFieldDeserializer());
+        customMappingModule.addDeserializer(EntitySearchPageId.Value.class, new PageIdValueDeserializer());
         customMappingModule.addSerializer(EntitySortCriteria.Field.class, new EntitySortCriteriaFieldSerializer());
         objectMapper.registerModules(customMappingModule);
+        objectMapper.registerModule(new JavaTimeModule());
 
     }
 
@@ -83,23 +88,70 @@ class Base64JacksonPageIdTranslator implements PageIdTranslator {
         }
     }
 
-    static private class EntitySortCriteriaFieldDeserializer extends StdDeserializer<EntitySortCriteria.Field> {
+//    static private class EntitySortCriteriaFieldDeserializer extends StdDeserializer<EntitySortCriteria.Field> {
+//
+//        private EntitySortCriteriaFieldDeserializer() {
+//            this(null);
+//        }
+//
+//        private EntitySortCriteriaFieldDeserializer(Class<?> vc) {
+//            super(vc);
+//        }
+//
+//
+//        @Override
+//        public EntitySortCriteria.Field deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+//            JsonNode node = p.readValueAsTree();
+//            var name = node.get("name").asText();
+//            var type = node.get("type").asText();
+//
+//            var pageableFieldAlias = PageableFieldAlias.fromString(type)
+//                    .orElseThrow(() -> new IllegalArgumentException("Unknown pageable field type %s".formatted(type)));
+//            return pageableFieldAlias.findField(name)
+//                    .orElseThrow(() -> new IllegalArgumentException(
+//                            "No pageable field name %s found in type %s".formatted(name, pageableFieldAlias.fieldType)
+//                    ));
+//        }
+//    }
 
-        private EntitySortCriteriaFieldDeserializer() {
+    static private class PageIdValueDeserializer extends StdDeserializer<EntitySearchPageId.Value> {
+
+        private PageIdValueDeserializer() {
             this(null);
         }
 
-        private EntitySortCriteriaFieldDeserializer(Class<?> vc) {
+        private PageIdValueDeserializer(Class<?> vc) {
             super(vc);
         }
 
-
         @Override
-        public EntitySortCriteria.Field deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+        public EntitySearchPageId.Value deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             JsonNode node = p.readValueAsTree();
-            var name = node.get("name").asText();
-            var type = node.get("type").asText();
+            var sortField = node.get("sortField");
+            var pageableField = getPageableField(sortField);
+            var order = getOrder(node);
+            var pageValue = getValue(node, pageableField);
 
+            return new EntitySearchPageId.Value(pageableField, order, pageValue);
+        }
+
+        private Object getValue(JsonNode sortField, EntitySortCriteria.Field pageableField) {
+            var sortableFieldMapping = SortableFieldMapping.mapperFor(pageableField);
+            JsonNode valueNode = sortField.get("value");
+            if (isNull(valueNode) || valueNode.isNull()) {
+                return sortableFieldMapping.pageIdValueType.cast(null);
+            }
+            return sortableFieldMapping.pageIdValueMapper.mapNonNull(valueNode);
+        }
+
+        private EntitySortCriteria.Order getOrder(JsonNode sortField) {
+            var sortOrder = sortField.get("sortOrder").asText();
+            return EntitySortCriteria.Order.valueOf(sortOrder);
+        }
+
+        private EntitySortCriteria.Field getPageableField(JsonNode sortField) {
+            var name = sortField.get("name").asText();
+            var type = sortField.get("type").asText();
             var pageableFieldAlias = PageableFieldAlias.fromString(type)
                     .orElseThrow(() -> new IllegalArgumentException("Unknown pageable field type %s".formatted(type)));
             return pageableFieldAlias.findField(name)
@@ -166,6 +218,55 @@ class Base64JacksonPageIdTranslator implements PageIdTranslator {
             return stream(fields)
                     .filter(field -> field.toString().equals(fieldName))
                     .findAny();
+        }
+    }
+
+    private enum SortableFieldMapping {
+        ACTIVITY_END_TIME(ActivitySearchCriteria.SortableField.END_TIME, Instant.class, new PageIdInstantValueMapper()),
+        DEFAULT(null, String.class, new PageIdStringValueMapper());
+
+        private final EntitySortCriteria.Field sortableField;
+        private final Class<?> pageIdValueType;
+        private final PageIdValueMapper<?> pageIdValueMapper;
+
+        <T> SortableFieldMapping(EntitySortCriteria.Field sortableField,
+                                 Class<T> pageIdValueType,
+                                 PageIdValueMapper<T> pageIdValueMapper) {
+
+            this.sortableField = sortableField;
+            this.pageIdValueType = pageIdValueType;
+            this.pageIdValueMapper = pageIdValueMapper;
+        }
+
+        private static SortableFieldMapping mapperFor(EntitySortCriteria.Field field) {
+            return stream(values())
+                    .filter(value -> nonNull(value.sortableField))
+                    .filter(value -> value.sortableField.equals(field))
+                    .findAny()
+                    .orElse(DEFAULT);
+        }
+    }
+
+    private sealed interface PageIdValueMapper<T> permits PageIdInstantValueMapper, PageIdStringValueMapper {
+        T mapNonNull(JsonNode pageIdValueNode);
+    }
+
+    private static final class PageIdInstantValueMapper implements PageIdValueMapper<Instant> {
+        @Override
+        public Instant mapNonNull(JsonNode pageIdValueNode) {
+            var rawValue = pageIdValueNode.decimalValue();
+            var seconds = rawValue.longValue();
+            int nanoseconds = rawValue.remainder(BigDecimal.ONE)
+                    .movePointRight(9)
+                    .intValue();
+            return Instant.ofEpochSecond(seconds, nanoseconds);
+        }
+    }
+
+    private static final class PageIdStringValueMapper implements PageIdValueMapper<String> {
+        @Override
+        public String mapNonNull(JsonNode pageIdValueNode) {
+            return pageIdValueNode.asText();
         }
     }
 }
