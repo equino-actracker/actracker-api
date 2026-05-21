@@ -322,22 +322,22 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                 .createdBy(user)
                 .withId(new UUID(400, 3))
                 .withTitle("a")
-                .endedAt(Instant.ofEpochSecond(1));
+                .endedAt(Instant.ofEpochSecond(0, 1000));
         var activity4 = anActivity()
                 .createdBy(user)
                 .withId(new UUID(400, 4))
                 .withTitle(null)
-                .endedAt(Instant.ofEpochSecond(1));
+                .endedAt(Instant.ofEpochSecond(0, 1000));
         var activity5 = anActivity()
                 .createdBy(user)
                 .withId(new UUID(400, 5))
                 .withTitle(null)
-                .endedAt(Instant.ofEpochSecond(3));
+                .endedAt(Instant.ofEpochSecond(0, 3000));
         var activity6 = anActivity()
                 .createdBy(user)
                 .withId(new UUID(400, 6))
                 .withTitle("ZZZ")
-                .endedAt(Instant.ofEpochSecond(2));
+                .endedAt(Instant.ofEpochSecond(0, 2000));
 
         var activitiesToAdd = List.of(activity1, activity2, activity3, activity4, activity5, activity6);
 
