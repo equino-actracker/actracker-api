@@ -64,7 +64,7 @@ final class SelectTenantQuery extends SingleResultJpaQuery<TenantEntity, TenantP
         }
 
         @Override
-        protected List<PageCondition<? extends Comparable<?>>> toEntityPageConditions(
+        protected List<PageCondition<?>> toEntityPageConditions(
                 EntitySearchPageId.Value pageAttribute) {
 
             return emptyList();

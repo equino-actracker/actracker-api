@@ -98,7 +98,7 @@ final class SelectDashboardQuery extends SingleResultJpaQuery<DashboardEntity, D
         }
 
         @Override
-        protected List<PageCondition<? extends Comparable<?>>> toEntityPageConditions(EntitySearchPageId.Value pageAttribute) {
+        protected List<PageCondition<?>> toEntityPageConditions(EntitySearchPageId.Value pageAttribute) {
             return emptyList();
         }
     }

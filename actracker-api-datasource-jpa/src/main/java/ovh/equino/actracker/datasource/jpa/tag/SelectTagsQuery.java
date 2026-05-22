@@ -118,7 +118,7 @@ final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection
         }
 
         @Override
-        protected List<PageCondition<? extends Comparable<?>>> toEntityPageConditions(
+        protected List<PageCondition<?>> toEntityPageConditions(
                 EntitySearchPageId.Value pageAttribute) {
 
             if (pageAttribute.sortField() instanceof TagSearchCriteria.SortableField sortableAttribute) {
@@ -127,7 +127,7 @@ final class SelectTagsQuery extends MultiResultJpaQuery<TagEntity, TagProjection
                     case NAME -> nullFirstPageConditions(
                             tagNameLowerCase,
                             tagNameNullWeight,
-                            nullableValueLowerCase(pageAttribute),
+                            nullableStringLowerCase(pageAttribute),
                             sortDirection
                     );
                 };

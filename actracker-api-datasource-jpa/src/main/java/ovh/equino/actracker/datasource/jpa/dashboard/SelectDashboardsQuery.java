@@ -114,7 +114,7 @@ final class SelectDashboardsQuery extends MultiResultJpaQuery<DashboardEntity, D
         }
 
         @Override
-        protected List<PageCondition<? extends Comparable<?>>> toEntityPageConditions(
+        protected List<PageCondition<?>> toEntityPageConditions(
                 EntitySearchPageId.Value pageAttribute) {
 
             if (pageAttribute.sortField() instanceof DashboardSearchCriteria.SortableField sortableAttribute) {
@@ -123,7 +123,7 @@ final class SelectDashboardsQuery extends MultiResultJpaQuery<DashboardEntity, D
                     case NAME -> nullFirstPageConditions(
                             dashboardNameLowerCase,
                             dashboardNameNullWeight,
-                            nullableValueLowerCase(pageAttribute),
+                            nullableStringLowerCase(pageAttribute),
                             sortDirection
                     );
                 };

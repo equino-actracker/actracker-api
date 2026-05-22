@@ -10,8 +10,8 @@ import java.util.UUID;
 record DashboardProjection(String id,
                            String creatorId,
                            String name,
-                           String tagNameLowerCase,
-                           Integer tagNameNullWeight,
+                           String nameLowerCase,
+                           Integer nameNullWeight,
                            Boolean deleted) {
 
     @SuppressWarnings("unused")

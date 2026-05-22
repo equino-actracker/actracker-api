@@ -20,6 +20,7 @@ public final class IntegrationTestPostgresDataBase extends IntegrationTestRelati
 
     private IntegrationTestPostgresDataBase() {
         container = new PostgreSQLContainer<>("postgres:15.1");
+        container.withCommand("postgres", "-c", "max_connections=500");
         container.start();
         this.jdbcUrl = container.getJdbcUrl();
         this.username = container.getUsername();

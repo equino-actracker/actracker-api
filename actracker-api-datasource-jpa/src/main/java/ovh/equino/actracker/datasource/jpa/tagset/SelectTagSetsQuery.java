@@ -94,7 +94,7 @@ final class SelectTagSetsQuery extends MultiResultJpaQuery<TagSetEntity, TagSetP
         }
 
         @Override
-        protected List<PageCondition<? extends Comparable<?>>> toEntityPageConditions(
+        protected List<PageCondition<?>> toEntityPageConditions(
                 EntitySearchPageId.Value pageAttribute) {
 
             if (pageAttribute.sortField() instanceof TagSetSearchCriteria.SortableField sortableAttribute) {
@@ -103,7 +103,7 @@ final class SelectTagSetsQuery extends MultiResultJpaQuery<TagSetEntity, TagSetP
                     case NAME -> nullFirstPageConditions(
                             tagSetNameLowerCase,
                             tagSetNameNullWeight,
-                            nullableValueLowerCase(pageAttribute),
+                            nullableStringLowerCase(pageAttribute),
                             sortDirection
                     );
                 };

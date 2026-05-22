@@ -38,6 +38,18 @@ public record EntitySortCriteria(Deque<Level> levels) {
         return new EntitySortCriteria(new Level(field, order));
     }
 
+    public EntitySortCriteria thenSortBy(Field field, Order order) {
+        var newLevels = levels();
+        newLevels.removeLast(); // Remove sort guard
+        newLevels.addLast(new Level(field, order));
+        return new EntitySortCriteria(newLevels);
+    }
+
+    @Override
+    public Deque<Level> levels() {
+        return new LinkedList<>(levels);
+    }
+
     public record Level(
             Field field,
             Order order

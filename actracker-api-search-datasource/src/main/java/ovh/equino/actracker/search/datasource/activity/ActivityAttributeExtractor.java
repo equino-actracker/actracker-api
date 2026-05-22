@@ -14,6 +14,7 @@ final class ActivityAttributeExtractor extends NextPageIdExtractor.AttributeValu
         if (attribute instanceof ActivitySearchCriteria.SortableField activityAttribute) {
             return switch (activityAttribute) {
                 case TITLE -> Optional.ofNullable(dto.title());
+                case END_TIME -> Optional.ofNullable(dto.endTime());
             };
         }
         return Optional.empty();

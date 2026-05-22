@@ -13,10 +13,11 @@ import static java.util.Objects.isNull;
 record ActivityProjection(String id,
                           String creatorId,
                           String title,
-                          String activityTitleLowerCase,
-                          Integer activityTitleNullWeight,
+                          String titleLowerCase,
+                          Integer titleNullWeight,
                           Timestamp startTime,
                           Timestamp endTime,
+                          Integer endTimeNullWeight,
                           String comment,
                           Boolean deleted) {
 
@@ -29,7 +30,7 @@ record ActivityProjection(String id,
                        String comment,
                        Boolean deleted) {
 
-        this(id, creatorId, title, null, null, startTime, endTime, comment, deleted);
+        this(id, creatorId, title, null, null, startTime, endTime, null, comment, deleted);
     }
 
     ActivityDto toActivity(Set<UUID> tagIds, List<MetricValue> metricValues) {

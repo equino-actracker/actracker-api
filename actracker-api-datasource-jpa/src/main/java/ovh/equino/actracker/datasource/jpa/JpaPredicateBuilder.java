@@ -1,12 +1,13 @@
 package ovh.equino.actracker.datasource.jpa;
 
 import jakarta.persistence.criteria.*;
-import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder.PageCondition.Relation;
 import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.jpa.JpaEntity;
 import ovh.equino.actracker.jpa.JpaEntity_;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -112,8 +113,7 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
         return isInPage(pageConditions);
     }
 
-    private JpaPredicate isInPage(
-            List<? extends PageCondition<? extends Comparable<?>>> pageConditions) {
+    private JpaPredicate isInPage(List<PageCondition<?>> pageConditions) {
 
         if (isEmpty(pageConditions)) {
             return allMatch();
@@ -138,9 +138,9 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
         return or(predicates.toArray(new JpaPredicate[]{}));
     }
 
-    private <T extends Comparable<T>> JpaPredicate predicateForNextCondition(PageCondition<T> pageCondition,
-                                                                             boolean isLast,
-                                                                             Collection<PageCondition<?>> handledConditions) {
+    private JpaPredicate predicateForNextCondition(PageCondition pageCondition,
+                                                   boolean isLast,
+                                                   Collection<PageCondition<?>> handledConditions) {
 
         var handledPredicates = handledConditions.stream()
                 .map(value -> (JpaPredicate) () -> criteriaBuilder.equal(value.field(), value.value()));
@@ -159,7 +159,7 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
         return and(predicates);
     }
 
-    private List<PageCondition<? extends Comparable<?>>> toPageConditions(EntitySearchPageId.Value pageAttribute) {
+    private List<PageCondition<?>> toPageConditions(EntitySearchPageId.Value pageAttribute) {
         var commonPageConditions = toCommonPageConditions(pageAttribute);
         if (isNotEmpty(commonPageConditions)) {
             return commonPageConditions;
@@ -167,25 +167,23 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
         return toEntityPageConditions(pageAttribute);
     }
 
-    private List<PageCondition<? extends Comparable<?>>> toCommonPageConditions(
-            EntitySearchPageId.Value pageAttribute) {
+    private List<PageCondition<?>> toCommonPageConditions(EntitySearchPageId.Value pageAttribute) {
 
         if (pageAttribute.sortField() instanceof EntitySortCriteria.CommonField commonField) {
             return switch (commonField) {
                 case ID -> singletonList(PageCondition.of(
                         root.get(JpaEntity_.id),
                         pageAttribute.value().toString(),
-                        Relation.from(pageAttribute.sortOrder()))
+                        PageCondition.Relation.from(pageAttribute.sortOrder()))
                 );
             };
         }
         return emptyList();
     }
 
-    protected abstract List<PageCondition<? extends Comparable<?>>> toEntityPageConditions(
-            EntitySearchPageId.Value pageAttribute);
+    protected abstract List<PageCondition<?>> toEntityPageConditions(EntitySearchPageId.Value pageAttribute);
 
-    protected <T extends Comparable<T>> List<PageCondition<? extends Comparable<?>>> nullFirstPageConditions(
+    protected <T extends Comparable<? super T>> List<PageCondition<?>> nullFirstPageConditions(
             Expression<T> nullableAttribute,
             Expression<Integer> nullWeightAttribute,
             T pageAttributeValue,
@@ -202,29 +200,36 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
         );
     }
 
-    protected String nullableValueLowerCase(EntitySearchPageId.Value attributeValue) {
+    protected String nullableStringLowerCase(EntitySearchPageId.Value attributeValue) {
         if (isNull(attributeValue.value())) {
             return null;
         }
         return attributeValue.value().toString().toLowerCase();
     }
 
-    protected record PageCondition<T extends Comparable<T>>(Expression<T> field,
-                                                            T value,
-                                                            Relation relation) {
+    protected Timestamp nullableTimestamp(EntitySearchPageId.Value attributeValue) {
+        if (isNull(attributeValue.value())) {
+            return null;
+        }
+        return Timestamp.from((Instant) attributeValue.value());
+    }
 
-        public static <T extends Comparable<T>> PageCondition<T> of(Expression<T> field,
+    protected record PageCondition<T extends Comparable<? super T>>(Expression<T> field,
                                                                     T value,
                                                                     Relation relation) {
+
+        private static <T extends Comparable<? super T>> PageCondition<T> of(Expression<T> field,
+                                                                             T value,
+                                                                             Relation relation) {
 
             return new PageCondition<>(field, value, relation);
         }
 
-        public enum Relation {
+        private enum Relation {
             LTE,
             GTE;
 
-            public static Relation from(EntitySortCriteria.Order sortOrder) {
+            private static Relation from(EntitySortCriteria.Order sortOrder) {
                 return switch (sortOrder) {
                     case ASC -> GTE;
                     case DESC -> LTE;

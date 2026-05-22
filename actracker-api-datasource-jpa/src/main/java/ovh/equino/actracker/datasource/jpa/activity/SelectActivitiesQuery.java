@@ -32,6 +32,8 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
 
     private final Expression<String> activityTitleLowerCase;
     private final Expression<Integer> activityTitleNullWeight;
+    private final Expression<Integer> activityEndTimeNullWeight;
+
 
     SelectActivitiesQuery(EntityManager entityManager) {
         super(entityManager);
@@ -41,6 +43,10 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
         this.activityTitleLowerCase = criteriaBuilder.lower(root.get(ActivityEntity_.title));
         this.activityTitleNullWeight = criteriaBuilder.selectCase()
                 .when(criteriaBuilder.isNull(root.get(ActivityEntity_.title)), 0)
+                .otherwise(1)
+                .as(Integer.class);
+        this.activityEndTimeNullWeight = criteriaBuilder.selectCase()
+                .when(criteriaBuilder.isNull(root.get(ActivityEntity_.endTime)), 0)
                 .otherwise(1)
                 .as(Integer.class);
     }
@@ -58,6 +64,7 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
                                 activityTitleNullWeight,
                                 root.get(ActivityEntity_.startTime),
                                 root.get(ActivityEntity_.endTime),
+                                activityEndTimeNullWeight,
                                 root.get(ActivityEntity_.comment),
                                 root.get(ActivityEntity_.deleted)
                         )
@@ -191,7 +198,7 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
         }
 
         @Override
-        protected List<PageCondition<? extends Comparable<?>>> toEntityPageConditions(
+        protected List<PageCondition<?>> toEntityPageConditions(
                 EntitySearchPageId.Value pageAttribute) {
 
             if (pageAttribute.sortField() instanceof ActivitySearchCriteria.SortableField sortableAttribute) {
@@ -200,7 +207,13 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
                     case TITLE -> nullFirstPageConditions(
                             activityTitleLowerCase,
                             activityTitleNullWeight,
-                            nullableValueLowerCase(pageAttribute),
+                            nullableStringLowerCase(pageAttribute),
+                            sortDirection
+                    );
+                    case END_TIME -> nullFirstPageConditions(
+                            root.get(ActivityEntity_.endTime),
+                            activityEndTimeNullWeight,
+                            nullableTimestamp(pageAttribute),
                             sortDirection
                     );
                 };
@@ -219,8 +232,16 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
             if (sortCriterion.field() instanceof ActivitySearchCriteria.SortableField sortableAttribute) {
                 var sortDirection = sortCriterion.order();
                 return switch (sortableAttribute) {
-                    case TITLE ->
-                            nullFirstOrderCriteria(activityTitleLowerCase, activityTitleNullWeight, sortDirection);
+                    case TITLE -> nullFirstOrderCriteria(
+                            activityTitleLowerCase,
+                            activityTitleNullWeight,
+                            sortDirection
+                    );
+                    case END_TIME -> nullFirstOrderCriteria(
+                            root.get(ActivityEntity_.endTime),
+                            activityEndTimeNullWeight,
+                            sortDirection
+                    );
                 };
             }
             return emptyList();
