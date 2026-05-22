@@ -1,7 +1,6 @@
 package ovh.equino.actracker.datasource.jpa;
 
 import jakarta.persistence.criteria.*;
-import ovh.equino.actracker.datasource.jpa.JpaPredicateBuilder.PageCondition.Relation;
 import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.jpa.JpaEntity;
@@ -114,8 +113,7 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
         return isInPage(pageConditions);
     }
 
-    private JpaPredicate isInPage(
-            List<PageCondition<?>> pageConditions) {
+    private JpaPredicate isInPage(List<PageCondition<?>> pageConditions) {
 
         if (isEmpty(pageConditions)) {
             return allMatch();
@@ -169,23 +167,21 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
         return toEntityPageConditions(pageAttribute);
     }
 
-    private List<PageCondition<?>> toCommonPageConditions(
-            EntitySearchPageId.Value pageAttribute) {
+    private List<PageCondition<?>> toCommonPageConditions(EntitySearchPageId.Value pageAttribute) {
 
         if (pageAttribute.sortField() instanceof EntitySortCriteria.CommonField commonField) {
             return switch (commonField) {
                 case ID -> singletonList(PageCondition.of(
                         root.get(JpaEntity_.id),
                         pageAttribute.value().toString(),
-                        Relation.from(pageAttribute.sortOrder()))
+                        PageCondition.Relation.from(pageAttribute.sortOrder()))
                 );
             };
         }
         return emptyList();
     }
 
-    protected abstract List<PageCondition<?>> toEntityPageConditions(
-            EntitySearchPageId.Value pageAttribute);
+    protected abstract List<PageCondition<?>> toEntityPageConditions(EntitySearchPageId.Value pageAttribute);
 
     protected <T extends Comparable<? super T>> List<PageCondition<?>> nullFirstPageConditions(
             Expression<T> nullableAttribute,
@@ -222,18 +218,18 @@ public abstract class JpaPredicateBuilder<E extends JpaEntity> {
                                                                     T value,
                                                                     Relation relation) {
 
-        public static <T extends Comparable<? super T>> PageCondition<T> of(Expression<T> field,
-                                                                            T value,
-                                                                            Relation relation) {
+        private static <T extends Comparable<? super T>> PageCondition<T> of(Expression<T> field,
+                                                                             T value,
+                                                                             Relation relation) {
 
             return new PageCondition<>(field, value, relation);
         }
 
-        public enum Relation {
+        private enum Relation {
             LTE,
             GTE;
 
-            public static Relation from(EntitySortCriteria.Order sortOrder) {
+            private static Relation from(EntitySortCriteria.Order sortOrder) {
                 return switch (sortOrder) {
                     case ASC -> GTE;
                     case DESC -> LTE;

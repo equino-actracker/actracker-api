@@ -88,32 +88,6 @@ class Base64JacksonPageIdTranslator implements PageIdTranslator {
         }
     }
 
-//    static private class EntitySortCriteriaFieldDeserializer extends StdDeserializer<EntitySortCriteria.Field> {
-//
-//        private EntitySortCriteriaFieldDeserializer() {
-//            this(null);
-//        }
-//
-//        private EntitySortCriteriaFieldDeserializer(Class<?> vc) {
-//            super(vc);
-//        }
-//
-//
-//        @Override
-//        public EntitySortCriteria.Field deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-//            JsonNode node = p.readValueAsTree();
-//            var name = node.get("name").asText();
-//            var type = node.get("type").asText();
-//
-//            var pageableFieldAlias = PageableFieldAlias.fromString(type)
-//                    .orElseThrow(() -> new IllegalArgumentException("Unknown pageable field type %s".formatted(type)));
-//            return pageableFieldAlias.findField(name)
-//                    .orElseThrow(() -> new IllegalArgumentException(
-//                            "No pageable field name %s found in type %s".formatted(name, pageableFieldAlias.fieldType)
-//                    ));
-//        }
-//    }
-
     static private class PageIdValueDeserializer extends StdDeserializer<EntitySearchPageId.Value> {
 
         private PageIdValueDeserializer() {
@@ -127,8 +101,7 @@ class Base64JacksonPageIdTranslator implements PageIdTranslator {
         @Override
         public EntitySearchPageId.Value deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             JsonNode node = p.readValueAsTree();
-            var sortField = node.get("sortField");
-            var pageableField = getPageableField(sortField);
+            var pageableField = getPageableField(node);
             var order = getOrder(node);
             var pageValue = getValue(node, pageableField);
 
@@ -149,7 +122,8 @@ class Base64JacksonPageIdTranslator implements PageIdTranslator {
             return EntitySortCriteria.Order.valueOf(sortOrder);
         }
 
-        private EntitySortCriteria.Field getPageableField(JsonNode sortField) {
+        private EntitySortCriteria.Field getPageableField(JsonNode node) {
+            var sortField = node.get("sortField");
             var name = sortField.get("name").asText();
             var type = sortField.get("type").asText();
             var pageableFieldAlias = PageableFieldAlias.fromString(type)
