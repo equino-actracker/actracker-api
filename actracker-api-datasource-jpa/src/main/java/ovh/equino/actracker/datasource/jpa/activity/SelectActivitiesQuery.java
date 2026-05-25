@@ -222,7 +222,6 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
                             nullableTimestamp(pageAttribute),
                             sortDirection
                     );
-
                     case END_TIME -> nullFirstPageConditions(
                             root.get(ActivityEntity_.endTime),
                             activityEndTimeNullWeight,
