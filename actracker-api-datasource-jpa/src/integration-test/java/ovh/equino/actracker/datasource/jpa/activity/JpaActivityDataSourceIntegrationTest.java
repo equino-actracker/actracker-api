@@ -319,21 +319,25 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                 .createdBy(user)
                 .withId(new UUID(400, 1))
                 .withTitle("Z")
+                .startedAt(null)
                 .endedAt(null);
         var activity2 = anActivity()
                 .createdBy(user)
                 .withId(new UUID(400, 2))
                 .withTitle("a")
+                .startedAt(Instant.ofEpochSecond(0, 2000))
                 .endedAt(null);
         var activity3 = anActivity()
                 .createdBy(user)
                 .withId(new UUID(400, 3))
                 .withTitle("a")
+                .startedAt(null)
                 .endedAt(Instant.ofEpochSecond(0, 1000));
         var activity4 = anActivity()
                 .createdBy(user)
                 .withId(new UUID(400, 4))
                 .withTitle(null)
+                .startedAt(Instant.ofEpochSecond(0, 1000))
                 .endedAt(Instant.ofEpochSecond(0, 1000));
         var activity5 = anActivity()
                 .createdBy(user)
@@ -351,6 +355,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                 .createdBy(user)
                 .withId(new UUID(400, 7))
                 .withTitle("ZZZ")
+                .startedAt(null)
                 .endedAt(Instant.ofEpochSecond(0, 2000));
 
         var activitiesToAdd = List.of(activity1, activity2, activity3, activity4, activity5, activity6, activity7);
@@ -432,6 +437,54 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                                                 .with(Value.of(ID, DESC, activity7.id())),
                                         100,
                                         List.of(activity7, activity1, activity3, activity2)
+                                )
+                        )
+                ),
+
+                Arguments.of(
+                        "START_TIME:ASC",
+                        user,
+                        activitiesToAdd,
+                        sortBy(START_TIME, ASC),
+                        List.of(
+                                new ExpectedPage(firstPage(), 4, List.of(activity1, activity3, activity7, activity4)),
+                                new ExpectedPage(
+                                        aPageId()
+                                                .with(Value.of(START_TIME, ASC, null))
+                                                .with(Value.of(ID, ASC, activity7.id())),
+                                        2,
+                                        List.of(activity7, activity4)
+                                ),
+                                new ExpectedPage(
+                                        aPageId()
+                                                .with(Value.of(START_TIME, ASC, activity4.endTime()))
+                                                .with(Value.of(ID, ASC, activity4.id())),
+                                        100,
+                                        List.of(activity4, activity2, activity6, activity5)
+                                )
+                        )
+                ),
+
+                Arguments.of(
+                        "START_TIME:DESC",
+                        user,
+                        activitiesToAdd,
+                        sortBy(START_TIME, DESC),
+                        List.of(
+                                new ExpectedPage(firstPage(), 4, List.of(activity7, activity3, activity1, activity5)),
+                                new ExpectedPage(
+                                        aPageId()
+                                                .with(Value.of(START_TIME, DESC, null))
+                                                .with(Value.of(ID, DESC, activity1.id())),
+                                        2,
+                                        List.of(activity1, activity5)
+                                ),
+                                new ExpectedPage(
+                                        aPageId()
+                                                .with(Value.of(START_TIME, DESC, activity5.endTime()))
+                                                .with(Value.of(ID, DESC, activity5.id())),
+                                        100,
+                                        List.of(activity5, activity6, activity2, activity4)
                                 )
                         )
                 ),
