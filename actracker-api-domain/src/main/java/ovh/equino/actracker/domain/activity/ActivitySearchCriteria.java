@@ -32,6 +32,7 @@ public record ActivitySearchCriteria(
 
     public enum SortableField implements EntitySortCriteria.Field {
         TITLE,
+        START_TIME,
         END_TIME
     }
 }
