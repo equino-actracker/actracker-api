@@ -16,6 +16,7 @@ record ActivityProjection(String id,
                           String titleLowerCase,
                           Integer titleNullWeight,
                           Timestamp startTime,
+                          Integer startTimeNullWeight,
                           Timestamp endTime,
                           Integer endTimeNullWeight,
                           String comment,
@@ -30,7 +31,7 @@ record ActivityProjection(String id,
                        String comment,
                        Boolean deleted) {
 
-        this(id, creatorId, title, null, null, startTime, endTime, null, comment, deleted);
+        this(id, creatorId, title, null, null, startTime, null, endTime, null, comment, deleted);
     }
 
     ActivityDto toActivity(Set<UUID> tagIds, List<MetricValue> metricValues) {

@@ -32,6 +32,7 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
 
     private final Expression<String> activityTitleLowerCase;
     private final Expression<Integer> activityTitleNullWeight;
+    private final Expression<Integer> activityStartTimeNullWeight;
     private final Expression<Integer> activityEndTimeNullWeight;
 
 
@@ -43,6 +44,10 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
         this.activityTitleLowerCase = criteriaBuilder.lower(root.get(ActivityEntity_.title));
         this.activityTitleNullWeight = criteriaBuilder.selectCase()
                 .when(criteriaBuilder.isNull(root.get(ActivityEntity_.title)), 0)
+                .otherwise(1)
+                .as(Integer.class);
+        this.activityStartTimeNullWeight = criteriaBuilder.selectCase()
+                .when(criteriaBuilder.isNull(root.get(ActivityEntity_.startTime)), 0)
                 .otherwise(1)
                 .as(Integer.class);
         this.activityEndTimeNullWeight = criteriaBuilder.selectCase()
@@ -63,6 +68,7 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
                                 activityTitleLowerCase,
                                 activityTitleNullWeight,
                                 root.get(ActivityEntity_.startTime),
+                                activityStartTimeNullWeight,
                                 root.get(ActivityEntity_.endTime),
                                 activityEndTimeNullWeight,
                                 root.get(ActivityEntity_.comment),
@@ -210,7 +216,13 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
                             nullableStringLowerCase(pageAttribute),
                             sortDirection
                     );
-                    case START_TIME -> emptyList(); // TODO implement
+                    case START_TIME -> nullFirstPageConditions(
+                            root.get(ActivityEntity_.startTime),
+                            activityStartTimeNullWeight,
+                            nullableTimestamp(pageAttribute),
+                            sortDirection
+                    );
+
                     case END_TIME -> nullFirstPageConditions(
                             root.get(ActivityEntity_.endTime),
                             activityEndTimeNullWeight,
@@ -238,7 +250,11 @@ final class SelectActivitiesQuery extends MultiResultJpaQuery<ActivityEntity, Ac
                             activityTitleNullWeight,
                             sortDirection
                     );
-                    case START_TIME -> emptyList();
+                    case START_TIME -> nullFirstOrderCriteria(
+                            root.get(ActivityEntity_.startTime),
+                            activityStartTimeNullWeight,
+                            sortDirection
+                    );
                     case END_TIME -> nullFirstOrderCriteria(
                             root.get(ActivityEntity_.endTime),
                             activityEndTimeNullWeight,

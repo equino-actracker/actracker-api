@@ -541,7 +541,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                         "All criteria: [TITLE:DESC,END_TIME:ASC,START_TIME:DESC]",
                         user,
                         activitiesToAdd,
-                        sortBy(TITLE, DESC).thenSortBy(END_TIME, ASC),//.thenSortBy(START_TIME, DESC),
+                        sortBy(TITLE, DESC).thenSortBy(END_TIME, ASC).thenSortBy(START_TIME, DESC),
                         List.of(
                                 new ExpectedPage(firstPage(), 4, List.of(activity4, activity5, activity6, activity7)),
                                 new ExpectedPage(
@@ -557,7 +557,7 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
                                         aPageId()
                                                 .with(Value.of(TITLE, DESC, activity7.title()))
                                                 .with(Value.of(END_TIME, ASC, activity7.endTime()))
-                                                .with(Value.of(START_TIME, DESC, activity6.startTime()))
+                                                .with(Value.of(START_TIME, DESC, activity7.startTime()))
                                                 .with(Value.of(ID, DESC, activity7.id())),
                                         100,
                                         List.of(activity7, activity1, activity2, activity3)
