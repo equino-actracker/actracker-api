@@ -197,6 +197,7 @@ class Base64JacksonPageIdTranslator implements PageIdTranslator {
 
     private enum SortableFieldMapping {
         ACTIVITY_END_TIME(ActivitySearchCriteria.SortableField.END_TIME, Instant.class, new PageIdInstantValueMapper()),
+        ACTIVITY_START_TIME(ActivitySearchCriteria.SortableField.START_TIME, Instant.class, new PageIdInstantValueMapper()),
         DEFAULT(null, String.class, new PageIdStringValueMapper());
 
         private final EntitySortCriteria.Field sortableField;

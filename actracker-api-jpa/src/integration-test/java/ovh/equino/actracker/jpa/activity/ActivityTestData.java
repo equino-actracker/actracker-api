@@ -16,6 +16,7 @@ public final class ActivityTestData {
     private UUID id = randomUUID();
     private TenantTestData creator = aTenant();
     private String title = "titleless activity";
+    private Instant startTime = null;
     private Instant endTime = null;
 
     public static ActivityTestData anActivity() {
@@ -45,6 +46,15 @@ public final class ActivityTestData {
         return title;
     }
 
+    public ActivityTestData startedAt(Instant startTime) {
+        this.startTime = startTime;
+        return this;
+    }
+
+    public Instant startTime() {
+        return startTime;
+    }
+
     public ActivityTestData endedAt(Instant endTime) {
         this.endTime = endTime;
         return this;
@@ -55,6 +65,6 @@ public final class ActivityTestData {
     }
 
     public ActivityDto asDto() {
-        return new ActivityDto(id, creator.id(), title, null, endTime, null, emptySet(), emptyList(), false);
+        return new ActivityDto(id, creator.id(), title, startTime, endTime, null, emptySet(), emptyList(), false);
     }
 }
