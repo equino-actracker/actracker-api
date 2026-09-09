@@ -1,7 +1,6 @@
-package ovh.equino.actracker.jpa.activity;
+package ovh.equino.actracker.domain.activity;
 
-import ovh.equino.actracker.domain.activity.ActivityDto;
-import ovh.equino.actracker.jpa.tenant.TenantTestData;
+import ovh.equino.actracker.domain.tenant.TenantTestData;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -9,7 +8,7 @@ import java.util.UUID;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.UUID.randomUUID;
-import static ovh.equino.actracker.jpa.tenant.TenantTestData.aTenant;
+import static ovh.equino.actracker.domain.tenant.TenantTestData.aTenant;
 
 public final class ActivityTestData {
 
@@ -18,6 +17,7 @@ public final class ActivityTestData {
     private String title = "titleless activity";
     private Instant startTime = null;
     private Instant endTime = null;
+    // TODO startTime, endTime, comment, tags, metrics
 
     public static ActivityTestData anActivity() {
         return new ActivityTestData();

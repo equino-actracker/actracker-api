@@ -57,12 +57,10 @@ subprojects {
 
     sourceSets {
         integrationTest {
-            java {
-                compileClasspath += main.output + test.output
-                runtimeClasspath += main.output + test.output
-                srcDir file("src/integration-test/java")
-            }
+            java.srcDir file("src/integration-test/java")
             resources.srcDir file("src/integration-test/resources")
+            compileClasspath += sourceSets.main.output + sourceSets.test.output
+            runtimeClasspath += sourceSets.main.output + sourceSets.test.output
         }
     }
 
@@ -70,6 +68,8 @@ subprojects {
         integrationTestImplementation.extendsFrom testImplementation
         integrationTestRuntime.extendsFrom testRuntime
         integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
+        integrationTestCompileClasspath.extendsFrom testCompileClasspath
+        integrationTestRuntimeClasspath.extendsFrom testRuntimeClasspath
     }
 
     dependencies {
@@ -78,6 +78,7 @@ subprojects {
         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.1'
         integrationTestImplementation 'org.assertj:assertj-core:3.24.2'
         integrationTestImplementation 'org.junit.jupiter:junit-jupiter-params:5.10.1'
+        integrationTestImplementation project(':actracker-api-domain').sourceSets.test.output
     }
 
     test {

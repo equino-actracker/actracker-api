@@ -19,6 +19,7 @@ dependencies {
     integrationTestImplementation project(':actracker-api-repository-jpa').sourceSets.integrationTest.runtimeClasspath
     integrationTestImplementation project(':actracker-api-datasource-jpa').sourceSets.integrationTest.compileClasspath
     integrationTestImplementation project(':actracker-api-datasource-jpa').sourceSets.integrationTest.runtimeClasspath
+    integrationTestImplementation "org.testcontainers:testcontainers:2.0.2"
     integrationTestImplementation "org.testcontainers:postgresql:1.19.3"
 }
 

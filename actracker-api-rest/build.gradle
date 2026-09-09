@@ -2,4 +2,9 @@ dependencies {
     implementation project(':actracker-api-application')
     compileOnly 'org.springframework:spring-web:6.1.2'
     implementation 'org.apache.commons:commons-lang3:3.14.0'
+
+    integrationTestImplementation 'org.springframework.boot:spring-boot-starter-test:3.1.0'
+//    integrationTestRuntimeOnly 'org.springframework.boot:spring-boot-starter-test:3.1.0'
+    integrationTestImplementation 'org.springframework.boot:spring-boot-starter-web:3.1.0'
+//    integrationTestRuntimeOnly 'org.springframework.boot:spring-boot-starter-web:3.1.0'
 }
