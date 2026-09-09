@@ -2,17 +2,17 @@ package ovh.equino.actracker.jpa;
 
 import ovh.equino.actracker.domain.Notification;
 import ovh.equino.actracker.domain.activity.ActivityDto;
+import ovh.equino.actracker.domain.activity.ActivityTestData;
 import ovh.equino.actracker.domain.dashboard.Chart;
 import ovh.equino.actracker.domain.dashboard.DashboardDto;
 import ovh.equino.actracker.domain.exception.ParseException;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tagset.TagSetDto;
 import ovh.equino.actracker.domain.tenant.TenantDto;
-import ovh.equino.actracker.jpa.activity.ActivityTestData;
-import ovh.equino.actracker.jpa.dashboard.DashboardTestData;
-import ovh.equino.actracker.jpa.tag.TagTestData;
-import ovh.equino.actracker.jpa.tagset.TagSetTestData;
-import ovh.equino.actracker.jpa.tenant.TenantTestData;
+import ovh.equino.actracker.domain.tenant.TenantTestData;
+import ovh.equino.actracker.domain.dashboard.DashboardTestData;
+import ovh.equino.actracker.domain.tag.TagTestData;
+import ovh.equino.actracker.domain.tagset.TagSetTestData;
 
 import java.sql.Connection;
 import java.sql.SQLException;

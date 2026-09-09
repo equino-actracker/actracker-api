@@ -10,19 +10,15 @@ import ovh.equino.actracker.domain.EntitySearchCriteria;
 import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySearchPageId.Value;
 import ovh.equino.actracker.domain.EntitySortCriteria;
-import ovh.equino.actracker.domain.activity.ActivityDto;
-import ovh.equino.actracker.domain.activity.ActivityId;
-import ovh.equino.actracker.domain.activity.ActivitySearchCriteria;
-import ovh.equino.actracker.domain.activity.MetricValue;
+import ovh.equino.actracker.domain.activity.*;
 import ovh.equino.actracker.domain.tag.MetricDto;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tag.TagSearchCriteria;
 import ovh.equino.actracker.domain.tenant.TenantDto;
+import ovh.equino.actracker.domain.tenant.TenantTestData;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.IntegrationTestConfiguration;
 import ovh.equino.actracker.jpa.JpaIntegrationTest;
-import ovh.equino.actracker.jpa.activity.ActivityTestData;
-import ovh.equino.actracker.jpa.tenant.TenantTestData;
 
 import java.sql.SQLException;
 import java.time.Instant;
@@ -39,9 +35,9 @@ import static ovh.equino.actracker.domain.EntitySortCriteria.Order.ASC;
 import static ovh.equino.actracker.domain.EntitySortCriteria.Order.DESC;
 import static ovh.equino.actracker.domain.EntitySortCriteria.sortBy;
 import static ovh.equino.actracker.domain.activity.ActivitySearchCriteria.SortableField.*;
+import static ovh.equino.actracker.domain.activity.ActivityTestData.anActivity;
+import static ovh.equino.actracker.domain.tenant.TenantTestData.aTenant;
 import static ovh.equino.actracker.jpa.TestUtil.randomBigDecimal;
-import static ovh.equino.actracker.jpa.activity.ActivityTestData.anActivity;
-import static ovh.equino.actracker.jpa.tenant.TenantTestData.aTenant;
 
 abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
 

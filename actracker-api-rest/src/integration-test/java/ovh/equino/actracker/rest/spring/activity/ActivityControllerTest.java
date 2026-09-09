@@ -9,18 +9,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ovh.equino.actracker.application.activity.ActivityApplicationService;
-import ovh.equino.actracker.application.activity.ActivityResult;
-import ovh.equino.actracker.application.activity.MetricValueResult;
+import ovh.equino.actracker.domain.activity.ActivityTestData;
 
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.util.List;
-import java.util.Set;
-
-import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static ovh.equino.actracker.rest.spring.activity.ActivityRestTestData.restfulActivity;
 
 @WebMvcTest(ActivityController.class)
 class ActivityControllerTest {
@@ -37,23 +32,12 @@ class ActivityControllerTest {
     @Test
     void shouldGetActivity() throws Exception {
         // given
-        var activityId = randomUUID();
-        var expectedActivity = new ActivityResult(
-                activityId,
-                "dummyActivity",
-                Instant.now(),
-                Instant.now(),
-                "comment",
-                Set.of(randomUUID(), randomUUID()),
-                List.of(
-                        new MetricValueResult(randomUUID(), BigDecimal.ZERO),
-                        new MetricValueResult(randomUUID(), BigDecimal.ZERO)
-                )
-        );
-        when(activityApplicationService.getActivity(activityId)).thenReturn(expectedActivity);
+        var restfulActivity = restfulActivity();
+        when(activityApplicationService.getActivity(restfulActivity.id()))
+                .thenReturn(restfulActivity.asActivityResult());
 
         // when
-        var mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/"))
+        var mvcResult = mockMvc.perform(get("/api/activity/" + restfulActivity.id()))
                 .andExpect(status().isOk())
                 .andReturn();
 
