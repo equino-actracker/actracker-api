@@ -10,7 +10,7 @@ import static ovh.equino.actracker.domain.activity.ActivityTestData.anActivity;
 
 record ActivityRestTestData(ActivityTestData activity) {
 
-    static ActivityRestTestData restfulActivity() {
+    static ActivityRestTestData aRestfulActivity() {
         return new ActivityRestTestData(anActivity());
     }
 
@@ -21,5 +21,9 @@ record ActivityRestTestData(ActivityTestData activity) {
     ActivityResult asActivityResult() {
         // TODO startTime, endTime, comment, tags, metrics
         return new ActivityResult(activity.id(), activity.title(), activity.startTime(), activity.endTime(), null, Collections.emptySet(), Collections.emptyList());
+    }
+
+    String asHttpResponse() {
+        return "";
     }
 }
