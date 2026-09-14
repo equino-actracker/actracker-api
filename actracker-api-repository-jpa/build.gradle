@@ -4,6 +4,7 @@ dependencies {
     implementation project(':actracker-api-notification-outbox')
     implementation project(':actracker-api-jpa')
 
+    // TODO remove? :
     integrationTestImplementation project(':actracker-api-domain').sourceSets.test.output
     integrationTestImplementation project(':actracker-api-jpa').sourceSets.main.output
     integrationTestImplementation project(':actracker-api-jpa').sourceSets.integrationTest.output

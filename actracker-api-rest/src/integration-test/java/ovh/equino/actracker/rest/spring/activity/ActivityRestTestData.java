@@ -1,18 +1,19 @@
 package ovh.equino.actracker.rest.spring.activity;
 
 import ovh.equino.actracker.application.activity.ActivityResult;
+import ovh.equino.actracker.application.activity.MetricValueResult;
 import ovh.equino.actracker.domain.activity.ActivityTestData;
+import ovh.equino.actracker.rest.spring.PayloadUtils;
 
-import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
-import static ovh.equino.actracker.domain.activity.ActivityTestData.anActivity;
-import static ovh.equino.actracker.rest.spring.PayloadUtils.*;
+import static ovh.equino.actracker.rest.spring.PayloadUtils.jsonValue;
 
 record ActivityRestTestData(ActivityTestData activity) {
 
-    static ActivityRestTestData aRestfulActivity() {
-        return new ActivityRestTestData(anActivity());
+    static ActivityRestTestData aRestfulActivity(ActivityTestData activity) {
+        return new ActivityRestTestData(activity);
     }
 
     UUID id() {
@@ -20,16 +21,23 @@ record ActivityRestTestData(ActivityTestData activity) {
     }
 
     ActivityResult asActivityResult() {
-        // TODO startTime, endTime, comment, tags, metrics
+
         return new ActivityResult(
                 activity.id(),
                 activity.title(),
                 activity.startTime(),
                 activity.endTime(),
-                null,
-                Collections.emptySet(),
-                Collections.emptyList()
+                activity.comment(),
+                activity.tags(),
+                metricValueResults()
         );
+    }
+
+    private List<MetricValueResult> metricValueResults() {
+        return activity.metricValues()
+                .stream()
+                .map(metricValue -> new MetricValueResult(metricValue.metricId(), metricValue.value()))
+                .toList();
     }
 
     String asHttpResponse() {
@@ -44,12 +52,23 @@ record ActivityRestTestData(ActivityTestData activity) {
                     "metricValues": {metricValues}
                 }
                 """
-                .replace("{id}", mandatoryUuid(activity.id()))
-                .replace("{title}", nullableString(activity.title()))
-                .replace("{startTimestamp}", nullableTimestamp(activity.startTime()))
-                .replace("{endTimestamp}", nullableTimestamp(activity.endTime()))
-                .replace("{comment}", "null")
-                .replace("{tags}", "[]")
-                .replace("{metricValues}", "[]");
+                .replace("{id}", jsonValue(activity.id()))
+                .replace("{title}", jsonValue(activity.title()))
+                .replace("{startTimestamp}", jsonValue(activity.startTime()))
+                .replace("{endTimestamp}", jsonValue(activity.endTime()))
+                .replace("{comment}", jsonValue(activity.comment()))
+                .replace("{tags}", jsonValue(activity.tags(), PayloadUtils::jsonValue))
+                .replace("{metricValues}", jsonValue(metricValueResults(), this::stringifyMetricValue));
+    }
+
+    String stringifyMetricValue(MetricValueResult metricValue) {
+        return """
+                {
+                    "metricId": {metricId},
+                    "value": {value}
+                }
+                """
+                .replace("{metricId}", jsonValue(metricValue.metricId()))
+                .replace("{value}", jsonValue(metricValue.value()));
     }
 }

@@ -35,7 +35,7 @@ import static ovh.equino.actracker.domain.EntitySortCriteria.Order.ASC;
 import static ovh.equino.actracker.domain.EntitySortCriteria.Order.DESC;
 import static ovh.equino.actracker.domain.EntitySortCriteria.sortBy;
 import static ovh.equino.actracker.domain.activity.ActivitySearchCriteria.SortableField.*;
-import static ovh.equino.actracker.domain.activity.ActivityTestData.anActivity;
+import static ovh.equino.actracker.domain.activity.ActivityTestData.minimalActivity;
 import static ovh.equino.actracker.domain.tenant.TenantTestData.aTenant;
 import static ovh.equino.actracker.jpa.TestUtil.randomBigDecimal;
 
@@ -311,43 +311,43 @@ abstract class JpaActivityDataSourceIntegrationTest extends JpaIntegrationTest {
     static Stream<Arguments> activitiesSortedAndPaginated() {
         var user = aTenant();
 
-        var activity1 = anActivity()
+        var activity1 = minimalActivity()
                 .createdBy(user)
                 .withId(new UUID(400, 1))
                 .withTitle("Z")
                 .startedAt(null)
                 .endedAt(null);
-        var activity2 = anActivity()
+        var activity2 = minimalActivity()
                 .createdBy(user)
                 .withId(new UUID(400, 2))
                 .withTitle("a")
                 .startedAt(Instant.ofEpochSecond(0, 2000))
                 .endedAt(null);
-        var activity3 = anActivity()
+        var activity3 = minimalActivity()
                 .createdBy(user)
                 .withId(new UUID(400, 3))
                 .withTitle("a")
                 .startedAt(null)
                 .endedAt(Instant.ofEpochSecond(0, 1000));
-        var activity4 = anActivity()
+        var activity4 = minimalActivity()
                 .createdBy(user)
                 .withId(new UUID(400, 4))
                 .withTitle(null)
                 .startedAt(Instant.ofEpochSecond(0, 1000))
                 .endedAt(Instant.ofEpochSecond(0, 1000));
-        var activity5 = anActivity()
+        var activity5 = minimalActivity()
                 .createdBy(user)
                 .withId(new UUID(400, 5))
                 .withTitle(null)
                 .startedAt(Instant.ofEpochSecond(0, 3000))
                 .endedAt(Instant.ofEpochSecond(0, 3000));
-        var activity6 = anActivity()
+        var activity6 = minimalActivity()
                 .createdBy(user)
                 .withId(new UUID(400, 6))
                 .withTitle(null)
                 .startedAt(Instant.ofEpochSecond(0, 2000))
                 .endedAt(Instant.ofEpochSecond(0, 3000));
-        var activity7 = anActivity()
+        var activity7 = minimalActivity()
                 .createdBy(user)
                 .withId(new UUID(400, 7))
                 .withTitle("ZZZ")

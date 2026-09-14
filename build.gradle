@@ -78,6 +78,7 @@ subprojects {
         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.1'
         integrationTestImplementation 'org.assertj:assertj-core:3.24.2'
         integrationTestImplementation 'org.junit.jupiter:junit-jupiter-params:5.10.1'
+        integrationTestImplementation project(':actracker-api-domain').sourceSets.main.output
         integrationTestImplementation project(':actracker-api-domain').sourceSets.test.output
     }
 
