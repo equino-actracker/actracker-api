@@ -1,6 +1,5 @@
-package ovh.equino.actracker.jpa.tenant;
+package ovh.equino.actracker.domain.tenant;
 
-import ovh.equino.actracker.domain.tenant.TenantDto;
 import ovh.equino.actracker.domain.user.User;
 
 import java.util.UUID;
