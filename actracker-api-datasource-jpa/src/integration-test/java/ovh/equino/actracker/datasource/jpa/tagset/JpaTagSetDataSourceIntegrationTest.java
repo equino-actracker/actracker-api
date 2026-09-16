@@ -15,12 +15,12 @@ import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tagset.TagSetDto;
 import ovh.equino.actracker.domain.tagset.TagSetId;
 import ovh.equino.actracker.domain.tagset.TagSetSearchCriteria;
+import ovh.equino.actracker.domain.tagset.TagSetTestData;
 import ovh.equino.actracker.domain.tenant.TenantDto;
 import ovh.equino.actracker.domain.tenant.TenantTestData;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.IntegrationTestConfiguration;
 import ovh.equino.actracker.jpa.JpaIntegrationTest;
-import ovh.equino.actracker.domain.tagset.TagSetTestData;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -35,8 +35,8 @@ import static ovh.equino.actracker.domain.EntitySortCriteria.Order.ASC;
 import static ovh.equino.actracker.domain.EntitySortCriteria.Order.DESC;
 import static ovh.equino.actracker.domain.EntitySortCriteria.sortBy;
 import static ovh.equino.actracker.domain.tagset.TagSetSearchCriteria.SortableField.NAME;
-import static ovh.equino.actracker.domain.tenant.TenantTestData.aTenant;
 import static ovh.equino.actracker.domain.tagset.TagSetTestData.aTagSet;
+import static ovh.equino.actracker.domain.tenant.TenantTestData.aTenant;
 
 abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
 

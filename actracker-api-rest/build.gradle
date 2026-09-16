@@ -4,7 +4,5 @@ dependencies {
     implementation 'org.apache.commons:commons-lang3:3.14.0'
 
     integrationTestImplementation 'org.springframework.boot:spring-boot-starter-test:3.4.0'
-//    integrationTestRuntimeOnly 'org.springframework.boot:spring-boot-starter-test:3.4.0'
     integrationTestImplementation 'org.springframework.boot:spring-boot-starter-web:3.4.0'
-//    integrationTestRuntimeOnly 'org.springframework.boot:spring-boot-starter-web:3.4.0'
 }

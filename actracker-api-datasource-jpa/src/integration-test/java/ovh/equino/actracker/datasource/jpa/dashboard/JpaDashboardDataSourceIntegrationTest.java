@@ -11,17 +11,13 @@ import ovh.equino.actracker.domain.EntitySearchPageId;
 import ovh.equino.actracker.domain.EntitySearchPageId.Value;
 import ovh.equino.actracker.domain.EntitySortCriteria;
 import ovh.equino.actracker.domain.activity.ActivitySearchCriteria;
-import ovh.equino.actracker.domain.dashboard.Chart;
-import ovh.equino.actracker.domain.dashboard.DashboardDto;
-import ovh.equino.actracker.domain.dashboard.DashboardId;
-import ovh.equino.actracker.domain.dashboard.DashboardSearchCriteria;
+import ovh.equino.actracker.domain.dashboard.*;
 import ovh.equino.actracker.domain.tag.TagDto;
 import ovh.equino.actracker.domain.tenant.TenantDto;
 import ovh.equino.actracker.domain.tenant.TenantTestData;
 import ovh.equino.actracker.domain.user.User;
 import ovh.equino.actracker.jpa.IntegrationTestConfiguration;
 import ovh.equino.actracker.jpa.JpaIntegrationTest;
-import ovh.equino.actracker.domain.dashboard.DashboardTestData;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -36,8 +32,8 @@ import static ovh.equino.actracker.domain.EntitySortCriteria.Order.ASC;
 import static ovh.equino.actracker.domain.EntitySortCriteria.Order.DESC;
 import static ovh.equino.actracker.domain.EntitySortCriteria.sortBy;
 import static ovh.equino.actracker.domain.dashboard.DashboardSearchCriteria.SortableField.NAME;
-import static ovh.equino.actracker.domain.tenant.TenantTestData.aTenant;
 import static ovh.equino.actracker.domain.dashboard.DashboardTestData.aDashboard;
+import static ovh.equino.actracker.domain.tenant.TenantTestData.aTenant;
 
 abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest {
 

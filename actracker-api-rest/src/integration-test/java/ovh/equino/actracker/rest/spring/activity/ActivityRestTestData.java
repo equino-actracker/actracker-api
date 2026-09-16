@@ -61,7 +61,7 @@ record ActivityRestTestData(ActivityTestData activity) {
                 .replace("{metricValues}", jsonValue(metricValueResults(), this::stringifyMetricValue));
     }
 
-    String stringifyMetricValue(MetricValueResult metricValue) {
+    private String stringifyMetricValue(MetricValueResult metricValue) {
         return """
                 {
                     "metricId": {metricId},

@@ -26,9 +26,11 @@ public final class PayloadUtils {
     }
 
     public static String jsonValue(Instant value) {
-        return isNull(value)
-                ? NULL_VALUE
-                : Long.toString(value.toEpochMilli());
+        return isNull(value) ? NULL_VALUE : Long.toString(value.toEpochMilli());
+    }
+
+    public static String jsonValue(BigDecimal value) {
+        return isNull(value) ? NULL_VALUE : value.toString();
     }
 
     public static <T> String jsonValue(Collection<T> value, Function<T, String> elementStringifier) {
@@ -41,9 +43,5 @@ public final class PayloadUtils {
                 .collect(joining(","));
 
         return "[%s]".formatted(stringifiedElements);
-    }
-
-    public static String jsonValue(BigDecimal value) {
-        return isNull(value) ? NULL_VALUE : value.toString();
     }
 }
