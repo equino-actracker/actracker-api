@@ -6,7 +6,6 @@ import ovh.equino.actracker.domain.activity.ActivityTestData;
 import ovh.equino.actracker.rest.spring.PayloadUtils;
 
 import java.util.List;
-import java.util.UUID;
 
 import static ovh.equino.actracker.rest.spring.PayloadUtils.jsonValue;
 
@@ -16,12 +15,7 @@ record ActivityRestTestData(ActivityTestData activity) {
         return new ActivityRestTestData(activity);
     }
 
-    UUID id() {
-        return activity.id();
-    }
-
     ActivityResult asActivityResult() {
-
         return new ActivityResult(
                 activity.id(),
                 activity.title(),

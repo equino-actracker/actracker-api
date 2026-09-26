@@ -8,37 +8,25 @@ import static java.util.Collections.emptyList;
 import static java.util.UUID.randomUUID;
 import static ovh.equino.actracker.domain.tenant.TenantTestData.aTenant;
 
-public final class DashboardTestData {
+// TODO add missing fields
+public record DashboardTestData(UUID id,
+                                TenantTestData creator,
+                                String name) {
 
-    private UUID id = randomUUID();
-    private TenantTestData creator = aTenant();
-    private String name = "nameless dashboard";
-
-    public static DashboardTestData aDashboard() {
-        return new DashboardTestData();
+    public static DashboardTestData minimalDashboard() {
+        return new DashboardTestData(randomUUID(), aTenant(), "nameless dashboard");
     }
 
     public DashboardTestData createdBy(TenantTestData creator) {
-        this.creator = creator;
-        return this;
+        return new DashboardTestData(this.id, creator, this.name);
     }
 
     public DashboardTestData withId(UUID id) {
-        this.id = id;
-        return this;
-    }
-
-    public UUID id() {
-        return id;
+        return new DashboardTestData(id, this.creator, this.name);
     }
 
     public DashboardTestData named(String name) {
-        this.name = name;
-        return this;
-    }
-
-    public String name() {
-        return name;
+        return new DashboardTestData(this.id, this.creator, name);
     }
 
     public DashboardDto asDto() {

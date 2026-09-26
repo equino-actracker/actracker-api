@@ -36,11 +36,11 @@ class ActivityControllerIntegrationTest implements ControllerIntegrationTest {
     void shouldGetActivity(String testName, ActivityTestData activityToGet) throws Exception {
         // given
         var restfulActivity = aRestfulActivity(activityToGet);
-        when(activityApplicationService.getActivity(restfulActivity.id()))
+        when(activityApplicationService.getActivity(activityToGet.id()))
                 .thenReturn(restfulActivity.asActivityResult());
 
         // when / then
-        mockMvc.perform(get(ACTIVITY_URL + restfulActivity.id()))
+        mockMvc.perform(get(ACTIVITY_URL + activityToGet.id()))
                 .andExpect(status().isOk())
                 .andExpect(content().json(restfulActivity.asHttpResponse(), NO_EXTRA_FIELDS__IGNORE_COLLECTION_ORDER));
     }

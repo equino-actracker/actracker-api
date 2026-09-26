@@ -32,7 +32,7 @@ import static ovh.equino.actracker.domain.EntitySortCriteria.Order.ASC;
 import static ovh.equino.actracker.domain.EntitySortCriteria.Order.DESC;
 import static ovh.equino.actracker.domain.EntitySortCriteria.sortBy;
 import static ovh.equino.actracker.domain.dashboard.DashboardSearchCriteria.SortableField.NAME;
-import static ovh.equino.actracker.domain.dashboard.DashboardTestData.aDashboard;
+import static ovh.equino.actracker.domain.dashboard.DashboardTestData.minimalDashboard;
 import static ovh.equino.actracker.domain.tenant.TenantTestData.aTenant;
 
 abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest {
@@ -228,12 +228,12 @@ abstract class JpaDashboardDataSourceIntegrationTest extends JpaIntegrationTest 
     static Stream<Arguments> dashboardsSortedAndPaginated() {
         var user = aTenant();
 
-        var dashboard1 = aDashboard().createdBy(user).withId(new UUID(300, 1)).named("Z");
-        var dashboard2 = aDashboard().createdBy(user).withId(new UUID(300, 2)).named("a");
-        var dashboard3 = aDashboard().createdBy(user).withId(new UUID(300, 3)).named("a");
-        var dashboard4 = aDashboard().createdBy(user).withId(new UUID(300, 4)).named(null);
-        var dashboard5 = aDashboard().createdBy(user).withId(new UUID(300, 5)).named(null);
-        var dashboard6 = aDashboard().createdBy(user).withId(new UUID(300, 6)).named("ZZZ");
+        var dashboard1 = minimalDashboard().createdBy(user).withId(new UUID(300, 1)).named("Z");
+        var dashboard2 = minimalDashboard().createdBy(user).withId(new UUID(300, 2)).named("a");
+        var dashboard3 = minimalDashboard().createdBy(user).withId(new UUID(300, 3)).named("a");
+        var dashboard4 = minimalDashboard().createdBy(user).withId(new UUID(300, 4)).named(null);
+        var dashboard5 = minimalDashboard().createdBy(user).withId(new UUID(300, 5)).named(null);
+        var dashboard6 = minimalDashboard().createdBy(user).withId(new UUID(300, 6)).named("ZZZ");
 
         var dashboardsToAdd = List.of(dashboard1, dashboard2, dashboard3, dashboard4, dashboard5, dashboard6);
 

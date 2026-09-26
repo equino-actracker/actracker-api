@@ -8,37 +8,23 @@ import static java.util.Collections.emptyList;
 import static java.util.UUID.randomUUID;
 import static ovh.equino.actracker.domain.tenant.TenantTestData.aTenant;
 
-public final class TagTestData {
+// TODO add missing fields
+public record TagTestData(UUID id, TenantTestData creator, String name) {
 
-    private UUID id = randomUUID();
-    private TenantTestData creator = aTenant();
-    private String name = "nameless tag";
-
-    public static TagTestData aTag() {
-        return new TagTestData();
+    public static TagTestData minimalTag() {
+        return new TagTestData(randomUUID(), aTenant(), "nameless tag");
     }
 
     public TagTestData createdBy(TenantTestData creator) {
-        this.creator = creator;
-        return this;
+        return new TagTestData(this.id, creator, this.name);
     }
 
     public TagTestData withId(UUID id) {
-        this.id = id;
-        return this;
-    }
-
-    public UUID id() {
-        return id;
+        return new TagTestData(id, this.creator, this.name);
     }
 
     public TagTestData named(String name) {
-        this.name = name;
-        return this;
-    }
-
-    public String name() {
-        return name;
+        return new TagTestData(this.id, this.creator, name);
     }
 
     public TagDto asDto() {
