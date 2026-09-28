@@ -30,8 +30,12 @@ record ActivityRestTestData(ActivityTestData activity) {
     private List<MetricValueResult> metricValueResults() {
         return activity.metricValues()
                 .stream()
-                .map(metricValue -> new MetricValueResult(metricValue.metricId(), metricValue.value()))
+                .map(this::toMetricValueResult)
                 .toList();
+    }
+
+    private MetricValueResult toMetricValueResult(ovh.equino.actracker.domain.activity.MetricValue metricValue) {
+        return new MetricValueResult(metricValue.metricId(), metricValue.value());
     }
 
     String asHttpResponse() {
@@ -52,10 +56,10 @@ record ActivityRestTestData(ActivityTestData activity) {
                 .replace("{endTimestamp}", jsonValue(activity.endTime()))
                 .replace("{comment}", jsonValue(activity.comment()))
                 .replace("{tags}", jsonValue(activity.tags(), PayloadUtils::jsonValue))
-                .replace("{metricValues}", jsonValue(metricValueResults(), this::stringifyMetricValue));
+                .replace("{metricValues}", jsonValue(metricValueResults(), this::stringify));
     }
 
-    private String stringifyMetricValue(MetricValueResult metricValue) {
+    private String stringify(MetricValueResult metricValue) {
         return """
                 {
                     "metricId": {metricId},

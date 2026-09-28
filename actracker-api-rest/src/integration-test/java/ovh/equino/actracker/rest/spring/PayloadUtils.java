@@ -1,5 +1,7 @@
 package ovh.equino.actracker.rest.spring;
 
+import ovh.equino.actracker.domain.share.Share;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Collection;
@@ -43,5 +45,14 @@ public final class PayloadUtils {
                 .collect(joining(","));
 
         return "[%s]".formatted(stringifiedElements);
+    }
+
+    public static String stringify(Share share) {
+        return """
+                {
+                    "granteeName": {granteeName}
+                }
+                """
+                .replace("{granteeName}", jsonValue(share.granteeName()));
     }
 }

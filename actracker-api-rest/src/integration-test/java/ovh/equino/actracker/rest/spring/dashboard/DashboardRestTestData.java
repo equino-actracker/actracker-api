@@ -5,6 +5,11 @@ import ovh.equino.actracker.application.dashboard.DashboardResult;
 import ovh.equino.actracker.domain.dashboard.ChartTestData;
 import ovh.equino.actracker.domain.dashboard.DashboardTestData;
 import ovh.equino.actracker.domain.share.Share;
+import ovh.equino.actracker.rest.spring.PayloadUtils;
+
+import java.util.List;
+
+import static ovh.equino.actracker.rest.spring.PayloadUtils.jsonValue;
 
 record DashboardRestTestData(DashboardTestData dashboard) {
 
@@ -13,13 +18,15 @@ record DashboardRestTestData(DashboardTestData dashboard) {
     }
 
     DashboardResult asDashboardResult() {
-        var chartResults = dashboard.charts().stream().map(this::toChartResult).toList();
         var shareNames = dashboard.shares().stream().map(Share::granteeName).toList();
-
-        return new DashboardResult(dashboard.id(), dashboard.name(), chartResults, shareNames);
+        return new DashboardResult(dashboard.id(), dashboard.name(), chartResults(), shareNames);
     }
 
-    ChartResult toChartResult(ChartTestData chartTestData) {
+    private List<ChartResult> chartResults() {
+        return dashboard.charts().stream().map(this::toChartResult).toList();
+    }
+
+    private ChartResult toChartResult(ChartTestData chartTestData) {
         return new ChartResult(
                 chartTestData.id(),
                 chartTestData.name(),
@@ -30,6 +37,26 @@ record DashboardRestTestData(DashboardTestData dashboard) {
     }
 
     public String asHttpResponse() {
-        return "";
+        return """
+                {
+                    "id": {id},
+                    "name": {name},
+                    "charts": {charts},
+                    "shares": {shares}
+                }
+                """
+                .replace("{id}", jsonValue(dashboard.id()))
+                .replace("{name}", jsonValue(dashboard.name()))
+                .replace("{charts}", jsonValue(chartResults(), this::stringify))
+                .replace("{shares", jsonValue(dashboard.shares(), PayloadUtils::stringify));
+    }
+
+    private String stringify(ChartResult chartResult) {
+        return """
+                {
+                    "id": {id}
+                }
+                """
+                .replace("{id}", jsonValue(chartResult.id()));
     }
 }
