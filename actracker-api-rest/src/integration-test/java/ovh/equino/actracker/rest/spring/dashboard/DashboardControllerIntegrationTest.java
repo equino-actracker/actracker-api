@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static ovh.equino.actracker.domain.dashboard.DashboardTestData.complexDashboard;
 import static ovh.equino.actracker.domain.dashboard.DashboardTestData.minimalDashboard;
 import static ovh.equino.actracker.rest.spring.dashboard.DashboardRestTestData.aRestfulDashboard;
 
@@ -47,7 +48,7 @@ class DashboardControllerIntegrationTest implements ControllerIntegrationTest {
     private static Stream<Arguments> dashboardsToGet() {
         return Stream.of(
                 Arguments.of("Minimalistic dashboard", minimalDashboard()),
-                Arguments.of("Full dashboard", null)
+                Arguments.of("Full dashboard", complexDashboard())
         );
     }
 }

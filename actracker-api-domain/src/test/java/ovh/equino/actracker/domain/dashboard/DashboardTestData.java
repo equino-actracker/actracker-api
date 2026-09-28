@@ -2,12 +2,14 @@ package ovh.equino.actracker.domain.dashboard;
 
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tenant.TenantTestData;
+import ovh.equino.actracker.domain.user.User;
 
 import java.util.List;
 import java.util.UUID;
 
 import static java.util.Collections.emptyList;
 import static java.util.UUID.randomUUID;
+import static ovh.equino.actracker.domain.dashboard.ChartTestData.aChart;
 import static ovh.equino.actracker.domain.tenant.TenantTestData.aTenant;
 
 public record DashboardTestData(UUID id,
@@ -19,6 +21,14 @@ public record DashboardTestData(UUID id,
 
     public static DashboardTestData minimalDashboard() {
         return new DashboardTestData(randomUUID(), aTenant(), "nameless dashboards", emptyList(), emptyList(), false);
+    }
+
+    public static DashboardTestData complexDashboard() {
+        var grantee1 = new Share(new User(randomUUID()), "grantee1");
+        var grantee2 = new Share(new User(randomUUID()), "grantee2");
+        var shares = List.of(grantee1, grantee2);
+        var charts = List.of(aChart(), aChart());
+        return new DashboardTestData(randomUUID(), aTenant(), "nameless dashboards", charts, shares, false);
     }
 
     public DashboardTestData createdBy(TenantTestData creator) {
