@@ -20,7 +20,7 @@ import static ovh.equino.actracker.domain.tagset.TagSetTestData.minimalTagSet;
 import static ovh.equino.actracker.rest.spring.tagset.TagSetRestTestData.aRestfulTagSet;
 
 @WebMvcTest(TagSetController.class)
-class TagSetControllerTest implements ControllerIntegrationTest {
+class TagSetControllerIntegrationTest implements ControllerIntegrationTest {
 
     private static final String TAGSET_URL = "/api/tag-set/";
 
