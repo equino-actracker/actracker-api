@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static ovh.equino.actracker.domain.tag.TagTestData.complexTag;
 import static ovh.equino.actracker.domain.tag.TagTestData.minimalTag;
 import static ovh.equino.actracker.rest.spring.tag.TagRestTestData.aRestfulTag;
 
@@ -47,7 +48,7 @@ class TagControllerIntegrationTest implements ControllerIntegrationTest {
     private static Stream<Arguments> tagsToGet() {
         return Stream.of(
                 Arguments.of("Minimalistic tag", minimalTag()),
-                Arguments.of("Full tag", null)
+                Arguments.of("Full tag", complexTag())
         );
     }
 }

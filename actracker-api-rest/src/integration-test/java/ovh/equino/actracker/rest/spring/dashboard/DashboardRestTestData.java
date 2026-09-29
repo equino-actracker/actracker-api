@@ -27,7 +27,6 @@ record DashboardRestTestData(DashboardTestData dashboard) {
         return dashboard.charts().stream().map(this::toChartResult).toList();
     }
 
-    // TODO create ChartRestTestData and use asChartResult method from it
     private ChartResult toChartResult(ChartTestData chartTestData) {
         return new ChartResult(
                 chartTestData.id(),
@@ -53,7 +52,6 @@ record DashboardRestTestData(DashboardTestData dashboard) {
                 .replace("{shares}", jsonValue(dashboard.shares(), PayloadUtils::stringify));
     }
 
-    // TODO create ChartRestTestData and use asHttpResponse method from it
     private String stringify(ChartResult chartResult) {
         return """
                 {

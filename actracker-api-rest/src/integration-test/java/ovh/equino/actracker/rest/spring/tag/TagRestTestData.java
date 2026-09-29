@@ -48,9 +48,13 @@ record TagRestTestData(TagTestData tag) {
     private String stringify(MetricResult metricResult) {
         return """
                         {
-                            "id": {id}
+                            "id": {id},
+                            "name": {name},
+                            "type": {type}
                         }
                 """
-                .replace("{id}", jsonValue(metricResult.id()));
+                .replace("{id}", jsonValue(metricResult.id()))
+                .replace("{name}", jsonValue(metricResult.name()))
+                .replace("{type}", jsonValue(metricResult.type()));
     }
 }
