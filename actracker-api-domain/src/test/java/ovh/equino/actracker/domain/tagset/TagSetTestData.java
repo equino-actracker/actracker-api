@@ -15,6 +15,11 @@ public record TagSetTestData(UUID id, TenantTestData creator, String name, Set<U
         return new TagSetTestData(randomUUID(), aTenant(), "nameless tag set", emptySet(), false);
     }
 
+    public static TagSetTestData complexTagSet() {
+        var tags = Set.of(randomUUID(), randomUUID());
+        return new TagSetTestData(randomUUID(), aTenant(), "nameless tag set", tags, false);
+    }
+
     public TagSetTestData createdBy(TenantTestData creator) {
         return new TagSetTestData(this.id, creator, this.name, this.tags, this.isDeleted);
     }
