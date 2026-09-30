@@ -35,7 +35,7 @@ import static ovh.equino.actracker.domain.EntitySortCriteria.Order.ASC;
 import static ovh.equino.actracker.domain.EntitySortCriteria.Order.DESC;
 import static ovh.equino.actracker.domain.EntitySortCriteria.sortBy;
 import static ovh.equino.actracker.domain.tagset.TagSetSearchCriteria.SortableField.NAME;
-import static ovh.equino.actracker.domain.tagset.TagSetTestData.aTagSet;
+import static ovh.equino.actracker.domain.tagset.TagSetTestData.minimalTagSet;
 import static ovh.equino.actracker.domain.tenant.TenantTestData.aTenant;
 
 abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
@@ -205,12 +205,12 @@ abstract class JpaTagSetDataSourceIntegrationTest extends JpaIntegrationTest {
     static Stream<Arguments> tagSetsSortedAndPaginated() {
         var user = aTenant();
 
-        var tagSet1 = aTagSet().createdBy(user).withId(new UUID(200, 1)).named("Z");
-        var tagSet2 = aTagSet().createdBy(user).withId(new UUID(200, 2)).named("a");
-        var tagSet3 = aTagSet().createdBy(user).withId(new UUID(200, 3)).named("a");
-        var tagSet4 = aTagSet().createdBy(user).withId(new UUID(200, 4)).named(null);
-        var tagSet5 = aTagSet().createdBy(user).withId(new UUID(200, 5)).named(null);
-        var tagSet6 = aTagSet().createdBy(user).withId(new UUID(200, 6)).named("ZZZ");
+        var tagSet1 = minimalTagSet().createdBy(user).withId(new UUID(200, 1)).named("Z");
+        var tagSet2 = minimalTagSet().createdBy(user).withId(new UUID(200, 2)).named("a");
+        var tagSet3 = minimalTagSet().createdBy(user).withId(new UUID(200, 3)).named("a");
+        var tagSet4 = minimalTagSet().createdBy(user).withId(new UUID(200, 4)).named(null);
+        var tagSet5 = minimalTagSet().createdBy(user).withId(new UUID(200, 5)).named(null);
+        var tagSet6 = minimalTagSet().createdBy(user).withId(new UUID(200, 6)).named("ZZZ");
 
         var tagSetsToAdd = List.of(tagSet1, tagSet2, tagSet3, tagSet4, tagSet5, tagSet6);
 

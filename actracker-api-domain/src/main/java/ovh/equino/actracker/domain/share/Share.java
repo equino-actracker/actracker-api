@@ -1,5 +1,6 @@
 package ovh.equino.actracker.domain.share;
 
+import ovh.equino.actracker.domain.tenant.TenantDto;
 import ovh.equino.actracker.domain.user.User;
 
 import static java.util.Objects.requireNonNull;

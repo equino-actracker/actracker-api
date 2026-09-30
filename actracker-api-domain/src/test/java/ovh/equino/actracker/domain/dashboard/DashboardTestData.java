@@ -1,47 +1,51 @@
 package ovh.equino.actracker.domain.dashboard;
 
+import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tenant.TenantTestData;
+import ovh.equino.actracker.domain.user.User;
 
+import java.util.List;
 import java.util.UUID;
 
 import static java.util.Collections.emptyList;
 import static java.util.UUID.randomUUID;
+import static ovh.equino.actracker.domain.dashboard.ChartTestData.aChart;
 import static ovh.equino.actracker.domain.tenant.TenantTestData.aTenant;
 
-public final class DashboardTestData {
+public record DashboardTestData(UUID id,
+                                TenantTestData creator,
+                                String name,
+                                List<ChartTestData> charts,
+                                List<Share> shares,
+                                boolean isDeleted) {
 
-    private UUID id = randomUUID();
-    private TenantTestData creator = aTenant();
-    private String name = "nameless dashboard";
+    public static DashboardTestData minimalDashboard() {
+        return new DashboardTestData(randomUUID(), aTenant(), "nameless dashboards", emptyList(), emptyList(), false);
+    }
 
-    public static DashboardTestData aDashboard() {
-        return new DashboardTestData();
+    public static DashboardTestData complexDashboard() {
+        var grantee1 = new Share(new User(randomUUID()), "grantee1");
+        var grantee2 = new Share(new User(randomUUID()), "grantee2");
+        var shares = List.of(grantee1, grantee2);
+        var charts = List.of(aChart(), aChart());
+        return new DashboardTestData(randomUUID(), aTenant(), "nameless dashboards", charts, shares, false);
     }
 
     public DashboardTestData createdBy(TenantTestData creator) {
-        this.creator = creator;
-        return this;
+        return new DashboardTestData(this.id, creator, this.name, this.charts, this.shares, this.isDeleted);
     }
 
     public DashboardTestData withId(UUID id) {
-        this.id = id;
-        return this;
-    }
-
-    public UUID id() {
-        return id;
+        return new DashboardTestData(id, this.creator, this.name, this.charts, this.shares, this.isDeleted);
     }
 
     public DashboardTestData named(String name) {
-        this.name = name;
-        return this;
-    }
-
-    public String name() {
-        return name;
+        return new DashboardTestData(this.id, this.creator, name, this.charts, this.shares, this.isDeleted);
     }
 
     public DashboardDto asDto() {
-        return new DashboardDto(id, creator.id(), name, emptyList(), emptyList(), false);
+        var chartDtos = charts.stream().map(ChartTestData::asDto).toList();
+        return new DashboardDto(id, creator.id(), name, chartDtos, shares, isDeleted);
     }
+
 }
