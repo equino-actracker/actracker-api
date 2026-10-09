@@ -1,6 +1,6 @@
 package ovh.equino.actracker.jpa;
 
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 import ovh.equino.actracker.postgres.SchemaMigrator;
 
 import java.sql.Connection;
@@ -11,7 +11,7 @@ public final class IntegrationTestPostgresDataBase extends IntegrationTestRelati
 
     public static final IntegrationTestPostgresDataBase INSTANCE = new IntegrationTestPostgresDataBase();
 
-    private final PostgreSQLContainer<?> container;
+    private final PostgreSQLContainer container;
 
     private final String jdbcUrl;
     private final String username;
@@ -19,7 +19,7 @@ public final class IntegrationTestPostgresDataBase extends IntegrationTestRelati
     private final String driverClassName;
 
     private IntegrationTestPostgresDataBase() {
-        container = new PostgreSQLContainer<>("postgres:15.1");
+        container = new PostgreSQLContainer("postgres:15.1");
         container.withCommand("postgres", "-c", "max_connections=500");
         container.start();
         this.jdbcUrl = container.getJdbcUrl();
