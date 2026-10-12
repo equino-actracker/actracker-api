@@ -19,40 +19,6 @@ record ActivityRestTestData(ActivityTestData activity) {
         return new ActivityRestTestData(activity);
     }
 
-    ActivityResult asActivityResult() {
-        return new ActivityResult(
-                activity.id(),
-                activity.title(),
-                activity.startTime(),
-                activity.endTime(),
-                activity.comment(),
-                activity.tags(),
-                metricValueResults()
-        );
-    }
-
-    CreateActivityCommand asCreateActivityCommand() {
-        return new CreateActivityCommand(
-                activity.title(),
-                truncateToMillis(activity.startTime()),
-                truncateToMillis(activity.endTime()),
-                activity.comment(),
-                activity.tags(),
-                metricValueAssignments()
-        );
-    }
-
-    private List<MetricValueAssignment> metricValueAssignments() {
-        return activity.metricValues()
-                .stream()
-                .map(this::toMetricValueAssignment)
-                .toList();
-    }
-
-    private MetricValueAssignment toMetricValueAssignment(ovh.equino.actracker.domain.activity.MetricValue metricValue) {
-        return new MetricValueAssignment(metricValue.metricId(), metricValue.value());
-    }
-
     String asHttpRequest() {
         return """
                 {
@@ -69,22 +35,18 @@ record ActivityRestTestData(ActivityTestData activity) {
                 .replace("{endTimestamp}", jsonValue(activity.endTime()))
                 .replace("{comment}", jsonValue(activity.comment()))
                 .replace("{tags}", jsonValue(activity.tags(), PayloadUtils::jsonValue))
-                .replace("{metricValues}", jsonValue(metricValueResults(), this::stringify));
+                .replace("{metricValues}", jsonValue(activity.metricValues(), this::stringify));
     }
 
-    private static Instant truncateToMillis(Instant instant) {
-        return isNull(instant) ? null : Instant.ofEpochMilli(instant.toEpochMilli());
-    }
-
-    private List<MetricValueResult> metricValueResults() {
-        return activity.metricValues()
-                .stream()
-                .map(this::toMetricValueResult)
-                .toList();
-    }
-
-    private MetricValueResult toMetricValueResult(ovh.equino.actracker.domain.activity.MetricValue metricValue) {
-        return new MetricValueResult(metricValue.metricId(), metricValue.value());
+    private String stringify(ovh.equino.actracker.domain.activity.MetricValue metricValue) {
+        return """
+                {
+                    "metricId": {metricId},
+                    "value": {value}
+                }
+                """
+                .replace("{metricId}", jsonValue(metricValue.metricId()))
+                .replace("{value}", jsonValue(metricValue.value()));
     }
 
     String asHttpResponse() {
@@ -108,6 +70,17 @@ record ActivityRestTestData(ActivityTestData activity) {
                 .replace("{metricValues}", jsonValue(metricValueResults(), this::stringify));
     }
 
+    private List<MetricValueResult> metricValueResults() {
+        return activity.metricValues()
+                .stream()
+                .map(this::toMetricValueResult)
+                .toList();
+    }
+
+    private MetricValueResult toMetricValueResult(ovh.equino.actracker.domain.activity.MetricValue metricValue) {
+        return new MetricValueResult(metricValue.metricId(), metricValue.value());
+    }
+
     private String stringify(MetricValueResult metricValue) {
         return """
                 {
@@ -117,5 +90,43 @@ record ActivityRestTestData(ActivityTestData activity) {
                 """
                 .replace("{metricId}", jsonValue(metricValue.metricId()))
                 .replace("{value}", jsonValue(metricValue.value()));
+    }
+
+    CreateActivityCommand asCreateActivityCommand() {
+        return new CreateActivityCommand(
+                activity.title(),
+                truncateToMillis(activity.startTime()),
+                truncateToMillis(activity.endTime()),
+                activity.comment(),
+                activity.tags(),
+                metricValueAssignments()
+        );
+    }
+
+    private static Instant truncateToMillis(Instant instant) {
+        return isNull(instant) ? null : Instant.ofEpochMilli(instant.toEpochMilli());
+    }
+
+    private List<MetricValueAssignment> metricValueAssignments() {
+        return activity.metricValues()
+                .stream()
+                .map(this::toMetricValueAssignment)
+                .toList();
+    }
+
+    private MetricValueAssignment toMetricValueAssignment(ovh.equino.actracker.domain.activity.MetricValue metricValue) {
+        return new MetricValueAssignment(metricValue.metricId(), metricValue.value());
+    }
+
+    ActivityResult asActivityResult() {
+        return new ActivityResult(
+                activity.id(),
+                activity.title(),
+                activity.startTime(),
+                activity.endTime(),
+                activity.comment(),
+                activity.tags(),
+                metricValueResults()
+        );
     }
 }
