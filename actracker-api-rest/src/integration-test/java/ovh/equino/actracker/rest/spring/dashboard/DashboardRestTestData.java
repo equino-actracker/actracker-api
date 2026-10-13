@@ -1,6 +1,8 @@
 package ovh.equino.actracker.rest.spring.dashboard;
 
+import ovh.equino.actracker.application.dashboard.ChartAssignment;
 import ovh.equino.actracker.application.dashboard.ChartResult;
+import ovh.equino.actracker.application.dashboard.CreateDashboardCommand;
 import ovh.equino.actracker.application.dashboard.DashboardResult;
 import ovh.equino.actracker.domain.dashboard.ChartTestData;
 import ovh.equino.actracker.domain.dashboard.DashboardTestData;
@@ -18,9 +20,47 @@ record DashboardRestTestData(DashboardTestData dashboard) {
         return new DashboardRestTestData(dashboard);
     }
 
-    DashboardResult asDashboardResult() {
-        var shareNames = dashboard.shares().stream().map(Share::granteeName).toList();
-        return new DashboardResult(dashboard.id(), dashboard.name(), chartResults(), shareNames);
+    String asHttpRequest() {
+        return """
+                {
+                    "name": {name},
+                    "charts": {charts},
+                    "shares": {shares}
+                }
+                """
+                .replace("{name}", jsonValue(dashboard.name()))
+                .replace("{charts}", jsonValue(dashboard.charts(), this::stringify))
+                .replace("{shares}", jsonValue(dashboard.shares(), PayloadUtils::stringify));
+    }
+
+    private String stringify(ChartTestData chartTestData) {
+        return """
+                {
+                    "name": {name},
+                    "groupBy": {groupBy},
+                    "metric": {metric},
+                    "includedTags": {includedTags}
+                }
+                """
+                .replace("{name}", jsonValue(chartTestData.name()))
+                .replace("{groupBy}", jsonValue(chartTestData.groupBy()))
+                .replace("{metric}", jsonValue(chartTestData.analysisMetric()))
+                .replace("{includedTags}", jsonValue(chartTestData.includedTags(), PayloadUtils::jsonValue));
+    }
+
+    String asHttpResponse() {
+        return """
+                {
+                    "id": {id},
+                    "name": {name},
+                    "charts": {charts},
+                    "shares": {shares}
+                }
+                """
+                .replace("{id}", jsonValue(dashboard.id()))
+                .replace("{name}", jsonValue(dashboard.name()))
+                .replace("{charts}", jsonValue(chartResults(), this::stringify))
+                .replace("{shares}", jsonValue(dashboard.shares(), PayloadUtils::stringify));
     }
 
     private List<ChartResult> chartResults() {
@@ -35,21 +75,6 @@ record DashboardRestTestData(DashboardTestData dashboard) {
                 chartTestData.analysisMetric().toString(),
                 chartTestData.includedTags()
         );
-    }
-
-    public String asHttpResponse() {
-        return """
-                {
-                    "id": {id},
-                    "name": {name},
-                    "charts": {charts},
-                    "shares": {shares}
-                }
-                """
-                .replace("{id}", jsonValue(dashboard.id()))
-                .replace("{name}", jsonValue(dashboard.name()))
-                .replace("{charts}", jsonValue(chartResults(), this::stringify))
-                .replace("{shares}", jsonValue(dashboard.shares(), PayloadUtils::stringify));
     }
 
     private String stringify(ChartResult chartResult) {
@@ -67,5 +92,34 @@ record DashboardRestTestData(DashboardTestData dashboard) {
                 .replace("{groupBy}", jsonValue(chartResult.groupBy()))
                 .replace("{metric}", jsonValue(chartResult.analysisMetric()))
                 .replace("{includedTags}", jsonValue(chartResult.includedTags(), UUID::toString));
+    }
+
+    CreateDashboardCommand asCreateDashboardCommand() {
+        return new CreateDashboardCommand(
+                dashboard.name(),
+                chartAssignments(),
+                shareNames()
+        );
+    }
+
+    private List<ChartAssignment> chartAssignments() {
+        return dashboard.charts().stream().map(this::toChartAssignment).toList();
+    }
+
+    private ChartAssignment toChartAssignment(ChartTestData chartTestData) {
+        return new ChartAssignment(
+                chartTestData.name(),
+                chartTestData.groupBy().toString(),
+                chartTestData.analysisMetric().toString(),
+                chartTestData.includedTags()
+        );
+    }
+
+    private List<String> shareNames() {
+        return dashboard.shares().stream().map(Share::granteeName).toList();
+    }
+
+    DashboardResult asDashboardResult() {
+        return new DashboardResult(dashboard.id(), dashboard.name(), chartResults(), shareNames());
     }
 }

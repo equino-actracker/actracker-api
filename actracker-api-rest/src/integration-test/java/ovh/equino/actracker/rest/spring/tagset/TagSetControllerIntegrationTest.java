@@ -13,7 +13,9 @@ import ovh.equino.actracker.rest.spring.ControllerIntegrationTest;
 import java.util.stream.Stream;
 
 import static org.mockito.Mockito.when;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ovh.equino.actracker.domain.tagset.TagSetTestData.complexTagSet;
@@ -23,7 +25,7 @@ import static ovh.equino.actracker.rest.spring.tagset.TagSetRestTestData.aRestfu
 @WebMvcTest(TagSetController.class)
 class TagSetControllerIntegrationTest implements ControllerIntegrationTest {
 
-    private static final String TAGSET_URL = "/api/tag-set/";
+    private static final String TAGSET_URL = "/api/tag-set";
 
     @Autowired
     private MockMvc mockMvc;
@@ -32,7 +34,7 @@ class TagSetControllerIntegrationTest implements ControllerIntegrationTest {
     private TagSetApplicationService tagSetApplicationService;
 
     @ParameterizedTest(name = "{0}")
-    @MethodSource("tagSetsToGet")
+    @MethodSource("tagSets")
     void shouldGetTagSet(String testName, TagSetTestData tagSetToGet) throws Exception {
         // given
         var restfulTagSet = aRestfulTagSet(tagSetToGet);
@@ -40,12 +42,28 @@ class TagSetControllerIntegrationTest implements ControllerIntegrationTest {
                 .thenReturn(restfulTagSet.asTagSetResult());
 
         // when / then
-        mockMvc.perform(get(TAGSET_URL + tagSetToGet.id()))
+        mockMvc.perform(get(TAGSET_URL + "/" + tagSetToGet.id()))
                 .andExpect(status().isOk())
                 .andExpect(content().json(restfulTagSet.asHttpResponse(), NO_EXTRA_FIELDS__IGNORE_COLLECTION_ORDER));
     }
 
-    private static Stream<Arguments> tagSetsToGet() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("tagSets")
+    void shouldCreateTagSet(String testName, TagSetTestData tagSetToCreate) throws Exception {
+        // given
+        var restfulTagSet = aRestfulTagSet(tagSetToCreate);
+        when(tagSetApplicationService.createTagSet(restfulTagSet.asCreateTagSetCommand()))
+                .thenReturn(restfulTagSet.asTagSetResult());
+
+        // when / then
+        mockMvc.perform(post(TAGSET_URL)
+                        .contentType(APPLICATION_JSON)
+                        .content(restfulTagSet.asHttpRequest()))
+                .andExpect(status().isOk())
+                .andExpect(content().json(restfulTagSet.asHttpResponse(), NO_EXTRA_FIELDS__IGNORE_COLLECTION_ORDER));
+    }
+
+    private static Stream<Arguments> tagSets() {
         return Stream.of(
                 Arguments.of("Minimalistic tag set", minimalTagSet()),
                 Arguments.of("Full tag set", complexTagSet())
