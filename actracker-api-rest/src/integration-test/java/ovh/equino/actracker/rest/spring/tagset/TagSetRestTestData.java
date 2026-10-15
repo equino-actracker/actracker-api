@@ -1,7 +1,9 @@
 package ovh.equino.actracker.rest.spring.tagset;
 
+import ovh.equino.actracker.application.tagset.CreateTagSetCommand;
 import ovh.equino.actracker.application.tagset.TagSetResult;
 import ovh.equino.actracker.domain.tagset.TagSetTestData;
+import ovh.equino.actracker.rest.spring.PayloadUtils;
 
 import java.util.UUID;
 
@@ -13,11 +15,18 @@ record TagSetRestTestData(TagSetTestData tagSet) {
         return new TagSetRestTestData(tagSet);
     }
 
-    TagSetResult asTagSetResult() {
-        return new TagSetResult(tagSet.id(), tagSet.name(), tagSet.tags());
+    String asHttpRequest() {
+        return """
+                {
+                    "name": {name},
+                    "tags": {tags}
+                }
+                """
+                .replace("{name}", jsonValue(tagSet.name()))
+                .replace("{tags}", jsonValue(tagSet.tags(), PayloadUtils::jsonValue));
     }
 
-    public String asHttpResponse() {
+    String asHttpResponse() {
         return """
                 {
                     "id": {id},
@@ -28,5 +37,16 @@ record TagSetRestTestData(TagSetTestData tagSet) {
                 .replace("{id}", jsonValue(tagSet.id()))
                 .replace("{name}", jsonValue(tagSet.name()))
                 .replace("{tags}", jsonValue(tagSet.tags(), UUID::toString));
+    }
+
+    CreateTagSetCommand asCreateTagSetCommand() {
+        return new CreateTagSetCommand(
+                tagSet.name(),
+                tagSet.tags()
+        );
+    }
+
+    TagSetResult asTagSetResult() {
+        return new TagSetResult(tagSet.id(), tagSet.name(), tagSet.tags());
     }
 }
