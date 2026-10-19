@@ -124,6 +124,20 @@ public record ActivityTestData(UUID id,
         );
     }
 
+    public ActivityTestData withComment(String comment) {
+        return new ActivityTestData(
+                this.id,
+                this.creator,
+                this.title,
+                this.startTime,
+                this.endTime,
+                comment,
+                this.tags,
+                this.metricValues,
+                this.isDeleted
+        );
+    }
+
     public ActivityDto asDto() {
         return new ActivityDto(id, creator.id(), title, startTime, endTime, comment, tags, metricValues, isDeleted);
     }
