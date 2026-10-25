@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.web.servlet.MockMvc;
@@ -163,8 +162,8 @@ class ActivityControllerIntegrationTest implements ControllerIntegrationTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("searchActivitiesQueryCases")
     void shouldSearchActivitiesWithFilters(String testName,
-                                          SearchActivitiesQuery expectedQuery,
-                                          org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder requestBuilder)
+                                           SearchActivitiesQuery expectedQuery,
+                                           org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder requestBuilder)
             throws Exception {
         // given
         when(activityApplicationService.searchActivities(any(SearchActivitiesQuery.class)))
