@@ -20,8 +20,9 @@ public record SortCriteria(LinkedHashMap<String, String> sortFieldWithOrder) {
         this(new LinkedHashMap<>());
     }
 
-    public void orderBy(String field, String order) {
+    public SortCriteria orderBy(String field, String order) {
         sortFieldWithOrder.put(field, order);
+        return this;
     }
 
     public interface FieldResolver {
