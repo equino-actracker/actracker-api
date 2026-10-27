@@ -44,6 +44,7 @@ record TagRestTestData(TagTestData tag) implements RestTestData<TagResult> {
                 .replace("{type}", jsonValue(metricTestData.type()));
     }
 
+    @Override
     public String asHttpResponse() {
         return """
                 {
@@ -100,6 +101,7 @@ record TagRestTestData(TagTestData tag) implements RestTestData<TagResult> {
         return tag.shares().stream().map(Share::granteeName).toList();
     }
 
+    @Override
     public TagResult asEntityResult() {
         return new TagResult(tag.id(), tag.name(), metricResults(), shareNames());
     }

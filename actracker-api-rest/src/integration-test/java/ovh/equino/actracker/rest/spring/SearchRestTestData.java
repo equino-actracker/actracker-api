@@ -4,7 +4,6 @@ import ovh.equino.actracker.application.SearchResult;
 
 import java.util.List;
 
-import static java.util.stream.Collectors.joining;
 import static ovh.equino.actracker.rest.spring.PayloadUtils.jsonValue;
 
 public record SearchRestTestData<T>(String nextPageId,
@@ -18,7 +17,7 @@ public record SearchRestTestData<T>(String nextPageId,
                 }
                 """
                 .replace("{nextPageId}", jsonValue(nextPageId))
-                .replace("{results}", httpResults());
+                .replace("{results}", jsonValue(entities, RestTestData<T>::asHttpResponse));
     }
 
     public SearchResult<T> asEntitySearchResult() {
@@ -26,11 +25,5 @@ public record SearchRestTestData<T>(String nextPageId,
                 .map(RestTestData<T>::asEntityResult)
                 .toList();
         return new SearchResult<>(nextPageId, entityResults);
-    }
-
-    private String httpResults() {
-        return entities.stream()
-                .map(RestTestData<T>::asHttpResponse)
-                .collect(joining(",", "[", "]"));
     }
 }

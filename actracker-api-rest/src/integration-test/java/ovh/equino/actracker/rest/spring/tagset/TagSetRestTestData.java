@@ -27,6 +27,7 @@ record TagSetRestTestData(TagSetTestData tagSet) implements RestTestData<TagSetR
                 .replace("{tags}", jsonValue(tagSet.tags(), PayloadUtils::jsonValue));
     }
 
+    @Override
     public String asHttpResponse() {
         return """
                 {
@@ -47,6 +48,7 @@ record TagSetRestTestData(TagSetTestData tagSet) implements RestTestData<TagSetR
         );
     }
 
+    @Override
     public TagSetResult asEntityResult() {
         return new TagSetResult(tagSet.id(), tagSet.name(), tagSet.tags());
     }

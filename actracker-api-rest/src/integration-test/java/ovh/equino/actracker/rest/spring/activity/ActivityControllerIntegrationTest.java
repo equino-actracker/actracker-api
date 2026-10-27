@@ -7,8 +7,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import ovh.equino.actracker.application.SearchResult;
 import ovh.equino.actracker.application.SortCriteria;
 import ovh.equino.actracker.application.activity.ActivityApplicationService;
 import ovh.equino.actracker.application.activity.ActivityResult;
@@ -19,6 +17,7 @@ import ovh.equino.actracker.rest.spring.SearchRestTestData;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -40,7 +39,6 @@ import static ovh.equino.actracker.rest.spring.activity.ActivityRestTestData.aRe
 class ActivityControllerIntegrationTest implements ControllerIntegrationTest {
 
     private static final String ACTIVITY_URL = "/api/activity";
-    private static final String MATCHING_ACTIVITIES_URL = ACTIVITY_URL + "/matching";
 
     @Autowired
     private MockMvc mockMvc;
@@ -166,13 +164,12 @@ class ActivityControllerIntegrationTest implements ControllerIntegrationTest {
     @MethodSource("searchActivitiesCriteria")
     void shouldSearchActivitiesMatchingCriteria(String testName,
                                                 SearchActivitiesQuery expectedQuery,
-                                                MockHttpServletRequestBuilder requestBuilder)
+                                                Map<String, String> searchCriteria)
             throws Exception {
-        // given
-        when(activityApplicationService.searchActivities(any(SearchActivitiesQuery.class)))
-                .thenReturn(new SearchResult<>(null, List.of()));
 
         // when
+        var requestBuilder = get(ACTIVITY_URL + "/matching");
+        searchCriteria.forEach((name, value) -> requestBuilder.queryParam(name, value));
         mockMvc.perform(requestBuilder)
                 .andExpect(status().isOk());
 
@@ -181,70 +178,49 @@ class ActivityControllerIntegrationTest implements ControllerIntegrationTest {
     }
 
     private static Stream<Arguments> searchActivitiesCriteria() {
-        var emptyPageId = (String) null;
-        var emptyPageSize = (Integer) null;
-        var emptyTerm = (String) null;
-        var emptyRangeStart = (Instant) null;
-        var emptyRangeEnd = (Instant) null;
-        var emptyTags = Set.<UUID>of();
-        var emptyExcludedActivities = Set.<UUID>of();
-        var emptySortCriteria = new SortCriteria();
-
-        var tag1 = UUID.fromString("11111111-1111-1111-1111-111111111111");
-        var tag2 = UUID.fromString("22222222-2222-2222-2222-222222222222");
-        var excludedActivity = UUID.fromString("33333333-3333-3333-3333-333333333333");
-        var sortCriteria = new SortCriteria();
-        sortCriteria.orderBy("startTime", "desc");
-
         return Stream.of(
-                Arguments.of("no filters",
-                        new SearchActivitiesQuery(emptyPageSize, emptyPageId, emptyTerm, emptyRangeStart, emptyRangeEnd,
-                                emptyTags, emptyExcludedActivities, emptySortCriteria),
-                        get(MATCHING_ACTIVITIES_URL)),
-                Arguments.of("pageId filter",
-                        new SearchActivitiesQuery(emptyPageSize, "page-id", emptyTerm, emptyRangeStart, emptyRangeEnd,
-                                emptyTags, emptyExcludedActivities, emptySortCriteria),
-                        get(MATCHING_ACTIVITIES_URL).queryParam("pageId", "page-id")),
+                Arguments.of("empty criteria",
+                        new SearchActivitiesQuery(null, null, null, null, null, null, null, null),
+                        Map.of()),
                 Arguments.of("pageSize filter",
-                        new SearchActivitiesQuery(25, emptyPageId, emptyTerm, emptyRangeStart, emptyRangeEnd,
-                                emptyTags, emptyExcludedActivities, emptySortCriteria),
-                        get(MATCHING_ACTIVITIES_URL).queryParam("pageSize", "25")),
+                        new SearchActivitiesQuery(25, null, null, null, null, null, null, null),
+                        Map.of("pageSize", "25")),
+                Arguments.of("pageId filter",
+                        new SearchActivitiesQuery(null, "page-id", null, null, null, null, null, null),
+                        Map.of("pageId", "page-id")),
                 Arguments.of("term filter",
-                        new SearchActivitiesQuery(emptyPageSize, emptyPageId, "gym", emptyRangeStart, emptyRangeEnd,
-                                emptyTags, emptyExcludedActivities, emptySortCriteria),
-                        get(MATCHING_ACTIVITIES_URL).queryParam("term", "gym")),
-                Arguments.of("requiredTags filter",
-                        new SearchActivitiesQuery(emptyPageSize, emptyPageId, emptyTerm, emptyRangeStart, emptyRangeEnd,
-                                Set.of(tag1, tag2), emptyExcludedActivities, emptySortCriteria),
-                        get(MATCHING_ACTIVITIES_URL).queryParam("requiredTags", tag1.toString() + "," + tag2.toString())),
-                Arguments.of("excludedActivities filter",
-                        new SearchActivitiesQuery(emptyPageSize, emptyPageId, emptyTerm, emptyRangeStart, emptyRangeEnd,
-                                emptyTags, Set.of(excludedActivity), emptySortCriteria),
-                        get(MATCHING_ACTIVITIES_URL).queryParam("excludedActivities", excludedActivity.toString())),
+                        new SearchActivitiesQuery(null, null, "gym", null, null, null, null, null),
+                        Map.of("term", "gym")),
                 Arguments.of("rangeStartMillis filter",
-                        new SearchActivitiesQuery(emptyPageSize, emptyPageId, emptyTerm, Instant.ofEpochMilli(1000L), emptyRangeEnd,
-                                emptyTags, emptyExcludedActivities, emptySortCriteria),
-                        get(MATCHING_ACTIVITIES_URL).queryParam("rangeStartMillis", "1000")),
+                        new SearchActivitiesQuery(null, null, null, Instant.ofEpochMilli(1000L), null, null, null, null),
+                        Map.of("rangeStartMillis", "1000")),
                 Arguments.of("rangeEndMillis filter",
-                        new SearchActivitiesQuery(emptyPageSize, emptyPageId, emptyTerm, emptyRangeStart, Instant.ofEpochMilli(2000L),
-                                emptyTags, emptyExcludedActivities, emptySortCriteria),
-                        get(MATCHING_ACTIVITIES_URL).queryParam("rangeEndMillis", "2000")),
+                        new SearchActivitiesQuery(null, null, null, null, Instant.ofEpochMilli(2000L), null, null, null),
+                        Map.of("rangeEndMillis", "2000")),
+                Arguments.of("requiredTags filter",
+                        new SearchActivitiesQuery(null, null, null, null, null,
+                                Set.of(new UUID(1L, 1L), new UUID(2L, 2L)), null, null),
+                        Map.of("requiredTags", new UUID(1L, 1L) + "," + new UUID(2L, 2L))),
+                Arguments.of("excludedActivities filter",
+                        new SearchActivitiesQuery(null, null, null, null, null, null,
+                                Set.of(new UUID(3L, 3L)), null),
+                        Map.of("excludedActivities", new UUID(3L, 3L).toString())),
                 Arguments.of("orderBy filter",
-                        new SearchActivitiesQuery(emptyPageSize, emptyPageId, emptyTerm, emptyRangeStart, emptyRangeEnd,
-                                emptyTags, emptyExcludedActivities, sortCriteria),
-                        get(MATCHING_ACTIVITIES_URL).queryParam("orderBy", "startTime.desc")),
+                        new SearchActivitiesQuery(null, null, null, null, null, null, null,
+                                new SortCriteria().orderBy("startTime", "desc")),
+                        Map.of("orderBy", "startTime.desc")),
                 Arguments.of("all filters combined",
                         new SearchActivitiesQuery(10, "p1", "run", Instant.ofEpochMilli(500L), Instant.ofEpochMilli(1500L),
-                                Set.of(tag1), Set.of(excludedActivity), sortCriteria),
-                        get(MATCHING_ACTIVITIES_URL)
-                                .queryParam("pageSize", "10")
-                                .queryParam("pageId", "p1")
-                                .queryParam("term", "run")
-                                .queryParam("requiredTags", tag1.toString())
-                                .queryParam("excludedActivities", excludedActivity.toString())
-                                .queryParam("rangeStartMillis", "500")
-                                .queryParam("rangeEndMillis", "1500")
-                                .queryParam("orderBy", "startTime.desc"))
+                                Set.of(new UUID(4L, 4L)), Set.of(new UUID(5L, 5L)),
+                                new SortCriteria().orderBy("startTime", "desc")),
+                        Map.of("pageSize", "10",
+                                "pageId", "p1",
+                                "term", "run",
+                                "rangeStartMillis", "500",
+                                "rangeEndMillis", "1500",
+                                "requiredTags", new UUID(4L, 4L).toString(),
+                                "excludedActivities", new UUID(5L, 5L).toString(),
+                                "orderBy", "startTime.desc"))
         );
     }
 
@@ -256,25 +232,22 @@ class ActivityControllerIntegrationTest implements ControllerIntegrationTest {
                 .thenReturn(expectedSearchResult.asEntitySearchResult());
 
         // when / then
-        mockMvc.perform(get(MATCHING_ACTIVITIES_URL))
+        mockMvc.perform(get(ACTIVITY_URL + "/matching"))
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedSearchResult.asHttpResponse(), NO_EXTRA_FIELDS__IGNORE_COLLECTION_ORDER));
     }
 
     private static Stream<Arguments> matchingActivities() {
-        var restfulMinimalActivity = aRestfulActivity(minimalActivity());
-        var restfulComplexActivity1 = aRestfulActivity(complexActivity());
-        var restfulComplexActivity2 = aRestfulActivity(complexActivity());
-        var restfulComplexActivity3 = aRestfulActivity(complexActivity());
-
         return Stream.of(
                 Arguments.of("no matching activities and no next page",
                         new SearchRestTestData<ActivityResult>(null, List.of())),
                 Arguments.of("single minimal activity and no next page",
-                        new SearchRestTestData<ActivityResult>(null, List.of(restfulMinimalActivity))),
+                        new SearchRestTestData<ActivityResult>(null, List.of(aRestfulActivity(minimalActivity())))),
                 Arguments.of("three complex activities and next page",
-                        new SearchRestTestData<ActivityResult>("next-page-id",
-                                List.of(restfulComplexActivity1, restfulComplexActivity2, restfulComplexActivity3)))
+                        new SearchRestTestData<ActivityResult>("next-page-id", List.of(
+                                aRestfulActivity(complexActivity()),
+                                aRestfulActivity(complexActivity()),
+                                aRestfulActivity(complexActivity()))))
         );
     }
 }

@@ -50,6 +50,7 @@ record ActivityRestTestData(ActivityTestData activity) implements RestTestData<A
                 .replace("{value}", jsonValue(metricValue.value()));
     }
 
+    @Override
     public String asHttpResponse() {
         return """
                 {
@@ -119,6 +120,7 @@ record ActivityRestTestData(ActivityTestData activity) implements RestTestData<A
         return new MetricValueAssignment(metricValue.metricId(), metricValue.value());
     }
 
+    @Override
     public ActivityResult asEntityResult() {
         return new ActivityResult(
                 activity.id(),

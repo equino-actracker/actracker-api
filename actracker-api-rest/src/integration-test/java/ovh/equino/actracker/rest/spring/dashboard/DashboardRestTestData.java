@@ -49,6 +49,7 @@ record DashboardRestTestData(DashboardTestData dashboard) implements RestTestDat
                 .replace("{includedTags}", jsonValue(chartTestData.includedTags(), PayloadUtils::jsonValue));
     }
 
+    @Override
     public String asHttpResponse() {
         return """
                 {
@@ -120,6 +121,7 @@ record DashboardRestTestData(DashboardTestData dashboard) implements RestTestDat
         return dashboard.shares().stream().map(Share::granteeName).toList();
     }
 
+    @Override
     public DashboardResult asEntityResult() {
         return new DashboardResult(dashboard.id(), dashboard.name(), chartResults(), shareNames());
     }
