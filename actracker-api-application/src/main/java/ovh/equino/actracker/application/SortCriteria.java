@@ -10,6 +10,7 @@ import static java.util.Objects.requireNonNullElse;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static ovh.equino.actracker.domain.EntitySortCriteria.Order.ASC;
 
+// TODO should be immutable
 public record SortCriteria(LinkedHashMap<String, String> sortFieldWithOrder) {
 
     public SortCriteria {
@@ -20,8 +21,9 @@ public record SortCriteria(LinkedHashMap<String, String> sortFieldWithOrder) {
         this(new LinkedHashMap<>());
     }
 
-    public void orderBy(String field, String order) {
+    public SortCriteria orderBy(String field, String order) {
         sortFieldWithOrder.put(field, order);
+        return this;
     }
 
     public interface FieldResolver {

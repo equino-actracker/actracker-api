@@ -39,7 +39,7 @@ class DashboardControllerIntegrationTest implements ControllerIntegrationTest {
         // given
         var restfulDashboard = aRestfulDashboard(dashboardToGet);
         when(dashboardApplicationService.getDashboard(dashboardToGet.id()))
-                .thenReturn(restfulDashboard.asDashboardResult());
+                .thenReturn(restfulDashboard.asEntityResult());
 
         // when / then
         mockMvc.perform(get(DASHBOARD_URL + "/" + dashboardToGet.id()))
@@ -53,7 +53,7 @@ class DashboardControllerIntegrationTest implements ControllerIntegrationTest {
         // given
         var restfulDashboard = aRestfulDashboard(dashboardToCreate);
         when(dashboardApplicationService.createDashboard(restfulDashboard.asCreateDashboardCommand()))
-                .thenReturn(restfulDashboard.asDashboardResult());
+                .thenReturn(restfulDashboard.asEntityResult());
 
         // when / then
         mockMvc.perform(post(DASHBOARD_URL)

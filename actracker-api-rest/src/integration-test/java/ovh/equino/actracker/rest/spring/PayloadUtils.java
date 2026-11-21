@@ -36,11 +36,9 @@ public final class PayloadUtils {
             return NULL_VALUE;
         }
 
-        var stringifiedElements = collection.stream()
+        return collection.stream()
                 .map(elementStringifier)
-                .collect(joining(","));
-
-        return "[%s]".formatted(stringifiedElements);
+                .collect(joining(",", "[", "]"));
     }
 
 

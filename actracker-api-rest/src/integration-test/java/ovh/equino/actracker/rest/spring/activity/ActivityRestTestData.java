@@ -6,6 +6,7 @@ import ovh.equino.actracker.application.activity.MetricValueAssignment;
 import ovh.equino.actracker.application.activity.MetricValueResult;
 import ovh.equino.actracker.domain.activity.ActivityTestData;
 import ovh.equino.actracker.rest.spring.PayloadUtils;
+import ovh.equino.actracker.rest.spring.RestTestData;
 
 import java.time.Instant;
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.List;
 import static java.util.Objects.isNull;
 import static ovh.equino.actracker.rest.spring.PayloadUtils.jsonValue;
 
-record ActivityRestTestData(ActivityTestData activity) {
+record ActivityRestTestData(ActivityTestData activity) implements RestTestData<ActivityResult> {
 
     static ActivityRestTestData aRestfulActivity(ActivityTestData activity) {
         return new ActivityRestTestData(activity);
@@ -49,7 +50,8 @@ record ActivityRestTestData(ActivityTestData activity) {
                 .replace("{value}", jsonValue(metricValue.value()));
     }
 
-    String asHttpResponse() {
+    @Override
+    public String asHttpResponse() {
         return """
                 {
                     "id": {id},
@@ -118,7 +120,8 @@ record ActivityRestTestData(ActivityTestData activity) {
         return new MetricValueAssignment(metricValue.metricId(), metricValue.value());
     }
 
-    ActivityResult asActivityResult() {
+    @Override
+    public ActivityResult asEntityResult() {
         return new ActivityResult(
                 activity.id(),
                 activity.title(),

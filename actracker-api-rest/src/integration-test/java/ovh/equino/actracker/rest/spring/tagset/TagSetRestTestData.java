@@ -4,12 +4,13 @@ import ovh.equino.actracker.application.tagset.CreateTagSetCommand;
 import ovh.equino.actracker.application.tagset.TagSetResult;
 import ovh.equino.actracker.domain.tagset.TagSetTestData;
 import ovh.equino.actracker.rest.spring.PayloadUtils;
+import ovh.equino.actracker.rest.spring.RestTestData;
 
 import java.util.UUID;
 
 import static ovh.equino.actracker.rest.spring.PayloadUtils.jsonValue;
 
-record TagSetRestTestData(TagSetTestData tagSet) {
+record TagSetRestTestData(TagSetTestData tagSet) implements RestTestData<TagSetResult> {
 
     static TagSetRestTestData aRestfulTagSet(TagSetTestData tagSet) {
         return new TagSetRestTestData(tagSet);
@@ -26,7 +27,8 @@ record TagSetRestTestData(TagSetTestData tagSet) {
                 .replace("{tags}", jsonValue(tagSet.tags(), PayloadUtils::jsonValue));
     }
 
-    String asHttpResponse() {
+    @Override
+    public String asHttpResponse() {
         return """
                 {
                     "id": {id},
@@ -46,7 +48,8 @@ record TagSetRestTestData(TagSetTestData tagSet) {
         );
     }
 
-    TagSetResult asTagSetResult() {
+    @Override
+    public TagSetResult asEntityResult() {
         return new TagSetResult(tagSet.id(), tagSet.name(), tagSet.tags());
     }
 }

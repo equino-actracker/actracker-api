@@ -39,7 +39,7 @@ class TagSetControllerIntegrationTest implements ControllerIntegrationTest {
         // given
         var restfulTagSet = aRestfulTagSet(tagSetToGet);
         when(tagSetApplicationService.getTagSet(tagSetToGet.id()))
-                .thenReturn(restfulTagSet.asTagSetResult());
+                .thenReturn(restfulTagSet.asEntityResult());
 
         // when / then
         mockMvc.perform(get(TAGSET_URL + "/" + tagSetToGet.id()))
@@ -53,7 +53,7 @@ class TagSetControllerIntegrationTest implements ControllerIntegrationTest {
         // given
         var restfulTagSet = aRestfulTagSet(tagSetToCreate);
         when(tagSetApplicationService.createTagSet(restfulTagSet.asCreateTagSetCommand()))
-                .thenReturn(restfulTagSet.asTagSetResult());
+                .thenReturn(restfulTagSet.asEntityResult());
 
         // when / then
         mockMvc.perform(post(TAGSET_URL)

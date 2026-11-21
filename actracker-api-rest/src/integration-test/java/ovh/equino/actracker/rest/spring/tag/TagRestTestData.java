@@ -8,12 +8,13 @@ import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.domain.tag.MetricTestData;
 import ovh.equino.actracker.domain.tag.TagTestData;
 import ovh.equino.actracker.rest.spring.PayloadUtils;
+import ovh.equino.actracker.rest.spring.RestTestData;
 
 import java.util.List;
 
 import static ovh.equino.actracker.rest.spring.PayloadUtils.jsonValue;
 
-record TagRestTestData(TagTestData tag) {
+record TagRestTestData(TagTestData tag) implements RestTestData<TagResult> {
 
     static TagRestTestData aRestfulTag(TagTestData tag) {
         return new TagRestTestData(tag);
@@ -43,7 +44,8 @@ record TagRestTestData(TagTestData tag) {
                 .replace("{type}", jsonValue(metricTestData.type()));
     }
 
-    String asHttpResponse() {
+    @Override
+    public String asHttpResponse() {
         return """
                 {
                     "id": {id},
@@ -99,7 +101,8 @@ record TagRestTestData(TagTestData tag) {
         return tag.shares().stream().map(Share::granteeName).toList();
     }
 
-    TagResult asTagResult() {
+    @Override
+    public TagResult asEntityResult() {
         return new TagResult(tag.id(), tag.name(), metricResults(), shareNames());
     }
 }

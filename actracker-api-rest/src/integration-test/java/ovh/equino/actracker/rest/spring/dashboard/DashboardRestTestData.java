@@ -8,13 +8,14 @@ import ovh.equino.actracker.domain.dashboard.ChartTestData;
 import ovh.equino.actracker.domain.dashboard.DashboardTestData;
 import ovh.equino.actracker.domain.share.Share;
 import ovh.equino.actracker.rest.spring.PayloadUtils;
+import ovh.equino.actracker.rest.spring.RestTestData;
 
 import java.util.List;
 import java.util.UUID;
 
 import static ovh.equino.actracker.rest.spring.PayloadUtils.jsonValue;
 
-record DashboardRestTestData(DashboardTestData dashboard) {
+record DashboardRestTestData(DashboardTestData dashboard) implements RestTestData<DashboardResult> {
 
     static DashboardRestTestData aRestfulDashboard(DashboardTestData dashboard) {
         return new DashboardRestTestData(dashboard);
@@ -48,7 +49,8 @@ record DashboardRestTestData(DashboardTestData dashboard) {
                 .replace("{includedTags}", jsonValue(chartTestData.includedTags(), PayloadUtils::jsonValue));
     }
 
-    String asHttpResponse() {
+    @Override
+    public String asHttpResponse() {
         return """
                 {
                     "id": {id},
@@ -119,7 +121,8 @@ record DashboardRestTestData(DashboardTestData dashboard) {
         return dashboard.shares().stream().map(Share::granteeName).toList();
     }
 
-    DashboardResult asDashboardResult() {
+    @Override
+    public DashboardResult asEntityResult() {
         return new DashboardResult(dashboard.id(), dashboard.name(), chartResults(), shareNames());
     }
 }

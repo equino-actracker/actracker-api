@@ -39,7 +39,7 @@ class TagControllerIntegrationTest implements ControllerIntegrationTest {
         // given
         var restfulTag = aRestfulTag(tagToGet);
         when(tagApplicationService.getTag(tagToGet.id()))
-                .thenReturn(restfulTag.asTagResult());
+                .thenReturn(restfulTag.asEntityResult());
 
         // when / then
         mockMvc.perform(get(TAG_URL + "/" + tagToGet.id()))
@@ -53,7 +53,7 @@ class TagControllerIntegrationTest implements ControllerIntegrationTest {
         // given
         var restfulTag = aRestfulTag(tagToCreate);
         when(tagApplicationService.createTag(restfulTag.asCreateTagCommand()))
-                .thenReturn(restfulTag.asTagResult());
+                .thenReturn(restfulTag.asEntityResult());
 
         // when / then
         mockMvc.perform(post(TAG_URL)
