@@ -169,6 +169,7 @@ class ActivityControllerIntegrationTest implements ControllerIntegrationTest {
             throws Exception {
 
         // given
+        // TODO should not be necessary, mapping in controller should handle null
         when(activityApplicationService.searchActivities(any(SearchActivitiesQuery.class)))
                 .thenReturn(new SearchResult<>(null, List.of()));
 
