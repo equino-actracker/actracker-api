@@ -169,7 +169,7 @@ class ActivityControllerIntegrationTest implements ControllerIntegrationTest {
 
         // when
         var requestBuilder = get(ACTIVITY_URL + "/matching");
-        searchCriteria.forEach((name, value) -> requestBuilder.queryParam(name, value));
+        searchCriteria.forEach(requestBuilder::queryParam);
         mockMvc.perform(requestBuilder)
                 .andExpect(status().isOk());
 
@@ -226,7 +226,9 @@ class ActivityControllerIntegrationTest implements ControllerIntegrationTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("matchingActivities")
-    void shouldFindMatchingActivities(String testName, SearchRestTestData<ActivityResult> expectedSearchResult) throws Exception {
+    void shouldFindMatchingActivities(String testName, SearchRestTestData<ActivityResult> expectedSearchResult)
+            throws Exception {
+
         // given
         when(activityApplicationService.searchActivities(any(SearchActivitiesQuery.class)))
                 .thenReturn(expectedSearchResult.asEntitySearchResult());
@@ -234,7 +236,10 @@ class ActivityControllerIntegrationTest implements ControllerIntegrationTest {
         // when / then
         mockMvc.perform(get(ACTIVITY_URL + "/matching"))
                 .andExpect(status().isOk())
-                .andExpect(content().json(expectedSearchResult.asHttpResponse(), NO_EXTRA_FIELDS__IGNORE_COLLECTION_ORDER));
+                .andExpect(content().json(
+                        expectedSearchResult.asHttpResponse(),
+                        NO_EXTRA_FIELDS__IGNORE_COLLECTION_ORDER)
+                );
     }
 
     private static Stream<Arguments> matchingActivities() {
@@ -242,9 +247,9 @@ class ActivityControllerIntegrationTest implements ControllerIntegrationTest {
                 Arguments.of("no matching activities and no next page",
                         new SearchRestTestData<ActivityResult>(null, List.of())),
                 Arguments.of("single minimal activity and no next page",
-                        new SearchRestTestData<ActivityResult>(null, List.of(aRestfulActivity(minimalActivity())))),
+                        new SearchRestTestData<>(null, List.of(aRestfulActivity(minimalActivity())))),
                 Arguments.of("three complex activities and next page",
-                        new SearchRestTestData<ActivityResult>("next-page-id", List.of(
+                        new SearchRestTestData<>("next-page-id", List.of(
                                 aRestfulActivity(complexActivity()),
                                 aRestfulActivity(complexActivity()),
                                 aRestfulActivity(complexActivity()))))
