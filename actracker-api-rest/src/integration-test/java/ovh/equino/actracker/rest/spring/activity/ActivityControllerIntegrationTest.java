@@ -7,6 +7,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.web.servlet.MockMvc;
+import ovh.equino.actracker.application.SearchResult;
 import ovh.equino.actracker.application.SortCriteria;
 import ovh.equino.actracker.application.activity.ActivityApplicationService;
 import ovh.equino.actracker.application.activity.ActivityResult;
@@ -166,6 +167,10 @@ class ActivityControllerIntegrationTest implements ControllerIntegrationTest {
                                                 SearchActivitiesQuery expectedQuery,
                                                 Map<String, String> searchCriteria)
             throws Exception {
+
+        // given
+        when(activityApplicationService.searchActivities(any(SearchActivitiesQuery.class)))
+                .thenReturn(new SearchResult<>(null, List.of()));
 
         // when
         var requestBuilder = get(ACTIVITY_URL + "/matching");
