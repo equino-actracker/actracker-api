@@ -213,12 +213,18 @@ class ActivityControllerIntegrationTest implements ControllerIntegrationTest {
                         Map.of("excludedActivities", new UUID(3L, 3L).toString())),
                 Arguments.of("orderBy filter",
                         new SearchActivitiesQuery(null, null, null, null, null, null, null,
-                                new SortCriteria().orderBy("startTime", "desc")),
-                        Map.of("orderBy", "startTime.desc")),
+                                new SortCriteria()
+                                        .orderBy("title", "desc")
+                                        .orderBy("start_time", "desc")
+                                        .orderBy("end_time", "desc")),
+                        Map.of("orderBy", "title.desc,start_time.desc,end_time.desc")),
                 Arguments.of("all filters combined",
                         new SearchActivitiesQuery(10, "p1", "run", Instant.ofEpochMilli(500L), Instant.ofEpochMilli(1500L),
                                 Set.of(new UUID(4L, 4L)), Set.of(new UUID(5L, 5L)),
-                                new SortCriteria().orderBy("startTime", "desc")),
+                                new SortCriteria()
+                                        .orderBy("title", "desc")
+                                        .orderBy("start_time", "desc")
+                                        .orderBy("end_time", "desc")),
                         Map.of("pageSize", "10",
                                 "pageId", "p1",
                                 "term", "run",
@@ -226,7 +232,7 @@ class ActivityControllerIntegrationTest implements ControllerIntegrationTest {
                                 "rangeEndMillis", "1500",
                                 "requiredTags", new UUID(4L, 4L).toString(),
                                 "excludedActivities", new UUID(5L, 5L).toString(),
-                                "orderBy", "startTime.desc"))
+                                "orderBy", "title.desc,start_time.desc,end_time.desc"))
         );
     }
 
